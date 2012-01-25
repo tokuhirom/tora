@@ -12,6 +12,7 @@ typedef enum {
     OP_FUNCALL,
     OP_PUSH_STRING,
     OP_DUMP,
+    OP_JUMP_IF_FALSE,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -28,4 +29,5 @@ static const char*opcode2name[] = {
     "OP_FUNCALL",
     "OP_PUSH_STRING",
     "OP_DUMP",
+    "OP_JUMP_IF_FALSE",
 };

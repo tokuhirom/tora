@@ -21,15 +21,22 @@ say("yo")
 say("ho")
 ...
 
+run_is(<<'...', "true\nfalse\n");
+say(true)
+say(false)
+...
+
 run_is('', "");
 
-=pod
-run_is(<<'...', "OK\n");
-if (true) {
-    say("OK")
-}
+run_is(<<'...', "OK\nHERE\n");
+if (true) { say("OK") }
+say("HERE")
 ...
-=cut
+
+run_is(<<'...', "HERE\n");
+if (false) { say("NOT OK") }
+say("HERE")
+...
 
 done_testing;
 

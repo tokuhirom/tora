@@ -40,6 +40,7 @@ typedef enum {
     NODE_DIV,
     NODE_STMTS,
     NODE_NEWLINE,
+    NODE_IF,
 } NODE_TYPE;
 
 typedef struct {
@@ -130,6 +131,11 @@ public:
             v->set_str(strdup(this->value.str_value));
             return v;
         }
+        case VALUE_TYPE_BOOL: {
+            Value *v = new Value();
+            v->set_str(strdup(this->value.bool_value ? "true" : "false"));
+            return v;
+        }
         default:
             printf("[BUG] unknown in to_s: %d\n", value_type);
             abort();
@@ -145,6 +151,18 @@ public:
         }
         default:
             abort();
+        }
+    }
+    Value *to_b() {
+        switch (value_type) {
+        case VALUE_TYPE_BOOL:
+            this->retain();
+            return this;
+        default: {
+            Value *v = new Value();
+            v->set_bool(false);
+            return v;
+        }
         }
     }
 };
@@ -169,7 +187,7 @@ public:
             switch (op->op_type) {
             case OP_PUSH_TRUE: {
                 Value *v = new Value;
-                v->set_bool(false);
+                v->set_bool(true);
                 stack.push_back(v);
                 break;
             }
@@ -280,8 +298,20 @@ public:
                 this->dump_stack();
                 break;
             }
+            case OP_JUMP_IF_FALSE: {
+                Value * v = stack.back();
+                stack.pop_back();
+
+                Value * b = v->to_b();
+                if (!b->value.bool_value) {
+                    pc = op->operand.int_value-1;
+                }
+                b->release();
+                v->release();
+                break;
+            }
             default: {
-                fprintf(stderr, "[BUG] OOPS. unknown op code: %d\n", op->op_type);
+                fprintf(stderr, "[BUG] OOPS. unknown op code: %d(%s)\n", op->op_type, opcode2name[op->op_type]);
                 abort();
                 break;
             }
@@ -367,8 +397,11 @@ void tora_dump_node(TNode *node, int indent) {
         break;
     case NODE_STMTS:
         printf("NODE_STMTS\n");
-        assert(node->binary.left);
-        assert(node->binary.right);
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_IF:
+        printf("NODE_IF\n");
         tora_dump_node(node->binary.left, 1);
         tora_dump_node(node->binary.right, 1);
         break;
@@ -451,6 +484,26 @@ static void tora_compile(TNode *node) {
         tora_compile(node->binary.right);
         break;
     }
+    case NODE_IF: {
+        /*
+            run_jouken_code
+            jump_if_false END_LABEL
+            run_block_code
+        END_LABEL:
+            ...
+        */
+        tora_compile(node->binary.left); // jouken
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_JUMP_IF_FALSE;
+        vm.ops.push_back(tmp);
+
+        tora_compile(node->binary.right); // block
+
+        tmp->operand.int_value = vm.ops.size();
+
+        break;
+    }
     case NODE_NEWLINE:
         // nop
         break;
@@ -510,9 +563,7 @@ line
     | IF L_PAREN expression R_PAREN L_BRACE line_list R_BRACE
     {
         // printf("if stmt: %d\n", $6);
-        OP * tmp = new OP;
-        tmp->op_type = OP_DUMP;
-        vm.ops.push_back(tmp);
+        $$ = tora_create_binary_expression(NODE_IF, $3, $6);
     }
     | identifier L_PAREN expression R_PAREN
     {

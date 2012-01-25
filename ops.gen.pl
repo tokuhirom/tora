@@ -20,6 +20,7 @@ my @ops = qw(
     OP_FUNCALL
     OP_PUSH_STRING
     OP_DUMP
+    OP_JUMP_IF_FALSE
 );
 
 my $xslate = Text::Xslate->new(
