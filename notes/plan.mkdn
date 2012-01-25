@@ -1,0 +1,20 @@
+0.0.1
+-v option
+
+future plans
+------------
+
+- if stmt
+- while stmt
+- for stmt
+- for-each stmt
+- do-while stmt
+
+- variable
+- array
+- qw()
+- regexp
+- throw
+
+- "-e" option
+

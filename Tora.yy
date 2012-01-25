@@ -5,6 +5,8 @@
 #include <vector>
 #include <cassert>
 #include <sstream>
+#include <unistd.h>
+
 #define YYDEBUG 1
 
 extern int yylex();
@@ -353,16 +355,32 @@ identifier
     ;
 
 %%
+
+#define TORA_VERSION_STR "0.0.1"
+
 int yyerror(const char *err) {
     extern char *yytext;
     fprintf(stderr, "parser error near %s\n", yytext);
     return 0;
 }
 
-int main() {
+int main(int argc, char **argv) {
     extern int yyparse(void);
     extern FILE *yyin;
     yyin = stdin;
+
+    char opt;
+    while ((opt = getopt(argc, argv, "v")) != -1) {
+        switch (opt) {
+        case 'v':
+            printf("tora version %s\n", TORA_VERSION_STR);
+            exit(EXIT_SUCCESS);
+        default:
+            fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     if (yyparse()) {
         fprintf(stderr, "Error!\n");
         exit(1);
