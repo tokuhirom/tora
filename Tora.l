@@ -1,9 +1,23 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <sstream>
 #include "Tora.tab.hh"
 
 extern "C" int yywrap();
+
+static std::stringstream string_buffer;
+
+static void tora_open_string_literal() {
+    string_buffer.str("");
+}
+static void tora_add_string_literal(char c) {
+    string_buffer << c;
+}
+static const char *tora_close_string_literal() {
+    return string_buffer.str().c_str();
+}
 
 // yywrap?
 int yywrap(void)
@@ -13,40 +27,66 @@ int yywrap(void)
 
 
 %}
+
+%start C_COMMENT CC_COMMENT STRING_LITERAL_STATE
 %%
 
-"+"        return ADD;
-"-"        return SUB;
-"*"        return MUL;
-"/"        return DIV;
-"\n"       return CR;
+<INITIAL>"+"        return ADD;
+<INITIAL>"-"        return SUB;
+<INITIAL>"*"        return MUL;
+<INITIAL>"/"        return DIV;
+<INITIAL>"\n"       return CR;
 
-[1-9][0-9]* {
+<INITIAL>[1-9][0-9]* {
     int tmp;
     sscanf(yytext, "%d", &tmp);
     yylval.int_value = tmp;
     return INT_LITERAL;
 }
 
-"if" return IF;
-"(" return L_PAREN;
-")" return R_PAREN;
-"{" return L_BRACE;
-"}" return R_BRACE;
-"true" return TRUE;
-"false" return FALSE;
-[ \t] ;
-[\n] {
+<INITIAL>"if" return IF;
+<INITIAL>"(" return L_PAREN;
+<INITIAL>")" return R_PAREN;
+<INITIAL>"{" return L_BRACE;
+<INITIAL>"}" return R_BRACE;
+<INITIAL>"true" return TRUE;
+<INITIAL>"false" return FALSE;
+<INITIAL>[ \t] ;
+<INITIAL>[\n] {
     // increment_line_number();
     return CR;
 }
 
-[A-Za-z_][A-Za-z0-9_]* {
+<INITIAL>[A-Za-z_][A-Za-z0-9_]* {
     char *tmp = new char [strlen(yytext)+1];
     strcpy(tmp, yytext);
     printf("GET IDENTIFIER in LEX: '%s'\n", tmp);
     yylval.str_value = tmp;
     return IDENTIFIER;
 }
+
+<INITIAL>\" {
+    tora_open_string_literal();
+    BEGIN STRING_LITERAL_STATE;
+}
+
+<STRING_LITERAL_STATE>\"        {
+    yylval.str_value = strdup(tora_close_string_literal());
+    BEGIN INITIAL;
+    return STRING_LITERAL;
+}
+<STRING_LITERAL_STATE>\n        {
+    tora_add_string_literal('\n');
+//    increment_line_number();
+}
+<STRING_LITERAL_STATE>\\\"      tora_add_string_literal('"');
+<STRING_LITERAL_STATE>\\n       tora_add_string_literal('\n');
+<STRING_LITERAL_STATE>\\t       tora_add_string_literal('\t');
+<STRING_LITERAL_STATE>\\\\      tora_add_string_literal('\\');
+<STRING_LITERAL_STATE>[\x81-\x9f\xe0-\xef][\x40-\x7e\x80-\xfc] {
+  tora_add_string_literal(yytext[0]);
+  tora_add_string_literal(yytext[1]);
+}
+<STRING_LITERAL_STATE>.         tora_add_string_literal(yytext[0]);
 
 %%
