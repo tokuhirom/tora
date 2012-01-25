@@ -1,0 +1,16 @@
+YARV
+----
+
+http://d.hatena.ne.jp/hzkr/20061110
+
+Optimization
+------------
+
+http://doc.pypy.org/en/latest/interpreter-optimizations.html
+
+TinyC
+-----
+
+http://www.hpcs.cs.tsukuba.ac.jp/~msato/lecture-note/comp-lecture/note8.html
+http://www.hpcs.cs.tsukuba.ac.jp/~msato/lecture-note/comp-lecture/tiny-c-note1.html
+
