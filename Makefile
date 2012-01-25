@@ -18,5 +18,8 @@ lex.yy.c: Tora.l
 clean:
 	rm -f lex.yy.cc lex.yy.o Tora.tab.cc Tora.output Tora.tab.hh tora Tora.tab.o lex.yy.c
 
-.PHONY: all clean
+test: tora
+	prove t/
+
+.PHONY: all clean test
 

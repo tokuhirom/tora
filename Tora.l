@@ -71,7 +71,6 @@ int yywrap(void)
 <INITIAL>[A-Za-z_][A-Za-z0-9_]* {
     char *tmp = new char [strlen(yytext)+1];
     strcpy(tmp, yytext);
-    printf("GET IDENTIFIER in LEX: '%s'\n", tmp);
     yylval.str_value = tmp;
     return IDENTIFIER;
 }
