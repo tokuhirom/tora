@@ -1,0 +1,31 @@
+typedef enum {
+    OP_NOP,
+    OP_ADD,
+    OP_SUB,
+    OP_DIV,
+    OP_MUL,
+    OP_PRINT,
+    OP_PUSH_INT,
+    OP_PUSH_TRUE,
+    OP_PUSH_FALSE,
+    OP_PUSH_IDENTIFIER,
+    OP_FUNCALL,
+    OP_PUSH_STRING,
+    OP_DUMP,
+} OP_TYPE;
+
+static const char*opcode2name[] = {
+    "OP_NOP",
+    "OP_ADD",
+    "OP_SUB",
+    "OP_DIV",
+    "OP_MUL",
+    "OP_PRINT",
+    "OP_PUSH_INT",
+    "OP_PUSH_TRUE",
+    "OP_PUSH_FALSE",
+    "OP_PUSH_IDENTIFIER",
+    "OP_FUNCALL",
+    "OP_PUSH_STRING",
+    "OP_DUMP",
+};

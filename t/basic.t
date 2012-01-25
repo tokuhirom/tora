@@ -16,5 +16,13 @@ run_is(<<'...', "2\n");
 say(4/2)
 ...
 
+=pod
+run_is(<<'...', "OK\n");
+if (true) {
+    say("OK")
+}
+...
+=cut
+
 done_testing;
 

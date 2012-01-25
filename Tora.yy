@@ -7,25 +7,12 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "ops.gen.h"
+
 #define YYDEBUG 1
 
 extern int yylex();
 int yyerror(const char *err);
-
-typedef enum {
-    OP_NOP = 0,
-    OP_ADD,
-    OP_SUB,
-    OP_DIV,
-    OP_MUL,
-    OP_PRINT,
-    OP_PUSH_INT,
-    OP_PUSH_TRUE,
-    OP_PUSH_FALSE,
-    OP_PUSH_IDENTIFIER,
-    OP_FUNCALL,
-    OP_PUSH_STRING,
-} OP_TYPE;
 
 typedef struct {
     int op_type;
@@ -242,6 +229,10 @@ public:
                 stack.push_back(v);
                 break;
             }
+            case OP_DUMP: {
+                this->dump_stack();
+                break;
+            }
             default: {
                 fprintf(stderr, "[BUG] OOPS. unknown op code: %d\n", op->op_type);
                 abort();
@@ -251,13 +242,20 @@ public:
             pc++;
         }
     }
+    void dump_ops() {
+        printf("-- OP DUMP    --\n");
+        for (int i=0; i<ops.size(); i++) {
+            printf("[%d] %s\n", i, opcode2name[ops[i]->op_type]);
+        }
+        printf("----------------\n");
+    }
     void dump_stack() {
         printf("-- STACK DUMP --\nSP: %d\n", sp);
         for (int i=0; i<stack.size(); i++) {
             printf("[%d] ", i);
             stack.at(i)->dump();
         }
-        printf("--           --\n");
+        printf("----------------\n");
     }
 };
 
@@ -276,14 +274,20 @@ VM vm;
 %token ADD SUB MUL DIV CR
 %token TRUE FALSE
 %token <str_value>STRING_LITERAL
-%type <int_value> expression term primary_expression
+%type <int_value> expression term primary_expression line_list
 %type <str_value> identifier
 
 %%
 
 line_list
     : line
+    {
+        $$ = vm.ops.size()
+    }
     | line_list line
+    {
+        $$ = vm.ops.size()
+    }
     ;
 
 line
@@ -294,9 +298,12 @@ line
         vm.ops.push_back(tmp);
     }
     | CR
-    | IF "(" expression ")" "{" line_list "}"
+    | IF L_PAREN expression R_PAREN L_BRACE line_list R_BRACE
     {
-        printf("if stmt\n");
+        printf("if stmt: %d\n", $6);
+        OP * tmp = new OP;
+        tmp->op_type = OP_DUMP;
+        vm.ops.push_back(tmp);
     }
     | identifier L_PAREN expression R_PAREN
     {
@@ -414,6 +421,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error!\n");
         exit(1);
     } else {
+        // vm.dump_ops();
         vm.execute();
     }
 }

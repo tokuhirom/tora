@@ -6,10 +6,13 @@ tora: Tora.tab.o lex.yy.o
 lex.yy.o: lex.yy.c
 	g++ -g -o lex.yy.o -c lex.yy.c
 
+ops.gen.h: ops.gen.pl
+	perl ops.gen.pl
+
 Tora.tab.o: Tora.tab.cc
 	g++ -g -o Tora.tab.o -c Tora.tab.cc
 
-Tora.tab.cc: Tora.yy
+Tora.tab.cc: Tora.yy ops.gen.h
 	bison -dv Tora.yy
 
 lex.yy.c: Tora.l
