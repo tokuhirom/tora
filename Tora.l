@@ -7,6 +7,9 @@
 
 extern "C" int yywrap();
 
+/**
+ * string buffer
+ */
 static std::stringstream string_buffer;
 
 static void tora_open_string_literal() {
@@ -17,6 +20,14 @@ static void tora_add_string_literal(char c) {
 }
 static const char *tora_close_string_literal() {
     return string_buffer.str().c_str();
+}
+
+/**
+ * line number
+ */
+static int line_number = 0;
+static void increment_line_number() {
+    line_number++;
 }
 
 // yywrap?
@@ -52,8 +63,8 @@ int yywrap(void)
 <INITIAL>"true" return TRUE;
 <INITIAL>"false" return FALSE;
 <INITIAL>[ \t] ;
-<INITIAL>[\n] {
-    // increment_line_number();
+<INITIAL>[ \t\r\n] {
+    increment_line_number();
     return CR;
 }
 
@@ -70,6 +81,17 @@ int yywrap(void)
     BEGIN STRING_LITERAL_STATE;
 }
 
+<C_COMMENT>\n     increment_line_number();
+<C_COMMENT>"*/"     {
+    BEGIN INITIAL;
+}
+<C_COMMENT>.      ;
+<CC_COMMENT>\n  {
+    increment_line_number();
+    BEGIN INITIAL;
+}
+<CC_COMMENT>.   ;
+
 <STRING_LITERAL_STATE>\"        {
     yylval.str_value = strdup(tora_close_string_literal());
     BEGIN INITIAL;
@@ -77,7 +99,7 @@ int yywrap(void)
 }
 <STRING_LITERAL_STATE>\n        {
     tora_add_string_literal('\n');
-//    increment_line_number();
+    increment_line_number();
 }
 <STRING_LITERAL_STATE>\\\"      tora_add_string_literal('"');
 <STRING_LITERAL_STATE>\\n       tora_add_string_literal('\n');
