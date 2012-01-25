@@ -1,16 +1,22 @@
 all: tora
 
-tora: Tora.tab.c lex.yy.c
-	gcc -g -o tora Tora.tab.c lex.yy.c
+tora: Tora.tab.o lex.yy.o
+	g++ -g -o tora Tora.tab.o lex.yy.o
 
-Tora.tab.c: Tora.y
-	bison -dv Tora.y
+lex.yy.o: lex.yy.c
+	g++ -g -o lex.yy.o -c lex.yy.c
+
+Tora.tab.o: Tora.tab.cc
+	g++ -g -o Tora.tab.o -c Tora.tab.cc
+
+Tora.tab.cc: Tora.yy
+	bison -dv Tora.yy
 
 lex.yy.c: Tora.l
 	flex Tora.l
 
 clean:
-	rm -f lex.yy.c Tora.tab.c Tora.output Tora.tab.h tora
+	rm -f lex.yy.cc lex.yy.o Tora.tab.cc Tora.output Tora.tab.hh tora Tora.tab.o lex.yy.c
 
 .PHONY: all clean
 

@@ -1,11 +1,12 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "Tora.tab.h"
+#include "Tora.tab.hh"
+
+extern "C" int yywrap();
 
 // yywrap?
-int
-yywrap(void)
+int yywrap(void)
 {
     return 1;
 }

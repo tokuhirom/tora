@@ -1,7 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 #define YYDEBUG 1
+
+extern int yylex();
+int yyerror(const char *err);
 
 %}
 %token IF
