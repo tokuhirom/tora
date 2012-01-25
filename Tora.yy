@@ -14,6 +14,34 @@
 extern int yylex();
 int yyerror(const char *err);
 
+typedef struct TNode {
+    int type;
+    union {
+        struct TNode *node;
+        int int_value;
+        const char*str_value;
+        struct {
+            struct TNode *left;
+            struct TNode *right;
+        } binary;
+    };
+} NODE;
+
+typedef enum {
+    NODE_INT = 0,
+    NODE_TRUE,
+    NODE_FALSE,
+    NODE_IDENTIFIER,
+    NODE_FUNCALL,
+    NODE_STRING,
+    NODE_ADD,
+    NODE_SUB,
+    NODE_MUL,
+    NODE_DIV,
+    NODE_STMTS,
+    NODE_NEWLINE,
+} NODE_TYPE;
+
 typedef struct {
     int op_type;
     union {
@@ -98,7 +126,7 @@ public:
             return v;
         }
         case VALUE_TYPE_STR: {
-            Value *v;
+            Value *v = new Value();
             v->set_str(strdup(this->value.str_value));
             return v;
         }
@@ -108,13 +136,24 @@ public:
             break;
         }
     }
+    Value *to_i() {
+        switch (value_type) {
+        case VALUE_TYPE_INT: {
+            Value *v = new Value();
+            v->set_int(this->value.int_value);
+            return v;
+        }
+        default:
+            abort();
+        }
+    }
 };
 
 class VM {
 public:
     std::vector<Value*> stack;
     int sp; // stack pointer
-    int pc; // program counter
+    size_t pc; // program counter
     std::vector<OP*> ops;
 
     VM() {
@@ -216,6 +255,14 @@ public:
                     Value *s = v->to_s();
                     printf("%s\n", s->value.str_value);
                     s->release();
+                } else if (strcmp(funname->value.str_value, "exit") == 0) {
+                    Value *v = stack.back();
+                    stack.pop_back();
+                    assert(v->value_type == VALUE_TYPE_INT);
+                    Value *s = v->to_i();
+                    exit(s->value.int_value);
+                    s->release();
+                    v->release();
                 } else {
                     fprintf(stderr, "Unknown function: %s\n", funname->value.str_value);
                 }
@@ -244,14 +291,14 @@ public:
     }
     void dump_ops() {
         printf("-- OP DUMP    --\n");
-        for (int i=0; i<ops.size(); i++) {
+        for (size_t i=0; i<ops.size(); i++) {
             printf("[%d] %s\n", i, opcode2name[ops[i]->op_type]);
         }
         printf("----------------\n");
     }
     void dump_stack() {
         printf("-- STACK DUMP --\nSP: %d\n", sp);
-        for (int i=0; i<stack.size(); i++) {
+        for (size_t i=0; i<stack.size(); i++) {
             printf("[%d] ", i);
             stack.at(i)->dump();
         }
@@ -261,12 +308,167 @@ public:
 
 VM vm;
 
+static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2) {
+    TNode *node = new TNode();
+    node->type = type;
+    node->binary.left  = t1;
+    node->binary.right = t2;
+    return node;
+}
+
+void tora_dump_node(TNode *node, int indent) {
+    for (int i=0; i<indent*4; i++) {
+        printf(" ");
+    }
+    switch (node->type) {
+    case NODE_STRING:
+        printf("NODE_STRING('%s')\n", node->str_value);
+        break;
+    case NODE_INT:
+        printf("NODE_INT(%d)\n", node->int_value);
+        break;
+    case NODE_TRUE:
+        printf("NODE_TRUE\n");
+        break;
+    case NODE_FALSE:
+        printf("NODE_FALSE\n");
+        break;
+    case NODE_IDENTIFIER:
+        printf("NODE_IDENTIFIER(%s)\n", node->str_value);
+        break;
+    case NODE_NEWLINE:
+        printf("NODE_NEWLINE\n");
+        break;
+
+    case NODE_FUNCALL:
+        printf("NODE_FUNCALL\n");
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_ADD:
+        printf("NODE_ADD\n");
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_SUB:
+        printf("NODE_SUB\n");
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_MUL:
+        printf("NODE_MUL\n");
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_DIV:
+        printf("NODE_DIV\n");
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+    case NODE_STMTS:
+        printf("NODE_STMTS\n");
+        assert(node->binary.left);
+        assert(node->binary.right);
+        tora_dump_node(node->binary.left, 1);
+        tora_dump_node(node->binary.right, 1);
+        break;
+
+    default:
+        printf("Unknown node\n");
+        break;
+    }
+}
+void tora_dump_node(TNode *node) {
+    tora_dump_node(node, 0);
+}
+
+static TNode *root_node;
+
+static void tora_compile(TNode *node) {
+    switch (node->type) {
+    case NODE_STRING: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_STRING;
+        tmp->operand.str_value = strdup(node->str_value);
+        vm.ops.push_back(tmp);
+        break;
+    }
+    case NODE_INT: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_INT;
+        tmp->operand.int_value = node->int_value;
+        vm.ops.push_back(tmp);
+        break;
+    }
+    case NODE_TRUE: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_TRUE;
+        vm.ops.push_back(tmp);
+        break;
+    }
+    case NODE_FALSE: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_FALSE;
+        vm.ops.push_back(tmp);
+        break;
+    }
+    case NODE_IDENTIFIER: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_IDENTIFIER;
+        tmp->operand.str_value = strdup(node->str_value);
+        vm.ops.push_back(tmp);
+        break;
+    }
+
+    case NODE_FUNCALL: {
+        tora_compile(node->binary.left);
+        tora_compile(node->binary.right);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_FUNCALL;
+        tmp->operand.int_value = 1; // the number of args
+        vm.ops.push_back(tmp);
+        break;
+    }
+#define C_OP_BINARY(type) \
+    { \
+        tora_compile(node->binary.left); \
+        tora_compile(node->binary.right); \
+        OP * tmp = new OP; \
+        tmp->op_type = (type); \
+        vm.ops.push_back(tmp); \
+        break; \
+    }
+
+    case NODE_ADD: C_OP_BINARY(OP_ADD);
+    case NODE_SUB: C_OP_BINARY(OP_SUB);
+    case NODE_MUL: C_OP_BINARY(OP_MUL);
+    case NODE_DIV: C_OP_BINARY(OP_DIV);
+#undef C_OP_BINARY
+
+    case NODE_STMTS: {
+        tora_compile(node->binary.left);
+        tora_compile(node->binary.right);
+        break;
+    }
+    case NODE_NEWLINE:
+        // nop
+        break;
+
+    default:
+        printf("Unknown node: %d\n", node->type);
+        abort();
+        break;
+    }
+}
+
 %}
 %token IF
 %token L_PAREN R_PAREN L_BRACE R_BRACE
 %union {
     int int_value;
     char *str_value;
+    TNode *node;
 }
 
 %token <int_value> INT_LITERAL;
@@ -274,33 +476,40 @@ VM vm;
 %token ADD SUB MUL DIV CR
 %token TRUE FALSE
 %token <str_value>STRING_LITERAL
-%type <int_value> expression term primary_expression line_list
-%type <str_value> identifier
+%type <node> expression term primary_expression line line_list root
+%type <node> identifier
 
 %%
 
+root
+    : line_list
+    {
+        // tora_dump_node($1);
+        root_node = $1;
+    }
+
 line_list
     : line
-    {
-        $$ = vm.ops.size()
-    }
     | line_list line
     {
-        $$ = vm.ops.size()
+        $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
     }
     ;
 
 line
     :expression CR
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PRINT;
-        vm.ops.push_back(tmp);
+        $$ = $1;
     }
     | CR
+    {
+        TNode *node = new TNode();
+        node->type = NODE_NEWLINE;
+        $$ = node;
+    }
     | IF L_PAREN expression R_PAREN L_BRACE line_list R_BRACE
     {
-        printf("if stmt: %d\n", $6);
+        // printf("if stmt: %d\n", $6);
         OP * tmp = new OP;
         tmp->op_type = OP_DUMP;
         vm.ops.push_back(tmp);
@@ -311,25 +520,18 @@ line
         // TODO: support multiple args
         // TODO: support vargs
         // call function
-        OP * tmp = new OP;
-        tmp->op_type = OP_FUNCALL;
-        tmp->operand.int_value = 1; // the number of args
-        vm.ops.push_back(tmp);
+        $$ = tora_create_binary_expression(NODE_FUNCALL, $1, $3);
     }
 
 expression
     : term
     | expression ADD term
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_ADD;
-        vm.ops.push_back(tmp);
+        $$ = tora_create_binary_expression(NODE_ADD, $1, $3);
     }
     | expression SUB term
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_SUB;
-        vm.ops.push_back(tmp);
+        $$ = tora_create_binary_expression(NODE_SUB, $1, $3);
     }
     ;
 
@@ -337,56 +539,49 @@ term
     : primary_expression
     | term MUL primary_expression
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_MUL;
-        vm.ops.push_back(tmp);
-        $$ = $1 * $3;
+        $$ = tora_create_binary_expression(NODE_MUL, $1, $3);
     }
     | term DIV primary_expression
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_DIV;
-        vm.ops.push_back(tmp);
-        $$ = $1 / $3;
+        $$ = tora_create_binary_expression(NODE_DIV, $1, $3);
     }
     ;
 
 primary_expression
     : INT_LITERAL
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_INT;
-        tmp->operand.int_value = $1;
-        vm.ops.push_back(tmp);
-        $$ = $1;
+        TNode *node = new TNode();
+        node->type = NODE_INT;
+        node->int_value = $1;
+        $$ = node;
     }
     | FALSE
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_FALSE;
-        vm.ops.push_back(tmp);
+        TNode *node = new TNode();
+        node->type = NODE_FALSE;
+        $$ = node;
     }
     | TRUE
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_TRUE;
-        vm.ops.push_back(tmp);
+        TNode *node = new TNode();
+        node->type = NODE_TRUE;
+        $$ = node;
     }
     | STRING_LITERAL
     {
-        OP *tmp = new OP;
-        tmp->op_type = OP_PUSH_STRING;
-        tmp->operand.str_value = $1;
-        vm.ops.push_back(tmp);
+        TNode *node = new TNode();
+        node->type = NODE_STRING;
+        node->str_value = $1;
+        $$ = node;
     }
 
 identifier
     : IDENTIFIER
     {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_IDENTIFIER;
-        tmp->operand.str_value = $1;
-        vm.ops.push_back(tmp);
+        TNode *node = new TNode();
+        node->type = NODE_IDENTIFIER;
+        node->str_value = $1;
+        $$ = node;
     }
     ;
 
@@ -406,22 +601,39 @@ int main(int argc, char **argv) {
     yyin = stdin;
 
     char opt;
-    while ((opt = getopt(argc, argv, "v")) != -1) {
+    bool dump_ops = false;
+    while ((opt = getopt(argc, argv, "vd")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
             exit(EXIT_SUCCESS);
+        case 'd':
+            dump_ops = true;
+            break;
         default:
             fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
 
+    if (optind < argc) { // source code
+        FILE *fh = fopen(argv[optind], "rb");
+        if (!fh) { perror(argv[optind]); exit(EXIT_FAILURE); }
+        yyin = fh;
+    } else {
+        yyin = stdin;
+    }
+
+    root_node = NULL;
     if (yyparse()) {
         fprintf(stderr, "Error!\n");
         exit(1);
     } else {
-        // vm.dump_ops();
+        assert(root_node);
+        tora_compile(root_node);
+        if (dump_ops) {
+            vm.dump_ops();
+        }
         vm.execute();
     }
 }
