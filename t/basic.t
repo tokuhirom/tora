@@ -16,6 +16,11 @@ run_is(<<'...', "2\n");
 say(4/2)
 ...
 
+run_is(<<'...', "yo\nho\n");
+say("yo")
+say("ho")
+...
+
 run_is('', "");
 
 =pod
