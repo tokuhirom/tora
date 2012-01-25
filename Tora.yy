@@ -167,22 +167,50 @@ public:
             }
             case OP_ADD: {
                 Value *v1 = stack.back();
-                Value *v2 = stack.back();
                 stack.pop_back();
+                Value *v2 = stack.back();
                 stack.pop_back();
                 Value *v = new Value;
                 v->set_int(v1->value.int_value + v2->value.int_value);
                 stack.push_back(v);
+                v1->release();
+                v2->release();
                 break;
             }
             case OP_SUB: {
                 Value *v1 = stack.back();
+                stack.pop_back();
                 Value *v2 = stack.back();
                 stack.pop_back();
+                Value *v = new Value;
+                v->set_int(v2->value.int_value - v1->value.int_value);
+                stack.push_back(v);
+                v1->release();
+                v2->release();
+                break;
+            }
+            case OP_MUL: {
+                Value *v1 = stack.back();
+                stack.pop_back();
+                Value *v2 = stack.back();
                 stack.pop_back();
                 Value *v = new Value;
-                v->set_int(v1->value.int_value - v2->value.int_value);
+                v->set_int(v2->value.int_value * v1->value.int_value);
                 stack.push_back(v);
+                v1->release();
+                v2->release();
+                break;
+            }
+            case OP_DIV: {
+                Value *v1 = stack.back();
+                stack.pop_back();
+                Value *v2 = stack.back();
+                stack.pop_back();
+                Value *v = new Value;
+                v->set_int(v2->value.int_value / v1->value.int_value);
+                stack.push_back(v);
+                v1->release();
+                v2->release();
                 break;
             }
             case OP_FUNCALL: {
@@ -215,7 +243,8 @@ public:
                 break;
             }
             default: {
-                fprintf(stderr, "OOPS. unknown op code\n");
+                fprintf(stderr, "[BUG] OOPS. unknown op code: %d\n", op->op_type);
+                abort();
                 break;
             }
             }
