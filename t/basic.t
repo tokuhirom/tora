@@ -16,6 +16,8 @@ run_is(<<'...', "2\n");
 say(4/2)
 ...
 
+run_is('', "");
+
 =pod
 run_is(<<'...', "OK\n");
 if (true) {
