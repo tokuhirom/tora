@@ -152,10 +152,6 @@ line
     {
         $$ = tora_create_binary_expression(NODE_IF, $3, $5);
     }
-    | WHILE L_PAREN expression R_PAREN block
-    {
-        $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
-    }
     | lvalue ASSIGN expression
     {
         $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
@@ -167,6 +163,10 @@ line
         // TODO: support vargs
         // call function
         $$ = tora_create_binary_expression(NODE_FUNCALL, $1, $3);
+    }
+    | WHILE L_PAREN expression R_PAREN block
+    {
+        $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
     }
     ;
 

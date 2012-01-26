@@ -102,6 +102,23 @@ void tora_compile(TNode *node, VM &vm) {
           goto LABEL1
         LABEL2:
         */
+        int label1 = vm.ops.size();
+        tora_compile(node->binary.left, vm); // cond
+
+        OP * jump_if_false = new OP;
+        jump_if_false->op_type = OP_JUMP_IF_FALSE;
+        vm.ops.push_back(jump_if_false);
+
+        tora_compile(node->binary.right, vm); //body
+
+        OP * goto_ = new OP;
+        goto_->op_type = OP_JUMP;
+        goto_->operand.int_value = label1;
+        vm.ops.push_back(goto_);
+
+        int label2 = vm.ops.size();
+        jump_if_false->operand.int_value = label2;
+
         break;
     }
     case NODE_NEWLINE:

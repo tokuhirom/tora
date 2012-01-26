@@ -48,6 +48,11 @@ int yywrap(void)
 <INITIAL>"/"        return DIV;
 <INITIAL>"\n"       return CR;
 
+<INITIAL>0 {
+    yylval.int_value = 0;
+    return INT_LITERAL;
+}
+
 <INITIAL>[1-9][0-9]* {
     int tmp;
     sscanf(yytext, "%d", &tmp);

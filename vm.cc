@@ -100,6 +100,10 @@ void VM::execute() {
             v->release();
             break;
         }
+        case OP_JUMP: {
+            pc = op->operand.int_value-1;
+            break;
+        }
         case OP_EQ: {
             Value * v1 = stack.back();
             stack.pop_back();

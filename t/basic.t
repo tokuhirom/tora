@@ -84,5 +84,13 @@ $x=$x+3
 say($x)
 ...
 
+run_is(<<'...', "0\n1\n2\n");
+$i=0
+while ($i<3) {
+    say($i)
+    $i = $i + 1
+}
+...
+
 done_testing;
 
