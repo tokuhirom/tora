@@ -38,5 +38,45 @@ if (false) { say("NOT OK") }
 say("HERE")
 ...
 
+run_is(<<'...', "true\nfalse\n");
+say(1==1)
+say(1==2)
+...
+
+my $src = <<'...';
+say(4<5)
+say(4<1)
+say(4<4)
+
+say(4>5)
+say(4>1)
+say(4>4)
+
+say(4>=5)
+say(4>=1)
+say(4>=4)
+
+say(4<=5)
+say(4<=1)
+say(4<=4)
+...
+run_is($src , join("\n", qw(
+    true false false
+    false true false
+    false true true
+    true false true
+)). "\n");
+
+run_is(<<'...', "5\n");
+$x=5
+say($x)
+...
+
+run_is(<<'...', "7\n");
+$x=3
+$y=4
+say($x+$y)
+...
+
 done_testing;
 

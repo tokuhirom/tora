@@ -5,336 +5,18 @@
 #include <vector>
 #include <cassert>
 #include <sstream>
+#include <map>
 #include <unistd.h>
 
 #include "ops.gen.h"
+#include "tora.h"
+#include "value.h"
+#include "vm.h"
 
 #define YYDEBUG 1
 
 extern int yylex();
 int yyerror(const char *err);
-
-typedef struct TNode {
-    int type;
-    union {
-        struct TNode *node;
-        int int_value;
-        const char*str_value;
-        struct {
-            struct TNode *left;
-            struct TNode *right;
-        } binary;
-    };
-} NODE;
-
-typedef enum {
-    NODE_INT = 0,
-    NODE_TRUE,
-    NODE_FALSE,
-    NODE_IDENTIFIER,
-    NODE_FUNCALL,
-    NODE_STRING,
-    NODE_ADD,
-    NODE_SUB,
-    NODE_MUL,
-    NODE_DIV,
-    NODE_STMTS,
-    NODE_NEWLINE,
-    NODE_IF,
-} NODE_TYPE;
-
-typedef struct {
-    int op_type;
-    union {
-        int  int_value;
-        bool bool_value;
-        char *str_value;
-    } operand;
-} OP;
-
-typedef enum {
-    VALUE_TYPE_INT = 1,
-    VALUE_TYPE_BOOL,
-    VALUE_TYPE_STR,
-} value_type_t;
-
-/**
- * The value class
- */
-class Value {
-public:
-    value_type_t value_type;
-    union {
-        int  int_value;
-        bool bool_value;
-        const char *str_value;
-    } value;
-    int refcnt; // reference count
-
-    Value() {
-        refcnt = 1;
-    }
-    ~Value() {
-        if (value_type == VALUE_TYPE_STR) {
-            delete [] value.str_value;
-        }
-    }
-    void release() {
-        --refcnt;
-        if (refcnt == 0) {
-            delete this;
-        }
-    }
-    void retain() {
-        ++refcnt;
-    }
-    void set_int(int i) {
-        value.int_value = i;
-        value_type = VALUE_TYPE_INT;
-    }
-    void set_bool(bool b) {
-        value.bool_value = b;
-        value_type = VALUE_TYPE_BOOL;
-    }
-    void set_str(const char *s) {
-        // memory leak
-        value.str_value = s;
-        value_type = VALUE_TYPE_STR;
-    }
-    void dump() {
-        switch (value_type) {
-        case VALUE_TYPE_INT:
-            printf("[dump] IV: %d\n", value.int_value);
-            break;
-        case VALUE_TYPE_BOOL:
-            printf("[dump] bool: %s\n", value.bool_value ? "true" : "false");
-            break;
-        case VALUE_TYPE_STR:
-            printf("[dump] str: %s\n", value.str_value);
-            break;
-        default:
-            printf("[dump] unknown: %d\n", value_type);
-            break;
-        }
-    }
-    Value *to_s() {
-        switch (value_type) {
-        case VALUE_TYPE_INT: {
-            Value *v = new Value();
-            std::ostringstream os;
-            os << this->value.int_value;
-            v->set_str(strdup(os.str().c_str()));
-            return v;
-        }
-        case VALUE_TYPE_STR: {
-            Value *v = new Value();
-            v->set_str(strdup(this->value.str_value));
-            return v;
-        }
-        case VALUE_TYPE_BOOL: {
-            Value *v = new Value();
-            v->set_str(strdup(this->value.bool_value ? "true" : "false"));
-            return v;
-        }
-        default:
-            printf("[BUG] unknown in to_s: %d\n", value_type);
-            abort();
-            break;
-        }
-    }
-    Value *to_i() {
-        switch (value_type) {
-        case VALUE_TYPE_INT: {
-            Value *v = new Value();
-            v->set_int(this->value.int_value);
-            return v;
-        }
-        default:
-            abort();
-        }
-    }
-    Value *to_b() {
-        switch (value_type) {
-        case VALUE_TYPE_BOOL:
-            this->retain();
-            return this;
-        default: {
-            Value *v = new Value();
-            v->set_bool(false);
-            return v;
-        }
-        }
-    }
-};
-
-class VM {
-public:
-    std::vector<Value*> stack;
-    int sp; // stack pointer
-    size_t pc; // program counter
-    std::vector<OP*> ops;
-
-    VM() {
-        sp = 0;
-        pc = 0;
-    }
-
-    // run program
-    void execute() {
-        // printf("[DEBUG] OPS: %d, %d\n", pc, ops.size());
-        while (pc < ops.size()) {
-            OP *op = ops[pc];
-            switch (op->op_type) {
-            case OP_PUSH_TRUE: {
-                Value *v = new Value;
-                v->set_bool(true);
-                stack.push_back(v);
-                break;
-            }
-            case OP_PUSH_FALSE: {
-                Value *v = new Value;
-                v->set_bool(false);
-                stack.push_back(v);
-                break;
-            }
-            case OP_PUSH_INT: {
-                Value *v = new Value;
-                v->set_int(op->operand.int_value);
-                stack.push_back(v);
-                break;
-            }
-            case OP_PUSH_STRING: {
-                Value *v = new Value;
-                v->set_str(op->operand.str_value);
-                stack.push_back(v);
-                break;
-            }
-            case OP_ADD: {
-                Value *v1 = stack.back();
-                stack.pop_back();
-                Value *v2 = stack.back();
-                stack.pop_back();
-                Value *v = new Value;
-                v->set_int(v1->value.int_value + v2->value.int_value);
-                stack.push_back(v);
-                v1->release();
-                v2->release();
-                break;
-            }
-            case OP_SUB: {
-                Value *v1 = stack.back();
-                stack.pop_back();
-                Value *v2 = stack.back();
-                stack.pop_back();
-                Value *v = new Value;
-                v->set_int(v2->value.int_value - v1->value.int_value);
-                stack.push_back(v);
-                v1->release();
-                v2->release();
-                break;
-            }
-            case OP_MUL: {
-                Value *v1 = stack.back();
-                stack.pop_back();
-                Value *v2 = stack.back();
-                stack.pop_back();
-                Value *v = new Value;
-                v->set_int(v2->value.int_value * v1->value.int_value);
-                stack.push_back(v);
-                v1->release();
-                v2->release();
-                break;
-            }
-            case OP_DIV: {
-                Value *v1 = stack.back();
-                stack.pop_back();
-                Value *v2 = stack.back();
-                stack.pop_back();
-                Value *v = new Value;
-                v->set_int(v2->value.int_value / v1->value.int_value);
-                stack.push_back(v);
-                v1->release();
-                v2->release();
-                break;
-            }
-            case OP_FUNCALL: {
-                assert(stack.size() >= op->operand.int_value + 1);
-                Value *funname = stack.at(stack.size()-op->operand.int_value-1);
-                assert(funname->value_type == VALUE_TYPE_STR);
-                if (strcmp(funname->value.str_value, "print") == 0) {
-                    Value *v = stack.back();
-                    stack.pop_back();
-                    Value *s = v->to_s();
-                    printf("%s", s->value.str_value);
-                    s->release();
-                } else if (strcmp(funname->value.str_value, "say") == 0) {
-                    Value *v = stack.back();
-                    stack.pop_back();
-                    Value *s = v->to_s();
-                    printf("%s\n", s->value.str_value);
-                    s->release();
-                } else if (strcmp(funname->value.str_value, "exit") == 0) {
-                    Value *v = stack.back();
-                    stack.pop_back();
-                    assert(v->value_type == VALUE_TYPE_INT);
-                    Value *s = v->to_i();
-                    exit(s->value.int_value);
-                    s->release();
-                    v->release();
-                } else {
-                    fprintf(stderr, "Unknown function: %s\n", funname->value.str_value);
-                }
-                break;
-            }
-            case OP_PUSH_IDENTIFIER: {
-                // operand = the number of args
-                Value *v = new Value;
-                v->value.str_value = op->operand.str_value;
-                v->value_type = VALUE_TYPE_STR;
-                stack.push_back(v);
-                break;
-            }
-            case OP_DUMP: {
-                this->dump_stack();
-                break;
-            }
-            case OP_JUMP_IF_FALSE: {
-                Value * v = stack.back();
-                stack.pop_back();
-
-                Value * b = v->to_b();
-                if (!b->value.bool_value) {
-                    pc = op->operand.int_value-1;
-                }
-                b->release();
-                v->release();
-                break;
-            }
-            default: {
-                fprintf(stderr, "[BUG] OOPS. unknown op code: %d(%s)\n", op->op_type, opcode2name[op->op_type]);
-                abort();
-                break;
-            }
-            }
-            pc++;
-        }
-    }
-    void dump_ops() {
-        printf("-- OP DUMP    --\n");
-        for (size_t i=0; i<ops.size(); i++) {
-            printf("[%d] %s\n", i, opcode2name[ops[i]->op_type]);
-        }
-        printf("----------------\n");
-    }
-    void dump_stack() {
-        printf("-- STACK DUMP --\nSP: %d\n", sp);
-        for (size_t i=0; i<stack.size(); i++) {
-            printf("[%d] ", i);
-            stack.at(i)->dump();
-        }
-        printf("----------------\n");
-    }
-};
 
 VM vm;
 
@@ -415,9 +97,9 @@ void tora_dump_node(TNode *node) {
     tora_dump_node(node, 0);
 }
 
-static TNode *root_node;
+TNode *root_node;
 
-static void tora_compile(TNode *node) {
+void tora_compile(TNode *node) {
     switch (node->type) {
     case NODE_STRING: {
         OP * tmp = new OP;
@@ -477,6 +159,12 @@ static void tora_compile(TNode *node) {
     case NODE_SUB: C_OP_BINARY(OP_SUB);
     case NODE_MUL: C_OP_BINARY(OP_MUL);
     case NODE_DIV: C_OP_BINARY(OP_DIV);
+    case NODE_LT:  C_OP_BINARY(OP_LT);
+    case NODE_GT:  C_OP_BINARY(OP_GT);
+    case NODE_LE:  C_OP_BINARY(OP_LE);
+    case NODE_GE:  C_OP_BINARY(OP_GE);
+    case NODE_EQ:  C_OP_BINARY(OP_EQ);
+    case NODE_ASSIGN:  C_OP_BINARY(OP_ASSIGN);
 #undef C_OP_BINARY
 
     case NODE_STMTS: {
@@ -507,6 +195,13 @@ static void tora_compile(TNode *node) {
     case NODE_NEWLINE:
         // nop
         break;
+    case NODE_VARIABLE: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_VARIABLE;
+        tmp->operand.str_value = node->str_value;
+        vm.ops.push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %d\n", node->type);
@@ -521,15 +216,19 @@ static void tora_compile(TNode *node) {
 %union {
     int int_value;
     char *str_value;
-    TNode *node;
+    struct TNode *node;
 }
 
 %token <int_value> INT_LITERAL;
 %token <str_value> IDENTIFIER;
+%token <str_value> VARIABLE;
 %token ADD SUB MUL DIV CR
 %token TRUE FALSE
+%token LT GT LE GE EQ
+%token ASSIGN
+%token MY
 %token <str_value>STRING_LITERAL
-%type <node> expression term primary_expression line line_list root
+%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable
 %type <node> identifier
 
 %%
@@ -540,6 +239,7 @@ root
         // tora_dump_node($1);
         root_node = $1;
     }
+    ;
 
 line_list
     : line
@@ -565,6 +265,10 @@ line
         // printf("if stmt: %d\n", $6);
         $$ = tora_create_binary_expression(NODE_IF, $3, $6);
     }
+    | lvalue ASSIGN expression
+    {
+        $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
+    }
     | identifier L_PAREN expression R_PAREN
     {
         // funciton call
@@ -573,8 +277,41 @@ line
         // call function
         $$ = tora_create_binary_expression(NODE_FUNCALL, $1, $3);
     }
+    ;
+
+lvalue
+    : variable
+    ;
 
 expression
+    : expression2
+    | expression EQ expression2
+    {
+        $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
+    }
+    ;
+
+expression2
+    : expression3
+    | expression2 LT expression3
+    {
+        $$ = tora_create_binary_expression(NODE_LT, $1, $3);
+    }
+    | expression2 GT expression3
+    {
+        $$ = tora_create_binary_expression(NODE_GT, $1, $3);
+    }
+    | expression2 LE expression3
+    {
+        $$ = tora_create_binary_expression(NODE_LE, $1, $3);
+    }
+    | expression2 GE expression3
+    {
+        $$ = tora_create_binary_expression(NODE_GE, $1, $3);
+    }
+    ;
+
+expression3
     : term
     | expression ADD term
     {
@@ -625,6 +362,8 @@ primary_expression
         node->str_value = $1;
         $$ = node;
     }
+    | variable
+    ;
 
 identifier
     : IDENTIFIER
@@ -636,9 +375,17 @@ identifier
     }
     ;
 
-%%
+variable
+    : VARIABLE
+    {
+        TNode *node = new TNode();
+        node->type = NODE_VARIABLE;
+        node->str_value = $1;
+        $$ = node;
+    }
+    ;
 
-#define TORA_VERSION_STR "0.0.1"
+%%
 
 int yyerror(const char *err) {
     extern char *yytext;
@@ -646,46 +393,4 @@ int yyerror(const char *err) {
     return 0;
 }
 
-int main(int argc, char **argv) {
-    extern int yyparse(void);
-    extern FILE *yyin;
-    yyin = stdin;
-
-    char opt;
-    bool dump_ops = false;
-    while ((opt = getopt(argc, argv, "vd")) != -1) {
-        switch (opt) {
-        case 'v':
-            printf("tora version %s\n", TORA_VERSION_STR);
-            exit(EXIT_SUCCESS);
-        case 'd':
-            dump_ops = true;
-            break;
-        default:
-            fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    if (optind < argc) { // source code
-        FILE *fh = fopen(argv[optind], "rb");
-        if (!fh) { perror(argv[optind]); exit(EXIT_FAILURE); }
-        yyin = fh;
-    } else {
-        yyin = stdin;
-    }
-
-    root_node = NULL;
-    if (yyparse()) {
-        fprintf(stderr, "Error!\n");
-        exit(1);
-    } else {
-        assert(root_node);
-        tora_compile(root_node);
-        if (dump_ops) {
-            vm.dump_ops();
-        }
-        vm.execute();
-    }
-}
 

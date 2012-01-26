@@ -56,11 +56,18 @@ int yywrap(void)
 }
 
 <INITIAL>"if" return IF;
+<INITIAL>"<" return GT;
+<INITIAL>">" return LT;
+<INITIAL>"<=" return GE;
+<INITIAL>">=" return LE;
+<INITIAL>"==" return EQ;
 <INITIAL>"(" return L_PAREN;
 <INITIAL>")" return R_PAREN;
 <INITIAL>"{" return L_BRACE;
 <INITIAL>"}" return R_BRACE;
+<INITIAL>"=" return ASSIGN;
 <INITIAL>"true" return TRUE;
+<INITIAL>"my" return MY;
 <INITIAL>"false" return FALSE;
 <INITIAL>[ \t] ;
 <INITIAL>[ \t\r\n] {
@@ -73,6 +80,13 @@ int yywrap(void)
     strcpy(tmp, yytext);
     yylval.str_value = tmp;
     return IDENTIFIER;
+}
+
+<INITIAL>[$][A-Za-z_][A-Za-z0-9_]* {
+    char *tmp = new char [strlen(yytext)+1];
+    strcpy(tmp, yytext);
+    yylval.str_value = tmp;
+    return VARIABLE;
 }
 
 <INITIAL>\" {

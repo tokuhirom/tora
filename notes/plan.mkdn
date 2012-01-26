@@ -10,8 +10,11 @@ future plans
 - for-each stmt
 - do-while stmt
 
+- double literal
+
 - variable
 - array
+- hash
 - qw()
 - regexp
 - throw

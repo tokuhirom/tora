@@ -21,6 +21,13 @@ my @ops = qw(
     OP_PUSH_STRING
     OP_DUMP
     OP_JUMP_IF_FALSE
+    OP_LT
+    OP_GT
+    OP_LE
+    OP_GE
+    OP_EQ
+    OP_ASSIGN
+    OP_VARIABLE
 );
 
 my $xslate = Text::Xslate->new(
