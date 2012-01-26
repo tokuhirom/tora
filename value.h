@@ -9,6 +9,7 @@
 #include <cassert>
 #include <vector>
 #include <map>
+#include <memory>
 
 /**
  * The value class
@@ -32,13 +33,13 @@ public:
             delete [] value.str_value;
         }
     }
-    void release() {
+    inline void release() {
         --refcnt;
         if (refcnt == 0) {
             delete this;
         }
     }
-    void retain() {
+    inline void retain() {
         ++refcnt;
     }
     void set_int(int i) {
@@ -113,5 +114,14 @@ public:
     }
     Value *to_b();
 };
+
+struct ValueDeleter {
+    typedef Value pointer;
+    void operator ()(Value* handle) {
+        handle->release();
+    }
+};
+
+typedef std::unique_ptr<Value, ValueDeleter> ValuePtr;
 
 #endif // VALUE_H_

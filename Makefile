@@ -1,4 +1,4 @@
-COPTS=-Wall -g
+COPTS=-Wall -g -std=c++0x
 CXX=g++
 
 all: tora
