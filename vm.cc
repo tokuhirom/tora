@@ -2,8 +2,9 @@
 
 // run program
 void VM::execute() {
-    // printf("[DEBUG] OPS: %d, %d\n", pc, ops.size());
     while (pc < ops.size()) {
+        // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
+
         OP *op = ops[pc];
         switch (op->op_type) {
         case OP_PUSH_TRUE: {
@@ -55,6 +56,10 @@ void VM::execute() {
                 Value *s = v->to_s();
                 printf("%s", s->value.str_value);
                 s->release();
+            } else if (strcmp(funname->value.str_value, "p") == 0) {
+                Value *v = stack.pop();
+                v->dump();
+                v->release();
             } else if (strcmp(funname->value.str_value, "say") == 0) {
                 Value *v = stack.pop();
                 Value *s = v->to_s();
@@ -231,6 +236,7 @@ void VM::execute() {
                 v = new Value();
                 global_vars[std::string(op->operand.str_value)] = v;
             }
+            v->retain();
             stack.push(v);
             break;
         }
@@ -240,6 +246,7 @@ void VM::execute() {
             break;
         }
         }
+        // dump_stack();
         pc++;
     }
 }

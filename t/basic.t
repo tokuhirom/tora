@@ -78,5 +78,11 @@ $y=4
 say($x+$y)
 ...
 
+run_is(<<'...', "5\n");
+$x=2
+$x=$x+3
+say($x)
+...
+
 done_testing;
 

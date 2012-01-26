@@ -110,12 +110,13 @@ TNode *root_node;
 %token <str_value> IDENTIFIER;
 %token <str_value> VARIABLE;
 %token ADD SUB MUL DIV CR
+%token FOR WHILE
 %token TRUE FALSE
 %token LT GT LE GE EQ
 %token ASSIGN
 %token MY
 %token <str_value>STRING_LITERAL
-%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable
+%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block
 %type <node> identifier
 
 %%
@@ -147,10 +148,13 @@ line
         node->type = NODE_NEWLINE;
         $$ = node;
     }
-    | IF L_PAREN expression R_PAREN L_BRACE line_list R_BRACE
+    | IF L_PAREN expression R_PAREN block
     {
-        // printf("if stmt: %d\n", $6);
-        $$ = tora_create_binary_expression(NODE_IF, $3, $6);
+        $$ = tora_create_binary_expression(NODE_IF, $3, $5);
+    }
+    | WHILE L_PAREN expression R_PAREN block
+    {
+        $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
     }
     | lvalue ASSIGN expression
     {
@@ -165,6 +169,14 @@ line
         $$ = tora_create_binary_expression(NODE_FUNCALL, $1, $3);
     }
     ;
+
+block
+    : L_BRACE line_list R_BRACE
+    {
+        // TODO: enterscope
+        // TODO: leavescope
+        $$ = $2;
+    }
 
 lvalue
     : variable

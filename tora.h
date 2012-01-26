@@ -36,6 +36,7 @@ typedef enum {
     NODE_EQ,
     NODE_VARIABLE,
     NODE_ASSIGN,
+    NODE_WHILE,
 } NODE_TYPE;
 
 typedef struct {

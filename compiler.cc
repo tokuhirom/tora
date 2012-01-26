@@ -93,6 +93,17 @@ void tora_compile(TNode *node, VM &vm) {
 
         break;
     }
+    case NODE_WHILE: {
+        /*
+        LABEL1:
+          cond
+          jump_if_false LABEL2
+          body
+          goto LABEL1
+        LABEL2:
+        */
+        break;
+    }
     case NODE_NEWLINE:
         // nop
         break;

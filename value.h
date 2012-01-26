@@ -25,6 +25,7 @@ public:
 
     Value() {
         refcnt = 1;
+        value_type = VALUE_TYPE_NIL;
     }
     ~Value() {
         if (value_type == VALUE_TYPE_STR) {

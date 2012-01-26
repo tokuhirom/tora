@@ -69,6 +69,8 @@ int yywrap(void)
 <INITIAL>"true" return TRUE;
 <INITIAL>"my" return MY;
 <INITIAL>"false" return FALSE;
+<INITIAL>"for" return FOR;
+<INITIAL>"while" return WHILE;
 <INITIAL>[ \t] ;
 <INITIAL>[ \t\r\n] {
     increment_line_number();

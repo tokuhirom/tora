@@ -23,6 +23,7 @@ typedef enum {
     OP_EQ,
     OP_ASSIGN,
     OP_VARIABLE,
+    OP_JUMP,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -47,6 +48,7 @@ static const char*opcode2name[] = {
     "OP_EQ",
     "OP_ASSIGN",
     "OP_VARIABLE",
+    "OP_JUMP",
 };
 
 #endif // OPS_GEN_H_
