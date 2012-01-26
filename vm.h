@@ -6,10 +6,11 @@
 #include "value.h"
 #include <vector>
 #include <map>
+#include "stack.h"
 
 class VM {
 public:
-    std::vector<Value*> stack;
+    tora::Stack stack;
     int sp; // stack pointer
     size_t pc; // program counter
     std::vector<OP*> ops;

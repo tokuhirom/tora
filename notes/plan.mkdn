@@ -4,7 +4,6 @@
 future plans
 ------------
 
-- if stmt
 - while stmt
 - for stmt
 - for-each stmt
@@ -18,6 +17,13 @@ future plans
 - qw()
 - regexp
 - throw
+- increment
+- decrement
+
+- declare function
+- c++ library('Dyna'.'Loader')
+
+- require
 
 - "-e" option
 
