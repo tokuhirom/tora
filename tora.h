@@ -54,7 +54,5 @@ typedef enum {
     VALUE_TYPE_STR,
 } value_type_t;
 
-void tora_compile(TNode *node);
-
 #endif // TORA_H_
 

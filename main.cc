@@ -5,9 +5,9 @@
 
 #include "tora.h"
 #include "vm.h"
+#include "compiler.h"
 
 extern TNode *root_node;
-extern VM vm;
 
 int main(int argc, char **argv) {
     extern int yyparse(void);
@@ -44,7 +44,8 @@ int main(int argc, char **argv) {
         exit(1);
     } else {
         assert(root_node);
-        tora_compile(root_node);
+        VM vm;
+        tora_compile(root_node, vm);
         if (dump_ops) {
             vm.dump_ops();
         }
