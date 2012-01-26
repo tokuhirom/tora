@@ -1,3 +1,6 @@
+#ifndef OPS_GEN_H_
+#define OPS_GEN_H_
+
 typedef enum {
     OP_NOP,
     OP_ADD,
@@ -45,3 +48,5 @@ static const char*opcode2name[] = {
     "OP_ASSIGN",
     "OP_VARIABLE",
 };
+
+#endif // OPS_GEN_H_

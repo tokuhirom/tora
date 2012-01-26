@@ -37,6 +37,9 @@ my $xslate = Text::Xslate->new(
 open my $fh, '>', 'ops.gen.h';
 
 print $fh $xslate->render_string(<<'...', { ops => \@ops });
+#ifndef OPS_GEN_H_
+#define OPS_GEN_H_
+
 typedef enum {
 [% FOR op IN ops -%]
     [% op %],
@@ -48,6 +51,8 @@ static const char*opcode2name[] = {
     "[% op %]",
 [% END -%]
 };
+
+#endif // OPS_GEN_H_
 ...
 
 close $fh;
