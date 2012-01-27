@@ -14,7 +14,8 @@ sub import {
         my $tmp = File::Temp->new(UNLINK => 1);
         print $tmp $code;
         my $ret = `./tora < $tmp`;
-        ::is($ret, $expected);
+        (my $name = $code) =~ s/\n/ /g;
+        ::is($ret, $expected, $name);
     };
     Test::More->export_to_level(1);
 }

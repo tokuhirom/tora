@@ -4,7 +4,6 @@
 future plans
 ------------
 
-- while stmt
 - for stmt
 - for-each stmt
 - do-while stmt

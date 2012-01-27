@@ -25,6 +25,12 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
+static TNode *tora_create_void() {
+    TNode *node = new TNode();
+    node->type = NODE_VOID;
+    return node;
+}
+
 static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2) {
     TNode *node = new TNode();
     node->type = type;
@@ -136,7 +142,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token SUB
 %token COMMA
 %token <str_value>STRING_LITERAL
-%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block
+%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void
 %type <node> identifier
 %type <argument_list> argument_list
 
@@ -150,11 +156,18 @@ root
     }
     ;
 
+void:
+
 line_list
     : line
     | line_list line
     {
         $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
+    }
+    | expression
+    | void
+    {
+        $$ = tora_create_void();
     }
     ;
 
@@ -176,13 +189,6 @@ line
     | lvalue ASSIGN expression
     {
         $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
-    }
-    | identifier L_PAREN argument_list R_PAREN
-    {
-        // funciton call
-        // TODO: support vargs
-        // call function
-        $$ = tora_create_funcall($1, $3);
     }
     | WHILE L_PAREN expression R_PAREN block
     {
@@ -255,7 +261,7 @@ expression3
     ;
 
 term
-    : primary_expression
+    : postfix_expression
     | term MUL primary_expression
     {
         $$ = tora_create_binary_expression(NODE_MUL, $1, $3);
@@ -263,6 +269,17 @@ term
     | term DIV primary_expression
     {
         $$ = tora_create_binary_expression(NODE_DIV, $1, $3);
+    }
+    ;
+
+postfix_expression
+    : primary_expression
+    | identifier L_PAREN argument_list R_PAREN
+    {
+        // funciton call
+        // TODO: support vargs
+        // call function
+        $$ = tora_create_funcall($1, $3);
     }
     ;
 

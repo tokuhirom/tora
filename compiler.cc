@@ -49,13 +49,13 @@ void tora_compile(TNode *node, VM &vm) {
     }
 
     case NODE_FUNCALL: {
-        tora_compile(node->funcall.name, vm);
         std::vector<TNode *>*args = node->funcall.args;
         int args_len = args->size();
         while (args->size() > 0) {
             tora_compile(args->back(), vm);
             args->pop_back();
         }
+        tora_compile(node->funcall.name, vm);
 
         OP * tmp = new OP;
         tmp->op_type = OP_FUNCALL;
@@ -138,6 +138,9 @@ void tora_compile(TNode *node, VM &vm) {
 
         break;
     }
+    case NODE_VOID:
+        // nop
+        break;
     case NODE_NEWLINE:
         // nop
         break;

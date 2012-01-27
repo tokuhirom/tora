@@ -29,12 +29,16 @@ say(false)
 run_is('', "");
 
 run_is(<<'...', "OK\nHERE\n");
-if (true) { say("OK") }
+if (true) {
+    say("OK")
+}
 say("HERE")
 ...
 
 run_is(<<'...', "HERE\n");
-if (false) { say("NOT OK") }
+if (false) {
+    say("NOT OK")
+}
 say("HERE")
 ...
 
@@ -91,6 +95,14 @@ while ($i<3) {
     $i = $i + 1
 }
 ...
+
+TODO: {
+    local $TODO = 'oops';
+    run_is(<<'...', "OK\nHERE\n");
+if (true) { say("OK") }
+say("HERE")
+...
+}
 
 done_testing;
 

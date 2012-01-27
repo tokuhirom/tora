@@ -45,6 +45,7 @@ typedef enum {
     NODE_ASSIGN,
     NODE_WHILE,
     NODE_ROOT,
+    NODE_VOID,
 } NODE_TYPE;
 
 typedef struct {

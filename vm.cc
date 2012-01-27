@@ -48,10 +48,11 @@ void VM::execute() {
 #undef BINOP
         case OP_FUNCALL: {
             if (!(stack.size() >= (size_t) op->operand.int_value + 1)) {
+                printf("[BUG] bad arguments\n");
                 dump_stack();
                 abort();
             }
-            Value *funname = stack.at(stack.size()-op->operand.int_value-1);
+            ValuePtr funname(stack.pop());
             assert(funname->value_type == VALUE_TYPE_STR);
             if (strcmp(funname->value.str_value, "print") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
@@ -68,6 +69,13 @@ void VM::execute() {
                     ValuePtr s(v->to_s());
                     printf("%s\n", s->value.str_value);
                 }
+            } else if (strcmp(funname->value.str_value, "getenv") == 0) {
+                assert(op->operand.int_value==1);
+                ValuePtr v(stack.pop());
+                ValuePtr s(v->to_s());
+                Value *ret = new Value();
+                ret->set_str(strdup(getenv(s->value.str_value)));
+                stack.push(ret);
             } else if (strcmp(funname->value.str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
@@ -81,7 +89,7 @@ void VM::execute() {
         case OP_PUSH_IDENTIFIER: {
             // operand = the number of args
             Value *v = new Value;
-            v->value.str_value = op->operand.str_value;
+            v->value.str_value = strdup(op->operand.str_value);
             v->value_type = VALUE_TYPE_STR;
             stack.push(v);
             break;
