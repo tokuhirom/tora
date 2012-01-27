@@ -47,7 +47,10 @@ void VM::execute() {
         BINOP(OP_MUL, *);
 #undef BINOP
         case OP_FUNCALL: {
-            assert(stack.size() >= op->operand.int_value + 1);
+            if (!(stack.size() >= (size_t) op->operand.int_value + 1)) {
+                dump_stack();
+                abort();
+            }
             Value *funname = stack.at(stack.size()-op->operand.int_value-1);
             assert(funname->value_type == VALUE_TYPE_STR);
             if (strcmp(funname->value.str_value, "print") == 0) {
@@ -58,9 +61,11 @@ void VM::execute() {
                 ValuePtr v(stack.pop());
                 v->dump();
             } else if (strcmp(funname->value.str_value, "say") == 0) {
-                ValuePtr v(stack.pop());
-                Value *s = v->to_s();
-                printf("%s\n", s->value.str_value);
+                for (int i=0; i<op->operand.int_value; i++) {
+                    ValuePtr v(stack.pop());
+                    Value *s = v->to_s();
+                    printf("%s\n", s->value.str_value);
+                }
             } else if (strcmp(funname->value.str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);

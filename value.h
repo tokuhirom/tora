@@ -11,6 +11,13 @@
 #include <map>
 #include <memory>
 
+typedef enum {
+    VALUE_TYPE_NIL = 0,
+    VALUE_TYPE_INT = 1,
+    VALUE_TYPE_BOOL,
+    VALUE_TYPE_STR,
+} value_type_t;
+
 /**
  * The value class
  */

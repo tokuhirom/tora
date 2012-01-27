@@ -37,12 +37,17 @@ void tora_compile(TNode *node, VM &vm) {
     }
 
     case NODE_FUNCALL: {
-        tora_compile(node->binary.left, vm);
-        tora_compile(node->binary.right, vm);
+        tora_compile(node->funcall.name, vm);
+        std::vector<TNode *>*args = node->funcall.args;
+        int args_len = args->size();
+        while (args->size() > 0) {
+            tora_compile(args->back(), vm);
+            args->pop_back();
+        }
 
         OP * tmp = new OP;
         tmp->op_type = OP_FUNCALL;
-        tmp->operand.int_value = 1; // the number of args
+        tmp->operand.int_value = args_len; // the number of args
         vm.ops.push_back(tmp);
         break;
     }

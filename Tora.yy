@@ -26,6 +26,14 @@ static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2
     return node;
 }
 
+static TNode *tora_create_funcall(TNode *t1, std::vector<struct TNode*> *args) {
+    TNode *node = new TNode();
+    node->type = NODE_FUNCALL;
+    node->funcall.name  = t1;
+    node->funcall.args  = args;
+    return node;
+}
+
 void tora_dump_node(TNode *node, int indent) {
     for (int i=0; i<indent*4; i++) {
         printf(" ");
@@ -97,6 +105,8 @@ void tora_dump_node(TNode *node) {
 
 TNode *root_node;
 
+typedef std::vector<struct TNode*> argument_list_t;
+
 %}
 %token IF
 %token L_PAREN R_PAREN L_BRACE R_BRACE
@@ -104,20 +114,24 @@ TNode *root_node;
     int int_value;
     char *str_value;
     struct TNode *node;
+    std::vector<struct TNode*> *argument_list;
 }
 
 %token <int_value> INT_LITERAL;
 %token <str_value> IDENTIFIER;
 %token <str_value> VARIABLE;
-%token ADD SUB MUL DIV CR
+%token ADD SUBTRACT MUL DIV CR
 %token FOR WHILE
 %token TRUE FALSE
 %token LT GT LE GE EQ
 %token ASSIGN
 %token MY
+%token SUB
+%token COMMA
 %token <str_value>STRING_LITERAL
 %type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block
 %type <node> identifier
+%type <argument_list> argument_list
 
 %%
 
@@ -156,17 +170,28 @@ line
     {
         $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
     }
-    | identifier L_PAREN expression R_PAREN
+    | identifier L_PAREN argument_list R_PAREN
     {
         // funciton call
-        // TODO: support multiple args
         // TODO: support vargs
         // call function
-        $$ = tora_create_binary_expression(NODE_FUNCALL, $1, $3);
+        $$ = tora_create_funcall($1, $3);
     }
     | WHILE L_PAREN expression R_PAREN block
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
+    }
+    ;
+
+argument_list
+    : expression
+    {
+        $$ = new std::vector<TNode*>();
+        $$->push_back($1);
+    }
+    | argument_list COMMA expression
+    {
+        $$->push_back($3);
     }
     ;
 
@@ -216,7 +241,7 @@ expression3
     {
         $$ = tora_create_binary_expression(NODE_ADD, $1, $3);
     }
-    | expression SUB term
+    | expression SUBTRACT term
     {
         $$ = tora_create_binary_expression(NODE_SUB, $1, $3);
     }

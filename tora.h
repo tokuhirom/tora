@@ -2,6 +2,9 @@
 #define TORA_H_
 #define TORA_VERSION_STR "0.0.1"
 
+#include <vector>
+#include "value.h"
+
 typedef struct TNode {
     int type;
     union {
@@ -12,6 +15,10 @@ typedef struct TNode {
             struct TNode *left;
             struct TNode *right;
         } binary;
+        struct {
+            struct TNode *name;
+            std::vector<struct TNode*> *args;
+        } funcall;
     };
 } NODE;
 
@@ -47,13 +54,6 @@ typedef struct {
         const char *str_value;
     } operand;
 } OP;
-
-typedef enum {
-    VALUE_TYPE_NIL = 0,
-    VALUE_TYPE_INT = 1,
-    VALUE_TYPE_BOOL,
-    VALUE_TYPE_STR,
-} value_type_t;
 
 #endif // TORA_H_
 

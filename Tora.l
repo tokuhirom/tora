@@ -3,6 +3,7 @@
 #include <string.h>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "Tora.tab.hh"
 
 extern "C" int yywrap();
@@ -43,10 +44,12 @@ int yywrap(void)
 %%
 
 <INITIAL>"+"        return ADD;
-<INITIAL>"-"        return SUB;
+<INITIAL>"-"        return SUBTRACT;
 <INITIAL>"*"        return MUL;
 <INITIAL>"/"        return DIV;
 <INITIAL>"\n"       return CR;
+<INITIAL>"sub"       return SUB;
+<INITIAL>","       return COMMA;
 
 <INITIAL>0 {
     yylval.int_value = 0;
