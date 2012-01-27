@@ -54,16 +54,18 @@ void VM::execute() {
             Value *funname = stack.at(stack.size()-op->operand.int_value-1);
             assert(funname->value_type == VALUE_TYPE_STR);
             if (strcmp(funname->value.str_value, "print") == 0) {
-                ValuePtr v(stack.pop());
-                ValuePtr s(v->to_s());
-                printf("%s", s->value.str_value);
+                for (int i=0; i<op->operand.int_value; i++) {
+                    ValuePtr v(stack.pop());
+                    ValuePtr s(v->to_s());
+                    printf("%s", s->value.str_value);
+                }
             } else if (strcmp(funname->value.str_value, "p") == 0) {
                 ValuePtr v(stack.pop());
                 v->dump();
             } else if (strcmp(funname->value.str_value, "say") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
                     ValuePtr v(stack.pop());
-                    Value *s = v->to_s();
+                    ValuePtr s(v->to_s());
                     printf("%s\n", s->value.str_value);
                 }
             } else if (strcmp(funname->value.str_value, "exit") == 0) {
