@@ -18,6 +18,13 @@
 extern int yylex();
 int yyerror(const char *err);
 
+static TNode *tora_create_root_node(TNode *t) {
+    TNode *node = new TNode();
+    node->type = NODE_ROOT;
+    node->node = t;
+    return node;
+}
+
 static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2) {
     TNode *node = new TNode();
     node->type = type;
@@ -139,7 +146,7 @@ root
     : line_list
     {
         // tora_dump_node($1);
-        root_node = $1;
+        root_node = tora_create_root_node($1);
     }
     ;
 

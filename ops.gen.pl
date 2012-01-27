@@ -29,6 +29,7 @@ my @ops = qw(
     OP_ASSIGN
     OP_VARIABLE
     OP_JUMP
+    OP_END
 );
 
 my $xslate = Text::Xslate->new(

@@ -3,7 +3,7 @@
 
 // run program
 void VM::execute() {
-    while (pc < ops.size()) {
+    for (;;) {
         // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
 
         OP *op = ops[pc];
@@ -149,6 +149,10 @@ void VM::execute() {
             stack.push(v);
             break;
         }
+        case OP_END: {
+            goto END;
+            break;
+        }
         default: {
             fprintf(stderr, "[BUG] OOPS. unknown op code: %d(%s)\n", op->op_type, opcode2name[op->op_type]);
             abort();
@@ -158,4 +162,6 @@ void VM::execute() {
         // dump_stack();
         pc++;
     }
+END:
+    return;
 }

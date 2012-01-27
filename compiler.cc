@@ -2,6 +2,18 @@
 
 void tora_compile(TNode *node, VM &vm) {
     switch (node->type) {
+    case NODE_ROOT: {
+        // body
+        tora_compile(node->node, vm);
+
+        {
+            OP * tmp = new OP;
+            tmp->op_type = OP_END;
+            vm.ops.push_back(tmp);
+        }
+
+        break;
+    }
     case NODE_STRING: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_STRING;
