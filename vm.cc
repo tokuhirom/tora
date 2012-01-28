@@ -4,9 +4,9 @@
 // run program
 void VM::execute() {
     // TODO: move to vm.h
-    std::vector<int> return_addrs;
     this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
+    this->function_frames = new std::vector<FunctionFrame*>();
 
     for (;;) {
         // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
@@ -92,7 +92,12 @@ void VM::execute() {
                 if (iter != this->functions.end()) {
                     Value *code = iter->second;
                     // printf("jump to %d\n", code->value.code_value.start);
-                    return_addrs.push_back(pc);
+                    {
+                        FunctionFrame * fframe = new FunctionFrame();
+                        fframe->return_address = pc;
+                        fframe->top = stack.size() - op->operand.int_value;
+                        function_frames->push_back(fframe);
+                    }
                     pc = code->value.code_value.start;
 
                     LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
@@ -115,10 +120,17 @@ void VM::execute() {
             break;
         }
         case OP_RETURN: {
-            assert(return_addrs.size() > 0);
-            int addr = return_addrs.back();
-            return_addrs.pop_back();
-            pc = addr+1;
+            assert(function_frames->size() > 0);
+            FunctionFrame *fframe = function_frames->back();
+            function_frames->pop_back();
+            pc = fframe->return_address+1;
+            // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
+            if (fframe->top == stack.size()) {
+                Value * v = new Value();
+                v->value_type = VALUE_TYPE_NIL;
+                stack.push(v);
+            }
+            delete fframe;
 
             lexical_vars_stack->pop_back();
 

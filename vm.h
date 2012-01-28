@@ -8,6 +8,12 @@
 #include <map>
 #include "stack.h"
 
+class FunctionFrame {
+public:
+    int return_address;
+    int top;
+};
+
 class LexicalVarsFrame {
     LexicalVarsFrame* up;
 public:
@@ -42,6 +48,7 @@ public:
     std::vector<OP*> ops;
     std::map<std::string, Value*> global_vars;
     std::map<std::string, Value*> functions;
+    std::vector<FunctionFrame*> *function_frames;
 
     /*
      * stack for lexical variables.

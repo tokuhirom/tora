@@ -34,5 +34,21 @@ sub foo() {
 say(foo())
 ...
 
+# retval(nil)
+run_is(<<'...', "nil\n");
+sub foo() {
+}
+
+say(foo())
+...
+
+# retval(nil)
+run_is(<<'...', "nil\n");
+sub foo($n) {
+}
+
+say(foo(5))
+...
+
 done_testing;
 
