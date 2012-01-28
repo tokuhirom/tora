@@ -1,5 +1,5 @@
-# COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE 
-COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE -DYYDEBUG
+COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE 
+# COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE -DYYDEBUG
 CXX=g++
 
 all: tora

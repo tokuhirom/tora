@@ -62,6 +62,15 @@ static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2
     return node;
 }
 
+static TNode *tora_create_if(TNode *cond, TNode* if_body, TNode *else_body) {
+    TNode *node = new TNode();
+    node->type = NODE_IF;
+    node->if_stmt.cond      = cond;
+    node->if_stmt.if_body   = if_body;
+    node->if_stmt.else_body = else_body;
+    return node;
+}
+
 static TNode *tora_create_funcall(TNode *t1, std::vector<struct TNode*> *args) {
     TNode *node = new TNode();
     node->type = NODE_FUNCALL;
@@ -144,7 +153,7 @@ TNode *root_node;
 typedef std::vector<struct TNode*> argument_list_t;
 
 %}
-%token IF
+%token IF ELSE
 %token L_PAREN R_PAREN L_BRACE R_BRACE
 %union {
     int int_value;
@@ -167,7 +176,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
-%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void sub_stmt
+%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void sub_stmt if_statement
 %type <node> identifier
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
@@ -212,10 +221,7 @@ line
         node->type = NODE_NEWLINE;
         $$ = node;
     }
-    | IF L_PAREN expression R_PAREN block
-    {
-        $$ = tora_create_binary_expression(NODE_IF, $3, $5);
-    }
+    | if_statement
     | lvalue ASSIGN expression
     {
         $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
@@ -227,6 +233,16 @@ line
     | sub_stmt
     | block
     ;
+
+if_statement
+    : IF L_PAREN expression R_PAREN block
+    {
+        $$ = tora_create_if($3, $5, NULL);
+    }
+    | IF L_PAREN expression R_PAREN block ELSE block
+    {
+        $$ = tora_create_if($3, $5, $7);
+    }
 
 sub_stmt
     : SUB identifier L_PAREN parameter_list R_PAREN block

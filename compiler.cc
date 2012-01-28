@@ -145,21 +145,47 @@ void tora_compile(TNode *node, VM &vm) {
     }
     case NODE_IF: {
         /*
-            run_jouken_code
-            jump_if_false END_LABEL
-            run_block_code
+            if (cond) {
+                if_body
+            } else {
+                else_body
+            }
+
+            run(cond)
+            jump_if_false ELSE_LABEL
+            run_if_body
+            jump END_LABEL
+        ELSE_LABEL:
+            run_else_body
         END_LABEL:
-            ...
+
+            run(cond)
+            jump_if_false ELSE_LABEL
+            run_if_body
+            jump END_LABEL
+        ELSE_LABEL:
+        END_LABEL:
         */
         tora_compile(node->binary.left, vm); // jouken
 
-        OP * tmp = new OP;
-        tmp->op_type = OP_JUMP_IF_FALSE;
-        vm.ops.push_back(tmp);
+        OP * jump_else = new OP;
+        jump_else->op_type = OP_JUMP_IF_FALSE;
+        vm.ops.push_back(jump_else);
 
         tora_compile(node->binary.right, vm); // block
 
-        tmp->operand.int_value = vm.ops.size();
+        OP * jump_end = new OP;
+        jump_end->op_type = OP_JUMP;
+        vm.ops.push_back(jump_end);
+
+        int else_label = vm.ops.size();
+        jump_else->operand.int_value = else_label;
+        if (node->if_stmt.else_body) {
+            tora_compile(node->if_stmt.else_body, vm);
+        }
+
+        int end_label = vm.ops.size();
+        jump_end->operand.int_value = end_label;
 
         break;
     }

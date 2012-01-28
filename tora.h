@@ -24,6 +24,11 @@ typedef struct TNode {
             std::vector<struct TNode*> *params;
             struct TNode *block;
         } funcdef;
+        struct {
+            struct TNode *cond;
+            struct TNode *if_body;
+            struct TNode *else_body;
+        } if_stmt;
     };
 } NODE;
 
