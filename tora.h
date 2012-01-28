@@ -53,16 +53,22 @@ typedef enum {
     NODE_VOID,
     NODE_FUNCDEF,
     NODE_RETURN,
+    NODE_BLOCK,
 } NODE_TYPE;
 
-typedef struct {
+struct OP {
     int op_type;
     union {
         int  int_value;
         bool bool_value;
         const char *str_value;
     } operand;
-} OP;
+    OP() {
+    }
+    OP(int type) {
+        this->op_type = type;
+    }
+};
 
 #endif // TORA_H_
 

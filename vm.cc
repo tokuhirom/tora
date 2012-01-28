@@ -124,6 +124,15 @@ void VM::execute() {
 
             continue;
         }
+        case OP_ENTER: {
+            LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            lexical_vars_stack->push_back(frame);
+            break;
+        }
+        case OP_LEAVE: {
+            lexical_vars_stack->pop_back();
+            break;
+        }
         case OP_PUSH_IDENTIFIER: {
             // operand = the number of args
             Value *v = new Value;
@@ -186,23 +195,18 @@ void VM::execute() {
             break;
         }
         case OP_VARIABLE: {
-            {
-                // lexical vars
-                Value *v = lexical_vars_stack->back()->find(op->operand.str_value);
-                if (v) {
-                    // printf("found lexical var\n");
-                    v->retain();
-                    stack.push(v);
-                    break;
-                }
-            }
-            Value *v = global_vars[std::string(op->operand.str_value)];
-            if (!v) { // TODO: remove this and use 'my' keyword
+            // lexical vars
+            Value *v = lexical_vars_stack->back()->find(op->operand.str_value);
+            if (v) {
+                // printf("found lexical var\n");
+                v->retain();
+                stack.push(v);
+            } else { // TODO: remove this and use 'my' keyword
                 v = new Value();
-                global_vars[std::string(op->operand.str_value)] = v;
+                lexical_vars_stack->back()->setVar(new std::string(op->operand.str_value), v);
+                v->retain();
+                stack.push(v);
             }
-            v->retain();
-            stack.push(v);
             break;
         }
         case OP_END: {

@@ -18,6 +18,17 @@ void tora_compile(TNode *node, VM &vm) {
         tora_compile(node->node, vm);
         break;
     }
+    case NODE_BLOCK: {
+        OP * enter = new OP;
+        enter->op_type = OP_ENTER;
+        vm.ops.push_back(enter);
+
+        tora_compile(node->node, vm);
+
+        vm.ops.push_back(new OP(OP_LEAVE));
+
+        break;
+    }
     case NODE_FUNCDEF: {
         /*
         struct {

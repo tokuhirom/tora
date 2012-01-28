@@ -25,6 +25,13 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
+static TNode *tora_create_block(TNode *t) {
+    TNode *node = new TNode();
+    node->type = NODE_BLOCK;
+    node->node = t;
+    return node;
+}
+
 static TNode *tora_create_funcdef(TNode *name, std::vector<TNode *>*params, TNode *block) {
     TNode *node = new TNode();
     node->type = NODE_FUNCDEF;
@@ -218,6 +225,7 @@ line
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
     }
     | sub_stmt
+    | block
     ;
 
 sub_stmt
@@ -256,9 +264,7 @@ argument_list
 block
     : L_BRACE line_list R_BRACE
     {
-        // TODO: enterscope
-        // TODO: leavescope
-        $$ = $2;
+        $$ = tora_create_block($2);
     }
 
 lvalue

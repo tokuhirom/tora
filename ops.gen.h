@@ -26,6 +26,8 @@ typedef enum {
     OP_JUMP,
     OP_END,
     OP_RETURN,
+    OP_ENTER,
+    OP_LEAVE,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -53,6 +55,8 @@ static const char*opcode2name[] = {
     "OP_JUMP",
     "OP_END",
     "OP_RETURN",
+    "OP_ENTER",
+    "OP_LEAVE",
 };
 
 #endif // OPS_GEN_H_
