@@ -1,5 +1,5 @@
-sub foo($n) {
-    say($n)
+sub foo() {
+    say("a")
 }
 
-foo(3)
+foo()

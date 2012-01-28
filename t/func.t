@@ -16,5 +16,14 @@ sub foo($n) {
 foo(3)
 ...
 
+# no args.
+run_is(<<'...', "a\n");
+sub foo() {
+    say("a")
+}
+
+foo()
+...
+
 done_testing;
 

@@ -13,8 +13,10 @@ int main(int argc, char **argv) {
     extern int yyparse(void);
     extern FILE *yyin;
     yyin = stdin;
-    // extern int yydebug;
-    // yydebug = 1;
+#ifdef YYDEBUG
+    extern int yydebug;
+    yydebug = 1;
+#endif
 
     char opt;
     bool dump_ops = false;

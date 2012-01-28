@@ -25,12 +25,10 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
-static TNode *tora_create_funcdef(TNode *name, TNode *param, TNode *block) {
+static TNode *tora_create_funcdef(TNode *name, std::vector<TNode *>*params, TNode *block) {
     TNode *node = new TNode();
     node->type = NODE_FUNCDEF;
     node->funcdef.name   = name;
-    std::vector<TNode *> *params = new std::vector<TNode*>();
-    params->push_back(param);
     node->funcdef.params = params;
     node->funcdef.block  = block;
     return node;
@@ -139,6 +137,7 @@ typedef std::vector<struct TNode*> argument_list_t;
     char *str_value;
     struct TNode *node;
     std::vector<struct TNode*> *argument_list;
+    std::vector<struct TNode*> *parameter_list;
 }
 
 %token <int_value> INT_LITERAL;
@@ -154,9 +153,10 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
-%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void
+%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void sub_stmt
 %type <node> identifier
 %type <argument_list> argument_list
+%type <parameter_list> parameter_list
 
 %%
 
@@ -206,11 +206,29 @@ line
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
     }
-    | SUB identifier L_PAREN variable R_PAREN block
+    | sub_stmt
+    ;
+
+sub_stmt
+    : SUB identifier L_PAREN parameter_list R_PAREN block
     {
         $$ = tora_create_funcdef($2, $4, $6);
     }
-    ;
+
+parameter_list
+    : variable
+    {
+        $$ = new std::vector<TNode*>();
+        $$->push_back($1);
+    }
+    | parameter_list COMMA expression
+    {
+        $$->push_back($3);
+    }
+    | void
+    {
+        $$ = new std::vector<TNode*>();
+    }
 
 argument_list
     : expression
