@@ -73,6 +73,8 @@ int yywrap(void)
 <INITIAL>")" return R_PAREN;
 <INITIAL>"{" return L_BRACE;
 <INITIAL>"}" return R_BRACE;
+<INITIAL>"[" return L_BRACKET;
+<INITIAL>"]" return R_BRACKET;
 <INITIAL>"=" return ASSIGN;
 <INITIAL>"true" return TRUE;
 <INITIAL>"my" return MY;

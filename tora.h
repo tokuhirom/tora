@@ -19,6 +19,11 @@ typedef struct TNode {
             struct TNode *name;
             std::vector<struct TNode*> *args;
         } funcall;
+        struct {
+            struct TNode *name;
+            std::vector<struct TNode*> *params;
+            struct TNode *block;
+        } funcdef;
     };
 } NODE;
 
@@ -46,6 +51,7 @@ typedef enum {
     NODE_WHILE,
     NODE_ROOT,
     NODE_VOID,
+    NODE_FUNCDEF,
 } NODE_TYPE;
 
 typedef struct {

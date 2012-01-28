@@ -25,6 +25,17 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
+static TNode *tora_create_funcdef(TNode *name, TNode *param, TNode *block) {
+    TNode *node = new TNode();
+    node->type = NODE_FUNCDEF;
+    node->funcdef.name   = name;
+    std::vector<TNode *> *params = new std::vector<TNode*>();
+    params->push_back(param);
+    node->funcdef.params = params;
+    node->funcdef.block  = block;
+    return node;
+}
+
 static TNode *tora_create_void() {
     TNode *node = new TNode();
     node->type = NODE_VOID;
@@ -139,9 +150,10 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token LT GT LE GE EQ
 %token ASSIGN
 %token MY
-%token SUB
 %token COMMA
+%token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
+%token SUB
 %type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void
 %type <node> identifier
 %type <argument_list> argument_list
@@ -193,6 +205,10 @@ line
     | WHILE L_PAREN expression R_PAREN block
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
+    }
+    | SUB identifier L_PAREN variable R_PAREN block
+    {
+        $$ = tora_create_funcdef($2, $4, $6);
     }
     ;
 
@@ -274,11 +290,13 @@ term
 
 postfix_expression
     : primary_expression
+    | identifier L_PAREN R_PAREN
+    {
+        $$ = tora_create_funcall($1, new std::vector<TNode*>());
+    }
     | identifier L_PAREN argument_list R_PAREN
     {
-        // funciton call
         // TODO: support vargs
-        // call function
         $$ = tora_create_funcall($1, $3);
     }
     ;

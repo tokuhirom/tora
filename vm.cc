@@ -3,6 +3,7 @@
 
 // run program
 void VM::execute() {
+    std::vector<int> return_addrs;
     for (;;) {
         // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
 
@@ -48,7 +49,7 @@ void VM::execute() {
 #undef BINOP
         case OP_FUNCALL: {
             if (!(stack.size() >= (size_t) op->operand.int_value + 1)) {
-                printf("[BUG] bad arguments\n");
+                printf("[BUG] bad arguments(OP_FUNCALL)\n");
                 dump_stack();
                 abort();
             }
@@ -82,9 +83,25 @@ void VM::execute() {
                 ValuePtr s(v->to_i());
                 exit(s->value.int_value);
             } else {
-                fprintf(stderr, "Unknown function: %s\n", funname->value.str_value);
+                std::map<std::string, int>::iterator iter =  this->functions.find(funname->value.str_value);
+                if (iter != this->functions.end()) {
+                    printf("jump to %d\n", iter->second);
+                    return_addrs.push_back(pc);
+                    pc = iter->second;
+                    dump_stack();
+                    continue;
+                } else {
+                    fprintf(stderr, "Unknown function: %s\n", funname->value.str_value);
+                }
             }
             break;
+        }
+        case OP_RETURN: {
+            assert(return_addrs.size() > 0);
+            int addr = return_addrs.back();
+            return_addrs.pop_back();
+            pc = addr+1;
+            continue;
         }
         case OP_PUSH_IDENTIFIER: {
             // operand = the number of args

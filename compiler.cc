@@ -14,6 +14,35 @@ void tora_compile(TNode *node, VM &vm) {
 
         break;
     }
+    case NODE_FUNCDEF: {
+        /*
+        struct {
+            struct TNode *name;
+            std::vector<struct TNode*> *params;
+            struct TNode *block;
+        } funcdef;
+        */
+
+        // function name
+        const char *funcname = node->funcdef.name->str_value;
+        printf("define %s\n",funcname);
+
+        OP * jump = new OP;
+        jump->op_type = OP_JUMP;
+        vm.ops.push_back(jump);
+
+        vm.add_function(funcname, vm.ops.size());
+
+        tora_compile(node->funcdef.block, vm);
+
+        OP * ret = new OP;
+        ret->op_type = OP_RETURN;
+        vm.ops.push_back(ret);
+
+        jump->operand.int_value = vm.ops.size();
+
+        break;
+    }
     case NODE_STRING: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_STRING;

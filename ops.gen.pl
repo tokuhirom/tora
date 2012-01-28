@@ -30,6 +30,7 @@ my @ops = qw(
     OP_VARIABLE
     OP_JUMP
     OP_END
+    OP_RETURN
 );
 
 my $xslate = Text::Xslate->new(

@@ -15,6 +15,7 @@ public:
     size_t pc; // program counter
     std::vector<OP*> ops;
     std::map<std::string, Value*> global_vars;
+    std::map<std::string, int> functions;
 
     VM() {
         sp = 0;
@@ -25,7 +26,7 @@ public:
     void dump_ops() {
         printf("-- OP DUMP    --\n");
         for (size_t i=0; i<ops.size(); i++) {
-            printf("[%d] %s\n", i, opcode2name[ops[i]->op_type]);
+            printf("[%d] %s(%d)\n", i, opcode2name[ops[i]->op_type], ops[i]->op_type);
         }
         printf("----------------\n");
     }
@@ -36,6 +37,9 @@ public:
             stack.at(i)->dump();
         }
         printf("----------------\n");
+    }
+    void add_function(const char*name, int start) {
+        functions[std::string(name)] = start;
     }
 };
 

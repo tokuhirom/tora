@@ -13,16 +13,22 @@ int main(int argc, char **argv) {
     extern int yyparse(void);
     extern FILE *yyin;
     yyin = stdin;
+    // extern int yydebug;
+    // yydebug = 1;
 
     char opt;
     bool dump_ops = false;
-    while ((opt = getopt(argc, argv, "vd")) != -1) {
+    bool compile_only = false;
+    while ((opt = getopt(argc, argv, "vdc")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
             exit(EXIT_SUCCESS);
         case 'd':
             dump_ops = true;
+            break;
+        case 'c':
+            compile_only = true;
             break;
         default:
             fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
@@ -43,6 +49,10 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error!\n");
         exit(1);
     } else {
+        if (compile_only) {
+            printf("Syntax OK\n");
+            return 0;
+        }
         assert(root_node);
         VM vm;
         tora_compile(root_node, vm);

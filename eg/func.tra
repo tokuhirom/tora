@@ -1,0 +1,5 @@
+sub foo($n) {
+    say("YO!")
+}
+
+foo()

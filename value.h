@@ -28,6 +28,10 @@ public:
         int  int_value;
         bool bool_value;
         const char *str_value;
+        struct {
+            std::vector<struct TNode*> *params;
+            int start; // start point in vm
+        } code_value;
     } value;
     int refcnt; // reference count
 

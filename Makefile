@@ -1,4 +1,4 @@
-COPTS=-Wall -g -std=c++0x
+COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE -DYYDEBUG
 CXX=g++
 
 all: tora
@@ -12,7 +12,7 @@ ops.gen.h: ops.gen.pl
 lex.yy.o: lex.yy.c
 	$(CXX) $(COPTS) -c -o $@ $<
 
-.cc.o:
+.cc.o: vm.h
 	$(CXX) $(COPTS) -c -o $@ $<
 
 Tora.tab.cc: Tora.yy ops.gen.h
