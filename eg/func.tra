@@ -1,5 +1,5 @@
 sub foo($n) {
-    say("YO!")
+    say($n)
 }
 
-foo()
+foo(3)

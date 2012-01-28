@@ -25,13 +25,22 @@ void tora_compile(TNode *node, VM &vm) {
 
         // function name
         const char *funcname = node->funcdef.name->str_value;
-        printf("define %s\n",funcname);
 
         OP * jump = new OP;
         jump->op_type = OP_JUMP;
         vm.ops.push_back(jump);
 
-        vm.add_function(funcname, vm.ops.size());
+        std::vector<std::string *>* params = new std::vector<std::string *>();
+        for (size_t i=0; i<node->funcdef.params->size(); i++) {
+            params->push_back(new std::string(node->funcdef.params->at(i)->str_value));
+        }
+        Value *code = new Value();
+        code->value_type = VALUE_TYPE_CODE;
+        code->value.code_value.name = strdup(funcname);
+        code->value.code_value.start = vm.ops.size();
+        code->value.code_value.params = params;
+
+        vm.add_function(funcname, code);
 
         tora_compile(node->funcdef.block, vm);
 

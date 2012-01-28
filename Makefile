@@ -22,7 +22,7 @@ lex.yy.c: Tora.l
 	flex Tora.l
 
 clean:
-	rm -f lex.yy.cc lex.yy.o Tora.tab.cc Tora.output Tora.tab.hh tora Tora.tab.o lex.yy.c main.o ops.gen.h value.o
+	rm -f lex.yy.cc lex.yy.o Tora.tab.cc Tora.output Tora.tab.hh tora Tora.tab.o lex.yy.c main.o ops.gen.h value.o vm.o compiler.o
 
 test: tora
 	prove t/

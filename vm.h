@@ -15,7 +15,7 @@ public:
     size_t pc; // program counter
     std::vector<OP*> ops;
     std::map<std::string, Value*> global_vars;
-    std::map<std::string, int> functions;
+    std::map<std::string, Value*> functions;
 
     VM() {
         sp = 0;
@@ -38,8 +38,8 @@ public:
         }
         printf("----------------\n");
     }
-    void add_function(const char*name, int start) {
-        functions[std::string(name)] = start;
+    void add_function(const char*name, Value*code) {
+        functions[std::string(name)] = code;
     }
 };
 

@@ -14,8 +14,9 @@
 typedef enum {
     VALUE_TYPE_NIL = 0,
     VALUE_TYPE_INT = 1,
-    VALUE_TYPE_BOOL,
-    VALUE_TYPE_STR,
+    VALUE_TYPE_BOOL = 2,
+    VALUE_TYPE_STR = 3,
+    VALUE_TYPE_CODE = 4,
 } value_type_t;
 
 /**
@@ -29,7 +30,8 @@ public:
         bool bool_value;
         const char *str_value;
         struct {
-            std::vector<struct TNode*> *params;
+            const char *name;
+            std::vector<std::string*> *params;
             int start; // start point in vm
         } code_value;
     } value;
@@ -76,6 +78,9 @@ public:
             break;
         case VALUE_TYPE_STR:
             printf("[dump] str: %s\n", value.str_value);
+            break;
+        case VALUE_TYPE_CODE:
+            printf("[dump] code: name: %s start: %d\n", value.code_value.name, value.code_value.start);
             break;
         default:
             printf("[dump] unknown: %d\n", value_type);
