@@ -34,6 +34,13 @@ static TNode *tora_create_funcdef(TNode *name, std::vector<TNode *>*params, TNod
     return node;
 }
 
+static TNode *tora_create_return(TNode *child) {
+    TNode *node = new TNode();
+    node->type = NODE_RETURN;
+    node->node = child;
+    return node;
+}
+
 static TNode *tora_create_void() {
     TNode *node = new TNode();
     node->type = NODE_VOID;
@@ -149,7 +156,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token LT GT LE GE EQ
 %token ASSIGN
 %token MY
-%token COMMA
+%token COMMA RETURN
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
@@ -187,6 +194,10 @@ line
     :expression CR
     {
         $$ = $1;
+    }
+    | RETURN expression
+    {
+        $$ = tora_create_return($2);
     }
     | CR
     {

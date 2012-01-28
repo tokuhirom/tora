@@ -25,5 +25,14 @@ sub foo() {
 foo()
 ...
 
+# retval
+run_is(<<'...', "123\n");
+sub foo() {
+    return 123
+}
+
+say(foo())
+...
+
 done_testing;
 

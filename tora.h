@@ -52,6 +52,7 @@ typedef enum {
     NODE_ROOT,
     NODE_VOID,
     NODE_FUNCDEF,
+    NODE_RETURN,
 } NODE_TYPE;
 
 typedef struct {
