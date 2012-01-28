@@ -26,9 +26,9 @@ static const char *tora_close_string_literal() {
 /**
  * line number
  */
-static int line_number = 0;
+int tora_line_number = 1;
 static void increment_line_number() {
-    line_number++;
+    tora_line_number++;
 }
 
 // yywrap?

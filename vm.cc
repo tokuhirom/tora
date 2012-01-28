@@ -5,8 +5,8 @@
 void VM::execute() {
     // TODO: move to vm.h
     std::vector<int> return_addrs;
-    // TODO: move to vm.h
-    std::vector<std::map<std::string, Value*> *> lexical_vars_stack;
+    this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
+    this->lexical_vars_stack->push_back(new LexicalVarsFrame());
 
     for (;;) {
         // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
@@ -52,12 +52,13 @@ void VM::execute() {
         BINOP(OP_MUL, *);
 #undef BINOP
         case OP_FUNCALL: {
-            if (!(stack.size() >= (size_t) op->operand.int_value + 1)) {
-                printf("[BUG] bad arguments(OP_FUNCALL)\n");
+            ValuePtr funname(stack.pop());
+            const char *funname_c = funname->value.str_value;
+            if (!(stack.size() >= (size_t) op->operand.int_value)) {
+                printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
                 abort();
             }
-            ValuePtr funname(stack.pop());
             assert(funname->value_type == VALUE_TYPE_STR);
             if (strcmp(funname->value.str_value, "print") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
@@ -94,7 +95,7 @@ void VM::execute() {
                     return_addrs.push_back(pc);
                     pc = code->value.code_value.start;
 
-                    std::map<std::string, Value*> *vars = new std::map<std::string, Value*>();
+                    LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
                     // TODO: vargs support
                     // TODO: kwargs support
                     assert(op->operand.int_value == code->value.code_value.params->size());
@@ -102,9 +103,9 @@ void VM::execute() {
                         Value* arg = stack.pop();
                         std::string *argname = code->value.code_value.params->at(i);
                         // printf("set lexical var: %d for %s\n", i, argname->c_str());
-                        (*vars)[*argname] = arg;
+                        frame->setVar(argname, arg);
                     }
-                    lexical_vars_stack.push_back(vars);
+                    lexical_vars_stack->push_back(frame);
 
                     continue;
                 } else {
@@ -119,7 +120,7 @@ void VM::execute() {
             return_addrs.pop_back();
             pc = addr+1;
 
-            lexical_vars_stack.pop_back();
+            lexical_vars_stack->pop_back();
 
             continue;
         }
@@ -187,15 +188,12 @@ void VM::execute() {
         case OP_VARIABLE: {
             {
                 // lexical vars
-                if (lexical_vars_stack.size() > 0) {
-                    std::map<std::string, Value*>::iterator iter = lexical_vars_stack.back()->find(std::string(op->operand.str_value));
-                    if (iter != lexical_vars_stack.back()->end()) {
-                        Value *v = iter->second;
-                        // printf("found lexical var\n");
-                        v->retain();
-                        stack.push(v);
-                        break;
-                    }
+                Value *v = lexical_vars_stack->back()->find(op->operand.str_value);
+                if (v) {
+                    // printf("found lexical var\n");
+                    v->retain();
+                    stack.push(v);
+                    break;
                 }
             }
             Value *v = global_vars[std::string(op->operand.str_value)];

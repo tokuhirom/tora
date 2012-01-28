@@ -8,6 +8,32 @@
 #include <map>
 #include "stack.h"
 
+class LexicalVarsFrame {
+    LexicalVarsFrame* up;
+public:
+    std::map<std::string, Value*> vars;
+    LexicalVarsFrame() {
+        up = NULL;
+    }
+    LexicalVarsFrame(LexicalVarsFrame *up_) {
+        this->up = up_;
+    }
+    void setVar(std::string* name, Value *v) {
+        this->vars[*name] = v;
+    }
+    Value *find(std::string name) {
+        std::map<std::string, Value*>::iterator iter = this->vars.find(std::string(name));
+        if (iter != vars.end()) {
+            return iter->second;
+        } else {
+            if (this->up) {
+                return this->up->find(name);
+            }
+            return NULL;
+        }
+    }
+};
+
 class VM {
 public:
     tora::Stack stack;
@@ -16,6 +42,11 @@ public:
     std::vector<OP*> ops;
     std::map<std::string, Value*> global_vars;
     std::map<std::string, Value*> functions;
+
+    /*
+     * stack for lexical variables.
+     */
+    std::vector<LexicalVarsFrame *> *lexical_vars_stack;
 
     VM() {
         sp = 0;

@@ -384,7 +384,8 @@ variable
 
 int yyerror(const char *err) {
     extern char *yytext;
-    fprintf(stderr, "parser error near %s\n", yytext);
+    extern int tora_line_number;
+    fprintf(stderr, "parser error near %s at line %d\n", yytext, tora_line_number);
     return 0;
 }
 

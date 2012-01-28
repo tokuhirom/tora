@@ -48,7 +48,8 @@ int main(int argc, char **argv) {
 
     root_node = NULL;
     if (yyparse()) {
-        fprintf(stderr, "Error!\n");
+        extern int tora_line_number;
+        fprintf(stderr, "Error! at line %d\n", tora_line_number);
         exit(1);
     } else {
         if (compile_only) {
