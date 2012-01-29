@@ -58,7 +58,8 @@ int main(int argc, char **argv) {
         }
         assert(root_node);
         VM vm;
-        tora_compile(root_node, vm);
+        tora::Compiler compiler(&vm);
+        compiler.compile(root_node);
         if (dump_ops) {
             vm.dump_ops();
         }

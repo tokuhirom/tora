@@ -3,6 +3,18 @@
 
 #include "vm.h"
 
-void tora_compile(TNode *node, VM &vm);
+namespace tora {
+
+class Compiler {
+    VM *vm;
+public:
+    Compiler(VM*vm_) {
+        vm = vm_;
+    }
+    void compile(TNode *node);
+};
+
+};
+
 
 #endif // COMPILER_H_
