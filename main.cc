@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         tora::Compiler compiler(&vm);
         compiler.compile(root_node);
         if (compiler.error) {
-            printf("Compilation failed\n");
+            fprintf(stderr, "Compilation failed\n");
             exit(1);
         }
         if (dump_ops) {

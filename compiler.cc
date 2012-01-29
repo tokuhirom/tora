@@ -60,6 +60,7 @@ void tora::Compiler::compile(TNode *node) {
         std::vector<std::string *>* params = new std::vector<std::string *>();
         for (size_t i=0; i<node->funcdef.params->size(); i++) {
             params->push_back(new std::string(node->funcdef.params->at(i)->str_value));
+            this->define_localvar(std::string(node->funcdef.params->at(i)->str_value));
         }
         Value *code = new Value();
         code->value_type = VALUE_TYPE_CODE;
