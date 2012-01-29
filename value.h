@@ -131,6 +131,9 @@ public:
         }
     }
     Value *to_b();
+    bool is_numeric() {
+        return this->value_type == VALUE_TYPE_INT;
+    }
 };
 
 struct ValueDeleter {

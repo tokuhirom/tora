@@ -41,16 +41,42 @@ void VM::execute() {
         case optype: { \
             ValuePtr v1(stack.pop()); \
             ValuePtr v2(stack.pop()); \
+            if (!v1->is_numeric()) {  \
+                ValuePtr s(v1->to_s()); \
+                fprintf(stderr, "'%s' is not numeric.\n", s->value.str_value); \
+                exit(1); /* TODO: die */ \
+            } \
             Value *v = new Value; \
             v->set_int(v2->value.int_value op v1->value.int_value); \
             stack.push(v); \
             break; \
         }
-        BINOP(OP_ADD, +);
         BINOP(OP_SUB, -);
         BINOP(OP_DIV, /);
         BINOP(OP_MUL, *);
 #undef BINOP
+        case OP_ADD: {
+            ValuePtr v1(stack.pop());
+            ValuePtr v2(stack.pop());
+            if (v1->is_numeric()) {
+                Value *v = new Value();
+                ValuePtr i(v2->to_i());
+                v->set_int(v2->value.int_value + v1->value.int_value);
+                stack.push(v);
+            } else if (v1->value_type == VALUE_TYPE_STR) {
+                // TODO: support null terminated string
+                Value *v = new Value();
+                ValuePtr s(v2->to_s());
+                // strdup
+                v->set_str(strdup((std::string(s->value.str_value) + std::string(v1->value.str_value)).c_str()));
+                stack.push(v);
+            } else {
+                ValuePtr s(v1->to_s());
+                fprintf(stderr, "'%s' is not numeric or string.\n", s->value.str_value);
+                exit(1); // TODO : die
+            }
+            break;
+        }
         case OP_FUNCALL: {
             ValuePtr funname(stack.pop());
             const char *funname_c = funname->value.str_value;
