@@ -25,6 +25,13 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
+static TNode *tora_create_my(TNode *t) {
+    TNode *node = new TNode();
+    node->type = NODE_MY;
+    node->node = t;
+    return node;
+}
+
 static TNode *tora_create_block(TNode *t) {
     TNode *node = new TNode();
     node->type = NODE_BLOCK;
@@ -285,6 +292,10 @@ block
 
 lvalue
     : variable
+    | MY variable
+    {
+        $$ = tora_create_my($2);
+    }
     ;
 
 expression

@@ -59,6 +59,7 @@ typedef enum {
     NODE_FUNCDEF,
     NODE_RETURN,
     NODE_BLOCK,
+    NODE_MY,
 } NODE_TYPE;
 
 struct OP {

@@ -14,6 +14,10 @@ void tora_compile(TNode *node, VM &vm) {
 
         break;
     }
+    case NODE_MY: {
+        tora_compile(node->node, vm);
+        break;
+    }
     case NODE_RETURN: {
         tora_compile(node->node, vm);
         break;
