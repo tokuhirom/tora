@@ -1,3 +1,4 @@
+# COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE  -DDEBUG
 COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE 
 # COPTS=-Wall -g -std=c++0x -DYYERROR_VERBOSE -DYYDEBUG
 CXX=g++

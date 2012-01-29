@@ -3,7 +3,7 @@
 void tora::Compiler::compile(TNode *node) {
     switch (node->type) {
     case NODE_ROOT: {
-        // body
+        this->push_block();
         this->compile(node->node);
 
         {
@@ -12,9 +12,13 @@ void tora::Compiler::compile(TNode *node) {
             vm->ops.push_back(tmp);
         }
 
+        this->pop_block();
+
         break;
     }
     case NODE_MY: {
+        const char *name = node->node->str_value;
+        this->define_localvar(std::string(name));
         this->compile(node->node);
         break;
     }
@@ -23,6 +27,8 @@ void tora::Compiler::compile(TNode *node) {
         break;
     }
     case NODE_BLOCK: {
+        this->push_block();
+
         OP * enter = new OP;
         enter->op_type = OP_ENTER;
         vm->ops.push_back(enter);
@@ -30,6 +36,8 @@ void tora::Compiler::compile(TNode *node) {
         this->compile(node->node);
 
         vm->ops.push_back(new OP(OP_LEAVE));
+
+        this->pop_block();
 
         break;
     }
@@ -228,6 +236,11 @@ void tora::Compiler::compile(TNode *node) {
         // nop
         break;
     case NODE_VARIABLE: {
+        int no = this->find_localvar(std::string(node->str_value));
+        if (no<0) {
+            fprintf(stderr, "There is no variable named %s\n", node->str_value);
+            error = true;
+        }
         OP * tmp = new OP;
         tmp->op_type = OP_VARIABLE;
         tmp->operand.str_value = node->str_value;

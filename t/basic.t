@@ -72,24 +72,24 @@ run_is($src , join("\n", qw(
 )). "\n");
 
 run_is(<<'...', "5\n");
-$x=5
+my $x=5
 say($x)
 ...
 
 run_is(<<'...', "7\n");
-$x=3
-$y=4
+my $x=3
+my $y=4
 say($x+$y)
 ...
 
 run_is(<<'...', "5\n");
-$x=2
+my $x=2
 $x=$x+3
 say($x)
 ...
 
 run_is(<<'...', "0\n1\n2\n");
-$i=0
+my $i=0
 while ($i<3) {
     say($i)
     $i = $i + 1
