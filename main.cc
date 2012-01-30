@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
             return 0;
         }
         assert(root_node);
-        VM vm;
+        tora::VM vm;
         tora::Compiler compiler(&vm);
         compiler.compile(root_node);
         if (compiler.error) {

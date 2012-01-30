@@ -1,5 +1,7 @@
 #include "value.h"
 
+using namespace tora;
+
 Value *Value::to_b() {
     switch (value_type) {
     case VALUE_TYPE_NIL: {

@@ -11,6 +11,8 @@
 #include <map>
 #include <memory>
 
+namespace tora {
+
 typedef enum {
     VALUE_TYPE_NIL = 0,
     VALUE_TYPE_INT = 1,
@@ -144,5 +146,7 @@ struct ValueDeleter {
 };
 
 typedef std::unique_ptr<Value, ValueDeleter> ValuePtr;
+
+};
 
 #endif // VALUE_H_

@@ -8,6 +8,8 @@
 #include <map>
 #include "stack.h"
 
+namespace tora {
+
 class FunctionFrame {
 public:
     int return_address;
@@ -79,6 +81,8 @@ public:
     void add_function(const char*name, Value*code) {
         functions[std::string(name)] = code;
     }
+};
+
 };
 
 #endif // VM_H_

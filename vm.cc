@@ -1,6 +1,8 @@
 #include "vm.h"
 #include "value.h"
 
+using namespace tora;
+
 // run program
 void VM::execute() {
     // TODO: move to vm.h
