@@ -62,19 +62,7 @@ typedef enum {
     NODE_MY,
 } NODE_TYPE;
 
-struct OP {
-    int op_type;
-    union {
-        int  int_value;
-        bool bool_value;
-        const char *str_value;
-    } operand;
-    OP() {
-    }
-    OP(int type) {
-        this->op_type = type;
-    }
-};
+#include "op.h"
 
 #endif // TORA_H_
 

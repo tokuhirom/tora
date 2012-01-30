@@ -19,13 +19,16 @@ my @ops = qw(
     OP_PUSH_IDENTIFIER
     OP_FUNCALL
     OP_PUSH_STRING
+    OP_PUSH_VALUE
     OP_DUMP
     OP_JUMP_IF_FALSE
+
     OP_LT
     OP_GT
     OP_LE
     OP_GE
     OP_EQ
+
     OP_ASSIGN
     OP_VARIABLE
     OP_JUMP
@@ -33,6 +36,8 @@ my @ops = qw(
     OP_RETURN
     OP_ENTER
     OP_LEAVE
+
+    OP_DEFINE_METHOD
 );
 
 my $xslate = Text::Xslate->new(

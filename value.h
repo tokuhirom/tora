@@ -2,6 +2,8 @@
 #define VALUE_H_
 
 #include "tora.h"
+#include "op.h"
+#include "ops.gen.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -34,7 +36,7 @@ public:
         struct {
             const char *name;
             std::vector<std::string*> *params;
-            int start; // start point in vm
+            std::vector<OP*> *opcodes;
         } code_value;
     } value;
     int refcnt; // reference count
@@ -82,7 +84,11 @@ public:
             printf("[dump] str: %s\n", value.str_value);
             break;
         case VALUE_TYPE_CODE:
-            printf("[dump] code: name: %s start: %d\n", value.code_value.name, value.code_value.start);
+            printf("[dump] code: name: %s\n", value.code_value.name);
+            for (size_t i=0; i<value.code_value.opcodes->size(); i++) {
+                printf("    [%d] %s\n", i, opcode2name[value.code_value.opcodes->at(i)->op_type]);
+            }
+            printf("----------------\n");
             break;
         default:
             printf("[dump] unknown: %d\n", value_type);

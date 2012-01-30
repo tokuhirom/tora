@@ -14,6 +14,7 @@ class FunctionFrame {
 public:
     int return_address;
     int top;
+    std::vector<OP*> *orig_ops;
 };
 
 class LexicalVarsFrame {
@@ -47,7 +48,7 @@ public:
     tora::Stack stack;
     int sp; // stack pointer
     size_t pc; // program counter
-    std::vector<OP*> ops;
+    std::vector<OP*> *ops;
     std::map<std::string, Value*> global_vars;
     std::map<std::string, Value*> functions;
     std::vector<FunctionFrame*> *function_frames;
@@ -60,13 +61,17 @@ public:
     VM() {
         sp = 0;
         pc = 0;
+        ops = new std::vector<OP*>;
+    }
+    ~VM() {
+        // delete ops; // TODO
     }
     void execute();
 
     void dump_ops() {
         printf("-- OP DUMP    --\n");
-        for (size_t i=0; i<ops.size(); i++) {
-            printf("[%d] %s(%d)\n", i, opcode2name[ops[i]->op_type], ops[i]->op_type);
+        for (size_t i=0; i<ops->size(); i++) {
+            printf("[%d] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
         }
         printf("----------------\n");
     }

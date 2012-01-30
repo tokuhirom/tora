@@ -14,6 +14,7 @@ typedef enum {
     OP_PUSH_IDENTIFIER,
     OP_FUNCALL,
     OP_PUSH_STRING,
+    OP_PUSH_VALUE,
     OP_DUMP,
     OP_JUMP_IF_FALSE,
     OP_LT,
@@ -28,6 +29,7 @@ typedef enum {
     OP_RETURN,
     OP_ENTER,
     OP_LEAVE,
+    OP_DEFINE_METHOD,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -43,6 +45,7 @@ static const char*opcode2name[] = {
     "OP_PUSH_IDENTIFIER",
     "OP_FUNCALL",
     "OP_PUSH_STRING",
+    "OP_PUSH_VALUE",
     "OP_DUMP",
     "OP_JUMP_IF_FALSE",
     "OP_LT",
@@ -57,6 +60,7 @@ static const char*opcode2name[] = {
     "OP_RETURN",
     "OP_ENTER",
     "OP_LEAVE",
+    "OP_DEFINE_METHOD",
 };
 
 #endif // OPS_GEN_H_

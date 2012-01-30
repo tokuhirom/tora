@@ -11,9 +11,9 @@ void VM::execute() {
     this->function_frames = new std::vector<FunctionFrame*>();
 
     for (;;) {
-        // printf("[DEBUG] OP: %s\n", opcode2name[ops[pc]->op_type]);
+        // printf("[DEBUG] OP: %s\n", opcode2name[ops->at(pc)->op_type]);
 
-        OP *op = ops[pc];
+        OP *op = ops->at(pc);
         switch (op->op_type) {
         case OP_PUSH_TRUE: {
             Value *v = new Value;
@@ -37,6 +37,18 @@ void VM::execute() {
             Value *v = new Value;
             v->set_str(op->operand.str_value);
             stack.push(v);
+            break;
+        }
+        case OP_PUSH_VALUE: {
+            Value *v = op->operand.value;
+            stack.push(v);
+            break;
+        }
+        case OP_DEFINE_METHOD: {
+            ValuePtr code(stack.pop()); // code object
+            assert(code->value_type == VALUE_TYPE_CODE);
+            const char *funcname = op->operand.str_value;
+            this->add_function(funcname, &(*code));
             break;
         }
 #define BINOP(optype, op) \
@@ -119,14 +131,16 @@ void VM::execute() {
                 std::map<std::string, Value*>::iterator iter =  this->functions.find(funname->value.str_value);
                 if (iter != this->functions.end()) {
                     Value *code = iter->second;
-                    // printf("jump to %d\n", code->value.code_value.start);
+                    // printf("calling %s\n", funname->value.str_value);
                     {
                         FunctionFrame * fframe = new FunctionFrame();
                         fframe->return_address = pc;
+                        fframe->orig_ops = ops;
                         fframe->top = stack.size() - op->operand.int_value;
                         function_frames->push_back(fframe);
                     }
-                    pc = code->value.code_value.start;
+                    pc = 0;
+                    this->ops = code->value.code_value.opcodes;
 
                     LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
                     // TODO: vargs support
@@ -152,6 +166,7 @@ void VM::execute() {
             FunctionFrame *fframe = function_frames->back();
             function_frames->pop_back();
             pc = fframe->return_address+1;
+            ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
             if (fframe->top == stack.size()) {
                 Value * v = new Value();
