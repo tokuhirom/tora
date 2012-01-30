@@ -1,4 +1,11 @@
+import os
+import subprocess
+
 perl_builder = Builder(action = 'perl < $SOURCE > $TARGET')
+
+if 'test' in COMMAND_LINE_TARGETS:
+    subprocess.call(['prove', '-r', 't']);
+    exit()
 
 env = Environment(BUILDERS={"Perl":perl_builder})
 env.Append(CCFLAGS=['-g'])
