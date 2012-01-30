@@ -44,9 +44,7 @@ my $xslate = Text::Xslate->new(
     syntax => 'TTerse',
 );
 
-open my $fh, '>', 'ops.gen.h';
-
-print $fh $xslate->render_string(<<'...', { ops => \@ops });
+print $xslate->render_string(<<'...', { ops => \@ops });
 #ifndef OPS_GEN_H_
 #define OPS_GEN_H_
 
@@ -64,6 +62,4 @@ static const char*opcode2name[] = {
 
 #endif // OPS_GEN_H_
 ...
-
-close $fh;
 
