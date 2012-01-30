@@ -170,7 +170,7 @@ void VM::execute() {
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
             if (fframe->top == stack.size()) {
                 Value * v = new Value();
-                v->value_type = VALUE_TYPE_NIL;
+                v->value_type = VALUE_TYPE_UNDEF;
                 stack.push(v);
             }
             delete fframe;
@@ -258,7 +258,7 @@ void VM::execute() {
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword
                 v = new Value();
-                v->value_type = VALUE_TYPE_NIL;
+                v->value_type = VALUE_TYPE_UNDEF;
                 lexical_vars_stack->back()->setVar(new std::string(op->operand.str_value), v);
                 v->retain();
                 stack.push(v);

@@ -16,7 +16,7 @@
 namespace tora {
 
 typedef enum {
-    VALUE_TYPE_NIL = 0,
+    VALUE_TYPE_UNDEF = 0,
     VALUE_TYPE_INT = 1,
     VALUE_TYPE_BOOL = 2,
     VALUE_TYPE_STR = 3,
@@ -43,7 +43,7 @@ public:
 
     Value() {
         refcnt = 1;
-        value_type = VALUE_TYPE_NIL;
+        value_type = VALUE_TYPE_UNDEF;
     }
     ~Value() {
         if (value_type == VALUE_TYPE_STR) {
@@ -114,9 +114,9 @@ public:
             v->set_str(strdup(this->value.bool_value ? "true" : "false"));
             return v;
         }
-        case VALUE_TYPE_NIL: {
+        case VALUE_TYPE_UNDEF: {
             Value *v = new Value();
-            v->set_str(strdup("nil"));
+            v->set_str(strdup("undef"));
             return v;
         }
         default:

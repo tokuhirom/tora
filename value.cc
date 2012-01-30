@@ -4,7 +4,7 @@ using namespace tora;
 
 Value *Value::to_b() {
     switch (value_type) {
-    case VALUE_TYPE_NIL: {
+    case VALUE_TYPE_UNDEF: {
         Value *v = new Value();
         v->set_bool(false);
         return v;
