@@ -245,7 +245,8 @@ void tora::Compiler::compile(TNode *node) {
         // nop
         break;
     case NODE_GETVARIABLE: {
-        int no = this->find_localvar(std::string(node->str_value));
+        int level;
+        int no = this->find_localvar(std::string(node->str_value), &level);
         if (no<0) {
             fprintf(stderr, "There is no variable named %s\n", node->str_value);
             error = true;
@@ -260,7 +261,8 @@ void tora::Compiler::compile(TNode *node) {
         const char*varname = node->set_value.lvalue->str_value;
         this->define_localvar(std::string(varname));
 
-        int no = this->find_localvar(std::string(varname));
+        int level;
+        int no = this->find_localvar(std::string(varname), level);
         assert(no>=0);
 
         this->compile(node->set_value.rvalue);
@@ -273,7 +275,8 @@ void tora::Compiler::compile(TNode *node) {
     }
     case NODE_SETVARIABLE: {
         const char*varname = node->set_value.lvalue->str_value;
-        int no = this->find_localvar(std::string(varname));
+        int level;
+        int no = this->find_localvar(std::string(varname), level);
         if (no<0) {
             fprintf(stderr, "There is no variable named %s\n", varname);
             error = true;
@@ -283,7 +286,6 @@ void tora::Compiler::compile(TNode *node) {
 
         OP * tmp = new OP;
         tmp->op_type = OP_SETVARIABLE;
-        tmp->operand.str_value = varname;
         vm->ops->push_back(tmp);
         break;
     }

@@ -39,8 +39,9 @@ public:
         delete this->blocks.back();
         this->blocks.pop_back();
     }
-    int find_localvar(std::string name) {
+    int find_localvar(std::string name, int &level) {
         std::vector<Block*>::iterator iter = this->blocks.begin();
+        level = 0;
         for (; iter != this->blocks.end(); iter++) {
             Block *block = *iter;
             for (size_t i=0; i<block->vars.size(); i++) {
@@ -48,6 +49,7 @@ public:
                     return i;
                 }
             }
+            level++;
         }
         return -1;
     }
