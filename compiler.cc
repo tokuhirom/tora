@@ -72,15 +72,14 @@ void tora::Compiler::compile(TNode *node) {
         ret->op_type = OP_RETURN;
         vm_.ops->push_back(ret);
 
-        Value *code = new Value();
-        code->value_type = VALUE_TYPE_CODE;
-        code->value.code_value.name = strdup(funcname);
-        code->value.code_value.params = params;
-        code->value.code_value.opcodes = vm_.ops; // TODO: clone
+        CodeValue *code = new CodeValue();
+        code->code_name = strdup(funcname);
+        code->code_params = params;
+        code->code_opcodes = vm_.ops; // TODO: clone
 
         OP * putval = new OP;
         putval->op_type = OP_PUSH_VALUE;
-        putval->operand.value = code;
+        putval->operand.value = (Value*)code;
         vm->ops->push_back(putval);
 
         OP * define_method = new OP;
@@ -158,7 +157,6 @@ void tora::Compiler::compile(TNode *node) {
     case NODE_LE:  C_OP_BINARY(OP_LE);
     case NODE_GE:  C_OP_BINARY(OP_GE);
     case NODE_EQ:  C_OP_BINARY(OP_EQ);
-    case NODE_ASSIGN:  C_OP_BINARY(OP_ASSIGN);
 #undef C_OP_BINARY
 
     case NODE_STMTS: {
@@ -246,15 +244,46 @@ void tora::Compiler::compile(TNode *node) {
     case NODE_NEWLINE:
         // nop
         break;
-    case NODE_VARIABLE: {
+    case NODE_GETVARIABLE: {
         int no = this->find_localvar(std::string(node->str_value));
         if (no<0) {
             fprintf(stderr, "There is no variable named %s\n", node->str_value);
             error = true;
         }
         OP * tmp = new OP;
-        tmp->op_type = OP_VARIABLE;
+        tmp->op_type = OP_GETVARIABLE;
         tmp->operand.str_value = node->str_value;
+        vm->ops->push_back(tmp);
+        break;
+    }
+    case NODE_SETVARIABLE_MY: {
+        const char*varname = node->set_value.lvalue->str_value;
+        this->define_localvar(std::string(varname));
+
+        int no = this->find_localvar(std::string(varname));
+        assert(no>=0);
+
+        this->compile(node->set_value.rvalue);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_SETVARIABLE;
+        tmp->operand.str_value = varname;
+        vm->ops->push_back(tmp);
+        break;
+    }
+    case NODE_SETVARIABLE: {
+        const char*varname = node->set_value.lvalue->str_value;
+        int no = this->find_localvar(std::string(varname));
+        if (no<0) {
+            fprintf(stderr, "There is no variable named %s\n", varname);
+            error = true;
+        }
+
+        this->compile(node->set_value.rvalue);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_SETVARIABLE;
+        tmp->operand.str_value = varname;
         vm->ops->push_back(tmp);
         break;
     }

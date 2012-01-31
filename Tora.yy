@@ -229,9 +229,21 @@ line
         $$ = node;
     }
     | if_statement
-    | lvalue ASSIGN expression
+    | MY variable ASSIGN expression
     {
-        $$ = tora_create_binary_expression(NODE_ASSIGN, $1, $3);
+        TNode *node = new TNode();
+        node->type = NODE_SETVARIABLE_MY;
+        node->set_value.lvalue = $2;
+        node->set_value.rvalue = $4;
+        $$ = node;
+    }
+    | variable ASSIGN expression
+    {
+        TNode *node = new TNode();
+        node->type = NODE_SETVARIABLE;
+        node->set_value.lvalue = $1;
+        node->set_value.rvalue = $3;
+        $$ = node;
     }
     | WHILE L_PAREN expression R_PAREN block
     {
@@ -407,7 +419,7 @@ variable
     : VARIABLE
     {
         TNode *node = new TNode();
-        node->type = NODE_VARIABLE;
+        node->type = NODE_GETVARIABLE;
         node->str_value = $1;
         $$ = node;
     }

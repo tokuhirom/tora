@@ -23,12 +23,13 @@ typedef enum {
     OP_GE,
     OP_EQ,
     OP_ASSIGN,
-    OP_VARIABLE,
     OP_JUMP,
     OP_END,
     OP_RETURN,
     OP_ENTER,
     OP_LEAVE,
+    OP_SETVARIABLE,
+    OP_GETVARIABLE,
     OP_DEFINE_METHOD,
 } OP_TYPE;
 
@@ -54,12 +55,13 @@ static const char*opcode2name[] = {
     "OP_GE",
     "OP_EQ",
     "OP_ASSIGN",
-    "OP_VARIABLE",
     "OP_JUMP",
     "OP_END",
     "OP_RETURN",
     "OP_ENTER",
     "OP_LEAVE",
+    "OP_SETVARIABLE",
+    "OP_GETVARIABLE",
     "OP_DEFINE_METHOD",
 };
 

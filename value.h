@@ -23,22 +23,17 @@ typedef enum {
     VALUE_TYPE_CODE = 4,
 } value_type_t;
 
+class CodeValue;
+class IntValue;
+class StrValue;
+class BoolValue;
+
 /**
  * The value class
  */
 class Value {
 public:
     value_type_t value_type;
-    union {
-        int  int_value;
-        bool bool_value;
-        const char *str_value;
-        struct {
-            const char *name;
-            std::vector<std::string*> *params;
-            std::vector<OP*> *opcodes;
-        } code_value;
-    } value;
     int refcnt; // reference count
 
     Value() {
@@ -46,9 +41,6 @@ public:
         value_type = VALUE_TYPE_UNDEF;
     }
     ~Value() {
-        if (value_type == VALUE_TYPE_STR) {
-            delete [] value.str_value;
-        }
     }
     inline void release() {
         --refcnt;
@@ -59,88 +51,96 @@ public:
     inline void retain() {
         ++refcnt;
     }
-    void set_int(int i) {
-        value.int_value = i;
-        value_type = VALUE_TYPE_INT;
-    }
-    void set_bool(bool b) {
-        value.bool_value = b;
-        value_type = VALUE_TYPE_BOOL;
-    }
-    void set_str(const char *s) {
-        // memory leak
-        value.str_value = s;
-        value_type = VALUE_TYPE_STR;
-    }
-    void dump() {
-        switch (value_type) {
-        case VALUE_TYPE_INT:
-            printf("[dump] IV: %d\n", value.int_value);
-            break;
-        case VALUE_TYPE_BOOL:
-            printf("[dump] bool: %s\n", value.bool_value ? "true" : "false");
-            break;
-        case VALUE_TYPE_STR:
-            printf("[dump] str: %s\n", value.str_value);
-            break;
-        case VALUE_TYPE_CODE:
-            printf("[dump] code: name: %s\n", value.code_value.name);
-            for (size_t i=0; i<value.code_value.opcodes->size(); i++) {
-                printf("    [%d] %s\n", i, opcode2name[value.code_value.opcodes->at(i)->op_type]);
-            }
-            printf("----------------\n");
-            break;
-        default:
-            printf("[dump] unknown: %d\n", value_type);
-            break;
-        }
-    }
-    Value *to_s() {
-        switch (value_type) {
-        case VALUE_TYPE_INT: {
-            Value *v = new Value();
-            std::ostringstream os;
-            os << this->value.int_value;
-            v->set_str(strdup(os.str().c_str()));
-            return v;
-        }
-        case VALUE_TYPE_STR: {
-            Value *v = new Value();
-            v->set_str(strdup(this->value.str_value));
-            return v;
-        }
-        case VALUE_TYPE_BOOL: {
-            Value *v = new Value();
-            v->set_str(strdup(this->value.bool_value ? "true" : "false"));
-            return v;
-        }
-        case VALUE_TYPE_UNDEF: {
-            Value *v = new Value();
-            v->set_str(strdup("undef"));
-            return v;
-        }
-        default:
-            printf("[BUG] unknown in to_s: %d\n", value_type);
-            abort();
-            break;
-        }
-    }
-    Value *to_i() {
-        switch (value_type) {
-        case VALUE_TYPE_INT: {
-            Value *v = new Value();
-            v->set_int(this->value.int_value);
-            return v;
-        }
-        default:
-            printf("to_i is not supported yet in not VALUE_TYPE_INT(%d)\n", value_type);
+    CodeValue* to_code() {
+        if (this->value_type == VALUE_TYPE_CODE) {
+            return (CodeValue*)this;
+        } else {
+            printf("[BUG] %d is not a code value\n", this->value_type);
             this->dump();
-            abort();
+            exit(1); // BUG
         }
     }
+    IntValue* to_int() {
+        assert(this->value_type == VALUE_TYPE_INT);
+        return (IntValue*)this;
+    }
+    BoolValue* to_bool() {
+        assert(this->value_type == VALUE_TYPE_BOOL);
+        return (BoolValue*)this;
+    }
+    StrValue* to_str() {
+        assert(this->value_type == VALUE_TYPE_STR);
+        return (StrValue*)this;
+    }
+    void dump();
+    // TODO: rename to as_str
+    StrValue *to_s();
+    // TODO: rename to as_int
+    IntValue *to_i();
+    // TODO: rename to as_bool
     Value *to_b();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
+    }
+};
+
+class IntValue: public Value {
+public:
+    int  int_value;
+    IntValue(int i): Value() {
+        this->value_type = VALUE_TYPE_INT;
+        this->int_value = i;
+    }
+    void dump() {
+        printf("[dump] IV: %d\n", int_value);
+    }
+};
+
+class BoolValue: public Value {
+public:
+    bool bool_value;
+    BoolValue(bool b): Value() {
+        this->value_type = VALUE_TYPE_BOOL;
+        this->bool_value = b;
+    }
+    void dump() {
+        printf("[dump] bool: %s\n", bool_value ? "true" : "false");
+    }
+};
+
+class StrValue: public Value {
+public:
+    const char*str_value;
+    StrValue(): Value() {
+        this->value_type = VALUE_TYPE_STR;
+        this->str_value = NULL;
+    }
+    ~StrValue() {
+        delete [] str_value;
+    }
+    void set_str(const char*s) {
+        str_value = s;
+    }
+    void dump() {
+        printf("[dump] str: %s\n", str_value);
+    }
+};
+
+class CodeValue: public Value {
+public:
+    const char *code_name;
+    std::vector<std::string*> *code_params;
+    std::vector<OP*> *code_opcodes;
+
+    CodeValue(): Value() {
+        this->value_type = VALUE_TYPE_CODE;
+    }
+    void dump() {
+        printf("[dump] code: name: %s\n", this->code_name);
+        for (size_t i=0; i<this->code_opcodes->size(); i++) {
+            printf("    [%d] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
+        }
+        printf("----------------\n");
     }
 };
 

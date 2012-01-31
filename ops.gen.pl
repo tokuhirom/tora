@@ -30,12 +30,14 @@ my @ops = qw(
     OP_EQ
 
     OP_ASSIGN
-    OP_VARIABLE
     OP_JUMP
     OP_END
     OP_RETURN
     OP_ENTER
     OP_LEAVE
+
+    OP_SETVARIABLE
+    OP_GETVARIABLE
 
     OP_DEFINE_METHOD
 );

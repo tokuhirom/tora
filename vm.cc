@@ -16,25 +16,19 @@ void VM::execute() {
         OP *op = ops->at(pc);
         switch (op->op_type) {
         case OP_PUSH_TRUE: {
-            Value *v = new Value;
-            v->set_bool(true);
-            stack.push(v);
+            stack.push(new BoolValue(true));
             break;
         }
         case OP_PUSH_FALSE: {
-            Value *v = new Value;
-            v->set_bool(false);
-            stack.push(v);
+            stack.push(new BoolValue(false));
             break;
         }
         case OP_PUSH_INT: {
-            Value *v = new Value;
-            v->set_int(op->operand.int_value);
-            stack.push(v);
+            stack.push(new IntValue(op->operand.int_value));
             break;
         }
         case OP_PUSH_STRING: {
-            Value *v = new Value;
+            StrValue *v = new StrValue;
             v->set_str(op->operand.str_value);
             stack.push(v);
             break;
@@ -45,10 +39,10 @@ void VM::execute() {
             break;
         }
         case OP_DEFINE_METHOD: {
-            ValuePtr code(stack.pop()); // code object
+            Value *code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
             const char *funcname = op->operand.str_value;
-            this->add_function(funcname, &(*code));
+            this->add_function(funcname, code);
             break;
         }
 #define BINOP(optype, op) \
@@ -57,11 +51,10 @@ void VM::execute() {
             ValuePtr v2(stack.pop()); \
             if (!v1->is_numeric()) {  \
                 ValuePtr s(v1->to_s()); \
-                fprintf(stderr, "'%s' is not numeric.\n", s->value.str_value); \
+                fprintf(stderr, "'%s' is not numeric.\n", s->to_str()->str_value); \
                 exit(1); /* TODO: die */ \
             } \
-            Value *v = new Value; \
-            v->set_int(v2->value.int_value op v1->value.int_value); \
+            IntValue *v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
             stack.push(v); \
             break; \
         }
@@ -73,65 +66,64 @@ void VM::execute() {
             ValuePtr v1(stack.pop());
             ValuePtr v2(stack.pop());
             if (v1->is_numeric()) {
-                Value *v = new Value();
                 ValuePtr i(v2->to_i());
-                v->set_int(v2->value.int_value + v1->value.int_value);
+                IntValue *v = new IntValue(v2->to_int()->int_value + v1->to_int()->int_value);
                 stack.push(v);
             } else if (v1->value_type == VALUE_TYPE_STR) {
                 // TODO: support null terminated string
-                Value *v = new Value();
+                StrValue *v = new StrValue();
                 ValuePtr s(v2->to_s());
                 // strdup
-                v->set_str(strdup((std::string(s->value.str_value) + std::string(v1->value.str_value)).c_str()));
+                v->set_str(strdup((std::string(s->to_str()->str_value) + std::string(v1->to_str()->str_value)).c_str()));
                 stack.push(v);
             } else {
                 ValuePtr s(v1->to_s());
-                fprintf(stderr, "'%s' is not numeric or string.\n", s->value.str_value);
+                fprintf(stderr, "'%s' is not numeric or string.\n", s->to_str()->str_value);
                 exit(1); // TODO : die
             }
             break;
         }
         case OP_FUNCALL: {
             ValuePtr funname(stack.pop());
-            const char *funname_c = funname->value.str_value;
+            const char *funname_c = funname->to_str()->str_value;
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
                 printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
                 abort();
             }
             assert(funname->value_type == VALUE_TYPE_STR);
-            if (strcmp(funname->value.str_value, "print") == 0) {
+            if (strcmp(funname->to_str()->str_value, "print") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
                     ValuePtr v(stack.pop());
                     ValuePtr s(v->to_s());
-                    printf("%s", s->value.str_value);
+                    printf("%s", s->to_str()->str_value);
                 }
-            } else if (strcmp(funname->value.str_value, "p") == 0) {
+            } else if (strcmp(funname->to_str()->str_value, "p") == 0) {
                 ValuePtr v(stack.pop());
                 v->dump();
-            } else if (strcmp(funname->value.str_value, "say") == 0) {
+            } else if (strcmp(funname->to_str()->str_value, "say") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
                     ValuePtr v(stack.pop());
                     ValuePtr s(v->to_s());
-                    printf("%s\n", s->value.str_value);
+                    printf("%s\n", s->to_str()->str_value);
                 }
-            } else if (strcmp(funname->value.str_value, "getenv") == 0) {
+            } else if (strcmp(funname->to_str()->str_value, "getenv") == 0) {
                 assert(op->operand.int_value==1);
                 ValuePtr v(stack.pop());
                 ValuePtr s(v->to_s());
-                Value *ret = new Value();
-                ret->set_str(strdup(getenv(s->value.str_value)));
+                StrValue *ret = new StrValue();
+                ret->set_str(strdup(getenv(s->to_str()->str_value)));
                 stack.push(ret);
-            } else if (strcmp(funname->value.str_value, "exit") == 0) {
+            } else if (strcmp(funname->to_str()->str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
                 ValuePtr s(v->to_i());
-                exit(s->value.int_value);
+                exit(s->to_int()->int_value);
             } else {
-                std::map<std::string, Value*>::iterator iter =  this->functions.find(funname->value.str_value);
+                std::map<std::string, Value*>::iterator iter =  this->functions.find(funname->to_str()->str_value);
                 if (iter != this->functions.end()) {
-                    Value *code = iter->second;
-                    // printf("calling %s\n", funname->value.str_value);
+                    CodeValue *code = iter->second->to_code();
+                    // printf("calling %s\n", funname->to_str()->str_value);
                     {
                         FunctionFrame * fframe = new FunctionFrame();
                         fframe->return_address = pc;
@@ -140,15 +132,15 @@ void VM::execute() {
                         function_frames->push_back(fframe);
                     }
                     pc = 0;
-                    this->ops = code->value.code_value.opcodes;
+                    this->ops = code->code_opcodes;
 
                     LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
                     // TODO: vargs support
                     // TODO: kwargs support
-                    assert(op->operand.int_value == code->value.code_value.params->size());
+                    assert(op->operand.int_value == code->code_params->size());
                     for (int i=0; i<op->operand.int_value; i++) {
                         Value* arg = stack.pop();
-                        std::string *argname = code->value.code_value.params->at(i);
+                        std::string *argname = code->code_params->at(i);
                         // printf("set lexical var: %d for %s\n", i, argname->c_str());
                         frame->setVar(argname, arg);
                     }
@@ -156,7 +148,7 @@ void VM::execute() {
 
                     continue;
                 } else {
-                    fprintf(stderr, "Unknown function: %s\n", funname->value.str_value);
+                    fprintf(stderr, "Unknown function: %s\n", funname->to_str()->str_value);
                 }
             }
             break;
@@ -180,19 +172,18 @@ void VM::execute() {
             continue;
         }
         case OP_ENTER: {
-            LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
-            lexical_vars_stack->push_back(frame);
+            // LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            // lexical_vars_stack->push_back(frame);
             break;
         }
         case OP_LEAVE: {
-            lexical_vars_stack->pop_back();
+            // lexical_vars_stack->pop_back();
             break;
         }
         case OP_PUSH_IDENTIFIER: {
             // operand = the number of args
-            Value *v = new Value;
-            v->value.str_value = strdup(op->operand.str_value);
-            v->value_type = VALUE_TYPE_STR;
+            StrValue *v = new StrValue;
+            v->str_value = strdup(op->operand.str_value);
             stack.push(v);
             break;
         }
@@ -204,7 +195,7 @@ void VM::execute() {
             ValuePtr v(stack.pop());
 
             ValuePtr b(v->to_b());
-            if (!b->value.bool_value) {
+            if (!b->to_bool()->bool_value) {
                 pc = op->operand.int_value-1;
             }
             break;
@@ -221,8 +212,7 @@ void VM::execute() {
             switch (v1->value_type) { \
             case VALUE_TYPE_INT: { \
                 Value * i2 = v2->to_i(); \
-                Value *result = new Value(); \
-                result->set_bool( v1->value.int_value op i2->value.int_value ); \
+                BoolValue *result = new BoolValue(v1->to_int()->int_value op i2->to_int()->int_value); \
                 stack.push(result); \
                 break; \
             } \
@@ -238,18 +228,16 @@ void VM::execute() {
         CMPOP(OP_LT, <)
         CMPOP(OP_GE, >=)
         CMPOP(OP_LE, <=)
-        case OP_ASSIGN: {
-            ValuePtr v1(stack.pop());
-            Value * v2 = stack.pop(); // variable
-
-            v2->value_type  = v1->value_type;
-            v2->value = v1->value;
-
-            stack.push(v2);
-
+        case OP_SETVARIABLE: {
+            Value * rvalue = stack.pop();
+            rvalue->retain(); // TODO: maybe not needed
+            lexical_vars_stack->back()->setVar(
+                new std::string(op->operand.str_value),
+                rvalue
+            );
             break;
         }
-        case OP_VARIABLE: {
+        case OP_GETVARIABLE: {
             // lexical vars
             Value *v = lexical_vars_stack->back()->find(op->operand.str_value);
             if (v) {

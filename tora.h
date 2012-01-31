@@ -29,6 +29,10 @@ typedef struct TNode {
             struct TNode *if_body;
             struct TNode *else_body;
         } if_stmt;
+        struct {
+            struct TNode *lvalue;
+            struct TNode *rvalue;
+        } set_value;
     };
 } NODE;
 
@@ -51,7 +55,9 @@ typedef enum {
     NODE_LE,
     NODE_GE,
     NODE_EQ,
-    NODE_VARIABLE,
+    NODE_GETVARIABLE,
+    NODE_SETVARIABLE,
+    NODE_SETVARIABLE_MY,
     NODE_ASSIGN,
     NODE_WHILE,
     NODE_ROOT,

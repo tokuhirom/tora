@@ -34,16 +34,16 @@ sub foo() {
 say(foo())
 ...
 
-# retval(nil)
-run_is(<<'...', "nil\n");
+# retval(undef)
+run_is(<<'...', "undef\n");
 sub foo() {
 }
 
 say(foo())
 ...
 
-# retval(nil)
-run_is(<<'...', "nil\n");
+# retval(undef)
+run_is(<<'...', "undef\n");
 sub foo($n) {
 }
 
