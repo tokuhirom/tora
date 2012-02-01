@@ -137,7 +137,7 @@ void VM::execute() {
                     LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
                     // TODO: vargs support
                     // TODO: kwargs support
-                    assert(op->operand.int_value == code->code_params->size());
+                    assert(op->operand.int_value == (int)code->code_params->size());
                     for (int i=0; i<op->operand.int_value; i++) {
                         Value* arg = stack.pop();
                         /*
@@ -163,7 +163,7 @@ void VM::execute() {
             pc = fframe->return_address+1;
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
-            if (fframe->top == stack.size()) {
+            if (fframe->top == (int)stack.size()) {
                 Value * v = new Value();
                 v->value_type = VALUE_TYPE_UNDEF;
                 stack.push(v);
