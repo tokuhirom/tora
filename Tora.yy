@@ -183,7 +183,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
-%type <node> expression2 expression3 expression term primary_expression line line_list root lvalue variable block postfix_expression void sub_stmt if_statement
+%type <node> expression2 expression3 expression term primary_expression line line_list root variable block postfix_expression void sub_stmt if_statement
 %type <node> identifier
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
@@ -199,6 +199,7 @@ root
     ;
 
 void:
+    /* empty */
 
 line_list
     : line
@@ -231,11 +232,12 @@ line
     | if_statement
     | MY variable ASSIGN expression
     {
+        TNode *n1 = tora_create_my($2);
         TNode *node = new TNode();
-        node->type = NODE_SETVARIABLE_MY;
+        node->type = NODE_SETVARIABLE;
         node->set_value.lvalue = $2;
         node->set_value.rvalue = $4;
-        $$ = node;
+        $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
     }
     | variable ASSIGN expression
     {
@@ -301,14 +303,6 @@ block
     {
         $$ = tora_create_block($2);
     }
-
-lvalue
-    : variable
-    | MY variable
-    {
-        $$ = tora_create_my($2);
-    }
-    ;
 
 expression
     : expression2

@@ -48,7 +48,7 @@ public:
     }
     int find_localvar(std::string name, int &level) {
         DBG("FIND LOCAL VAR %d\n", 0);
-        for (level = 0; level < this->blocks->size(); ++level) {
+        for (level = 0; level < (int)this->blocks->size(); ++level) {
             Block *block = this->blocks->at(level);
             for (size_t i=0; i<block->vars.size(); i++) {
                 if (*(block->vars.at(i)) == name) {

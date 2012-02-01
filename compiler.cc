@@ -259,22 +259,6 @@ void tora::Compiler::compile(TNode *node) {
         vm->ops->push_back(tmp);
         break;
     }
-    case NODE_SETVARIABLE_MY: {
-        const char*varname = node->set_value.lvalue->str_value;
-        this->define_localvar(std::string(varname));
-
-        int level;
-        int no = this->find_localvar(std::string(varname), level);
-        assert(no>=0);
-
-        this->compile(node->set_value.rvalue);
-
-        OP * tmp = new OP;
-        tmp->op_type = OP_SETVARIABLE;
-        tmp->operand.int_value = no;
-        vm->ops->push_back(tmp);
-        break;
-    }
     case NODE_SETVARIABLE: {
         const char*varname = node->set_value.lvalue->str_value;
         int level;
