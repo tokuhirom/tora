@@ -254,8 +254,15 @@ void tora::Compiler::compile(TNode *node) {
         }
 
         OP * tmp = new OP;
-        tmp->op_type = OP_GETVARIABLE;
-        tmp->operand.int_value = no;
+        if (level == this->blocks->size()-1) {
+            DBG2("LOCAL\n");
+            tmp->op_type = OP_GETLOCAL;
+            tmp->operand.int_value = no;
+        } else {
+            DBG2("DYNAMIC\n");
+            tmp->op_type = OP_GETDYNAMIC;
+            tmp->operand.int_value = ((level+1&0x0000ffff) << 16) | (no&0x0000ffff);
+        }
         vm->ops->push_back(tmp);
         break;
     }
@@ -268,11 +275,19 @@ void tora::Compiler::compile(TNode *node) {
             error = true;
         }
 
+        // fprintf(stderr, "set level: %d\n", level);
         this->compile(node->set_value.rvalue);
 
         OP * tmp = new OP;
-        tmp->op_type = OP_SETVARIABLE;
-        tmp->operand.int_value = no;
+        if (level == this->blocks->size()-1) {
+            DBG2("LOCAL\n");
+            tmp->op_type = OP_SETLOCAL;
+            tmp->operand.int_value = no;
+        } else {
+            DBG2("DYNAMIC\n");
+            tmp->op_type = OP_SETDYNAMIC;
+            tmp->operand.int_value = ((level+1&0x0000ffff) << 16) | (no&0x0000ffff);
+        }
         vm->ops->push_back(tmp);
         break;
     }

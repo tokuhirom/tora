@@ -28,8 +28,10 @@ typedef enum {
     OP_RETURN,
     OP_ENTER,
     OP_LEAVE,
-    OP_SETVARIABLE,
-    OP_GETVARIABLE,
+    OP_SETLOCAL,
+    OP_SETDYNAMIC,
+    OP_GETLOCAL,
+    OP_GETDYNAMIC,
     OP_DEFINE_METHOD,
 } OP_TYPE;
 
@@ -60,8 +62,10 @@ static const char*opcode2name[] = {
     "OP_RETURN",
     "OP_ENTER",
     "OP_LEAVE",
-    "OP_SETVARIABLE",
-    "OP_GETVARIABLE",
+    "OP_SETLOCAL",
+    "OP_SETDYNAMIC",
+    "OP_GETLOCAL",
+    "OP_GETDYNAMIC",
     "OP_DEFINE_METHOD",
 };
 

@@ -18,8 +18,8 @@ public:
 };
 
 class LexicalVarsFrame {
-    LexicalVarsFrame* up;
 public:
+    LexicalVarsFrame* up;
     std::map<int, Value*> vars;
     LexicalVarsFrame() {
         up = NULL;
@@ -40,6 +40,22 @@ public:
             }
             return NULL;
         }
+    }
+    void dump_vars(int i) {
+        printf("[%d]\n", i);
+        std::map<int, Value*>::iterator iter = this->vars.begin();
+        for (; iter!=this->vars.end(); ++iter) {
+            printf("  %d\n", iter->first);
+            iter->second->dump();
+        }
+        if (this->up) {
+            this->up->dump_vars(i+1);
+        }
+    }
+    void dump_vars() {
+        printf("-- dump vars --\n");
+        dump_vars(0);
+        printf("---------------\n");
     }
 };
 

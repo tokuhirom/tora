@@ -10,8 +10,10 @@ void VM::execute() {
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<FunctionFrame*>();
 
+    DBG2("************** VM::execute\n");
+
     for (;;) {
-        // printf("[DEBUG] OP: %s\n", opcode2name[ops->at(pc)->op_type]);
+        DBG("[DEBUG] OP: %s\n", opcode2name[ops->at(pc)->op_type]);
 
         OP *op = ops->at(pc);
         switch (op->op_type) {
@@ -175,12 +177,12 @@ void VM::execute() {
             continue;
         }
         case OP_ENTER: {
-            // LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
-            // lexical_vars_stack->push_back(frame);
+            LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            lexical_vars_stack->push_back(frame);
             break;
         }
         case OP_LEAVE: {
-            // lexical_vars_stack->pop_back();
+            lexical_vars_stack->pop_back();
             break;
         }
         case OP_PUSH_IDENTIFIER: {
@@ -233,7 +235,7 @@ void VM::execute() {
         CMPOP(OP_LE, <=)
 
         // variable
-        case OP_SETVARIABLE: {
+        case OP_SETLOCAL: {
             Value * rvalue = stack.pop();
             rvalue->retain(); // TODO: maybe not needed
             lexical_vars_stack->back()->setVar(
@@ -242,7 +244,50 @@ void VM::execute() {
             );
             break;
         }
-        case OP_GETVARIABLE: {
+        case OP_SETDYNAMIC: {
+            // lexical_vars_stack->back()->dump_vars();
+            LexicalVarsFrame *frame = lexical_vars_stack->back();
+            int level = (op->operand.int_value >> 16) & 0x0000FFFF;
+            int no    = op->operand.int_value & 0x0000ffff;
+            DBG("SETDYNAMIC %d, %d\n", level, no);
+            for (int i=0; i<level; i++) {
+                frame = frame->up;
+            }
+            Value * rvalue = stack.pop();
+            rvalue->retain(); // TODO: maybe not needed
+            frame->setVar(
+                no,
+                rvalue
+            );
+            // lexical_vars_stack->back()->dump_vars();
+            break;
+        }
+        case OP_GETDYNAMIC: {
+            // lexical vars
+            LexicalVarsFrame *frame = lexical_vars_stack->back();
+            // frame->dump_vars();
+            int level = (op->operand.int_value >> 16) & 0x0000FFFF;
+            int no    = op->operand.int_value & 0x0000ffff;
+                DBG("GETDYNAMIC %d, %d\n", level, no);
+            for (int i=0; i<level-1; i++) {
+                DBG2("UP!\n");
+                frame = frame->up;
+            }
+            Value *v = frame->find(no);
+            if (v) {
+                DBG2("found lexical var\n");
+                v->retain();
+                stack.push(v);
+            } else { // TODO: remove this and use 'my' keyword?
+                v = new Value();
+                v->value_type = VALUE_TYPE_UNDEF;
+                lexical_vars_stack->back()->setVar(op->operand.int_value, v);
+                v->retain();
+                stack.push(v);
+            }
+            break;
+        }
+        case OP_GETLOCAL: {
             // lexical vars
             Value *v = lexical_vars_stack->back()->find(op->operand.int_value);
             if (v) {

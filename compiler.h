@@ -3,13 +3,6 @@
 
 #include "vm.h"
 
-// Debug Macro
-#ifdef DEBUG
-#define DBG(fmt, ...) printf(fmt, __VA_ARGS__)
-#else
-#define DBG(...)
-#endif
-
 namespace tora {
 
 class Block {
@@ -48,7 +41,7 @@ public:
     }
     int find_localvar(std::string name, int &level) {
         DBG("FIND LOCAL VAR %d\n", 0);
-        for (level = 0; level < (int)this->blocks->size(); ++level) {
+        for (level = this->blocks->size()-1; level >= 0; --level) {
             Block *block = this->blocks->at(level);
             for (size_t i=0; i<block->vars.size(); i++) {
                 if (*(block->vars.at(i)) == name) {
@@ -74,9 +67,9 @@ public:
         printf("Levels: %d\n", this->blocks->size());
         for (size_t level = 0; level < this->blocks->size(); ++level) {
             Block *block = this->blocks->at(level);
-            printf("Level: %d\n", level);
+            printf("[%d]\n", level);
             for (size_t i=0; i<block->vars.size(); i++) {
-                printf("[%d] %s\n", level, block->vars.at(i)->c_str());
+                printf("    %s\n", block->vars.at(i)->c_str());
             }
         }
         printf("--------------------\n");
