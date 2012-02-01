@@ -9,6 +9,7 @@ if 'test' in COMMAND_LINE_TARGETS:
 
 env = Environment(BUILDERS={"Perl":perl_builder})
 env.Append(CCFLAGS=['-g'])
+# env.Append(CCFLAGS=['-DDEBUG'])
 env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
 env.Perl(target='ops.gen.h', source='ops.gen.pl')
 env.CXXFile(target='lex.yy.c', source='Tora.ll')

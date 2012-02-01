@@ -140,9 +140,12 @@ void VM::execute() {
                     assert(op->operand.int_value == code->code_params->size());
                     for (int i=0; i<op->operand.int_value; i++) {
                         Value* arg = stack.pop();
+                        /*
                         std::string *argname = code->code_params->at(i);
                         // printf("set lexical var: %d for %s\n", i, argname->c_str());
                         frame->setVar(argname, arg);
+                        */
+                        frame->setVar(i, arg);
                     }
                     lexical_vars_stack->push_back(frame);
 
@@ -228,31 +231,34 @@ void VM::execute() {
         CMPOP(OP_LT, <)
         CMPOP(OP_GE, >=)
         CMPOP(OP_LE, <=)
+
+        // variable
         case OP_SETVARIABLE: {
             Value * rvalue = stack.pop();
             rvalue->retain(); // TODO: maybe not needed
             lexical_vars_stack->back()->setVar(
-                new std::string(op->operand.str_value),
+                op->operand.int_value,
                 rvalue
             );
             break;
         }
         case OP_GETVARIABLE: {
             // lexical vars
-            Value *v = lexical_vars_stack->back()->find(op->operand.str_value);
+            Value *v = lexical_vars_stack->back()->find(op->operand.int_value);
             if (v) {
                 // printf("found lexical var\n");
                 v->retain();
                 stack.push(v);
-            } else { // TODO: remove this and use 'my' keyword
+            } else { // TODO: remove this and use 'my' keyword?
                 v = new Value();
                 v->value_type = VALUE_TYPE_UNDEF;
-                lexical_vars_stack->back()->setVar(new std::string(op->operand.str_value), v);
+                lexical_vars_stack->back()->setVar(op->operand.int_value, v);
                 v->retain();
                 stack.push(v);
             }
             break;
         }
+
         case OP_END: {
             goto END;
             break;

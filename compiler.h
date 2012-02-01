@@ -24,37 +24,42 @@ public:
 
 class Compiler {
     VM *vm;
-    std::vector<Block*> blocks;
 public:
+    std::vector<Block*> *blocks;
     bool error;
     Compiler(VM*vm_) {
         vm = vm_;
         error = false;
+        blocks = new std::vector<Block*>();
+    }
+    ~Compiler() {
+        // delete blocks;
+        // TODO
     }
     void compile(TNode *node);
     void push_block() {
-        this->blocks.push_back(new Block());
+        DBG("PUSH BLOCK: %d\n", this->blocks->size());
+        this->blocks->push_back(new Block());
     }
     void pop_block() {
-        delete this->blocks.back();
-        this->blocks.pop_back();
+        DBG("POP BLOCK: %d\n", this->blocks->size());
+        delete this->blocks->back();
+        this->blocks->pop_back();
     }
     int find_localvar(std::string name, int &level) {
-        std::vector<Block*>::iterator iter = this->blocks.begin();
-        level = 0;
-        for (; iter != this->blocks.end(); iter++) {
-            Block *block = *iter;
+        DBG("FIND LOCAL VAR %d\n", 0);
+        for (level = 0; level < this->blocks->size(); ++level) {
+            Block *block = this->blocks->at(level);
             for (size_t i=0; i<block->vars.size(); i++) {
                 if (*(block->vars.at(i)) == name) {
                     return i;
                 }
             }
-            level++;
         }
         return -1;
     }
     void define_localvar(std::string name) {
-        Block *block = this->blocks.back();
+        Block *block = this->blocks->back();
         for (size_t i=0; i<block->vars.size(); i++) {
             if (*(block->vars.at(i)) == name) {
                 fprintf(stderr, "Duplicated variable: %s", name.c_str());
@@ -63,6 +68,18 @@ public:
         }
         block->vars.push_back(new std::string(name));
         DBG("Defined local variable: %s\n", name.c_str());
+    }
+    void dump_localvars() {
+        printf("-- dump_localvars --\n");
+        printf("Levels: %d\n", this->blocks->size());
+        for (size_t level = 0; level < this->blocks->size(); ++level) {
+            Block *block = this->blocks->at(level);
+            printf("Level: %d\n", level);
+            for (size_t i=0; i<block->vars.size(); i++) {
+                printf("[%d] %s\n", level, block->vars.at(i)->c_str());
+            }
+        }
+        printf("--------------------\n");
     }
 };
 

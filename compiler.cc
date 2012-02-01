@@ -66,6 +66,7 @@ void tora::Compiler::compile(TNode *node) {
         // TODO: better Compiler class definition
         VM vm_;
         Compiler funccomp(&vm_);
+        funccomp.blocks = this->blocks;
         funccomp.compile(node->funcdef.block);
 
         OP * ret = new OP;
@@ -246,14 +247,15 @@ void tora::Compiler::compile(TNode *node) {
         break;
     case NODE_GETVARIABLE: {
         int level;
-        int no = this->find_localvar(std::string(node->str_value), &level);
+        int no = this->find_localvar(std::string(node->str_value), level);
         if (no<0) {
-            fprintf(stderr, "There is no variable named %s\n", node->str_value);
+            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->str_value);
             error = true;
         }
+
         OP * tmp = new OP;
         tmp->op_type = OP_GETVARIABLE;
-        tmp->operand.str_value = node->str_value;
+        tmp->operand.int_value = no;
         vm->ops->push_back(tmp);
         break;
     }
@@ -269,7 +271,7 @@ void tora::Compiler::compile(TNode *node) {
 
         OP * tmp = new OP;
         tmp->op_type = OP_SETVARIABLE;
-        tmp->operand.str_value = varname;
+        tmp->operand.int_value = no;
         vm->ops->push_back(tmp);
         break;
     }
@@ -286,6 +288,7 @@ void tora::Compiler::compile(TNode *node) {
 
         OP * tmp = new OP;
         tmp->op_type = OP_SETVARIABLE;
+        tmp->operand.int_value = no;
         vm->ops->push_back(tmp);
         break;
     }

@@ -20,23 +20,23 @@ public:
 class LexicalVarsFrame {
     LexicalVarsFrame* up;
 public:
-    std::map<std::string, Value*> vars;
+    std::map<int, Value*> vars;
     LexicalVarsFrame() {
         up = NULL;
     }
     LexicalVarsFrame(LexicalVarsFrame *up_) {
         this->up = up_;
     }
-    void setVar(std::string* name, Value *v) {
-        this->vars[*name] = v;
+    void setVar(int id, Value *v) {
+        this->vars[id] = v;
     }
-    Value *find(std::string name) {
-        std::map<std::string, Value*>::iterator iter = this->vars.find(std::string(name));
+    Value *find(int id) {
+        std::map<int, Value*>::iterator iter = this->vars.find(id);
         if (iter != vars.end()) {
             return iter->second;
         } else {
             if (this->up) {
-                return this->up->find(name);
+                return this->up->find(id);
             }
             return NULL;
         }
