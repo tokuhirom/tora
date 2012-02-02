@@ -78,9 +78,9 @@ public:
         assert(this->value_type == VALUE_TYPE_ARRAY);
         return (ArrayValue*)this;
     }
-    void dump();
+    virtual void dump() = 0;
     // TODO: rename to as_str
-    StrValue *to_s();
+    virtual StrValue *to_s();
     // TODO: rename to as_int
     IntValue *to_i();
     // TODO: rename to as_bool
@@ -109,6 +109,7 @@ public:
         printf("[dump] IV: %d\n", int_value);
     }
     const char *type_str() { return "int"; }
+    StrValue *to_s();
 };
 
 class UndefValue: public Value {
@@ -130,6 +131,7 @@ public:
         printf("[dump] undef\n");
     }
     const char *type_str() { return "undef"; }
+    StrValue *to_s();
 };
 
 // This is singleton
@@ -168,6 +170,7 @@ public:
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
     const char *type_str() { return "bool"; }
+    StrValue *to_s();
 };
 
 class StrValue: public Value {
@@ -176,6 +179,10 @@ public:
     StrValue(): Value() {
         this->value_type = VALUE_TYPE_STR;
         this->str_value = NULL;
+    }
+    StrValue(const char *str): Value() {
+        this->value_type = VALUE_TYPE_STR;
+        this->str_value = str;
     }
     ~StrValue() {
         delete [] str_value;
@@ -187,6 +194,10 @@ public:
         printf("[dump] str: %s\n", str_value);
     }
     const char *type_str() { return "str"; }
+    StrValue *to_s() {
+        this->retain();
+        return this;
+    }
 };
 
 class ArrayValue: public Value {
@@ -239,6 +250,7 @@ public:
         printf("----------------\n");
     }
     const char *type_str() { return "code"; }
+    StrValue *to_s();
 };
 
 struct ValueDeleter {
