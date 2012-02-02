@@ -230,6 +230,14 @@ array:
         node->args = $2;
         $$ = node;
     }
+    | expression L_BRACKET expression R_BRACKET
+    {
+        TNode *node = new TNode();
+        node->type = NODE_GET_ITEM;
+        node->binary.left = $1;
+        node->binary.right = $3;
+        $$ = node;
+    }
 
 argument_list
     : expression

@@ -346,6 +346,16 @@ void VM::execute() {
             break;
         }
 
+        case OP_GET_ITEM: {
+            ValuePtr index(stack.pop());
+            ValuePtr container(stack.pop());
+
+            Value *ret = container->get_item(&(*index));
+            ret->retain();
+            stack.push(ret);
+            break;
+        }
+
         case OP_MAKE_ARRAY: {
             ArrayValue *a = new ArrayValue();
             int array_size = op->operand.int_value;

@@ -44,6 +44,9 @@ my @ops = qw(
     OP_DEFINE_METHOD
 
     OP_MAKE_ARRAY
+
+    OP_GET_ITEM
+    OP_SET_ITEM
 );
 
 my $xslate = Text::Xslate->new(

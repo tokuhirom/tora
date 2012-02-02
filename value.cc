@@ -50,6 +50,13 @@ void Value::dump() {
     }
 }
 
+Value *ArrayValue::get_item(Value *index) {
+    IntValue *iv = index->to_i();
+    int i = iv->int_value;
+    iv->release();
+    return this->at(i);
+}
+
 StrValue *Value::to_s() {
     switch (value_type) {
     case VALUE_TYPE_INT: {

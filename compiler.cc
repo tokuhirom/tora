@@ -318,6 +318,15 @@ void tora::Compiler::compile(TNode *node) {
         vm->ops->push_back(tmp);
         break;
     }
+    case NODE_GET_ITEM: {
+        this->compile(node->binary.left);  // container
+        this->compile(node->binary.right); // index
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_GET_ITEM;
+        vm->ops->push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %d\n", node->type);

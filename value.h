@@ -88,6 +88,14 @@ public:
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
     }
+
+    // GET type name in const char*
+    virtual const char *type_str() = 0;
+
+    virtual Value *get_item(Value *index) {
+        printf("This is not a container type: %s\n", this->type_str());
+        abort();
+    }
 };
 
 class IntValue: public Value {
@@ -100,6 +108,7 @@ public:
     void dump() {
         printf("[dump] IV: %d\n", int_value);
     }
+    const char *type_str() { return "int"; }
 };
 
 class UndefValue: public Value {
@@ -120,6 +129,7 @@ public:
     void dump() {
         printf("[dump] undef\n");
     }
+    const char *type_str() { return "undef"; }
 };
 
 // This is singleton
@@ -157,6 +167,7 @@ public:
     void dump() {
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
+    const char *type_str() { return "bool"; }
 };
 
 class StrValue: public Value {
@@ -175,6 +186,7 @@ public:
     void dump() {
         printf("[dump] str: %s\n", str_value);
     }
+    const char *type_str() { return "str"; }
 };
 
 class ArrayValue: public Value {
@@ -206,6 +218,8 @@ public:
             values->at(i)->dump();
         }
     }
+    Value *get_item(Value *index);
+    const char *type_str() { return "array"; }
 };
 
 class CodeValue: public Value {
@@ -224,6 +238,7 @@ public:
         }
         printf("----------------\n");
     }
+    const char *type_str() { return "code"; }
 };
 
 struct ValueDeleter {
@@ -234,6 +249,9 @@ struct ValueDeleter {
 };
 
 typedef std::unique_ptr<Value, ValueDeleter> ValuePtr;
+typedef std::unique_ptr<ArrayValue, ValueDeleter> ArrayValuePtr;
+typedef std::unique_ptr<IntValue, ValueDeleter> IntValuePtr;
+typedef std::unique_ptr<StrValue, ValueDeleter> StrValuePtr;
 
 };
 

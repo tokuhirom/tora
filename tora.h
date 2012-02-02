@@ -77,6 +77,7 @@ typedef enum {
     NODE_BLOCK,
     NODE_MY,
     NODE_MAKE_ARRAY,
+    NODE_GET_ITEM,
 } NODE_TYPE;
 
 #include "op.h"

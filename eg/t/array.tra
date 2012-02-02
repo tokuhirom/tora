@@ -1,2 +1,7 @@
-p([1,2,3])
-p([1,2,"OGE", [1,2,5]])
+my $a = ["hoge", "fuga", "haga"]
+say($a[2])
+say($a[0])
+
+__END__
+haga
+hoge
