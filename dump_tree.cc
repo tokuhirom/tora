@@ -2,7 +2,7 @@
 #include "dump_tree.h"
 
 static void print_indent(int indent) {
-    for (int i=0; i<indent*4; i++) {
+    for (int i=0; i<indent*2; i++) {
         printf(" ");
     }
 }
@@ -40,10 +40,15 @@ void tora::dump_tree(TNode *node, int indent) {
         }
         break;
     }
+    case NODE_GT:
+        printf("NODE_GT\n");
+        tora::dump_tree(node->binary.left, indent+1);
+        tora::dump_tree(node->binary.right, indent+1);
+        break;
     case NODE_ADD:
         printf("NODE_ADD\n");
-        tora::dump_tree(node->binary.left, 1);
-        tora::dump_tree(node->binary.right, 1);
+        tora::dump_tree(node->binary.left, indent+1);
+        tora::dump_tree(node->binary.right, indent+1);
         break;
     case NODE_SUB:
         printf("NODE_SUB\n");
@@ -62,8 +67,8 @@ void tora::dump_tree(TNode *node, int indent) {
         break;
     case NODE_STMTS:
         printf("NODE_STMTS\n");
-        tora::dump_tree(node->binary.left, 1);
-        tora::dump_tree(node->binary.right, 1);
+        tora::dump_tree(node->binary.left, indent+1);
+        tora::dump_tree(node->binary.right, indent+1);
         break;
     case NODE_IF:
         printf("NODE_IF\n");
@@ -73,6 +78,30 @@ void tora::dump_tree(TNode *node, int indent) {
     case NODE_ROOT:
         printf("NODE_ROOT\n");
         tora::dump_tree(node->node, indent+1);
+        break;
+    case NODE_BLOCK:
+        printf("NODE_BLOCK\n");
+        tora::dump_tree(node->node, indent+1);
+        break;
+    case NODE_GETVARIABLE:
+        printf("NODE_GETVARIABLE[%s]\n", node->str_value);
+        break;
+    case NODE_SETVARIABLE:
+        printf("NODE_SETVARIABLE[%s]\n", node->set_value.lvalue->str_value);
+        tora::dump_tree(node->set_value.rvalue, indent+1);
+        break;
+    case NODE_MY:
+        printf("NODE_MY\n");
+        tora::dump_tree(node->node, indent+1);
+        break;
+    case NODE_WHILE:
+        printf("NODE_WHILE\n");
+        print_indent(indent+1);
+        printf("condition:\n");
+        tora::dump_tree(node->binary.left, indent+2);
+        print_indent(indent+1);
+        printf("body:\n");
+        tora::dump_tree(node->binary.right, indent+2);
         break;
 
     default:
