@@ -74,14 +74,8 @@ public:
      */
     std::vector<LexicalVarsFrame *> *lexical_vars_stack;
 
-    VM() {
-        sp = 0;
-        pc = 0;
-        ops = new std::vector<OP*>;
-    }
-    ~VM() {
-        // delete ops; // TODO
-    }
+    VM();
+    ~VM();
     void execute();
 
     void dump_ops() {

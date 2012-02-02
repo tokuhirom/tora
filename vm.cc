@@ -3,13 +3,22 @@
 
 using namespace tora;
 
-// run program
-void VM::execute() {
-    // TODO: move to vm.h
+VM::VM() {
+    sp = 0;
+    pc = 0;
+    ops = new std::vector<OP*>;
     this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<FunctionFrame*>();
+}
 
+VM::~VM() {
+    delete this->lexical_vars_stack;
+    delete this->function_frames;
+}
+
+// run program
+void VM::execute() {
     DBG2("************** VM::execute\n");
 
     for (;;) {
