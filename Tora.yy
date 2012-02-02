@@ -182,6 +182,15 @@ line
         node->set_value.rvalue = $3;
         $$ = node;
     }
+    | variable L_BRACKET expression R_BRACKET ASSIGN expression
+    {
+        TNode *node = new TNode();
+        node->type = NODE_SET_ITEM;
+        node->set_item.container= $1;
+        node->set_item.index = $3;
+        node->set_item.rvalue = $6;
+        $$ = node;
+    }
     | WHILE L_PAREN expression R_PAREN block
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);

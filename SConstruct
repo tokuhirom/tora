@@ -18,4 +18,4 @@ if 'test' in COMMAND_LINE_TARGETS:
 env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
 env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.CXXFile(target='lex.yy.c', source='Tora.ll')
-env.Program('tora', ['Tora.tab.cc lex.yy.c main.cc value.cc compiler.cc vm.cc dump_tree.cc'.split(' ')], CXXFLAGS='--std=c++0x -Wall', CC='g++')
+env.Program('tora', ['Tora.tab.cc lex.yy.c main.cc value.cc compiler.cc vm.cc dump_tree.cc array.cc'.split(' ')], CXXFLAGS='--std=c++0x -Wall', CC='g++')

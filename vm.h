@@ -10,6 +10,8 @@
 
 namespace tora {
 
+class Stack;
+
 class FunctionFrame {
 public:
     int return_address;
@@ -81,7 +83,7 @@ public:
     void dump_ops() {
         printf("-- OP DUMP    --\n");
         for (size_t i=0; i<ops->size(); i++) {
-            printf("[%d] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
+            printf("[%02d] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
         }
         printf("----------------\n");
     }

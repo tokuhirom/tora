@@ -1,0 +1,7 @@
+my $a = my $b = 3;
+say($a)
+say($b)
+
+__END__
+3
+3

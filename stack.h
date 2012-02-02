@@ -3,6 +3,8 @@
 
 namespace tora {
 
+class Value;
+
 class Stack {
     std::vector<Value*> container;
 public:

@@ -20,6 +20,8 @@ future plans
 - increment
 - decrement
 
+- my $x = my $y = 3;
+
 - declare function
 - c++ library('Dyna'.'Loader')
 

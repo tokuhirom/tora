@@ -1,7 +1,18 @@
 my $a = ["hoge", "fuga", "haga"]
 say($a[2])
 say($a[0])
+say("--------------------")
+p($a)
+$a[5] = "IYAN";
+say("--------------------")
+p($a)
+say($a[5])
+$a[0] = "hOgE";
+say($a[0])
+p($a)
 
 __END__
 haga
 hoge
+IYAN
+hOgE

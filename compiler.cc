@@ -327,6 +327,16 @@ void tora::Compiler::compile(TNode *node) {
         vm->ops->push_back(tmp);
         break;
     }
+    case NODE_SET_ITEM: {
+        this->compile(node->set_item.container);
+        this->compile(node->set_item.index);
+        this->compile(node->set_item.rvalue);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_SET_ITEM;
+        vm->ops->push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %d\n", node->type);

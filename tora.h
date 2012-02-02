@@ -44,6 +44,11 @@ typedef struct TNode {
             struct TNode *lvalue;
             struct TNode *rvalue;
         } set_value;
+        struct {
+            struct TNode *container;
+            struct TNode *index;
+            struct TNode *rvalue;
+        } set_item;
     };
 } NODE;
 
@@ -78,6 +83,7 @@ typedef enum {
     NODE_MY,
     NODE_MAKE_ARRAY,
     NODE_GET_ITEM,
+    NODE_SET_ITEM,
 } NODE_TYPE;
 
 #include "op.h"

@@ -92,6 +92,10 @@ public:
     // GET type name in const char*
     virtual const char *type_str() = 0;
 
+    virtual void set_item(Value *index, Value *v) {
+        printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
+        abort();
+    }
     virtual Value *get_item(Value *index) {
         printf("This is not a container type: %s\n", this->type_str());
         abort();
@@ -200,39 +204,6 @@ public:
     }
 };
 
-class ArrayValue: public Value {
-public:
-    std::vector<Value*> *values;
-    ArrayValue() : Value() {
-        this->value_type = VALUE_TYPE_ARRAY;
-        this->values = new std::vector<Value*>();
-    }
-    ~ArrayValue() {
-        delete values;
-    }
-    // retain before push
-    void push(Value *v) {
-        this->values->push_back(v);
-    }
-    // release after pop by your hand
-    Value* pop() {
-        Value *v = this->values->back();
-        this->values->pop_back();
-        return v;
-    }
-    Value *at(int i) {
-        return this->values->at(i);
-    }
-    void dump() {
-        printf("[dump] array:\n");
-        for (size_t i=0; i<values->size(); i++) {
-            values->at(i)->dump();
-        }
-    }
-    Value *get_item(Value *index);
-    const char *type_str() { return "array"; }
-};
-
 class CodeValue: public Value {
 public:
     const char *code_name;
@@ -266,5 +237,7 @@ typedef std::unique_ptr<IntValue, ValueDeleter> IntValuePtr;
 typedef std::unique_ptr<StrValue, ValueDeleter> StrValuePtr;
 
 };
+
+#include "array.h"
 
 #endif // VALUE_H_

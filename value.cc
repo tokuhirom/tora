@@ -21,13 +21,6 @@ Value *Value::to_b() {
     }
 }
 
-Value *ArrayValue::get_item(Value *index) {
-    IntValue *iv = index->to_i();
-    int i = iv->int_value;
-    iv->release();
-    return this->at(i);
-}
-
 StrValue *IntValue::to_s() {
     StrValue *v = new StrValue();
     std::ostringstream os;

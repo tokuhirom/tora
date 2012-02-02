@@ -355,6 +355,17 @@ void VM::execute() {
             stack.push(ret);
             break;
         }
+        case OP_SET_ITEM: {
+            ValuePtr rvalue(stack.pop());
+            ValuePtr index(stack.pop());
+            ValuePtr container(stack.pop());
+
+            rvalue->retain();
+            container->set_item(&(*index), &(*rvalue));
+            rvalue->retain();
+            stack.push(&(*rvalue));
+            break;
+        }
 
         case OP_MAKE_ARRAY: {
             ArrayValue *a = new ArrayValue();
