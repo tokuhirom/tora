@@ -39,6 +39,7 @@ typedef struct TNode {
             struct TNode *if_body;
             struct TNode *else_body;
         } if_stmt;
+        std::vector<struct TNode*> *args;
         struct {
             struct TNode *lvalue;
             struct TNode *rvalue;
@@ -75,6 +76,7 @@ typedef enum {
     NODE_RETURN,
     NODE_BLOCK,
     NODE_MY,
+    NODE_MAKE_ARRAY,
 } NODE_TYPE;
 
 #include "op.h"

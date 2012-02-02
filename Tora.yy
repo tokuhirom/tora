@@ -115,7 +115,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
-%type <node> expression2 expression3 expression term primary_expression line line_list root variable block postfix_expression void sub_stmt if_statement
+%type <node> expression2 expression3 expression term primary_expression line line_list root variable block postfix_expression void sub_stmt if_statement array
 %type <node> identifier
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
@@ -221,6 +221,16 @@ parameter_list
         $$ = new std::vector<TNode*>();
     }
 
+/* array constructor */
+array:
+    | L_BRACKET argument_list R_BRACKET
+    {
+        TNode *node = new TNode();
+        node->type = NODE_MAKE_ARRAY;
+        node->args = $2;
+        $$ = node;
+    }
+
 argument_list
     : expression
     {
@@ -245,6 +255,7 @@ expression
     {
         $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
     }
+    | array
     ;
 
 expression2

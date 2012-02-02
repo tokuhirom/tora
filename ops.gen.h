@@ -33,6 +33,7 @@ typedef enum {
     OP_GETLOCAL,
     OP_GETDYNAMIC,
     OP_DEFINE_METHOD,
+    OP_MAKE_ARRAY,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -67,6 +68,7 @@ static const char*opcode2name[] = {
     "OP_GETLOCAL",
     "OP_GETDYNAMIC",
     "OP_DEFINE_METHOD",
+    "OP_MAKE_ARRAY",
 };
 
 #endif // OPS_GEN_H_

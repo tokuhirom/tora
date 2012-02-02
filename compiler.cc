@@ -304,6 +304,20 @@ void tora::Compiler::compile(TNode *node) {
         vm->ops->push_back(tmp);
         break;
     }
+    case NODE_MAKE_ARRAY: {
+        std::vector<TNode *>*args = node->args;
+        int args_len = args->size();
+        while (args->size() > 0) {
+            this->compile(args->back());
+            args->pop_back();
+        }
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_MAKE_ARRAY;
+        tmp->operand.int_value = args_len; // the number of args
+        vm->ops->push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %d\n", node->type);

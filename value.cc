@@ -36,6 +36,10 @@ void Value::dump() {
         this->to_code()->dump();
         break;
     }
+    case VALUE_TYPE_ARRAY: {
+        this->to_array()->dump();
+        break;
+    }
     case VALUE_TYPE_UNDEF: {
         printf("[dump] undef\n");
         break;

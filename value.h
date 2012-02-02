@@ -21,12 +21,14 @@ typedef enum {
     VALUE_TYPE_BOOL = 2,
     VALUE_TYPE_STR = 3,
     VALUE_TYPE_CODE = 4,
+    VALUE_TYPE_ARRAY = 5,
 } value_type_t;
 
 class CodeValue;
 class IntValue;
 class StrValue;
 class BoolValue;
+class ArrayValue;
 
 /**
  * The value class
@@ -71,6 +73,10 @@ public:
     StrValue* to_str() {
         assert(this->value_type == VALUE_TYPE_STR);
         return (StrValue*)this;
+    }
+    ArrayValue* to_array() {
+        assert(this->value_type == VALUE_TYPE_ARRAY);
+        return (ArrayValue*)this;
     }
     void dump();
     // TODO: rename to as_str
@@ -168,6 +174,37 @@ public:
     }
     void dump() {
         printf("[dump] str: %s\n", str_value);
+    }
+};
+
+class ArrayValue: public Value {
+public:
+    std::vector<Value*> *values;
+    ArrayValue() : Value() {
+        this->value_type = VALUE_TYPE_ARRAY;
+        this->values = new std::vector<Value*>();
+    }
+    ~ArrayValue() {
+        delete values;
+    }
+    // retain before push
+    void push(Value *v) {
+        this->values->push_back(v);
+    }
+    // release after pop by your hand
+    Value* pop() {
+        Value *v = this->values->back();
+        this->values->pop_back();
+        return v;
+    }
+    Value *at(int i) {
+        return this->values->at(i);
+    }
+    void dump() {
+        printf("[dump] array:\n");
+        for (size_t i=0; i<values->size(); i++) {
+            values->at(i)->dump();
+        }
     }
 };
 

@@ -346,6 +346,17 @@ void VM::execute() {
             break;
         }
 
+        case OP_MAKE_ARRAY: {
+            ArrayValue *a = new ArrayValue();
+            int array_size = op->operand.int_value;
+            for (int i=0; i<array_size; i++) {
+                Value *v = stack.pop();
+                a->push(v);
+            }
+            stack.push(a);
+            break;
+        }
+
         case OP_END: {
             goto END;
             break;
