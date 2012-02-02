@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "value.h"
+#include <unistd.h>
 
 using namespace tora;
 
@@ -17,12 +18,40 @@ VM::~VM() {
     delete this->function_frames;
 }
 
+static void disasm_one(OP* op) {
+    printf("OP: %s", opcode2name[op->op_type]);
+    switch (op->op_type) {
+    case OP_SETLOCAL: {
+        printf(" %d", op->operand.int_value);
+        break;
+    }
+    case OP_GETLOCAL: {
+        printf(" %d", op->operand.int_value);
+        break;
+    }
+    case OP_GETDYNAMIC: {
+        int level = (op->operand.int_value >> 16) & 0x0000FFFF;
+        int no    = op->operand.int_value & 0x0000ffff;
+        printf(" level: %d, no: %d", level, no);
+        break;
+    }
+    case OP_PUSH_INT: {
+        printf(" %d", op->operand.int_value);
+        break;
+    }
+    }
+    printf("\n");
+}
+
 // run program
 void VM::execute() {
     DBG2("************** VM::execute\n");
 
     for (;;) {
-        DBG("[DEBUG] OP: %s\n", opcode2name[ops->at(pc)->op_type]);
+#ifdef DEBUG
+        DBG2("[DEBUG] ");
+        disasm_one(ops->at(pc));
+#endif
 
         OP *op = ops->at(pc);
         switch (op->op_type) {
@@ -130,6 +159,12 @@ void VM::execute() {
                 } else {
                     stack.push(UndefValue::instance());
                 }
+            } else if (strcmp(funname->to_str()->str_value, "usleep") == 0) {
+                // TODO: remove later
+                ValuePtr v(stack.pop());
+                assert(v->value_type == VALUE_TYPE_INT);
+                ValuePtr s(v->to_i());
+                usleep(s->to_int()->int_value);
             } else if (strcmp(funname->to_str()->str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
@@ -276,11 +311,9 @@ void VM::execute() {
         case OP_GETDYNAMIC: {
             // lexical vars
             LexicalVarsFrame *frame = lexical_vars_stack->back();
-            // frame->dump_vars();
             int level = (op->operand.int_value >> 16) & 0x0000FFFF;
             int no    = op->operand.int_value & 0x0000ffff;
-                DBG("GETDYNAMIC %d, %d\n", level, no);
-            for (int i=0; i<level-1; i++) {
+            for (int i=0; i<level; i++) {
                 DBG2("UP!\n");
                 frame = frame->up;
             }
@@ -290,6 +323,7 @@ void VM::execute() {
                 v->retain();
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword?
+                DBG2("There is no variable...\n");
                 v = UndefValue::instance();
                 lexical_vars_stack->back()->setVar(op->operand.int_value, v);
                 stack.push(v);

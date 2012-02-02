@@ -6,8 +6,11 @@ use Test::More;
 for my $fname (glob('eg/t/*.tra')) {
     my $src = slurp($fname);
     my $result = `./tora $fname`;
-    $src =~ s/.*\n__END__\n//;
-    is($result, $src, $fname);
+    if (my ($expected) = ($src =~ /\n__END__\n(.+)/s)) {
+        is($result, $expected, $fname);
+    } else {
+        die "Bad test case: $src";
+    }
 }
 
 sub slurp {

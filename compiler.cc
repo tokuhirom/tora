@@ -1,5 +1,18 @@
 #include "compiler.h"
 
+int tora::Compiler::find_localvar(std::string name, int &level) {
+    DBG("FIND LOCAL VAR %d\n", 0);
+    for (level = 0; level<this->blocks->size(); level++) {
+        Block *block = this->blocks->at(this->blocks->size()-1-level);
+        for (size_t i=0; i<block->vars.size(); i++) {
+            if (*(block->vars.at(i)) == name) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
 void tora::Compiler::compile(TNode *node) {
     switch (node->type) {
     case NODE_ROOT: {
@@ -19,7 +32,7 @@ void tora::Compiler::compile(TNode *node) {
     case NODE_MY: {
         const char *name = node->node->str_value;
         this->define_localvar(std::string(name));
-        this->compile(node->node);
+        // this->compile(node->node);
         break;
     }
     case NODE_RETURN: {
@@ -254,14 +267,14 @@ void tora::Compiler::compile(TNode *node) {
         }
 
         OP * tmp = new OP;
-        if (level == this->blocks->size()-1) {
+        if (level == 0) {
             DBG2("LOCAL\n");
             tmp->op_type = OP_GETLOCAL;
             tmp->operand.int_value = no;
         } else {
             DBG2("DYNAMIC\n");
             tmp->op_type = OP_GETDYNAMIC;
-            tmp->operand.int_value = ((level+1&0x0000ffff) << 16) | (no&0x0000ffff);
+            tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
         }
         vm->ops->push_back(tmp);
         break;
@@ -279,14 +292,14 @@ void tora::Compiler::compile(TNode *node) {
         this->compile(node->set_value.rvalue);
 
         OP * tmp = new OP;
-        if (level == this->blocks->size()-1) {
+        if (level == 0) {
             DBG2("LOCAL\n");
             tmp->op_type = OP_SETLOCAL;
             tmp->operand.int_value = no;
         } else {
             DBG2("DYNAMIC\n");
             tmp->op_type = OP_SETDYNAMIC;
-            tmp->operand.int_value = ((level+1&0x0000ffff) << 16) | (no&0x0000ffff);
+            tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
         }
         vm->ops->push_back(tmp);
         break;

@@ -1,0 +1,23 @@
+my $x="THIS IS X";
+{
+    {
+        my $i2="THIS IS I2";
+        {
+            my $i="THIS IS I";
+            {
+                say($i)
+                say($i2)
+                say($x)
+            }
+            say($i2)
+        }
+    }
+}
+say($x)
+
+__END__
+THIS IS I
+THIS IS I2
+THIS IS X
+THIS IS I2
+THIS IS X

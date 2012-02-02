@@ -39,18 +39,7 @@ public:
         delete this->blocks->back();
         this->blocks->pop_back();
     }
-    int find_localvar(std::string name, int &level) {
-        DBG("FIND LOCAL VAR %d\n", 0);
-        for (level = this->blocks->size()-1; level >= 0; --level) {
-            Block *block = this->blocks->at(level);
-            for (size_t i=0; i<block->vars.size(); i++) {
-                if (*(block->vars.at(i)) == name) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
+    int find_localvar(std::string name, int &level);
     void define_localvar(std::string name) {
         Block *block = this->blocks->back();
         for (size_t i=0; i<block->vars.size(); i++) {

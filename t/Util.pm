@@ -10,6 +10,7 @@ sub import {
     warnings->import;
     no strict 'refs';
     *{caller(0) . "::run_is"} = sub {
+        note("L: " . (caller(0))[2]);
         my ($code, $expected) = @_;
         my $tmp = File::Temp->new(UNLINK => 1);
         print $tmp $code;
