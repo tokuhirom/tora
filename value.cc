@@ -2,17 +2,19 @@
 
 using namespace tora;
 
-//TODO: do not generate new instance
+BoolValue *BoolValue::true_  = NULL;
+BoolValue *BoolValue::false_ = NULL;
+
 Value *Value::to_b() {
     switch (value_type) {
     case VALUE_TYPE_UNDEF: {
-        return new BoolValue(false);
+        return BoolValue::false_instance();
     }
     case VALUE_TYPE_BOOL:
         this->retain();
         return this;
     default: {
-        return new BoolValue(true);
+        return BoolValue::true_instance();
     }
     }
 }

@@ -42,13 +42,13 @@ public:
     }
     ~Value() {
     }
-    inline void release() {
+    inline virtual void release() {
         --refcnt;
         if (refcnt == 0) {
             delete this;
         }
     }
-    inline void retain() {
+    inline virtual void retain() {
         ++refcnt;
     }
     CodeValue* to_code() {
@@ -97,11 +97,35 @@ public:
 };
 
 class BoolValue: public Value {
-public:
-    bool bool_value;
+private:
     BoolValue(bool b): Value() {
         this->value_type = VALUE_TYPE_BOOL;
         this->bool_value = b;
+    }
+    static BoolValue *true_;
+    static BoolValue *false_;
+public:
+    bool bool_value;
+    void release() {
+        // DO NOT RELEASE
+    }
+    void retain() {
+        // NOP
+    }
+    static BoolValue *true_instance() {
+        if (!true_) {
+            true_ = new BoolValue(true);
+        }
+        return true_;
+    }
+    static BoolValue *false_instance() {
+        if (!false_) {
+            false_ = new BoolValue(false);
+        }
+        return false_;
+    }
+    static BoolValue *instance(bool b) {
+        return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
     void dump() {
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");

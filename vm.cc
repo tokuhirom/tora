@@ -18,11 +18,11 @@ void VM::execute() {
         OP *op = ops->at(pc);
         switch (op->op_type) {
         case OP_PUSH_TRUE: {
-            stack.push(new BoolValue(true));
+            stack.push(BoolValue::true_instance());
             break;
         }
         case OP_PUSH_FALSE: {
-            stack.push(new BoolValue(false));
+            stack.push(BoolValue::false_instance());
             break;
         }
         case OP_PUSH_INT: {
@@ -223,16 +223,15 @@ void VM::execute() {
             \
             switch (v1->value_type) { \
             case VALUE_TYPE_INT: { \
-                Value * i2 = v2->to_i(); \
-                BoolValue *result = new BoolValue(v1->to_int()->int_value op i2->to_int()->int_value); \
+                ValuePtr i2(v2->to_i()); \
+                BoolValue *result = BoolValue::instance(v1->to_int()->int_value op i2->to_int()->int_value); \
+                result->retain(); \
                 stack.push(result); \
                 break; \
             } \
             default: \
                 abort(); \
             } \
-            v1->release(); \
-            v2->release(); \
             break; \
         }
         CMPOP(OP_EQ, ==)

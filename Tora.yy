@@ -146,7 +146,7 @@ line_list
     ;
 
 line
-    :expression SEMICOLON
+    :line SEMICOLON
     {
         $$ = $1;
     }
