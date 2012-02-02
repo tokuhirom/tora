@@ -47,7 +47,7 @@ typedef struct TNode {
 } NODE;
 
 typedef enum {
-    NODE_INT = 0,
+    NODE_INT = 1,
     NODE_TRUE,
     NODE_FALSE,
     NODE_IDENTIFIER,

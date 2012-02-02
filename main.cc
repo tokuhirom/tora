@@ -6,6 +6,7 @@
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
+#include "dump_tree.h"
 
 extern TNode *root_node;
 
@@ -20,12 +21,16 @@ int main(int argc, char **argv) {
 
     char opt;
     bool dump_ops = false;
+    bool dump_ast = false;
     bool compile_only = false;
-    while ((opt = getopt(argc, argv, "vdc")) != -1) {
+    while ((opt = getopt(argc, argv, "vdtc")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
             exit(EXIT_SUCCESS);
+        case 't':
+            dump_ast = true;
+            break;
         case 'd':
             dump_ops = true;
             break;
@@ -57,6 +62,10 @@ int main(int argc, char **argv) {
             return 0;
         }
         assert(root_node);
+        if (dump_ast) {
+            tora::dump_tree(root_node);
+        }
+
         tora::VM vm;
         tora::Compiler compiler(&vm);
         compiler.compile(root_node);
