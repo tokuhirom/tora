@@ -113,9 +113,16 @@ void VM::execute() {
                 assert(op->operand.int_value==1);
                 ValuePtr v(stack.pop());
                 ValuePtr s(v->to_s());
-                StrValue *ret = new StrValue();
-                ret->set_str(strdup(getenv(s->to_str()->str_value)));
-                stack.push(ret);
+                char *env = getenv(s->to_str()->str_value);
+                if (env) {
+                    StrValue *ret = new StrValue();
+                    ret->set_str(strdup(env));
+                    stack.push(ret);
+                } else {
+                    Value *ret = new Value();
+                    ret->value_type = VALUE_TYPE_UNDEF;
+                    stack.push(ret);
+                }
             } else if (strcmp(funname->to_str()->str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
