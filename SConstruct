@@ -13,7 +13,8 @@ env.Append(CCFLAGS=['-g'])
 if ARGUMENTS.get('debug', 0):
     env.Append(CCFLAGS=['-DDEBUG'])
 
-env.Command('test', 'tora', 'prove -r t')
+if 'test' in COMMAND_LINE_TARGETS:
+    env.Command('test', 'tora', 'prove -r t')
 env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
 env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.CXXFile(target='lex.yy.c', source='Tora.ll')
