@@ -1,7 +1,8 @@
 use t::Util;
 
-run_is(<<'...', $ENV{HOME});
-print(getenv("HOME"))
+local $ENV{FOO} = 'hogehoge';
+run_is(<<'...', $ENV{FOO});
+print(getenv("FOO"))
 ...
 
 done_testing;
