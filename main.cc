@@ -23,7 +23,8 @@ int main(int argc, char **argv) {
     bool dump_ops = false;
     bool dump_ast = false;
     bool compile_only = false;
-    while ((opt = getopt(argc, argv, "vdtc")) != -1) {
+    char *code = NULL;
+    while ((opt = getopt(argc, argv, "vdtce:")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
@@ -34,6 +35,9 @@ int main(int argc, char **argv) {
         case 'd':
             dump_ops = true;
             break;
+        case 'e':
+            code = optarg;
+            break;
         case 'c':
             compile_only = true;
             break;
@@ -43,7 +47,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (optind < argc) { // source code
+    if (code) {
+        FILE *fh = tmpfile();
+        fprintf(fh, "%s", code);
+        rewind(fh);
+        yyin = fh;
+    } else if (optind < argc) { // source code
         FILE *fh = fopen(argv[optind], "rb");
         if (!fh) { perror(argv[optind]); exit(EXIT_FAILURE); }
         yyin = fh;
