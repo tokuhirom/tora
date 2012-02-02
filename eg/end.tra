@@ -1,0 +1,3 @@
+say("hello")
+__END__
+say("YO");

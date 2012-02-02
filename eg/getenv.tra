@@ -1,1 +1,1 @@
-say(getenv("HOME"))
+print(getenv("HOME"))

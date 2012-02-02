@@ -125,7 +125,6 @@ typedef std::vector<struct TNode*> argument_list_t;
 root
     : line_list
     {
-        // tora_dump_node($1);
         root_node = tora_create_root_node($1);
     }
     ;

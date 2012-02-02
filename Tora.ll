@@ -40,7 +40,7 @@ int yywrap(void)
 
 %}
 
-%start C_COMMENT CC_COMMENT STRING_LITERAL_STATE PERL_COMMENT
+%start C_COMMENT CC_COMMENT STRING_LITERAL_STATE PERL_COMMENT END
 %%
 
 <INITIAL>"+"        return ADD;
@@ -89,6 +89,12 @@ int yywrap(void)
     return CR;
 }
 
+<INITIAL>"\n__END__\n" {
+    increment_line_number();
+    increment_line_number();
+    BEGIN END;
+}
+
 <INITIAL>[A-Za-z_][A-Za-z0-9_]* {
     char *tmp = new char [strlen(yytext)+1];
     strcpy(tmp, yytext);
@@ -133,6 +139,9 @@ int yywrap(void)
     BEGIN INITIAL;
 }
 <PERL_COMMENT>.   ;
+
+<END>. ;
+<END>\n ;
 
 <STRING_LITERAL_STATE>\"        {
     yylval.str_value = strdup(tora_close_string_literal());
