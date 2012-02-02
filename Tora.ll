@@ -48,6 +48,7 @@ int yywrap(void)
 <INITIAL>"*"        return MUL;
 <INITIAL>"/"        return DIV;
 <INITIAL>"\n"       return CR;
+<INITIAL>";"       return SEMICOLON;
 <INITIAL>"sub"       return SUB;
 <INITIAL>","       return COMMA;
 

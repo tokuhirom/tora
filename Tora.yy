@@ -111,7 +111,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token LT GT LE GE EQ
 %token ASSIGN
 %token MY
-%token COMMA RETURN
+%token COMMA RETURN SEMICOLON
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
 %token SUB
@@ -146,7 +146,11 @@ line_list
     ;
 
 line
-    :expression CR
+    :expression SEMICOLON
+    {
+        $$ = $1;
+    }
+    |expression CR
     {
         $$ = $1;
     }
