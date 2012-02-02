@@ -32,14 +32,14 @@ class BoolValue;
  * The value class
  */
 class Value {
+protected:
+    Value() {
+        refcnt = 1;
+    }
 public:
     value_type_t value_type;
     int refcnt; // reference count
 
-    Value() {
-        refcnt = 1;
-        value_type = VALUE_TYPE_UNDEF;
-    }
     ~Value() {
     }
     inline virtual void release() {
@@ -96,6 +96,27 @@ public:
     }
 };
 
+class UndefValue: public Value {
+private:
+    UndefValue(): Value() {
+        this->value_type = VALUE_TYPE_UNDEF;
+    }
+    static UndefValue *undef_;
+public:
+    void release() { } // DO NOT RELEASE
+    void retain()  { } // NOP
+    static UndefValue *instance() {
+        if (!undef_) {
+            undef_ = new UndefValue();
+        }
+        return undef_;
+    }
+    void dump() {
+        printf("[dump] undef\n");
+    }
+};
+
+// This is singleton
 class BoolValue: public Value {
 private:
     BoolValue(bool b): Value() {

@@ -2,6 +2,8 @@
 
 using namespace tora;
 
+// singleton values
+UndefValue *UndefValue::undef_  = NULL;
 BoolValue *BoolValue::true_  = NULL;
 BoolValue *BoolValue::false_ = NULL;
 

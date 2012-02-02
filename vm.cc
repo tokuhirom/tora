@@ -119,9 +119,7 @@ void VM::execute() {
                     ret->set_str(strdup(env));
                     stack.push(ret);
                 } else {
-                    Value *ret = new Value();
-                    ret->value_type = VALUE_TYPE_UNDEF;
-                    stack.push(ret);
+                    stack.push(UndefValue::instance());
                 }
             } else if (strcmp(funname->to_str()->str_value, "exit") == 0) {
                 ValuePtr v(stack.pop());
@@ -173,9 +171,7 @@ void VM::execute() {
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
             if (fframe->top == (int)stack.size()) {
-                Value * v = new Value();
-                v->value_type = VALUE_TYPE_UNDEF;
-                stack.push(v);
+                stack.push(UndefValue::instance());
             }
             delete fframe;
 
@@ -285,10 +281,8 @@ void VM::execute() {
                 v->retain();
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword?
-                v = new Value();
-                v->value_type = VALUE_TYPE_UNDEF;
+                v = UndefValue::instance();
                 lexical_vars_stack->back()->setVar(op->operand.int_value, v);
-                v->retain();
                 stack.push(v);
             }
             break;
@@ -301,8 +295,7 @@ void VM::execute() {
                 v->retain();
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword?
-                v = new Value();
-                v->value_type = VALUE_TYPE_UNDEF;
+                v = UndefValue::instance();
                 lexical_vars_stack->back()->setVar(op->operand.int_value, v);
                 v->retain();
                 stack.push(v);
