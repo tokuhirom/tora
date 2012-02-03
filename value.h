@@ -92,6 +92,11 @@ public:
     // GET type name in const char*
     virtual const char *type_str() = 0;
 
+    virtual Value* tora__neg__() {
+        printf("%s is not a numeric. You cannot apply unary negative operator.\n", this->type_str());
+        abort();
+    }
+
     virtual void set_item(Value *index, Value *v) {
         printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
         abort();
@@ -114,6 +119,7 @@ public:
     }
     const char *type_str() { return "int"; }
     StrValue *to_s();
+    Value* tora__neg__();
 };
 
 class UndefValue: public Value {

@@ -59,3 +59,7 @@ IntValue *Value::to_i() {
     }
 }
 
+Value *IntValue::tora__neg__() {
+    return new IntValue(-this->int_value);
+}
+

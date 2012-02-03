@@ -367,6 +367,13 @@ void VM::execute() {
             break;
         }
 
+        case OP_UNARY_NEGATIVE: {
+            ValuePtr v(stack.pop());
+            Value * result = v->tora__neg__();
+            stack.push(result);
+            break;
+        }
+
         case OP_MAKE_ARRAY: {
             ArrayValue *a = new ArrayValue();
             int array_size = op->operand.int_value;

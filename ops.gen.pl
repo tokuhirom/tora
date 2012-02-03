@@ -47,6 +47,8 @@ my @ops = qw(
 
     OP_GET_ITEM
     OP_SET_ITEM
+
+    OP_UNARY_NEGATIVE
 );
 
 my $xslate = Text::Xslate->new(

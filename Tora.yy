@@ -25,6 +25,12 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
+static TNode *tora_create_newline() {
+    TNode *node = new TNode();
+    node->type = NODE_NEWLINE;
+    return node;
+}
+
 static TNode *tora_create_my(TNode *t) {
     TNode *node = new TNode();
     node->type = NODE_MY;
@@ -69,6 +75,13 @@ static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2
     return node;
 }
 
+static TNode *tora_create_unary_expression(NODE_TYPE type, TNode *t1) {
+    TNode *node = new TNode();
+    node->type = type;
+    node->node  = t1;
+    return node;
+}
+
 static TNode *tora_create_if(TNode *cond, TNode* if_body, TNode *else_body) {
     TNode *node = new TNode();
     node->type = NODE_IF;
@@ -90,6 +103,8 @@ static TNode *tora_create_funcall(TNode *t1, std::vector<struct TNode*> *args) {
 TNode *root_node;
 
 typedef std::vector<struct TNode*> argument_list_t;
+
+// see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 %}
 %token IF ELSE
@@ -116,14 +131,18 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token <str_value>STRING_LITERAL
 %token SUB FOR
 
-%type <node> expression2 expression3 expression term primary_expression line line_list root variable block postfix_expression void sub_stmt if_statement array
+%type <node> relational_expression expression3 expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression void sub_stmt if_statement array unary_expression jump_statement
 %type <node> identifier
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
 
+%left  '+' '-'    /* 左結合で優先順位3 */
+%left  '*' '/'    /* 左結合で優先順位2 */
+%right '!'        /* 右結合で優先順位1 */
+
 %%
 
-root
+translation_unit
     : line_list
     {
         root_node = tora_create_root_node($1);
@@ -155,16 +174,13 @@ line
     {
         $$ = $1;
     }
-    | RETURN expression
-    {
-        $$ = tora_create_return($2);
-    }
     | CR
     {
         TNode *node = new TNode();
         node->type = NODE_NEWLINE;
         $$ = node;
     }
+    | jump_statement
     | if_statement
     | MY variable ASSIGN expression
     {
@@ -209,6 +225,12 @@ line
     | sub_stmt
     | block
     ;
+
+jump_statement
+    : RETURN expression
+    {
+        $$ = tora_create_return($2);
+    }
 
 if_statement
     : IF L_PAREN expression R_PAREN block
@@ -268,59 +290,70 @@ block
     {
         $$ = tora_create_block($2);
     }
+    | L_BRACE R_BRACE
+    {
+        $$ = tora_create_newline();
+    }
 
 expression
-    : expression2
-    | expression EQ expression2
+    : relational_expression
+    | expression EQ relational_expression
     {
         $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
     }
     | array
     ;
 
-expression2
+relational_expression
     : expression3
-    | expression2 LT expression3
+    | relational_expression LT expression3
     {
         $$ = tora_create_binary_expression(NODE_LT, $1, $3);
     }
-    | expression2 GT expression3
+    | relational_expression GT expression3
     {
         $$ = tora_create_binary_expression(NODE_GT, $1, $3);
     }
-    | expression2 LE expression3
+    | relational_expression LE expression3
     {
         $$ = tora_create_binary_expression(NODE_LE, $1, $3);
     }
-    | expression2 GE expression3
+    | relational_expression GE expression3
     {
         $$ = tora_create_binary_expression(NODE_GE, $1, $3);
     }
     ;
 
 expression3
-    : term
-    | expression ADD term
+    : multiplicative_expression
+    | expression ADD multiplicative_expression
     {
         $$ = tora_create_binary_expression(NODE_ADD, $1, $3);
     }
-    | expression SUBTRACT term
+    | expression SUBTRACT multiplicative_expression
     {
         $$ = tora_create_binary_expression(NODE_SUB, $1, $3);
     }
     ;
 
-term
+multiplicative_expression
     : postfix_expression
-    | term MUL primary_expression
+    | multiplicative_expression MUL postfix_expression
     {
         $$ = tora_create_binary_expression(NODE_MUL, $1, $3);
     }
-    | term DIV primary_expression
+    | multiplicative_expression DIV postfix_expression
     {
         $$ = tora_create_binary_expression(NODE_DIV, $1, $3);
     }
     ;
+
+unary_expression
+    : postfix_expression
+    | SUB postfix_expression
+    {
+        $$ = tora_create_unary_expression(NODE_UNARY_NEGATIVE, $2);
+    }
 
 postfix_expression
     : primary_expression

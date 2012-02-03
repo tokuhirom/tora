@@ -91,6 +91,7 @@ typedef enum {
     NODE_GET_ITEM,
     NODE_SET_ITEM,
     NODE_FOR,
+    NODE_UNARY_NEGATIVE,
 } NODE_TYPE;
 
 #include "op.h"

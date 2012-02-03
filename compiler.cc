@@ -338,6 +338,14 @@ void tora::Compiler::compile(TNode *node) {
         break;
     }
 
+    case NODE_UNARY_NEGATIVE: {
+        this->compile(node->node);
+
+        vm->ops->push_back(new OP(OP_UNARY_NEGATIVE));
+
+        break;
+    }
+
     case NODE_FOR: {
         /*
         struct {
