@@ -49,6 +49,12 @@ typedef struct TNode {
             struct TNode *index;
             struct TNode *rvalue;
         } set_item;
+        struct {
+            struct TNode *initialize;
+            struct TNode *cond;
+            struct TNode *postfix;
+            struct TNode *block;
+        } for_stmt;
     };
 } NODE;
 
@@ -84,6 +90,7 @@ typedef enum {
     NODE_MAKE_ARRAY,
     NODE_GET_ITEM,
     NODE_SET_ITEM,
+    NODE_FOR,
 } NODE_TYPE;
 
 #include "op.h"

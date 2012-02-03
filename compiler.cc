@@ -338,6 +338,45 @@ void tora::Compiler::compile(TNode *node) {
         break;
     }
 
+    case NODE_FOR: {
+        /*
+        struct {
+            struct TNode *initialize;
+            struct TNode *cond;
+            struct TNode *postfix;
+            struct TNode *block;
+        } for_stmt;
+
+            (initialize)
+        LABEL1:
+            (cond)
+            jump_if_false LABEL2
+            (block)
+            (postfix)
+            goto LABEL1
+        LABEL2:
+        */
+
+        this->compile(node->for_stmt.initialize);
+        int label1 = vm->ops->size();
+        this->compile(node->for_stmt.cond);
+
+        OP * jump_label2 = new OP;
+        jump_label2->op_type = OP_JUMP_IF_FALSE;
+        vm->ops->push_back(jump_label2);
+
+        this->compile(node->for_stmt.block);
+        this->compile(node->for_stmt.postfix);
+
+        OP * jump_label1 = new OP;
+        jump_label1->op_type = OP_JUMP;
+        jump_label1->operand.int_value = label1;
+        vm->ops->push_back(jump_label1);
+
+        int label2 = vm->ops->size();
+        jump_label2->operand.int_value = label2;
+    }
+
     default:
         printf("Unknown node: %d\n", node->type);
         abort();

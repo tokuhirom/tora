@@ -50,6 +50,7 @@ int yywrap(void)
 <INITIAL>"\n"       return CR;
 <INITIAL>";"       return SEMICOLON;
 <INITIAL>"sub"       return SUB;
+<INITIAL>"for"       return FOR;
 <INITIAL>","       return COMMA;
 
 <INITIAL>0 {

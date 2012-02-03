@@ -114,7 +114,8 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token COMMA RETURN SEMICOLON
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
-%token SUB
+%token SUB FOR
+
 %type <node> expression2 expression3 expression term primary_expression line line_list root variable block postfix_expression void sub_stmt if_statement array
 %type <node> identifier
 %type <argument_list> argument_list
@@ -195,6 +196,16 @@ line
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
     }
+    | FOR L_PAREN expression SEMICOLON expression SEMICOLON expression R_PAREN block
+    {
+        TNode *node = new TNode();
+        node->type = NODE_FOR;
+        node->for_stmt.initialize = $3;
+        node->for_stmt.cond = $5;
+        node->for_stmt.postfix = $7;
+        node->for_stmt.block = $9;
+        $$ = node;
+    }
     | sub_stmt
     | block
     ;
@@ -237,14 +248,6 @@ array:
         TNode *node = new TNode();
         node->type = NODE_MAKE_ARRAY;
         node->args = $2;
-        $$ = node;
-    }
-    | expression L_BRACKET expression R_BRACKET
-    {
-        TNode *node = new TNode();
-        node->type = NODE_GET_ITEM;
-        node->binary.left = $1;
-        node->binary.right = $3;
         $$ = node;
     }
 
@@ -321,6 +324,14 @@ term
 
 postfix_expression
     : primary_expression
+    | primary_expression L_BRACKET expression R_BRACKET
+    {
+        TNode *node = new TNode();
+        node->type = NODE_GET_ITEM;
+        node->binary.left = $1;
+        node->binary.right = $3;
+        $$ = node;
+    }
     | identifier L_PAREN R_PAREN
     {
         $$ = tora_create_funcall($1, new std::vector<TNode*>());
@@ -360,6 +371,10 @@ primary_expression
         $$ = node;
     }
     | variable
+    | L_PAREN expression R_PAREN
+    {
+        $$ = $2;
+    }
     ;
 
 identifier
