@@ -219,6 +219,9 @@ public:
     CodeValue(): Value() {
         this->value_type = VALUE_TYPE_CODE;
     }
+    ~CodeValue() {
+        delete code_opcodes;
+    }
     void dump() {
         printf("[dump] code: name: %s\n", this->code_name);
         for (size_t i=0; i<this->code_opcodes->size(); i++) {

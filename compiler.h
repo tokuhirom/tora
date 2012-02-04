@@ -28,7 +28,6 @@ public:
     }
     ~Compiler() {
         // delete blocks;
-        // TODO
     }
     void compile(Node *node);
     void push_block() {

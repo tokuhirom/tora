@@ -92,7 +92,7 @@ void tora::Compiler::compile(Node *node) {
         CodeValue *code = new CodeValue();
         code->code_name = strdup(funcname);
         code->code_params = params;
-        code->code_opcodes = vm_.ops; // TODO: clone
+        code->code_opcodes = new std::vector<OP*>(*vm_.ops);
 
         OP * putval = new OP;
         putval->op_type = OP_PUSH_VALUE;
