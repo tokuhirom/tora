@@ -52,6 +52,7 @@ int yywrap(void)
 <INITIAL>"sub"       return SUB;
 <INITIAL>"for"       return FOR;
 <INITIAL>","       return COMMA;
+<INITIAL>".."       return DOTDOT;
 
 <INITIAL>0 {
     yylval.int_value = 0;

@@ -59,6 +59,10 @@ struct TNode {
             struct TNode *block;
         } for_stmt;
     };
+    TNode() { }
+    TNode(node_type_t t) {
+        this->type = t;
+    }
     const char *type_name_str() {
         return node_type2name[this->type];
     }

@@ -28,12 +28,6 @@ static TNode *tora_create_root_node(TNode *t) {
     return node;
 }
 
-static TNode *tora_create_newline() {
-    TNode *node = new TNode();
-    node->type = NODE_NEWLINE;
-    return node;
-}
-
 static TNode *tora_create_my(TNode *t) {
     TNode *node = new TNode();
     node->type = NODE_MY;
@@ -147,6 +141,7 @@ typedef std::vector<TNode*> argument_list_t;
 %token COMMA RETURN SEMICOLON
 %token SUB
 
+%left DOTDOT
 %left L_BRACKET R_BRACKET
 %left EQ
 %left LT GT LE GE
@@ -265,7 +260,7 @@ block
     }
     | L_BRACE R_BRACE
     {
-        $$ = tora_create_newline();
+        $$ = new TNode(NODE_VOID);
     }
 
 statement_list
