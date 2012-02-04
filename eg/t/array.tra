@@ -1,0 +1,26 @@
+my $a = ["hoge", "fuga", "haga"];
+say($a[0]);
+$a[5] = "IYAN";
+$a[0] = "hOgE";
+$a[1] = "hOgE1";
+$a[8] = "hOgE8";
+
+p($a);
+
+my $b=5;
+$b = 4;
+say($b);
+
+__END__
+hoge
+[dump] array:
+[0] [dump] str: hOgE
+[1] [dump] str: hOgE1
+[2] [dump] str: haga
+[3] [dump] undef
+[4] [dump] undef
+[5] [dump] str: IYAN
+[6] [dump] undef
+[7] [dump] undef
+[8] [dump] str: hOgE8
+4

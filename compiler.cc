@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include "dump_tree.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
@@ -280,28 +281,52 @@ void tora::Compiler::compile(TNode *node) {
         break;
     }
     case NODE_SETVARIABLE: {
-        const char*varname = node->set_value.lvalue->str_value;
-        int level;
-        int no = this->find_localvar(std::string(varname), level);
-        if (no<0) {
-            fprintf(stderr, "There is no variable named %s\n", varname);
+        switch (node->set_value.lvalue->type) {
+        case NODE_GETVARIABLE: { // $a = $b;
+            const char*varname = node->set_value.lvalue->str_value;
+            int level;
+            int no = this->find_localvar(std::string(varname), level);
+            if (no<0) {
+                fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname);
+                error = true;
+            }
+
+            // fprintf(stderr, "set level: %d\n", level);
+            this->compile(node->set_value.rvalue);
+
+            OP * tmp = new OP;
+            if (level == 0) {
+                DBG2("LOCAL\n");
+                tmp->op_type = OP_SETLOCAL;
+                tmp->operand.int_value = no;
+            } else {
+                DBG2("DYNAMIC\n");
+                tmp->op_type = OP_SETDYNAMIC;
+                tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+            }
+            vm->ops->push_back(tmp);
+            break;
+        }
+        case NODE_GET_ITEM: { // $a[$b] = $c
+            auto container = node->set_value.lvalue->binary.left;
+            auto index     = node->set_value.lvalue->binary.right;
+            auto rvalue    = node->set_value.rvalue;
+            this->compile(container);
+            this->compile(index);
+            this->compile(rvalue);
+
+            OP * tmp = new OP;
+            tmp->op_type = OP_SET_ITEM;
+            vm->ops->push_back(tmp);
+            break;
+        }
+        default:
+            printf("This is not lvalue\n");
+            dump_tree(node);
             error = true;
+            break;
         }
 
-        // fprintf(stderr, "set level: %d\n", level);
-        this->compile(node->set_value.rvalue);
-
-        OP * tmp = new OP;
-        if (level == 0) {
-            DBG2("LOCAL\n");
-            tmp->op_type = OP_SETLOCAL;
-            tmp->operand.int_value = no;
-        } else {
-            DBG2("DYNAMIC\n");
-            tmp->op_type = OP_SETDYNAMIC;
-            tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
-        }
-        vm->ops->push_back(tmp);
         break;
     }
     case NODE_MAKE_ARRAY: {
@@ -324,16 +349,6 @@ void tora::Compiler::compile(TNode *node) {
 
         OP * tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
-        vm->ops->push_back(tmp);
-        break;
-    }
-    case NODE_SET_ITEM: {
-        this->compile(node->set_item.container);
-        this->compile(node->set_item.index);
-        this->compile(node->set_item.rvalue);
-
-        OP * tmp = new OP;
-        tmp->op_type = OP_SET_ITEM;
         vm->ops->push_back(tmp);
         break;
     }

@@ -58,6 +58,11 @@ struct TNode {
             struct TNode *postfix;
             struct TNode *block;
         } for_stmt;
+        struct {
+            struct TNode *object;
+            struct TNode *method;
+            std::vector<struct TNode*> *args;
+        } method_call;
     };
     TNode() { }
     TNode(node_type_t t) {

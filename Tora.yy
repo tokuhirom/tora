@@ -141,6 +141,7 @@ typedef std::vector<TNode*> argument_list_t;
 %token COMMA RETURN SEMICOLON
 %token SUB
 
+%left '.'
 %left DOTDOT
 %left L_BRACKET R_BRACKET
 %left EQ
@@ -284,22 +285,13 @@ assignment_expression
         node->set_value.rvalue = $4;
         $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
     }
-    | variable ASSIGN expression
+    | conditional_expression ASSIGN conditional_expression
     {
         TNode *node = new TNode();
         node->type = NODE_SETVARIABLE;
         node->set_value.lvalue = $1;
         node->set_value.rvalue = $3;
         $$ = node;
-    }
-    | variable L_BRACKET expression R_BRACKET ASSIGN expression
-    {
-        TNode *node = new TNode();
-        node->type = NODE_SET_ITEM;
-        node->set_item.container= $1;
-        node->set_item.index = $3;
-        node->set_item.rvalue = $6;
-         $$ = node;
     }
 
 conditional_expression
@@ -436,6 +428,14 @@ primary_expression
     {
         $$ = $2;
     }
+    | expression '.' identifier L_PAREN argument_list R_PAREN
+    {
+        TNode *node = new TNode();
+        node->type = NODE_METHOD_CALL;
+        node->method_call.object = $1;
+        node->method_call.method = $3;
+        node->method_call.args   = $5;
+    }
     ;
 
 identifier
@@ -463,7 +463,7 @@ variable
 int yyerror(const char *err) {
     extern char *yytext;
     extern int tora_line_number;
-    fprintf(stderr, "parser error near %s at line %d\n", yytext, tora_line_number);
+    fprintf(stderr, "%s near %s at line %d\n", err, yytext, tora_line_number);
     return 0;
 }
 

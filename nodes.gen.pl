@@ -37,9 +37,9 @@ my @nodes = qw(
     NODE_MY
     NODE_MAKE_ARRAY
     NODE_GET_ITEM
-    NODE_SET_ITEM
     NODE_FOR
     NODE_UNARY_NEGATIVE
+    NODE_METHOD_CALL
 );
 
 my $xslate = Text::Xslate->new(
