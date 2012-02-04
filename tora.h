@@ -14,43 +14,9 @@
 #define DBG2(...)
 #endif
 
-namespace tora {
+#include "nodes.gen.h"
 
-typedef enum {
-    NODE_INT = 1,
-    NODE_TRUE,
-    NODE_FALSE,
-    NODE_IDENTIFIER,
-    NODE_FUNCALL,
-    NODE_STRING,
-    NODE_ADD,
-    NODE_SUB,
-    NODE_MUL,
-    NODE_DIV,
-    NODE_STMTS,
-    NODE_NEWLINE,
-    NODE_IF,
-    NODE_LT,
-    NODE_GT,
-    NODE_LE,
-    NODE_GE,
-    NODE_EQ,
-    NODE_GETVARIABLE,
-    NODE_SETVARIABLE,
-    NODE_ASSIGN,
-    NODE_WHILE,
-    NODE_ROOT,
-    NODE_VOID,
-    NODE_FUNCDEF,
-    NODE_RETURN,
-    NODE_BLOCK,
-    NODE_MY,
-    NODE_MAKE_ARRAY,
-    NODE_GET_ITEM,
-    NODE_SET_ITEM,
-    NODE_FOR,
-    NODE_UNARY_NEGATIVE,
-} node_type_t;
+namespace tora {
 
 struct TNode {
     node_type_t type;
@@ -93,6 +59,9 @@ struct TNode {
             struct TNode *block;
         } for_stmt;
     };
+    const char *type_name_str() {
+        return node_type2name[this->type];
+    }
 };
 
 };

@@ -383,10 +383,11 @@ void tora::Compiler::compile(TNode *node) {
 
         int label2 = vm->ops->size();
         jump_label2->operand.int_value = label2;
+        break;
     }
 
     default:
-        printf("Unknown node: %d\n", node->type);
+        printf("Unknown node: %s\n", node->type_name_str());
         abort();
         break;
     }

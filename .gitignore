@@ -5,3 +5,5 @@ lex.yy.c
 tora
 .sconsign.dblite
 hoge.tra
+nodes.gen.cc
+nodes.gen.h
