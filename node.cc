@@ -1,5 +1,6 @@
 #include "tora.h"
 #include "node.h"
+#include <vector>
 
 // TODO: move to Node::dump()
 
@@ -9,11 +10,25 @@ static void print_indent(int indent) {
     }
 }
 
+static void dump_args(std::vector<tora::Node*> *args, int indent) {
+    for (size_t i=0; i<args->size(); i++) {
+        args->at(i)->dump(indent+1);
+    }
+}
+
 void tora::BinaryNode::dump(int indent) {
     print_indent(indent);
     printf("[Binary]%s\n", this->type_name_str());
     this->left->dump(indent+1);
     this->right->dump(indent+1);
+}
+
+void tora::MethodCallNode::dump(int indent) {
+    print_indent(indent);
+    printf("[MethodCall]%s\n", this->type_name_str());
+    this->object->dump(indent+1);
+    this->method->dump(indent+1);
+    dump_args(this->args, indent);
 }
 
 void tora::Node::dump(int indent) {

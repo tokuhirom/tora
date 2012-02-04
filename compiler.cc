@@ -407,14 +407,15 @@ void tora::Compiler::compile(Node *node) {
         node->method_call.method = $3;
         node->method_call.args   = $5;
         */
-        auto args = node->method_call.args;
+        auto mcn = node->to_method_call_node();
+        auto args = mcn->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(node->method_call.method);
-        this->compile(node->method_call.object);
+        this->compile(mcn->method);
+        this->compile(mcn->object);
 
         OP * tmp = new OP;
         tmp->op_type = OP_METHOD_CALL;

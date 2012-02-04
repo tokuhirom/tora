@@ -387,21 +387,11 @@ postfix_expression
     }
     | primary_expression DOT identifier L_PAREN argument_list R_PAREN
     {
-        Node *node = new Node();
-        node->type = NODE_METHOD_CALL;
-        node->method_call.object = $1;
-        node->method_call.method = $3;
-        node->method_call.args   = $5;
-        $$ = node;
+        $$ = new MethodCallNode($1, $3, $5);
     }
     | primary_expression DOT identifier L_PAREN R_PAREN
     {
-        Node *node = new Node();
-        node->type = NODE_METHOD_CALL;
-        node->method_call.object = $1;
-        node->method_call.method = $3;
-        node->method_call.args   = new std::vector<Node*>();
-        $$ = node;
+        $$ = new MethodCallNode($1, $3, new std::vector<Node*>());
     }
     ;
 
