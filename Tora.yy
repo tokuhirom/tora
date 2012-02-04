@@ -14,6 +14,7 @@
 #include "vm.h"
 
 #define YYDEBUG 1
+#define YYERROR_VERBOSE 1
 
 using namespace tora;
 
@@ -109,6 +110,10 @@ typedef std::vector<TNode*> argument_list_t;
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 %}
+
+// TODO: reentrant
+// %pure_parser
+
 %union {
     int int_value;
     char *str_value;
@@ -121,7 +126,7 @@ typedef std::vector<TNode*> argument_list_t;
 %type <node> expression
 %type <node> assignment_expression
 %type <node> conditional_expression
-%type <node> logical_or_expression
+%type <node> logical_or_expression logical_and_expression
 %type <node> equality_expression
 %type <node> relational_expression
 %type <node> shift_expression
