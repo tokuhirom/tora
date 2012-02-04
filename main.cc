@@ -8,6 +8,8 @@
 #include "compiler.h"
 #include "dump_tree.h"
 
+using namespace tora;
+
 extern TNode *root_node;
 
 int main(int argc, char **argv) {

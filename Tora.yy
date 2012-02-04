@@ -15,6 +15,8 @@
 
 #define YYDEBUG 1
 
+using namespace tora;
+
 extern int yylex();
 int yyerror(const char *err);
 
@@ -67,7 +69,7 @@ static TNode *tora_create_void() {
     return node;
 }
 
-static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2) {
+static TNode *tora_create_binary_expression(node_type_t type, TNode *t1, TNode* t2) {
     TNode *node = new TNode();
     node->type = type;
     node->binary.left  = t1;
@@ -75,7 +77,7 @@ static TNode *tora_create_binary_expression(NODE_TYPE type, TNode *t1, TNode* t2
     return node;
 }
 
-static TNode *tora_create_unary_expression(NODE_TYPE type, TNode *t1) {
+static TNode *tora_create_unary_expression(node_type_t type, TNode *t1) {
     TNode *node = new TNode();
     node->type = type;
     node->node  = t1;
@@ -91,7 +93,7 @@ static TNode *tora_create_if(TNode *cond, TNode* if_body, TNode *else_body) {
     return node;
 }
 
-static TNode *tora_create_funcall(TNode *t1, std::vector<struct TNode*> *args) {
+static TNode *tora_create_funcall(TNode *t1, std::vector<TNode*> *args) {
     TNode *node = new TNode();
     node->type = NODE_FUNCALL;
     node->funcall.name  = t1;
@@ -102,7 +104,7 @@ static TNode *tora_create_funcall(TNode *t1, std::vector<struct TNode*> *args) {
 
 TNode *root_node;
 
-typedef std::vector<struct TNode*> argument_list_t;
+typedef std::vector<TNode*> argument_list_t;
 
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
@@ -138,12 +140,12 @@ typedef std::vector<struct TNode*> argument_list_t;
 %right ASSIGN
 %right MY
 %token COMMA RETURN SEMICOLON
-%token L_BRACKET R_BRACKET
 %token SUB
 
-
-%left LT GT LE GE EQ
-%left  ADD SUBTRACT
+%left L_BRACKET R_BRACKET
+%left EQ
+%left LT GT LE GE
+%left ADD SUBTRACT
 %left MUL DIV
 %right '!'        /* 右結合で優先順位1 */
 
@@ -317,7 +319,6 @@ exclusive_or_expression
 
 and_expression
     : equality_expression
-    | array_creation
 
 equality_expression
     : relational_expression
@@ -352,11 +353,11 @@ shift_expression
 
 additive_expression
     : multiplicative_expression
-    | expression ADD multiplicative_expression
+    | additive_expression ADD multiplicative_expression
     {
         $$ = tora_create_binary_expression(NODE_ADD, $1, $3);
     }
-    | expression SUBTRACT multiplicative_expression
+    | additive_expression SUBTRACT multiplicative_expression
     {
         $$ = tora_create_binary_expression(NODE_SUB, $1, $3);
     }
@@ -430,6 +431,7 @@ primary_expression
         $$ = node;
     }
     | variable
+    | array_creation
     | L_PAREN expression R_PAREN
     {
         $$ = $2;
