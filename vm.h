@@ -12,14 +12,18 @@ namespace tora {
 
 class Stack;
 
-class FunctionFrame {
+class FunctionFrame : public Value {
 public:
     int return_address;
     int top;
     std::vector<OP*> *orig_ops;
+    void dump() {
+        printf("FunctionFrame\n");
+    }
+    const char *type_str() { return "FunctionFrame"; }
 };
 
-class LexicalVarsFrame {
+class LexicalVarsFrame : public Value {
 public:
     LexicalVarsFrame* up;
     std::map<int, Value*> vars;
@@ -27,6 +31,7 @@ public:
         up = NULL;
     }
     LexicalVarsFrame(LexicalVarsFrame *up_) {
+        up_->retain();
         this->up = up_;
     }
     void setVar(int id, Value *v) {
@@ -43,7 +48,7 @@ public:
             return NULL;
         }
     }
-    void dump_vars(int i) {
+    void dump(int i) {
         printf("[%d]\n", i);
         std::map<int, Value*>::iterator iter = this->vars.begin();
         for (; iter!=this->vars.end(); ++iter) {
@@ -51,14 +56,15 @@ public:
             iter->second->dump();
         }
         if (this->up) {
-            this->up->dump_vars(i+1);
+            this->up->dump(i+1);
         }
     }
-    void dump_vars() {
-        printf("-- dump vars --\n");
-        dump_vars(0);
+    void dump() {
+        printf("-- dump vars(refcnt: %d) --\n", this->refcnt);
+        this->dump(0);
         printf("---------------\n");
     }
+    const char *type_str() { return "LexicalVarsFrame"; }
 };
 
 class VM {

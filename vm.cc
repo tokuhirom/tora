@@ -16,8 +16,20 @@ VM::VM() {
 VM::~VM() {
     // TODO
     // delete this->ops;
-    delete this->lexical_vars_stack;
-    delete this->function_frames;
+    {
+        auto iter = this->lexical_vars_stack->begin();
+        for (; iter!=this->lexical_vars_stack->end(); iter++) {
+            (*iter)->release();
+        }
+        delete this->lexical_vars_stack;
+    }
+    {
+        auto iter = this->function_frames->begin();
+        for (; iter!=this->function_frames->end(); iter++) {
+            (*iter)->release();
+        }
+        delete this->function_frames;
+    }
 }
 
 static void disasm_one(OP* op) {
@@ -245,7 +257,7 @@ void VM::execute() {
             if (fframe->top == (int)stack.size()) {
                 stack.push(UndefValue::instance());
             }
-            delete fframe;
+            fframe->release();
 
             lexical_vars_stack->pop_back();
 
@@ -257,6 +269,7 @@ void VM::execute() {
             break;
         }
         case OP_LEAVE: {
+            lexical_vars_stack->back()->release();
             lexical_vars_stack->pop_back();
             break;
         }
