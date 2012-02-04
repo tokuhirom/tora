@@ -27,7 +27,7 @@ public:
         blocks = new std::vector<Block*>();
     }
     ~Compiler() {
-        // delete blocks;
+        delete blocks;
     }
     void compile(Node *node);
     void push_block() {

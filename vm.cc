@@ -14,7 +14,13 @@ VM::VM() {
 }
 
 VM::~VM() {
-    delete this->ops;
+    {
+        auto iter = this->ops->begin();
+        for (; iter!=this->ops->end(); iter++) {
+            delete (*iter);
+        }
+        delete this->ops;
+    }
     {
         auto iter = this->lexical_vars_stack->begin();
         for (; iter!=this->lexical_vars_stack->end(); iter++) {

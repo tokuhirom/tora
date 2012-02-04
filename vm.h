@@ -34,6 +34,9 @@ public:
         up_->retain();
         this->up = up_;
     }
+    ~LexicalVarsFrame() {
+        this->up->release();
+    }
     void setVar(int id, Value *v) {
         this->vars[id] = v;
     }
