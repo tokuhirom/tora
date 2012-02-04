@@ -52,7 +52,7 @@ void tora::FuncallNode::dump(int indent) {
 
 void tora::BinaryNode::dump(int indent) {
     print_indent(indent);
-    printf("[Binary]%s(%X)\n", this->type_name_str());
+    printf("[Binary]%s\n", this->type_name_str());
     this->left->dump(indent+1);
     this->right->dump(indent+1);
 }

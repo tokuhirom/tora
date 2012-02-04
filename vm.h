@@ -105,6 +105,7 @@ public:
         printf("----------------\n");
     }
     void add_function(const char*name, Value*code) {
+        code->retain();
         functions[std::string(name)] = code;
     }
 };

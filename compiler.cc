@@ -94,22 +94,18 @@ void tora::Compiler::compile(Node *node) {
         code->code_params = params;
         code->code_opcodes = new std::vector<OP*>(*vm_.ops);
 
-        OP * putval = new OP;
-        putval->op_type = OP_PUSH_VALUE;
-        putval->operand.value = (Value*)code;
+        ValueOP * putval = new ValueOP(OP_PUSH_VALUE, code);
         vm->ops->push_back(putval);
 
-        OP * define_method = new OP;
-        define_method->op_type = OP_DEFINE_METHOD;
-        define_method->operand.str_value = strdup(funcname);
+        StrValue *funcname_value = new StrValue(strdup(funcname));
+        ValueOP * define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
         vm->ops->push_back(define_method);
 
         break;
     }
     case NODE_STRING: {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_STRING;
-        tmp->operand.str_value = strdup(node->to_str_node()->str_value);
+        StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
+        ValueOP * tmp = new ValueOP(OP_PUSH_STRING, sv);
         vm->ops->push_back(tmp);
         break;
     }
@@ -133,9 +129,8 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_IDENTIFIER: {
-        OP * tmp = new OP;
-        tmp->op_type = OP_PUSH_IDENTIFIER;
-        tmp->operand.str_value = strdup(node->to_str_node()->str_value);
+        StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
+        ValueOP * tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
         vm->ops->push_back(tmp);
         break;
     }

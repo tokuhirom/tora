@@ -2,8 +2,8 @@
 #define VALUE_H_
 
 #include "tora.h"
-#include "op.h"
 #include "ops.gen.h"
+#include "op.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -196,6 +196,7 @@ public:
     }
     ~StrValue() {
         delete [] str_value;
+        this->str_value = NULL;
     }
     void set_str(const char*s) {
         str_value = s;

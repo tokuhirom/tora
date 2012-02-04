@@ -90,20 +90,20 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_STRING: {
-            StrValue *v = new StrValue;
-            v->set_str(op->operand.str_value);
-            stack.push(v);
+            Value *sv = ((ValueOP*)op)->value;
+            sv->retain();
+            stack.push(sv);
             break;
         }
         case OP_PUSH_VALUE: {
-            Value *v = op->operand.value;
+            Value *v = ((ValueOP*)op)->value;
             stack.push(v);
             break;
         }
         case OP_DEFINE_METHOD: {
             Value *code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
-            const char *funcname = op->operand.str_value;
+            const char *funcname = ((ValueOP*)op)->value->to_str()->str_value;
             this->add_function(funcname, code);
             break;
         }
@@ -282,10 +282,9 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_IDENTIFIER: {
-            // operand = the number of args
-            StrValue *v = new StrValue;
-            v->str_value = strdup(op->operand.str_value);
-            stack.push(v);
+            Value *sv = ((ValueOP*)op)->value;
+            sv->retain();
+            stack.push(sv);
             break;
         }
         case OP_DUMP: {
