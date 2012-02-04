@@ -1,0 +1,7 @@
+if (true) {
+    say(true);
+} else {
+    say(false);
+}
+__END__
+true

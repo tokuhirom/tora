@@ -9,6 +9,13 @@ static void print_indent(int indent) {
     }
 }
 
+void tora::BinaryNode::dump(int indent) {
+    print_indent(indent);
+    printf("[Binary]%s\n", this->type_name_str());
+    this->left->dump(indent+1);
+    this->right->dump(indent+1);
+}
+
 void tora::Node::dump(int indent) {
     print_indent(indent);
     switch (this->type) {
@@ -42,41 +49,6 @@ void tora::Node::dump(int indent) {
         }
         break;
     }
-    case NODE_GT:
-        printf("NODE_GT\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_ADD:
-        printf("NODE_ADD\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_SUB:
-        printf("NODE_SUB\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_MUL:
-        printf("NODE_MUL\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_DIV:
-        printf("NODE_DIV\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_STMTS:
-        printf("NODE_STMTS\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
-    case NODE_IF:
-        printf("NODE_IF\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
     case NODE_ROOT:
         printf("NODE_ROOT\n");
         this->node->dump(indent+1);
@@ -85,18 +57,8 @@ void tora::Node::dump(int indent) {
         printf("NODE_BLOCK\n");
         this->node->dump(indent+1);
         break;
-    case NODE_GET_ITEM:
-        printf("NODE_GET_ITEM\n");
-        this->binary.left->dump(indent+1);
-        this->binary.right->dump(indent+1);
-        break;
     case NODE_GETVARIABLE:
         printf("NODE_GETVARIABLE[%s]\n", this->str_value);
-        break;
-    case NODE_SETVARIABLE:
-        printf("NODE_SETVARIABLE\n");
-        this->set_value.lvalue->dump(indent+1);
-        this->set_value.rvalue->dump(indent+1);
         break;
     case NODE_MY:
         printf("NODE_MY\n");
@@ -112,15 +74,6 @@ void tora::Node::dump(int indent) {
         }
         break;
     }
-    case NODE_WHILE:
-        printf("NODE_WHILE\n");
-        print_indent(indent+1);
-        printf("condition:\n");
-        this->binary.left->dump(indent+2);
-        print_indent(indent+1);
-        printf("body:\n");
-        this->binary.right->dump(indent+2);
-        break;
 
     default:
         printf("Unknown this: %s\n", this->type_name_str());

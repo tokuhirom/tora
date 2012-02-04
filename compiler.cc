@@ -156,8 +156,8 @@ void tora::Compiler::compile(Node *node) {
     }
 #define C_OP_BINARY(type) \
     { \
-        this->compile(node->binary.left); \
-        this->compile(node->binary.right); \
+        this->compile(node->binary()->left); \
+        this->compile(node->binary()->right); \
         OP * tmp = new OP; \
         tmp->op_type = (type); \
         vm->ops->push_back(tmp); \
@@ -176,8 +176,8 @@ void tora::Compiler::compile(Node *node) {
 #undef C_OP_BINARY
 
     case NODE_STMTS: {
-        this->compile(node->binary.left);
-        this->compile(node->binary.right);
+        this->compile(node->binary()->left);
+        this->compile(node->binary()->right);
         break;
     }
     case NODE_IF: {
@@ -203,13 +203,13 @@ void tora::Compiler::compile(Node *node) {
         ELSE_LABEL:
         END_LABEL:
         */
-        this->compile(node->binary.left); // jouken
+        this->compile(node->if_stmt.cond);
 
         OP * jump_else = new OP;
         jump_else->op_type = OP_JUMP_IF_FALSE;
         vm->ops->push_back(jump_else);
 
-        this->compile(node->binary.right); // block
+        this->compile(node->if_stmt.if_body);
 
         OP * jump_end = new OP;
         jump_end->op_type = OP_JUMP;
@@ -236,13 +236,13 @@ void tora::Compiler::compile(Node *node) {
         LABEL2:
         */
         int label1 = vm->ops->size();
-        this->compile(node->binary.left); // cond
+        this->compile(node->binary()->left); // cond
 
         OP * jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
         vm->ops->push_back(jump_if_false);
 
-        this->compile(node->binary.right); //body
+        this->compile(node->binary()->right); //body
 
         OP * goto_ = new OP;
         goto_->op_type = OP_JUMP;
@@ -282,9 +282,9 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_SETVARIABLE: {
-        switch (node->set_value.lvalue->type) {
+        switch (node->binary()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
-            const char*varname = node->set_value.lvalue->str_value;
+            const char*varname = node->binary()->left->str_value;
             int level;
             int no = this->find_localvar(std::string(varname), level);
             if (no<0) {
@@ -293,7 +293,7 @@ void tora::Compiler::compile(Node *node) {
             }
 
             // fprintf(stderr, "set level: %d\n", level);
-            this->compile(node->set_value.rvalue);
+            this->compile(node->binary()->right);
 
             OP * tmp = new OP;
             if (level == 0) {
@@ -309,9 +309,9 @@ void tora::Compiler::compile(Node *node) {
             break;
         }
         case NODE_GET_ITEM: { // $a[$b] = $c
-            auto container = node->set_value.lvalue->binary.left;
-            auto index     = node->set_value.lvalue->binary.right;
-            auto rvalue    = node->set_value.rvalue;
+            auto container = node->binary()->left->binary()->left;
+            auto index     = node->binary()->left->binary()->right;
+            auto rvalue    = node->binary()->right;
             this->compile(container);
             this->compile(index);
             this->compile(rvalue);
@@ -345,8 +345,8 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_GET_ITEM: {
-        this->compile(node->binary.left);  // container
-        this->compile(node->binary.right); // index
+        this->compile(node->binary()->left);  // container
+        this->compile(node->binary()->right); // index
 
         OP * tmp = new OP;
         tmp->op_type = OP_GET_ITEM;

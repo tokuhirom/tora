@@ -67,11 +67,7 @@ static Node *tora_create_void() {
 }
 
 static Node *tora_create_binary_expression(node_type_t type, Node *t1, Node* t2) {
-    Node *node = new Node();
-    node->type = type;
-    node->binary.left  = t1;
-    node->binary.right = t2;
-    return node;
+    return new BinaryNode(type, t1, t2);
 }
 
 static Node *tora_create_unary_expression(node_type_t type, Node *t1) {
@@ -284,20 +280,14 @@ assignment_expression
     : conditional_expression
     | MY variable ASSIGN expression
     {
+        // REMOVE THIS NODE
         Node *n1 = tora_create_my($2);
-        Node *node = new Node();
-        node->type = NODE_SETVARIABLE;
-        node->set_value.lvalue = $2;
-        node->set_value.rvalue = $4;
+        Node *node = new BinaryNode(NODE_SETVARIABLE, $2, $4);
         $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
     }
     | conditional_expression ASSIGN conditional_expression
     {
-        Node *node = new Node();
-        node->type = NODE_SETVARIABLE;
-        node->set_value.lvalue = $1;
-        node->set_value.rvalue = $3;
-        $$ = node;
+        $$ = new BinaryNode(NODE_SETVARIABLE, $1, $3);
     }
 
 conditional_expression
@@ -384,11 +374,7 @@ postfix_expression
     : primary_expression
     | primary_expression L_BRACKET expression R_BRACKET
     {
-        Node *node = new Node();
-        node->type = NODE_GET_ITEM;
-        node->binary.left = $1;
-        node->binary.right = $3;
-        $$ = node;
+        $$ = new BinaryNode(NODE_GET_ITEM, $1, $3);
     }
     | identifier L_PAREN R_PAREN
     {

@@ -6,16 +6,16 @@
 
 namespace tora {
 
+struct BinaryNode;
+
 struct Node {
     node_type_t type;
     union {
         struct Node *node;
         int int_value;
         const char*str_value;
-        struct {
-            struct Node *left;
-            struct Node *right;
-        } binary;
+        std::vector<struct Node*> *args;
+
         struct {
             struct Node *name;
             std::vector<struct Node*> *args;
@@ -30,16 +30,6 @@ struct Node {
             struct Node *if_body;
             struct Node *else_body;
         } if_stmt;
-        std::vector<struct Node*> *args;
-        struct {
-            struct Node *lvalue;
-            struct Node *rvalue;
-        } set_value;
-        struct {
-            struct Node *container;
-            struct Node *index;
-            struct Node *rvalue;
-        } set_item;
         struct {
             struct Node *initialize;
             struct Node *cond;
@@ -59,8 +49,26 @@ struct Node {
     const char *type_name_str() {
         return node_type2name[this->type];
     }
-    void dump(int indent);
+    virtual void dump(int indent);
     void dump();
+    BinaryNode* binary() {
+        return (BinaryNode*)this;
+    }
+};
+
+struct BinaryNode: public Node {
+    struct Node *left;
+    struct Node *right;
+    BinaryNode(node_type_t t, Node* l, Node *r) {
+        type = t;
+        left = l;
+        right = r;
+    }
+    ~BinaryNode() {
+        delete left;
+        delete right;
+    }
+    void dump(int indent);
 };
 
 };
