@@ -7,3 +7,4 @@ tora
 hoge.tra
 nodes.gen.cc
 nodes.gen.h
+ops.gen.cc

@@ -2,7 +2,7 @@
 #define VM_H_
 
 #include "tora.h"
-#include "ops.gen.h"
+#include "op.h"
 #include "value.h"
 #include <vector>
 #include <map>

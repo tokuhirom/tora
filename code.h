@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include "value.h"
+#include "op.h"
 
 namespace tora {
 

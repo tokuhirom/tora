@@ -18,7 +18,7 @@ VM::~VM() {
     {
         auto iter = this->ops->begin();
         for (; iter!=this->ops->end(); iter++) {
-//          delete (*iter); // NEED GC...
+            // (*iter)->release();
         }
         delete this->ops;
     }

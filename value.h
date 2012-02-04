@@ -2,8 +2,6 @@
 #define VALUE_H_
 
 #include "tora.h"
-#include "ops.gen.h"
-#include "op.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
