@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "value.h"
+#include "code.h"
 #include <unistd.h>
 
 using namespace tora;
@@ -17,7 +18,7 @@ VM::~VM() {
     {
         auto iter = this->ops->begin();
         for (; iter!=this->ops->end(); iter++) {
-            delete (*iter);
+//          delete (*iter); // NEED GC...
         }
         delete this->ops;
     }

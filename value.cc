@@ -1,4 +1,5 @@
 #include "value.h"
+#include "code.h"
 
 using namespace tora;
 

@@ -1,6 +1,7 @@
 #include "nodes.gen.h"
 #include "node.h"
 #include "compiler.h"
+#include "code.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);

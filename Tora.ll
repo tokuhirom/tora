@@ -24,7 +24,10 @@ static void tora_add_string_literal(char c) {
     (*string_buffer) << c;
 }
 static const char *tora_close_string_literal() {
-    return strdup(string_buffer->str().c_str());
+    const char * ret = strdup(string_buffer->str().c_str());
+    delete string_buffer;
+    string_buffer = NULL;
+    return ret;
 }
 
 /**
