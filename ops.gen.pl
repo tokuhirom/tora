@@ -61,18 +61,29 @@ print $xslate->render_string(<<'...', { ops => \@ops });
 #ifndef OPS_GEN_H_
 #define OPS_GEN_H_
 
+namespace tora {
+
 typedef enum {
 [% FOR op IN ops -%]
     [% op %],
 [% END -%]
-} OP_TYPE;
+} op_type_t;
 
-static const char*opcode2name[] = {
+extern const char*opcode2name[];
+
+};
+
+#endif // OPS_GEN_H_
+...
+
+open my $fh, '>', 'ops.gen.cc';
+print $fh $xslate->render_string(<<'...', { ops => \@ops });
+#include "ops.gen.h"
+
+const char*tora::opcode2name[] = {
 [% FOR op IN ops -%]
     "[% op %]",
 [% END -%]
 };
-
-#endif // OPS_GEN_H_
 ...
 

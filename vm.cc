@@ -62,6 +62,8 @@ static void disasm_one(OP* op) {
         printf(" %d", op->operand.int_value);
         break;
     }
+    default:
+        break;
     }
     printf("\n");
 }

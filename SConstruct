@@ -20,4 +20,4 @@ env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
 env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl > nodes.gen.h');
 env.CXXFile(target='lex.yy.c', source='Tora.ll')
-env.Program('tora', ['Tora.tab.cc lex.yy.c main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc'.split(' ')], CXXFLAGS='--std=c++0x -Wall', CC='g++')
+env.Program('tora', ['Tora.tab.cc lex.yy.c main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc'.split(' ')], CXXFLAGS='--std=c++0x -Wall', CC='g++')
