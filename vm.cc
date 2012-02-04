@@ -14,8 +14,7 @@ VM::VM() {
 }
 
 VM::~VM() {
-    // TODO
-    // delete this->ops;
+    delete this->ops;
     {
         auto iter = this->lexical_vars_stack->begin();
         for (; iter!=this->lexical_vars_stack->end(); iter++) {
@@ -29,6 +28,9 @@ VM::~VM() {
             (*iter)->release();
         }
         delete this->function_frames;
+    }
+    while (this->stack.size() > 0) {
+        this->stack.pop()->release();
     }
 }
 
