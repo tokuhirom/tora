@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
     if (code) {
         FILE *fh = tmpfile();
-        fprintf(fh, "%s", code);
+        fprintf(fh, "%s;", code);
         rewind(fh);
         yyin = fh;
     } else if (optind < argc) { // source code

@@ -175,6 +175,10 @@ statement
     {
         $$ = $1;
     }
+    | SEMICOLON
+    {
+        $$ = tora_create_void();
+    }
     | jump_statement
     | if_statement
     | WHILE L_PAREN expression R_PAREN block
