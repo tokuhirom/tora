@@ -8,6 +8,7 @@ from types import DictType, StringTypes
 
 env = Environment()
 env.Append(CCFLAGS=['-g'])
+env.Append(CCFLAGS=['-Wall'])
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):

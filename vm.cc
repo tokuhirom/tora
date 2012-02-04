@@ -207,6 +207,32 @@ void VM::execute() {
             }
             break;
         }
+        case OP_METHOD_CALL: {
+            ValuePtr object(stack.pop());
+            ValuePtr funname(stack.pop());
+            const char *funname_c = funname->to_str()->str_value;
+            if (!(stack.size() >= (size_t) op->operand.int_value)) {
+                printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+                dump_stack();
+                abort();
+            }
+            assert(funname->value_type == VALUE_TYPE_STR);
+            switch (object->value_type) {
+            case VALUE_TYPE_ARRAY: {
+                ArrayValue*av = object->to_array();
+                if (strcmp(funname->to_str()->str_value, "size") == 0) {
+                    IntValue *size = new IntValue(av->size());
+                    stack.push(size);
+                }
+                break;
+            }
+            default:
+                fprintf(stderr, "Unknown method %s for %s\n", funname->to_str()->str_value, object->type_str());
+                // TODO throw exception
+                break;
+            }
+            break;
+        }
         case OP_RETURN: {
             assert(function_frames->size() > 0);
             FunctionFrame *fframe = function_frames->back();

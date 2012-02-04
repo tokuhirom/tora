@@ -399,6 +399,27 @@ void tora::Compiler::compile(Node *node) {
         jump_label2->operand.int_value = label2;
         break;
     }
+    case NODE_METHOD_CALL: {
+        /*
+        node->method_call.object = $1;
+        node->method_call.method = $3;
+        node->method_call.args   = $5;
+        */
+        auto args = node->method_call.args;
+        int args_len = args->size();
+        while (args->size() > 0) {
+            this->compile(args->back());
+            args->pop_back();
+        }
+        this->compile(node->method_call.method);
+        this->compile(node->method_call.object);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_METHOD_CALL;
+        tmp->operand.int_value = args_len; // the number of args
+        vm->ops->push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %s\n", node->type_name_str());

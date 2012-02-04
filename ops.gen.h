@@ -37,6 +37,7 @@ typedef enum {
     OP_GET_ITEM,
     OP_SET_ITEM,
     OP_UNARY_NEGATIVE,
+    OP_METHOD_CALL,
 } OP_TYPE;
 
 static const char*opcode2name[] = {
@@ -75,6 +76,7 @@ static const char*opcode2name[] = {
     "OP_GET_ITEM",
     "OP_SET_ITEM",
     "OP_UNARY_NEGATIVE",
+    "OP_METHOD_CALL",
 };
 
 #endif // OPS_GEN_H_

@@ -116,7 +116,7 @@ typedef std::vector<Node*> argument_list_t;
     std::vector<struct Node*> *parameter_list;
 }
 
-%type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list
+%type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list inclusive_or_expression exclusive_or_expression and_expression
 %type <node> expression
 %type <node> assignment_expression
 %type <node> conditional_expression
@@ -141,7 +141,7 @@ typedef std::vector<Node*> argument_list_t;
 %token COMMA RETURN SEMICOLON
 %token SUB
 
-%left '.'
+%left DOT
 %left DOTDOT
 %left L_BRACKET R_BRACKET
 %left EQ
@@ -393,6 +393,24 @@ postfix_expression
         // TODO: support vargs
         $$ = tora_create_funcall($1, $3);
     }
+    | primary_expression DOT identifier L_PAREN argument_list R_PAREN
+    {
+        Node *node = new Node();
+        node->type = NODE_METHOD_CALL;
+        node->method_call.object = $1;
+        node->method_call.method = $3;
+        node->method_call.args   = $5;
+        $$ = node;
+    }
+    | primary_expression DOT identifier L_PAREN R_PAREN
+    {
+        Node *node = new Node();
+        node->type = NODE_METHOD_CALL;
+        node->method_call.object = $1;
+        node->method_call.method = $3;
+        node->method_call.args   = new std::vector<Node*>();
+        $$ = node;
+    }
     ;
 
 primary_expression
@@ -428,14 +446,6 @@ primary_expression
     {
         $$ = $2;
     }
-    | expression '.' identifier L_PAREN argument_list R_PAREN
-    {
-        Node *node = new Node();
-        node->type = NODE_METHOD_CALL;
-        node->method_call.object = $1;
-        node->method_call.method = $3;
-        node->method_call.args   = $5;
-    }
     ;
 
 identifier
@@ -463,7 +473,7 @@ variable
 int yyerror(const char *err) {
     extern char *yytext;
     extern int tora_line_number;
-    fprintf(stderr, "%s near %s at line %d\n", err, yytext, tora_line_number);
+    fprintf(stderr, "%s near '%s' at line %d\n", err, yytext, tora_line_number);
     return 0;
 }
 

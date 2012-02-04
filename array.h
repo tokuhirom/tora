@@ -19,6 +19,9 @@ public:
     void push(Value *v) {
         this->values->push_back(v);
     }
+    size_t size() {
+        return this->values->size();
+    }
     // release after pop by your hand
     Value* pop() {
         Value *v = this->values->back();
