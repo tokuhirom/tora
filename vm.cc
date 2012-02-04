@@ -14,6 +14,8 @@ VM::VM() {
 }
 
 VM::~VM() {
+    // TODO
+    // delete this->ops;
     delete this->lexical_vars_stack;
     delete this->function_frames;
 }

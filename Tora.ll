@@ -11,16 +11,20 @@ extern "C" int yywrap();
 /**
  * string buffer
  */
-static std::stringstream string_buffer;
+static std::stringstream *string_buffer = NULL;
 
 static void tora_open_string_literal() {
-    string_buffer.str("");
+    if (string_buffer) {
+        delete string_buffer;
+        string_buffer = NULL;
+    }
+    string_buffer = new std::stringstream();
 }
 static void tora_add_string_literal(char c) {
-    string_buffer << c;
+    (*string_buffer) << c;
 }
 static const char *tora_close_string_literal() {
-    return string_buffer.str().c_str();
+    return strdup(string_buffer->str().c_str());
 }
 
 /**
@@ -148,7 +152,7 @@ int yywrap(void)
 <END>\n ;
 
 <STRING_LITERAL_STATE>\"        {
-    yylval.str_value = strdup(tora_close_string_literal());
+    yylval.str_value = tora_close_string_literal();
     BEGIN INITIAL;
     return STRING_LITERAL;
 }

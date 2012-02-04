@@ -23,14 +23,6 @@ using namespace tora;
 extern int yylex();
 int yyerror(const char *err);
 
-static Node *tora_create_my(Node *t) {
-    return new NodeNode(NODE_MY, t);
-}
-
-static Node *tora_create_block(Node *t) {
-    return new NodeNode(NODE_BLOCK, t);
-}
-
 static Node *tora_create_funcdef(Node *name, std::vector<Node *>*params, Node *block) {
     return new FuncdefNode(name, params, block);
 }
@@ -58,8 +50,6 @@ static Node *tora_create_funcall(Node *t1, std::vector<Node*> *args) {
 
 Node *root_node;
 
-typedef std::vector<Node*> argument_list_t;
-
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 %}
@@ -69,7 +59,7 @@ typedef std::vector<Node*> argument_list_t;
 
 %union {
     int int_value;
-    char *str_value;
+    const char *str_value;
     struct Node *node;
     std::vector<struct Node*> *argument_list;
     std::vector<struct Node*> *parameter_list;
@@ -211,7 +201,7 @@ argument_list
 block
     : L_BRACE statement_list R_BRACE
     {
-        $$ = tora_create_block($2);
+        $$ = new NodeNode(NODE_BLOCK, $2);
     }
     | L_BRACE R_BRACE
     {
@@ -233,7 +223,7 @@ assignment_expression
     | MY variable ASSIGN expression
     {
         // REMOVE THIS NODE
-        Node *n1 = tora_create_my($2);
+        Node *n1 = new NodeNode(NODE_MY, $2);
         Node *node = new BinaryNode(NODE_SETVARIABLE, $2, $4);
         $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
     }
