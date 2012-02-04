@@ -2,17 +2,17 @@ use t::Util;
 
 run_is(<<'...', "true\n");
 if (true) {
-    say(true)
+    say(true);
 } else {
-    say(false)
+    say(false);
 }
 ...
 
 run_is(<<'...', "false\n");
 if (false) {
-    say(true)
+    say(true);
 } else {
-    say(false)
+    say(false);
 }
 ...
 

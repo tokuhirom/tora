@@ -47,7 +47,7 @@ int yywrap(void)
 <INITIAL>"-"        return SUBTRACT;
 <INITIAL>"*"        return MUL;
 <INITIAL>"/"        return DIV;
-<INITIAL>"\n"       return CR;
+<INITIAL>"\n"       ;
 <INITIAL>";"       return SEMICOLON;
 <INITIAL>"sub"       return SUB;
 <INITIAL>"for"       return FOR;
@@ -81,14 +81,12 @@ int yywrap(void)
 <INITIAL>"true" return TRUE;
 <INITIAL>"my" return MY;
 <INITIAL>"false" return FALSE;
-<INITIAL>"for" return FOR;
 <INITIAL>"while" return WHILE;
 <INITIAL>"return" return RETURN;
 <INITIAL>"else" return ELSE;
 <INITIAL>[ \t] ;
 <INITIAL>[ \t\r\n] {
     increment_line_number();
-    return CR;
 }
 
 <INITIAL>"\n__END__\n" {

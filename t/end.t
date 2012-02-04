@@ -5,7 +5,7 @@ use Test::More;
 use t::Util;
 
 run_is(<<'...', "hello\n");
-say("hello")
+say("hello");
 __END__
 say("YO");
 ...

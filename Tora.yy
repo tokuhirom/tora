@@ -107,8 +107,6 @@ typedef std::vector<struct TNode*> argument_list_t;
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 %}
-%token IF ELSE
-%token L_PAREN R_PAREN L_BRACE R_BRACE
 %union {
     int int_value;
     char *str_value;
@@ -117,21 +115,7 @@ typedef std::vector<struct TNode*> argument_list_t;
     std::vector<struct TNode*> *parameter_list;
 }
 
-%token <int_value> INT_LITERAL;
-%token <str_value> IDENTIFIER;
-%token <str_value> VARIABLE;
-%token ADD SUBTRACT MUL DIV CR
-%token FOR WHILE
-%token TRUE FALSE
-%token LT GT LE GE EQ
-%token ASSIGN
-%token MY
-%token COMMA RETURN SEMICOLON
-%token L_BRACKET R_BRACKET
-%token <str_value>STRING_LITERAL
-%token SUB
-
-%type <node> additive_expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression sub_stmt if_statement array unary_expression jump_statement
+%type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list
 %type <node> expression
 %type <node> assignment_expression
 %type <node> conditional_expression
@@ -143,75 +127,53 @@ typedef std::vector<struct TNode*> argument_list_t;
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
 
-%left  ADD SUB
-%left  MUL DIV
+%token IF ELSE
+%token L_PAREN R_PAREN L_BRACE R_BRACE
+%token <int_value> INT_LITERAL;
+%token <str_value> IDENTIFIER;
+%token <str_value> VARIABLE;
+%token <str_value>STRING_LITERAL
+%token FOR WHILE
+%nonassoc TRUE FALSE
+%right ASSIGN
+%right MY
+%token COMMA RETURN SEMICOLON
+%token L_BRACKET R_BRACKET
+%token SUB
+
+
+%left LT GT LE GE EQ
+%left  ADD SUBTRACT
+%left MUL DIV
 %right '!'        /* 右結合で優先順位1 */
 
 %%
 
-translation_unit
-    : line_list
+root
+    : translation_unit
     {
         root_node = tora_create_root_node($1);
     }
+    |
+    {
+        root_node = tora_create_root_node(tora_create_void());
+    }
+
+translation_unit
+    : statement
+    | translation_unit statement
+    {
+         $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
+    }
     ;
 
-line_list
-    :
-    {
-        $$ = tora_create_void();
-    }
-    | line
-    | line_list line
-    {
-        $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
-    }
-    | expression
-    ;
-
-line
-    :line SEMICOLON
+statement
+    :expression SEMICOLON
     {
         $$ = $1;
-    }
-    | expression CR
-    {
-        $$ = $1;
-    }
-    | CR
-    {
-        TNode *node = new TNode();
-        node->type = NODE_NEWLINE;
-        $$ = node;
     }
     | jump_statement
     | if_statement
-    | MY variable ASSIGN expression
-    {
-        TNode *n1 = tora_create_my($2);
-        TNode *node = new TNode();
-        node->type = NODE_SETVARIABLE;
-        node->set_value.lvalue = $2;
-        node->set_value.rvalue = $4;
-        $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
-    }
-    | variable ASSIGN expression
-    {
-        TNode *node = new TNode();
-        node->type = NODE_SETVARIABLE;
-        node->set_value.lvalue = $1;
-        node->set_value.rvalue = $3;
-        $$ = node;
-    }
-    | variable L_BRACKET expression R_BRACKET ASSIGN expression
-    {
-        TNode *node = new TNode();
-        node->type = NODE_SET_ITEM;
-        node->set_item.container= $1;
-        node->set_item.index = $3;
-        node->set_item.rvalue = $6;
-         $$ = node;
-    }
     | WHILE L_PAREN expression R_PAREN block
     {
         $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
@@ -231,7 +193,7 @@ line
     ;
 
 jump_statement
-    : RETURN expression
+    : RETURN expression SEMICOLON
     {
         $$ = tora_create_return($2);
     }
@@ -268,8 +230,8 @@ parameter_list
     }
 
 /* array constructor */
-array:
-    | L_BRACKET argument_list R_BRACKET
+array_creation
+    : L_BRACKET argument_list R_BRACKET
     {
         TNode *node = new TNode();
         node->type = NODE_MAKE_ARRAY;
@@ -290,7 +252,7 @@ argument_list
     ;
 
 block
-    : L_BRACE line_list R_BRACE
+    : L_BRACE statement_list R_BRACE
     {
         $$ = tora_create_block($2);
     }
@@ -299,11 +261,44 @@ block
         $$ = tora_create_newline();
     }
 
+statement_list
+    : statement_list statement
+    {
+        $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
+    }
+    | statement
+
 expression
     : assignment_expression
 
 assignment_expression
     : conditional_expression
+    | MY variable ASSIGN expression
+    {
+        TNode *n1 = tora_create_my($2);
+        TNode *node = new TNode();
+        node->type = NODE_SETVARIABLE;
+        node->set_value.lvalue = $2;
+        node->set_value.rvalue = $4;
+        $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
+    }
+    | variable ASSIGN expression
+    {
+        TNode *node = new TNode();
+        node->type = NODE_SETVARIABLE;
+        node->set_value.lvalue = $1;
+        node->set_value.rvalue = $3;
+        $$ = node;
+    }
+    | variable L_BRACKET expression R_BRACKET ASSIGN expression
+    {
+        TNode *node = new TNode();
+        node->type = NODE_SET_ITEM;
+        node->set_item.container= $1;
+        node->set_item.index = $3;
+        node->set_item.rvalue = $6;
+         $$ = node;
+    }
 
 conditional_expression
     : logical_or_expression
@@ -322,6 +317,7 @@ exclusive_or_expression
 
 and_expression
     : equality_expression
+    | array_creation
 
 equality_expression
     : relational_expression
@@ -329,7 +325,6 @@ equality_expression
     {
         $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
     }
-    | array
     ;
 
 relational_expression
@@ -381,7 +376,7 @@ multiplicative_expression
 
 unary_expression
     : postfix_expression
-    | SUBTRACT postfix_expression
+    | SUBTRACT unary_expression
     {
         $$ = tora_create_unary_expression(NODE_UNARY_NEGATIVE, $2);
     }

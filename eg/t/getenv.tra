@@ -1,3 +1,3 @@
-say(getenv("hoge"))
+say(getenv("hoge"));
 __END__
 undef

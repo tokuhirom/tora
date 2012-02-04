@@ -1,7 +1,7 @@
 use t::Util;
 
 run_is(<<'...', "hoge\n");
-say("ho" + "ge")
+say("ho" + "ge");
 ...
 
 done_testing;
