@@ -283,11 +283,12 @@ void VM::execute() {
         // variable
         case OP_SETLOCAL: {
             Value * rvalue = stack.pop();
-            rvalue->retain(); // TODO: maybe not needed
+            rvalue->retain();
             lexical_vars_stack->back()->setVar(
                 op->operand.int_value,
                 rvalue
             );
+            stack.push(rvalue);
             break;
         }
         case OP_SETDYNAMIC: {
@@ -300,12 +301,12 @@ void VM::execute() {
                 frame = frame->up;
             }
             Value * rvalue = stack.pop();
-            rvalue->retain(); // TODO: maybe not needed
+            rvalue->retain();
             frame->setVar(
                 no,
                 rvalue
             );
-            // lexical_vars_stack->back()->dump_vars();
+            stack.push(rvalue);
             break;
         }
         case OP_GETDYNAMIC: {
