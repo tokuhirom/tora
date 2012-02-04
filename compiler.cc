@@ -19,7 +19,7 @@ void tora::Compiler::compile(Node *node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
-        this->compile(node->node);
+        this->compile(node->to_node_node()->node);
 
         {
             OP * tmp = new OP;
@@ -32,13 +32,13 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_MY: {
-        const char *name = node->node->str_value;
+        const char *name = node->to_node_node()->node->to_str_node()->str_value;
         this->define_localvar(std::string(name));
-        // this->compile(node->node);
+        // this->compile(node->to_node_node()->node);
         break;
     }
     case NODE_RETURN: {
-        this->compile(node->node);
+        this->compile(node->to_node_node()->node);
         break;
     }
     case NODE_BLOCK: {
@@ -48,7 +48,7 @@ void tora::Compiler::compile(Node *node) {
         enter->op_type = OP_ENTER;
         vm->ops->push_back(enter);
 
-        this->compile(node->node);
+        this->compile(node->to_node_node()->node);
 
         vm->ops->push_back(new OP(OP_LEAVE));
 
@@ -68,21 +68,22 @@ void tora::Compiler::compile(Node *node) {
         make_function
         */
 
+        auto funcdef_node = node->to_funcdef_node();
+
         // function name
-        const char *funcname = node->funcdef.name->str_value;
+        const char *funcname = funcdef_node->name->to_str_node()->str_value;
 
-
-        std::vector<std::string *>* params = new std::vector<std::string *>();
-        for (size_t i=0; i<node->funcdef.params->size(); i++) {
-            params->push_back(new std::string(node->funcdef.params->at(i)->str_value));
-            this->define_localvar(std::string(node->funcdef.params->at(i)->str_value));
+        auto params = new std::vector<std::string *>();
+        for (size_t i=0; i<funcdef_node->params->size(); i++) {
+            params->push_back(new std::string(funcdef_node->params->at(i)->to_str_node()->str_value));
+            this->define_localvar(std::string(funcdef_node->params->at(i)->to_str_node()->str_value));
         }
 
         // TODO: better Compiler class definition
         VM vm_;
         Compiler funccomp(&vm_);
         funccomp.blocks = this->blocks;
-        funccomp.compile(node->funcdef.block);
+        funccomp.compile(funcdef_node->block);
 
         OP * ret = new OP;
         ret->op_type = OP_RETURN;
@@ -108,14 +109,14 @@ void tora::Compiler::compile(Node *node) {
     case NODE_STRING: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_STRING;
-        tmp->operand.str_value = strdup(node->str_value);
+        tmp->operand.str_value = strdup(node->to_str_node()->str_value);
         vm->ops->push_back(tmp);
         break;
     }
     case NODE_INT: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_INT;
-        tmp->operand.int_value = node->int_value;
+        tmp->operand.int_value = node->to_int_node()->int_value;
         vm->ops->push_back(tmp);
         break;
     }
@@ -134,19 +135,19 @@ void tora::Compiler::compile(Node *node) {
     case NODE_IDENTIFIER: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_IDENTIFIER;
-        tmp->operand.str_value = strdup(node->str_value);
+        tmp->operand.str_value = strdup(node->to_str_node()->str_value);
         vm->ops->push_back(tmp);
         break;
     }
 
     case NODE_FUNCALL: {
-        std::vector<Node *>*args = node->funcall.args;
+        std::vector<Node *>*args = node->to_funcall_node()->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(node->funcall.name);
+        this->compile(node->to_funcall_node()->name);
 
         OP * tmp = new OP;
         tmp->op_type = OP_FUNCALL;
@@ -203,13 +204,14 @@ void tora::Compiler::compile(Node *node) {
         ELSE_LABEL:
         END_LABEL:
         */
-        this->compile(node->if_stmt.cond);
+        auto if_node = node->to_if_node();
+        this->compile(if_node->cond);
 
         OP * jump_else = new OP;
         jump_else->op_type = OP_JUMP_IF_FALSE;
         vm->ops->push_back(jump_else);
 
-        this->compile(node->if_stmt.if_body);
+        this->compile(if_node->if_body);
 
         OP * jump_end = new OP;
         jump_end->op_type = OP_JUMP;
@@ -217,8 +219,8 @@ void tora::Compiler::compile(Node *node) {
 
         int else_label = vm->ops->size();
         jump_else->operand.int_value = else_label;
-        if (node->if_stmt.else_body) {
-            this->compile(node->if_stmt.else_body);
+        if (if_node->else_body) {
+            this->compile(if_node->else_body);
         }
 
         int end_label = vm->ops->size();
@@ -262,9 +264,9 @@ void tora::Compiler::compile(Node *node) {
         break;
     case NODE_GETVARIABLE: {
         int level;
-        int no = this->find_localvar(std::string(node->str_value), level);
+        int no = this->find_localvar(std::string(node->to_str_node()->str_value), level);
         if (no<0) {
-            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->str_value);
+            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->to_str_node()->str_value);
             error = true;
         }
 
@@ -284,7 +286,7 @@ void tora::Compiler::compile(Node *node) {
     case NODE_SETVARIABLE: {
         switch (node->binary()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
-            const char*varname = node->binary()->left->str_value;
+            const char*varname = node->binary()->left->to_str_node()->str_value;
             int level;
             int no = this->find_localvar(std::string(varname), level);
             if (no<0) {
@@ -331,7 +333,7 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_MAKE_ARRAY: {
-        std::vector<Node *>*args = node->args;
+        auto args = node->to_args_node()->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -355,7 +357,7 @@ void tora::Compiler::compile(Node *node) {
     }
 
     case NODE_UNARY_NEGATIVE: {
-        this->compile(node->node);
+        this->compile(node->to_node_node()->node);
 
         vm->ops->push_back(new OP(OP_UNARY_NEGATIVE));
 
@@ -381,16 +383,16 @@ void tora::Compiler::compile(Node *node) {
         LABEL2:
         */
 
-        this->compile(node->for_stmt.initialize);
+        this->compile(node->to_for_node()->initialize);
         int label1 = vm->ops->size();
-        this->compile(node->for_stmt.cond);
+        this->compile(node->to_for_node()->cond);
 
         OP * jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
         vm->ops->push_back(jump_label2);
 
-        this->compile(node->for_stmt.block);
-        this->compile(node->for_stmt.postfix);
+        this->compile(node->to_for_node()->block);
+        this->compile(node->to_for_node()->postfix);
 
         OP * jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;

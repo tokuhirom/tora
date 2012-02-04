@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Compilation failed\n");
             exit(1);
         }
+        // delete root_node; // AST is not needed after compiling.
         if (dump_ops) {
             vm.dump_ops();
         }

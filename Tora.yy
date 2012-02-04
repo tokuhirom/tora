@@ -23,47 +23,20 @@ using namespace tora;
 extern int yylex();
 int yyerror(const char *err);
 
-static Node *tora_create_root_node(Node *t) {
-    Node *node = new Node();
-    node->type = NODE_ROOT;
-    node->node = t;
-    return node;
-}
-
 static Node *tora_create_my(Node *t) {
-    Node *node = new Node();
-    node->type = NODE_MY;
-    node->node = t;
-    return node;
+    return new NodeNode(NODE_MY, t);
 }
 
 static Node *tora_create_block(Node *t) {
-    Node *node = new Node();
-    node->type = NODE_BLOCK;
-    node->node = t;
-    return node;
+    return new NodeNode(NODE_BLOCK, t);
 }
 
 static Node *tora_create_funcdef(Node *name, std::vector<Node *>*params, Node *block) {
-    Node *node = new Node();
-    node->type = NODE_FUNCDEF;
-    node->funcdef.name   = name;
-    node->funcdef.params = params;
-    node->funcdef.block  = block;
-    return node;
+    return new FuncdefNode(name, params, block);
 }
 
 static Node *tora_create_return(Node *child) {
-    Node *node = new Node();
-    node->type = NODE_RETURN;
-    node->node = child;
-    return node;
-}
-
-static Node *tora_create_void() {
-    Node *node = new Node();
-    node->type = NODE_VOID;
-    return node;
+    return new NodeNode(NODE_RETURN, child);
 }
 
 static Node *tora_create_binary_expression(node_type_t type, Node *t1, Node* t2) {
@@ -71,27 +44,15 @@ static Node *tora_create_binary_expression(node_type_t type, Node *t1, Node* t2)
 }
 
 static Node *tora_create_unary_expression(node_type_t type, Node *t1) {
-    Node *node = new Node();
-    node->type = type;
-    node->node  = t1;
-    return node;
+    return new NodeNode(type, t1);
 }
 
 static Node *tora_create_if(Node *cond, Node* if_body, Node *else_body) {
-    Node *node = new Node();
-    node->type = NODE_IF;
-    node->if_stmt.cond      = cond;
-    node->if_stmt.if_body   = if_body;
-    node->if_stmt.else_body = else_body;
-    return node;
+    return new IfNode(NODE_IF, cond, if_body, else_body);
 }
 
 static Node *tora_create_funcall(Node *t1, std::vector<Node*> *args) {
-    Node *node = new Node();
-    node->type = NODE_FUNCALL;
-    node->funcall.name  = t1;
-    node->funcall.args  = args;
-    return node;
+    return new FuncallNode(t1, args);
 }
 
 
@@ -153,11 +114,11 @@ typedef std::vector<Node*> argument_list_t;
 root
     : translation_unit
     {
-        root_node = tora_create_root_node($1);
+        root_node = new NodeNode(NODE_ROOT, $1);
     }
     |
     {
-        root_node = tora_create_root_node(tora_create_void());
+        root_node = new NodeNode(NODE_ROOT, new VoidNode(NODE_VOID));
     }
 
 translation_unit
@@ -175,7 +136,7 @@ statement
     }
     | SEMICOLON
     {
-        $$ = tora_create_void();
+        $$ = new VoidNode(NODE_VOID);
     }
     | jump_statement
     | if_statement
@@ -185,13 +146,7 @@ statement
     }
     | FOR L_PAREN expression SEMICOLON expression SEMICOLON expression R_PAREN block
     {
-        Node *node = new Node();
-        node->type = NODE_FOR;
-        node->for_stmt.initialize = $3;
-        node->for_stmt.cond = $5;
-        node->for_stmt.postfix = $7;
-        node->for_stmt.block = $9;
-        $$ = node;
+        $$ = new ForNode($3, $5, $7, $9);
     }
     | sub_stmt
     | block
@@ -238,10 +193,7 @@ parameter_list
 array_creation
     : L_BRACKET argument_list R_BRACKET
     {
-        Node *node = new Node();
-        node->type = NODE_MAKE_ARRAY;
-        node->args = $2;
-        $$ = node;
+        $$ = new ArgsNode(NODE_MAKE_ARRAY, $2);
     }
 
 argument_list
@@ -263,7 +215,7 @@ block
     }
     | L_BRACE R_BRACE
     {
-        $$ = new Node(NODE_VOID);
+        $$ = new VoidNode(NODE_VOID);
     }
 
 statement_list
@@ -398,29 +350,19 @@ postfix_expression
 primary_expression
     : INT_LITERAL
     {
-        Node *node = new Node();
-        node->type = NODE_INT;
-        node->int_value = $1;
-        $$ = node;
+        $$ = new IntNode(NODE_INT, $1);
     }
     | FALSE
     {
-        Node *node = new Node();
-        node->type = NODE_FALSE;
-        $$ = node;
+        $$ = new VoidNode(NODE_FALSE);
     }
     | TRUE
     {
-        Node *node = new Node();
-        node->type = NODE_TRUE;
-        $$ = node;
+        $$ = new VoidNode(NODE_TRUE);
     }
     | STRING_LITERAL
     {
-        Node *node = new Node();
-        node->type = NODE_STRING;
-        node->str_value = $1;
-        $$ = node;
+        $$ = new StrNode(NODE_STRING, $1);
     }
     | variable
     | array_creation
@@ -433,20 +375,14 @@ primary_expression
 identifier
     : IDENTIFIER
     {
-        Node *node = new Node();
-        node->type = NODE_IDENTIFIER;
-        node->str_value = $1;
-        $$ = node;
+        $$ = new StrNode(NODE_IDENTIFIER, $1);
     }
     ;
 
 variable
     : VARIABLE
     {
-        Node *node = new Node();
-        node->type = NODE_GETVARIABLE;
-        node->str_value = $1;
-        $$ = node;
+        $$ = new StrNode(NODE_GETVARIABLE, $1);
     }
     ;
 
