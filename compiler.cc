@@ -1,3 +1,5 @@
+#include "nodes.gen.h"
+#include "node.h"
 #include "compiler.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {

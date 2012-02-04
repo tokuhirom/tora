@@ -1,6 +1,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
+#include "node.h"
 #include "vm.h"
 
 namespace tora {

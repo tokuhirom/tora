@@ -1,4 +1,5 @@
 #include "tora.h"
+#include "node.h"
 
 // TODO: move to Node::dump()
 

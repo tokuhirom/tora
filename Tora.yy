@@ -9,6 +9,8 @@
 #include <unistd.h>
 
 #include "ops.gen.h"
+#include "nodes.gen.h"
+#include "node.h"
 #include "tora.h"
 #include "value.h"
 #include "vm.h"

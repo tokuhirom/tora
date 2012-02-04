@@ -6,6 +6,7 @@
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
+#include "node.h"
 
 using namespace tora;
 
