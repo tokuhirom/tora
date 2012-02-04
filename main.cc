@@ -6,11 +6,10 @@
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
-#include "dump_tree.h"
 
 using namespace tora;
 
-extern TNode *root_node;
+extern Node *root_node;
 
 int main(int argc, char **argv) {
     extern int yyparse(void);
@@ -74,7 +73,7 @@ int main(int argc, char **argv) {
         }
         assert(root_node);
         if (dump_ast) {
-            tora::dump_tree(root_node);
+            root_node->dump();
         }
 
         tora::VM vm;

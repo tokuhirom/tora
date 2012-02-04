@@ -1,5 +1,4 @@
 #include "compiler.h"
-#include "dump_tree.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
@@ -14,7 +13,7 @@ int tora::Compiler::find_localvar(std::string name, int &level) {
     return -1;
 }
 
-void tora::Compiler::compile(TNode *node) {
+void tora::Compiler::compile(Node *node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
@@ -58,9 +57,9 @@ void tora::Compiler::compile(TNode *node) {
     case NODE_FUNCDEF: {
         /*
         struct {
-            struct TNode *name;
-            std::vector<struct TNode*> *params;
-            struct TNode *block;
+            struct Node *name;
+            std::vector<struct Node*> *params;
+            struct Node *block;
         } funcdef;
         
         putcodevalue v
@@ -139,7 +138,7 @@ void tora::Compiler::compile(TNode *node) {
     }
 
     case NODE_FUNCALL: {
-        std::vector<TNode *>*args = node->funcall.args;
+        std::vector<Node *>*args = node->funcall.args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -322,7 +321,7 @@ void tora::Compiler::compile(TNode *node) {
         }
         default:
             printf("This is not lvalue\n");
-            dump_tree(node);
+            node->dump(1);
             error = true;
             break;
         }
@@ -330,7 +329,7 @@ void tora::Compiler::compile(TNode *node) {
         break;
     }
     case NODE_MAKE_ARRAY: {
-        std::vector<TNode *>*args = node->args;
+        std::vector<Node *>*args = node->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -364,10 +363,10 @@ void tora::Compiler::compile(TNode *node) {
     case NODE_FOR: {
         /*
         struct {
-            struct TNode *initialize;
-            struct TNode *cond;
-            struct TNode *postfix;
-            struct TNode *block;
+            struct Node *initialize;
+            struct Node *cond;
+            struct Node *postfix;
+            struct Node *block;
         } for_stmt;
 
             (initialize)

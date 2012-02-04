@@ -21,29 +21,29 @@ using namespace tora;
 extern int yylex();
 int yyerror(const char *err);
 
-static TNode *tora_create_root_node(TNode *t) {
-    TNode *node = new TNode();
+static Node *tora_create_root_node(Node *t) {
+    Node *node = new Node();
     node->type = NODE_ROOT;
     node->node = t;
     return node;
 }
 
-static TNode *tora_create_my(TNode *t) {
-    TNode *node = new TNode();
+static Node *tora_create_my(Node *t) {
+    Node *node = new Node();
     node->type = NODE_MY;
     node->node = t;
     return node;
 }
 
-static TNode *tora_create_block(TNode *t) {
-    TNode *node = new TNode();
+static Node *tora_create_block(Node *t) {
+    Node *node = new Node();
     node->type = NODE_BLOCK;
     node->node = t;
     return node;
 }
 
-static TNode *tora_create_funcdef(TNode *name, std::vector<TNode *>*params, TNode *block) {
-    TNode *node = new TNode();
+static Node *tora_create_funcdef(Node *name, std::vector<Node *>*params, Node *block) {
+    Node *node = new Node();
     node->type = NODE_FUNCDEF;
     node->funcdef.name   = name;
     node->funcdef.params = params;
@@ -51,36 +51,36 @@ static TNode *tora_create_funcdef(TNode *name, std::vector<TNode *>*params, TNod
     return node;
 }
 
-static TNode *tora_create_return(TNode *child) {
-    TNode *node = new TNode();
+static Node *tora_create_return(Node *child) {
+    Node *node = new Node();
     node->type = NODE_RETURN;
     node->node = child;
     return node;
 }
 
-static TNode *tora_create_void() {
-    TNode *node = new TNode();
+static Node *tora_create_void() {
+    Node *node = new Node();
     node->type = NODE_VOID;
     return node;
 }
 
-static TNode *tora_create_binary_expression(node_type_t type, TNode *t1, TNode* t2) {
-    TNode *node = new TNode();
+static Node *tora_create_binary_expression(node_type_t type, Node *t1, Node* t2) {
+    Node *node = new Node();
     node->type = type;
     node->binary.left  = t1;
     node->binary.right = t2;
     return node;
 }
 
-static TNode *tora_create_unary_expression(node_type_t type, TNode *t1) {
-    TNode *node = new TNode();
+static Node *tora_create_unary_expression(node_type_t type, Node *t1) {
+    Node *node = new Node();
     node->type = type;
     node->node  = t1;
     return node;
 }
 
-static TNode *tora_create_if(TNode *cond, TNode* if_body, TNode *else_body) {
-    TNode *node = new TNode();
+static Node *tora_create_if(Node *cond, Node* if_body, Node *else_body) {
+    Node *node = new Node();
     node->type = NODE_IF;
     node->if_stmt.cond      = cond;
     node->if_stmt.if_body   = if_body;
@@ -88,8 +88,8 @@ static TNode *tora_create_if(TNode *cond, TNode* if_body, TNode *else_body) {
     return node;
 }
 
-static TNode *tora_create_funcall(TNode *t1, std::vector<TNode*> *args) {
-    TNode *node = new TNode();
+static Node *tora_create_funcall(Node *t1, std::vector<Node*> *args) {
+    Node *node = new Node();
     node->type = NODE_FUNCALL;
     node->funcall.name  = t1;
     node->funcall.args  = args;
@@ -97,9 +97,9 @@ static TNode *tora_create_funcall(TNode *t1, std::vector<TNode*> *args) {
 }
 
 
-TNode *root_node;
+Node *root_node;
 
-typedef std::vector<TNode*> argument_list_t;
+typedef std::vector<Node*> argument_list_t;
 
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
@@ -111,9 +111,9 @@ typedef std::vector<TNode*> argument_list_t;
 %union {
     int int_value;
     char *str_value;
-    struct TNode *node;
-    std::vector<struct TNode*> *argument_list;
-    std::vector<struct TNode*> *parameter_list;
+    struct Node *node;
+    std::vector<struct Node*> *argument_list;
+    std::vector<struct Node*> *parameter_list;
 }
 
 %type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list
@@ -183,7 +183,7 @@ statement
     }
     | FOR L_PAREN expression SEMICOLON expression SEMICOLON expression R_PAREN block
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_FOR;
         node->for_stmt.initialize = $3;
         node->for_stmt.cond = $5;
@@ -218,13 +218,13 @@ sub_stmt
     }
     | SUB identifier L_PAREN R_PAREN block
     {
-        $$ = tora_create_funcdef($2, new std::vector<TNode*>(), $5);
+        $$ = tora_create_funcdef($2, new std::vector<Node*>(), $5);
     }
 
 parameter_list
     : variable
     {
-        $$ = new std::vector<TNode*>();
+        $$ = new std::vector<Node*>();
         $$->push_back($1);
     }
     | parameter_list COMMA expression
@@ -236,7 +236,7 @@ parameter_list
 array_creation
     : L_BRACKET argument_list R_BRACKET
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_MAKE_ARRAY;
         node->args = $2;
         $$ = node;
@@ -245,7 +245,7 @@ array_creation
 argument_list
     : expression
     {
-        $$ = new std::vector<TNode*>();
+        $$ = new std::vector<Node*>();
         $$->push_back($1);
     }
     | argument_list COMMA expression
@@ -261,7 +261,7 @@ block
     }
     | L_BRACE R_BRACE
     {
-        $$ = new TNode(NODE_VOID);
+        $$ = new Node(NODE_VOID);
     }
 
 statement_list
@@ -278,8 +278,8 @@ assignment_expression
     : conditional_expression
     | MY variable ASSIGN expression
     {
-        TNode *n1 = tora_create_my($2);
-        TNode *node = new TNode();
+        Node *n1 = tora_create_my($2);
+        Node *node = new Node();
         node->type = NODE_SETVARIABLE;
         node->set_value.lvalue = $2;
         node->set_value.rvalue = $4;
@@ -287,7 +287,7 @@ assignment_expression
     }
     | conditional_expression ASSIGN conditional_expression
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_SETVARIABLE;
         node->set_value.lvalue = $1;
         node->set_value.rvalue = $3;
@@ -378,7 +378,7 @@ postfix_expression
     : primary_expression
     | primary_expression L_BRACKET expression R_BRACKET
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_GET_ITEM;
         node->binary.left = $1;
         node->binary.right = $3;
@@ -386,7 +386,7 @@ postfix_expression
     }
     | identifier L_PAREN R_PAREN
     {
-        $$ = tora_create_funcall($1, new std::vector<TNode*>());
+        $$ = tora_create_funcall($1, new std::vector<Node*>());
     }
     | identifier L_PAREN argument_list R_PAREN
     {
@@ -398,26 +398,26 @@ postfix_expression
 primary_expression
     : INT_LITERAL
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_INT;
         node->int_value = $1;
         $$ = node;
     }
     | FALSE
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_FALSE;
         $$ = node;
     }
     | TRUE
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_TRUE;
         $$ = node;
     }
     | STRING_LITERAL
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_STRING;
         node->str_value = $1;
         $$ = node;
@@ -430,7 +430,7 @@ primary_expression
     }
     | expression '.' identifier L_PAREN argument_list R_PAREN
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_METHOD_CALL;
         node->method_call.object = $1;
         node->method_call.method = $3;
@@ -441,7 +441,7 @@ primary_expression
 identifier
     : IDENTIFIER
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_IDENTIFIER;
         node->str_value = $1;
         $$ = node;
@@ -451,7 +451,7 @@ identifier
 variable
     : VARIABLE
     {
-        TNode *node = new TNode();
+        Node *node = new Node();
         node->type = NODE_GETVARIABLE;
         node->str_value = $1;
         $$ = node;

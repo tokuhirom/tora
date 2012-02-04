@@ -29,7 +29,7 @@ public:
         // delete blocks;
         // TODO
     }
-    void compile(TNode *node);
+    void compile(Node *node);
     void push_block() {
         DBG("PUSH BLOCK: %d\n", this->blocks->size());
         this->blocks->push_back(new Block());

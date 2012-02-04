@@ -18,59 +18,61 @@
 
 namespace tora {
 
-struct TNode {
+struct Node {
     node_type_t type;
     union {
-        struct TNode *node;
+        struct Node *node;
         int int_value;
         const char*str_value;
         struct {
-            struct TNode *left;
-            struct TNode *right;
+            struct Node *left;
+            struct Node *right;
         } binary;
         struct {
-            struct TNode *name;
-            std::vector<struct TNode*> *args;
+            struct Node *name;
+            std::vector<struct Node*> *args;
         } funcall;
         struct {
-            struct TNode *name;
-            std::vector<struct TNode*> *params;
-            struct TNode *block;
+            struct Node *name;
+            std::vector<struct Node*> *params;
+            struct Node *block;
         } funcdef;
         struct {
-            struct TNode *cond;
-            struct TNode *if_body;
-            struct TNode *else_body;
+            struct Node *cond;
+            struct Node *if_body;
+            struct Node *else_body;
         } if_stmt;
-        std::vector<struct TNode*> *args;
+        std::vector<struct Node*> *args;
         struct {
-            struct TNode *lvalue;
-            struct TNode *rvalue;
+            struct Node *lvalue;
+            struct Node *rvalue;
         } set_value;
         struct {
-            struct TNode *container;
-            struct TNode *index;
-            struct TNode *rvalue;
+            struct Node *container;
+            struct Node *index;
+            struct Node *rvalue;
         } set_item;
         struct {
-            struct TNode *initialize;
-            struct TNode *cond;
-            struct TNode *postfix;
-            struct TNode *block;
+            struct Node *initialize;
+            struct Node *cond;
+            struct Node *postfix;
+            struct Node *block;
         } for_stmt;
         struct {
-            struct TNode *object;
-            struct TNode *method;
-            std::vector<struct TNode*> *args;
+            struct Node *object;
+            struct Node *method;
+            std::vector<struct Node*> *args;
         } method_call;
     };
-    TNode() { }
-    TNode(node_type_t t) {
+    Node() { }
+    Node(node_type_t t) {
         this->type = t;
     }
     const char *type_name_str() {
         return node_type2name[this->type];
     }
+    void dump(int indent);
+    void dump();
 };
 
 };
