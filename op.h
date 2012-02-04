@@ -6,7 +6,7 @@
 
 namespace tora {
 
-class OP : public Value {
+class OP : public Prim {
 public:
     op_type_t op_type;
     union {
@@ -19,8 +19,6 @@ public:
         this->op_type = type;
     }
     ~OP() { }
-    void dump() { }
-    const char *type_str() { return "OP"; };
 };
 
 /**
@@ -34,7 +32,6 @@ public:
         this->value = v;
     }
     ~ValueOP();
-    const char *type_str() { return "ValueOP"; };
 };
 
 };

@@ -28,20 +28,13 @@ class StrValue;
 class BoolValue;
 class ArrayValue;
 
-/**
- * The value class
- */
-class Value {
+class Prim {
 protected:
-    Value() {
+    int refcnt; // reference count
+    Prim() {
         refcnt = 1;
     }
 public:
-    value_type_t value_type;
-    int refcnt; // reference count
-
-    ~Value() {
-    }
     inline virtual void release() {
         --refcnt;
         if (refcnt == 0) {
@@ -51,6 +44,18 @@ public:
     inline virtual void retain() {
         ++refcnt;
     }
+    virtual ~Prim() { }
+};
+
+/**
+ * The value class
+ */
+class Value : public Prim {
+protected:
+    Value() : Prim() { }
+public:
+    value_type_t value_type;
+
     CodeValue* to_code() {
         if (this->value_type == VALUE_TYPE_CODE) {
             return (CodeValue*)this;
@@ -192,10 +197,12 @@ public:
         this->value_type = VALUE_TYPE_STR;
         this->str_value = str;
     }
+    /*
     ~StrValue() {
         delete [] str_value;
         this->str_value = NULL;
     }
+    */
     void set_str(const char*s) {
         str_value = s;
     }

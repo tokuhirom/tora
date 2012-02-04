@@ -12,30 +12,27 @@ namespace tora {
 
 class Stack;
 
-class FunctionFrame : public Value {
+class FunctionFrame : public Prim {
 public:
     int return_address;
     int top;
     std::vector<OP*> *orig_ops;
-    void dump() {
-        printf("FunctionFrame\n");
-    }
-    const char *type_str() { return "FunctionFrame"; }
 };
 
-class LexicalVarsFrame : public Value {
+class LexicalVarsFrame : public Prim {
 public:
     LexicalVarsFrame* up;
     std::map<int, Value*> vars;
-    LexicalVarsFrame() {
+    LexicalVarsFrame() : Prim() {
         up = NULL;
     }
-    LexicalVarsFrame(LexicalVarsFrame *up_) {
+    LexicalVarsFrame(LexicalVarsFrame *up_) : Prim() {
         up_->retain();
         this->up = up_;
     }
     ~LexicalVarsFrame() {
-        this->up->release();
+// TODO: release this
+//      this->up->release();
     }
     void setVar(int id, Value *v) {
         this->vars[id] = v;
@@ -67,7 +64,6 @@ public:
         this->dump(0);
         printf("---------------\n");
     }
-    const char *type_str() { return "LexicalVarsFrame"; }
 };
 
 class VM {

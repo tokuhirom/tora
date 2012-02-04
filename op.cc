@@ -2,5 +2,5 @@
 #include "value.h"
 
 tora::ValueOP::~ValueOP() {
-    // this->value->release();
+    this->value->release();
 }
