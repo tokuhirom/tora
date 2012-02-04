@@ -129,15 +129,22 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token COMMA RETURN SEMICOLON
 %token L_BRACKET R_BRACKET
 %token <str_value>STRING_LITERAL
-%token SUB FOR
+%token SUB
 
-%type <node> relational_expression expression3 expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression void sub_stmt if_statement array unary_expression jump_statement
+%type <node> additive_expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression void sub_stmt if_statement array unary_expression jump_statement
+%type <node> expression
+%type <node> assignment_expression
+%type <node> conditional_expression
+%type <node> logical_or_expression
+%type <node> equality_expression
+%type <node> relational_expression
+%type <node> shift_expression
 %type <node> identifier
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
 
-%left  '+' '-'    /* 左結合で優先順位3 */
-%left  '*' '/'    /* 左結合で優先順位2 */
+%left  ADD SUB
+%left  MUL DIV
 %right '!'        /* 右結合で優先順位1 */
 
 %%
@@ -170,7 +177,7 @@ line
     {
         $$ = $1;
     }
-    |expression CR
+    | expression CR
     {
         $$ = $1;
     }
@@ -296,8 +303,32 @@ block
     }
 
 expression
+    : assignment_expression
+
+assignment_expression
+    : conditional_expression
+
+conditional_expression
+    : logical_or_expression
+
+logical_or_expression
+    : logical_and_expression
+
+logical_and_expression
+    : inclusive_or_expression
+
+inclusive_or_expression
+    : exclusive_or_expression
+
+exclusive_or_expression
+    : and_expression
+
+and_expression
+    : equality_expression
+
+equality_expression
     : relational_expression
-    | expression EQ relational_expression
+    | equality_expression EQ relational_expression
     {
         $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
     }
@@ -305,26 +336,29 @@ expression
     ;
 
 relational_expression
-    : expression3
-    | relational_expression LT expression3
+    : shift_expression
+    | relational_expression LT shift_expression
     {
         $$ = tora_create_binary_expression(NODE_LT, $1, $3);
     }
-    | relational_expression GT expression3
+    | relational_expression GT shift_expression
     {
         $$ = tora_create_binary_expression(NODE_GT, $1, $3);
     }
-    | relational_expression LE expression3
+    | relational_expression LE shift_expression
     {
         $$ = tora_create_binary_expression(NODE_LE, $1, $3);
     }
-    | relational_expression GE expression3
+    | relational_expression GE shift_expression
     {
         $$ = tora_create_binary_expression(NODE_GE, $1, $3);
     }
     ;
 
-expression3
+shift_expression
+    : additive_expression
+
+additive_expression
     : multiplicative_expression
     | expression ADD multiplicative_expression
     {
