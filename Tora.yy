@@ -131,7 +131,7 @@ typedef std::vector<struct TNode*> argument_list_t;
 %token <str_value>STRING_LITERAL
 %token SUB
 
-%type <node> additive_expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression void sub_stmt if_statement array unary_expression jump_statement
+%type <node> additive_expression multiplicative_expression primary_expression line line_list translation_unit variable block postfix_expression sub_stmt if_statement array unary_expression jump_statement
 %type <node> expression
 %type <node> assignment_expression
 %type <node> conditional_expression
@@ -156,20 +156,17 @@ translation_unit
     }
     ;
 
-void:
-    /* empty */
-
 line_list
-    : line
+    :
+    {
+        $$ = tora_create_void();
+    }
+    | line
     | line_list line
     {
         $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
     }
     | expression
-    | void
-    {
-        $$ = tora_create_void();
-    }
     ;
 
 line
@@ -213,7 +210,7 @@ line
         node->set_item.container= $1;
         node->set_item.index = $3;
         node->set_item.rvalue = $6;
-        $$ = node;
+         $$ = node;
     }
     | WHILE L_PAREN expression R_PAREN block
     {
@@ -254,6 +251,10 @@ sub_stmt
     {
         $$ = tora_create_funcdef($2, $4, $6);
     }
+    | SUB identifier L_PAREN R_PAREN block
+    {
+        $$ = tora_create_funcdef($2, new std::vector<TNode*>(), $5);
+    }
 
 parameter_list
     : variable
@@ -264,10 +265,6 @@ parameter_list
     | parameter_list COMMA expression
     {
         $$->push_back($3);
-    }
-    | void
-    {
-        $$ = new std::vector<TNode*>();
     }
 
 /* array constructor */
@@ -371,12 +368,12 @@ additive_expression
     ;
 
 multiplicative_expression
-    : postfix_expression
-    | multiplicative_expression MUL postfix_expression
+    : unary_expression
+    | multiplicative_expression MUL unary_expression
     {
         $$ = tora_create_binary_expression(NODE_MUL, $1, $3);
     }
-    | multiplicative_expression DIV postfix_expression
+    | multiplicative_expression DIV unary_expression
     {
         $$ = tora_create_binary_expression(NODE_DIV, $1, $3);
     }
@@ -384,7 +381,7 @@ multiplicative_expression
 
 unary_expression
     : postfix_expression
-    | SUB postfix_expression
+    | SUBTRACT postfix_expression
     {
         $$ = tora_create_unary_expression(NODE_UNARY_NEGATIVE, $2);
     }
