@@ -5,6 +5,6 @@ lex.yy.c
 tora
 .sconsign.dblite
 hoge.tra
-nodes.gen.cc
-nodes.gen.h
-ops.gen.cc
+# nodes.gen.cc
+# nodes.gen.h
+# ops.gen.cc
