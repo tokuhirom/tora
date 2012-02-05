@@ -5,16 +5,17 @@
 
 using namespace tora;
 
-VM::VM() {
+VM::VM(std::vector<OP*>* ops_) {
     sp = 0;
     pc = 0;
-    ops = new std::vector<OP*>;
+    ops = ops_;
     this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<FunctionFrame*>();
 }
 
 VM::~VM() {
+    /*
     {
         auto iter = this->ops->begin();
         for (; iter!=this->ops->end(); iter++) {
@@ -22,6 +23,7 @@ VM::~VM() {
         }
         delete this->ops;
     }
+    */
     {
         auto iter = this->lexical_vars_stack->begin();
         for (; iter!=this->lexical_vars_stack->end(); iter++) {

@@ -81,7 +81,7 @@ public:
      */
     std::vector<LexicalVarsFrame *> *lexical_vars_stack;
 
-    VM();
+    VM(std::vector<OP*>*ops_);
     ~VM();
     void execute();
 

@@ -25,7 +25,7 @@ void tora::Compiler::compile(Node *node) {
         {
             OP * tmp = new OP;
             tmp->op_type = OP_END;
-            vm->ops->push_back(tmp);
+            ops->push_back(tmp);
         }
 
         this->pop_block();
@@ -47,11 +47,11 @@ void tora::Compiler::compile(Node *node) {
 
         OP * enter = new OP;
         enter->op_type = OP_ENTER;
-        vm->ops->push_back(enter);
+        ops->push_back(enter);
 
         this->compile(node->to_node_node()->node);
 
-        vm->ops->push_back(new OP(OP_LEAVE));
+        ops->push_back(new OP(OP_LEAVE));
 
         this->pop_block();
 
@@ -80,59 +80,70 @@ void tora::Compiler::compile(Node *node) {
             this->define_localvar(std::string(funcdef_node->params->at(i)->to_str_node()->str_value));
         }
 
-        // TODO: better Compiler class definition
-        VM vm_;
-        Compiler funccomp(&vm_);
-        funccomp.blocks = this->blocks;
+        Compiler funccomp;
+        {
+            auto iter = this->blocks->begin();
+            for (; iter!=this->blocks->end(); iter++) {
+                (*iter)->retain();
+            }
+        }
+        funccomp.blocks = new std::vector<Block*>(*(this->blocks));
         funccomp.compile(funcdef_node->block);
 
         OP * ret = new OP;
         ret->op_type = OP_RETURN;
-        vm_.ops->push_back(ret);
+        funccomp.ops->push_back(ret);
+
+        {
+            auto iter = funccomp.ops->begin();
+            for (; iter!=funccomp.ops->end(); iter++) {
+                (*iter)->retain();
+            }
+        }
 
         CodeValue *code = new CodeValue();
         code->code_name = strdup(funcname);
         code->code_params = params;
-        code->code_opcodes = new std::vector<OP*>(*vm_.ops);
+        code->code_opcodes = new std::vector<OP*>(*funccomp.ops);
 
         ValueOP * putval = new ValueOP(OP_PUSH_VALUE, code);
-        vm->ops->push_back(putval);
+        ops->push_back(putval);
 
         StrValue *funcname_value = new StrValue(strdup(funcname));
         ValueOP * define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
-        vm->ops->push_back(define_method);
+        ops->push_back(define_method);
 
         break;
     }
     case NODE_STRING: {
         StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
         ValueOP * tmp = new ValueOP(OP_PUSH_STRING, sv);
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_INT: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_INT;
         tmp->operand.int_value = node->to_int_node()->int_value;
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_TRUE: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_FALSE: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_FALSE;
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_IDENTIFIER: {
         StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
         ValueOP * tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
 
@@ -148,7 +159,7 @@ void tora::Compiler::compile(Node *node) {
         OP * tmp = new OP;
         tmp->op_type = OP_FUNCALL;
         tmp->operand.int_value = args_len; // the number of args
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
 #define C_OP_BINARY(type) \
@@ -157,7 +168,7 @@ void tora::Compiler::compile(Node *node) {
         this->compile(node->binary()->right); \
         OP * tmp = new OP; \
         tmp->op_type = (type); \
-        vm->ops->push_back(tmp); \
+        ops->push_back(tmp); \
         break; \
     }
 
@@ -205,21 +216,21 @@ void tora::Compiler::compile(Node *node) {
 
         OP * jump_else = new OP;
         jump_else->op_type = OP_JUMP_IF_FALSE;
-        vm->ops->push_back(jump_else);
+        ops->push_back(jump_else);
 
         this->compile(if_node->if_body);
 
         OP * jump_end = new OP;
         jump_end->op_type = OP_JUMP;
-        vm->ops->push_back(jump_end);
+        ops->push_back(jump_end);
 
-        int else_label = vm->ops->size();
+        int else_label = ops->size();
         jump_else->operand.int_value = else_label;
         if (if_node->else_body) {
             this->compile(if_node->else_body);
         }
 
-        int end_label = vm->ops->size();
+        int end_label = ops->size();
         jump_end->operand.int_value = end_label;
 
         break;
@@ -233,21 +244,21 @@ void tora::Compiler::compile(Node *node) {
           goto LABEL1
         LABEL2:
         */
-        int label1 = vm->ops->size();
+        int label1 = ops->size();
         this->compile(node->binary()->left); // cond
 
         OP * jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
-        vm->ops->push_back(jump_if_false);
+        ops->push_back(jump_if_false);
 
         this->compile(node->binary()->right); //body
 
         OP * goto_ = new OP;
         goto_->op_type = OP_JUMP;
         goto_->operand.int_value = label1;
-        vm->ops->push_back(goto_);
+        ops->push_back(goto_);
 
-        int label2 = vm->ops->size();
+        int label2 = ops->size();
         jump_if_false->operand.int_value = label2;
 
         break;
@@ -276,7 +287,7 @@ void tora::Compiler::compile(Node *node) {
             tmp->op_type = OP_GETDYNAMIC;
             tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
         }
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_SETVARIABLE: {
@@ -303,7 +314,7 @@ void tora::Compiler::compile(Node *node) {
                 tmp->op_type = OP_SETDYNAMIC;
                 tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
             }
-            vm->ops->push_back(tmp);
+            ops->push_back(tmp);
             break;
         }
         case NODE_GET_ITEM: { // $a[$b] = $c
@@ -316,7 +327,7 @@ void tora::Compiler::compile(Node *node) {
 
             OP * tmp = new OP;
             tmp->op_type = OP_SET_ITEM;
-            vm->ops->push_back(tmp);
+            ops->push_back(tmp);
             break;
         }
         default:
@@ -339,7 +350,7 @@ void tora::Compiler::compile(Node *node) {
         OP * tmp = new OP;
         tmp->op_type = OP_MAKE_ARRAY;
         tmp->operand.int_value = args_len; // the number of args
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
     case NODE_GET_ITEM: {
@@ -348,14 +359,14 @@ void tora::Compiler::compile(Node *node) {
 
         OP * tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
 
     case NODE_UNARY_NEGATIVE: {
         this->compile(node->to_node_node()->node);
 
-        vm->ops->push_back(new OP(OP_UNARY_NEGATIVE));
+        ops->push_back(new OP(OP_UNARY_NEGATIVE));
 
         break;
     }
@@ -380,12 +391,12 @@ void tora::Compiler::compile(Node *node) {
         */
 
         this->compile(node->to_for_node()->initialize);
-        int label1 = vm->ops->size();
+        int label1 = ops->size();
         this->compile(node->to_for_node()->cond);
 
         OP * jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
-        vm->ops->push_back(jump_label2);
+        ops->push_back(jump_label2);
 
         this->compile(node->to_for_node()->block);
         this->compile(node->to_for_node()->postfix);
@@ -393,9 +404,9 @@ void tora::Compiler::compile(Node *node) {
         OP * jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
         jump_label1->operand.int_value = label1;
-        vm->ops->push_back(jump_label1);
+        ops->push_back(jump_label1);
 
-        int label2 = vm->ops->size();
+        int label2 = ops->size();
         jump_label2->operand.int_value = label2;
         break;
     }
@@ -418,7 +429,7 @@ void tora::Compiler::compile(Node *node) {
         OP * tmp = new OP;
         tmp->op_type = OP_METHOD_CALL;
         tmp->operand.int_value = args_len; // the number of args
-        vm->ops->push_back(tmp);
+        ops->push_back(tmp);
         break;
     }
 

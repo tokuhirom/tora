@@ -1,12 +1,12 @@
-#ifndef COMPILER_H_
-#define COMPILER_H_
+#ifndef TORA_COMPILER_H_
+#define TORA_COMPILER_H_
 
 #include "node.h"
 #include "vm.h"
 
 namespace tora {
 
-class Block {
+class Block : public Prim {
 public:
     std::vector<std::string*> vars;
     ~Block() {
@@ -17,17 +17,31 @@ public:
 };
 
 class Compiler {
-    VM *vm;
 public:
+    std::vector<OP*> *ops;
     std::vector<Block*> *blocks;
     bool error;
-    Compiler(VM*vm_) {
-        vm = vm_;
+    Compiler() {
         error = false;
         blocks = new std::vector<Block*>();
+        ops = new std::vector<OP*>();
     }
     ~Compiler() {
-        // delete blocks;
+        {
+            auto iter = ops->begin();
+            for (; iter!=ops->end() ; iter++) {
+                (*iter)->release();
+            }
+            delete ops;
+        }
+
+        {
+            auto iter = blocks->begin();
+            for (; iter!=blocks->end(); iter++) {
+                (*iter)->release();
+            }
+            delete blocks;
+        }
     }
     void compile(Node *node);
     void push_block() {
@@ -68,4 +82,4 @@ public:
 };
 
 
-#endif // COMPILER_H_
+#endif // TORA_COMPILER_H_

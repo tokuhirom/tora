@@ -77,13 +77,13 @@ int main(int argc, char **argv) {
             root_node->dump();
         }
 
-        tora::VM vm;
-        tora::Compiler compiler(&vm);
+        tora::Compiler compiler;
         compiler.compile(root_node);
         if (compiler.error) {
             fprintf(stderr, "Compilation failed\n");
             exit(1);
         }
+        tora::VM vm(compiler.ops);
         // TODO: use delete
         // delete root_node; // AST is not needed after compiling.
         if (dump_ops) {
