@@ -8,22 +8,24 @@ using namespace tora;
 VM::VM(std::vector<OP*>* ops_) {
     sp = 0;
     pc = 0;
-    ops = ops_;
+    ops = new std::vector<OP*>(*ops_);
+    auto iter = this->ops->begin();
+    for (; iter!=this->ops->end(); iter++) {
+        (*iter)->retain();
+    }
     this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<FunctionFrame*>();
 }
 
 VM::~VM() {
-    /*
     {
         auto iter = this->ops->begin();
         for (; iter!=this->ops->end(); iter++) {
-            // (*iter)->release();
+            (*iter)->release();
         }
         delete this->ops;
     }
-    */
     {
         auto iter = this->lexical_vars_stack->begin();
         for (; iter!=this->lexical_vars_stack->end(); iter++) {

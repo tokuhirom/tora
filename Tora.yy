@@ -23,16 +23,8 @@ using namespace tora;
 extern int yylex();
 int yyerror(const char *err);
 
-static Node *tora_create_funcdef(Node *name, std::vector<Node *>*params, Node *block) {
-    return new FuncdefNode(name, params, block);
-}
-
 static Node *tora_create_return(Node *child) {
     return new NodeNode(NODE_RETURN, child);
-}
-
-static Node *tora_create_binary_expression(node_type_t type, Node *t1, Node* t2) {
-    return new BinaryNode(type, t1, t2);
 }
 
 static Node *tora_create_unary_expression(node_type_t type, Node *t1) {
@@ -115,7 +107,7 @@ translation_unit
     : statement
     | translation_unit statement
     {
-         $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
+        $$ = new BinaryNode(NODE_STMTS, $1, $2);
     }
     ;
 
@@ -132,7 +124,7 @@ statement
     | if_statement
     | WHILE L_PAREN expression R_PAREN block
     {
-        $$ = tora_create_binary_expression(NODE_WHILE, $3, $5);
+        $$ = new BinaryNode(NODE_WHILE, $3, $5);
     }
     | FOR L_PAREN expression SEMICOLON expression SEMICOLON expression R_PAREN block
     {
@@ -161,11 +153,11 @@ if_statement
 sub_stmt
     : SUB identifier L_PAREN parameter_list R_PAREN block
     {
-        $$ = tora_create_funcdef($2, $4, $6);
+        $$ = new FuncdefNode($2, $4, $6);
     }
     | SUB identifier L_PAREN R_PAREN block
     {
-        $$ = tora_create_funcdef($2, new std::vector<Node*>(), $5);
+        $$ = new FuncdefNode($2, new std::vector<Node*>(), $5);
     }
 
 parameter_list
@@ -211,7 +203,7 @@ block
 statement_list
     : statement_list statement
     {
-        $$ = tora_create_binary_expression(NODE_STMTS, $1, $2);
+        $$ = new BinaryNode(NODE_STMTS, $1, $2);
     }
     | statement
 
@@ -225,7 +217,7 @@ assignment_expression
         // REMOVE THIS NODE
         Node *n1 = new NodeNode(NODE_MY, $2);
         Node *node = new BinaryNode(NODE_SETVARIABLE, $2, $4);
-        $$ = tora_create_binary_expression(NODE_STMTS, n1, node);
+        $$ = new BinaryNode(NODE_STMTS, n1, node);
     }
     | conditional_expression ASSIGN conditional_expression
     {
@@ -254,7 +246,7 @@ equality_expression
     : relational_expression
     | equality_expression EQ relational_expression
     {
-        $$ = tora_create_binary_expression(NODE_EQ, $1, $3);
+        $$ = new BinaryNode(NODE_EQ, $1, $3);
     }
     ;
 
@@ -262,19 +254,19 @@ relational_expression
     : shift_expression
     | relational_expression LT shift_expression
     {
-        $$ = tora_create_binary_expression(NODE_LT, $1, $3);
+        $$ = new BinaryNode(NODE_LT, $1, $3);
     }
     | relational_expression GT shift_expression
     {
-        $$ = tora_create_binary_expression(NODE_GT, $1, $3);
+        $$ = new BinaryNode(NODE_GT, $1, $3);
     }
     | relational_expression LE shift_expression
     {
-        $$ = tora_create_binary_expression(NODE_LE, $1, $3);
+        $$ = new BinaryNode(NODE_LE, $1, $3);
     }
     | relational_expression GE shift_expression
     {
-        $$ = tora_create_binary_expression(NODE_GE, $1, $3);
+        $$ = new BinaryNode(NODE_GE, $1, $3);
     }
     ;
 
@@ -285,11 +277,11 @@ additive_expression
     : multiplicative_expression
     | additive_expression ADD multiplicative_expression
     {
-        $$ = tora_create_binary_expression(NODE_ADD, $1, $3);
+        $$ = new BinaryNode(NODE_ADD, $1, $3);
     }
     | additive_expression SUBTRACT multiplicative_expression
     {
-        $$ = tora_create_binary_expression(NODE_SUB, $1, $3);
+        $$ = new BinaryNode(NODE_SUB, $1, $3);
     }
     ;
 
@@ -297,11 +289,11 @@ multiplicative_expression
     : unary_expression
     | multiplicative_expression MUL unary_expression
     {
-        $$ = tora_create_binary_expression(NODE_MUL, $1, $3);
+        $$ = new BinaryNode(NODE_MUL, $1, $3);
     }
     | multiplicative_expression DIV unary_expression
     {
-        $$ = tora_create_binary_expression(NODE_DIV, $1, $3);
+        $$ = new BinaryNode(NODE_DIV, $1, $3);
     }
     ;
 

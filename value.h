@@ -197,12 +197,7 @@ public:
         this->value_type = VALUE_TYPE_STR;
         this->str_value = str;
     }
-    /*
-    ~StrValue() {
-        delete [] str_value;
-        this->str_value = NULL;
-    }
-    */
+    ~StrValue();
     void set_str(const char*s) {
         str_value = s;
     }

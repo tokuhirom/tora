@@ -64,3 +64,7 @@ Value *IntValue::tora__neg__() {
     return new IntValue(-this->int_value);
 }
 
+StrValue::~StrValue() {
+    free((void*)str_value);
+}
+
