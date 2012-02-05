@@ -52,9 +52,9 @@ Node *root_node;
 %union {
     int int_value;
     const char *str_value;
-    struct Node *node;
-    std::vector<struct Node*> *argument_list;
-    std::vector<struct Node*> *parameter_list;
+    class Node *node;
+    std::vector<Node*> *argument_list;
+    std::vector<Node*> *parameter_list;
 }
 
 %type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list inclusive_or_expression exclusive_or_expression and_expression

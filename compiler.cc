@@ -60,9 +60,9 @@ void tora::Compiler::compile(Node *node) {
     case NODE_FUNCDEF: {
         /*
         struct {
-            struct Node *name;
-            std::vector<struct Node*> *params;
-            struct Node *block;
+            Node *name;
+            std::vector<Node*> *params;
+            Node *block;
         } funcdef;
         
         putcodevalue v
@@ -374,10 +374,10 @@ void tora::Compiler::compile(Node *node) {
     case NODE_FOR: {
         /*
         struct {
-            struct Node *initialize;
-            struct Node *cond;
-            struct Node *postfix;
-            struct Node *block;
+            Node *initialize;
+            Node *cond;
+            Node *postfix;
+            Node *block;
         } for_stmt;
 
             (initialize)
