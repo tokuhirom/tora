@@ -31,8 +31,9 @@ public:
         this->up = up_;
     }
     ~LexicalVarsFrame() {
-// TODO: release this
-//      this->up->release();
+        if (this->up) {
+            this->up->release();
+        }
     }
     void setVar(int id, Value *v) {
         this->vars[id] = v;
