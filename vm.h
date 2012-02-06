@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "stack.h"
+#include "shared_ptr.h"
 
 namespace tora {
 
@@ -16,13 +17,13 @@ class FunctionFrame : public Prim {
 public:
     int return_address;
     int top;
-    std::vector<OP*> *orig_ops;
+    std::vector<SharedPtr<OP>> *orig_ops;
 };
 
 class LexicalVarsFrame : public Prim {
 public:
     LexicalVarsFrame* up;
-    std::map<int, Value*> vars;
+    std::map<int, SharedPtr<Value>> vars;
     LexicalVarsFrame() : Prim() {
         up = NULL;
     }
@@ -35,13 +36,13 @@ public:
             this->up->release();
         }
     }
-    void setVar(int id, Value *v) {
+    void setVar(int id, Value * v) {
         this->vars[id] = v;
     }
     Value *find(int id) {
-        std::map<int, Value*>::iterator iter = this->vars.find(id);
+        auto iter = this->vars.find(id);
         if (iter != vars.end()) {
-            return iter->second;
+            return &(*(iter->second));
         } else {
             if (this->up) {
                 return this->up->find(id);
@@ -51,7 +52,7 @@ public:
     }
     void dump(int i) {
         printf("[%d]\n", i);
-        std::map<int, Value*>::iterator iter = this->vars.begin();
+        auto iter = this->vars.begin();
         for (; iter!=this->vars.end(); ++iter) {
             printf("  %d\n", iter->first);
             iter->second->dump();
@@ -72,7 +73,7 @@ public:
     tora::Stack stack;
     int sp; // stack pointer
     size_t pc; // program counter
-    std::vector<OP*> *ops;
+    std::vector<SharedPtr<OP>> *ops;
     std::map<std::string, Value*> global_vars;
     std::map<std::string, Value*> functions;
     std::vector<FunctionFrame*> *function_frames;
@@ -82,7 +83,7 @@ public:
      */
     std::vector<LexicalVarsFrame *> *lexical_vars_stack;
 
-    VM(std::vector<OP*>*ops_);
+    VM(std::vector<SharedPtr<OP>>* ops_);
     ~VM();
     void execute();
 

@@ -8,7 +8,7 @@ from types import DictType, StringTypes
 
 # env = Environment(CXX='clang')
 env = Environment()
-env.Append(CCFLAGS=['--std=c++0x'])
+env.Append(CCFLAGS=['-std=c++0x'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CCFLAGS=['-O2'])
 env.Append(CCFLAGS=['-Wall'])

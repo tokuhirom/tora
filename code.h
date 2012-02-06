@@ -5,6 +5,7 @@
 #include <vector>
 #include "value.h"
 #include "op.h"
+#include "shared_ptr.h"
 
 namespace tora {
 
@@ -12,7 +13,7 @@ class CodeValue: public Value {
 public:
     const char *code_name;
     std::vector<std::string*> *code_params;
-    std::vector<OP*> *code_opcodes;
+    std::vector<SharedPtr<OP>> *code_opcodes;
 
     CodeValue(): Value() {
         this->value_type = VALUE_TYPE_CODE;

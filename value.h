@@ -2,6 +2,7 @@
 #define VALUE_H_
 
 #include "tora.h"
+#include "shared_ptr.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -228,32 +229,6 @@ public:
     StrValue *to_s() {
         this->retain();
         return this;
-    }
-};
-
-struct ValueDeleter {
-    typedef Value pointer;
-    void operator ()(Value* handle) {
-        handle->release();
-    }
-};
-
-template <class T>
-class SharedPtr {
-    T *ptr;
-public:
-    SharedPtr(T *v) {
-        ptr = v;
-        v->retain();
-    }
-    ~SharedPtr() {
-        ptr->release();
-    }
-    T * operator->() const {
-        return ptr;
-    }
-    T & operator*() const {
-        return *ptr;
     }
 };
 

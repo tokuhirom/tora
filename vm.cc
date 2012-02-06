@@ -6,27 +6,17 @@
 
 using namespace tora;
 
-VM::VM(std::vector<OP*>* ops_) {
+VM::VM(std::vector<SharedPtr<OP>>* ops_) {
     sp = 0;
     pc = 0;
-    ops = new std::vector<OP*>(*ops_);
-    auto iter = this->ops->begin();
-    for (; iter!=this->ops->end(); iter++) {
-        (*iter)->retain();
-    }
+    ops = new std::vector<SharedPtr<OP>>(*ops_);
     this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<FunctionFrame*>();
 }
 
 VM::~VM() {
-    {
-        auto iter = this->ops->begin();
-        for (; iter!=this->ops->end(); iter++) {
-            (*iter)->release();
-        }
-        delete this->ops;
-    }
+    delete this->ops;
     {
         auto iter = this->lexical_vars_stack->begin();
         for (; iter!=this->lexical_vars_stack->end(); iter++) {
@@ -83,7 +73,7 @@ void VM::execute() {
         disasm_one(ops->at(pc));
 #endif
 
-        OP *op = ops->at(pc);
+        SharedPtr<OP> op = ops->at(pc);
         switch (op->op_type) {
         case OP_PUSH_TRUE: {
             stack.push(BoolValue::true_instance());
@@ -102,20 +92,20 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_STRING: {
-            Value *sv = ((ValueOP*)op)->value;
+            Value *sv = ((ValueOP*)&(*(op)))->value;
             sv->retain();
             stack.push(sv);
             break;
         }
         case OP_PUSH_VALUE: {
-            Value *v = ((ValueOP*)op)->value;
+            Value *v = ((ValueOP*)&(*(op)))->value;
             stack.push(v);
             break;
         }
         case OP_DEFINE_METHOD: {
             Value *code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
-            const char *funcname = ((ValueOP*)op)->value->to_str()->str_value;
+            const char *funcname = ((ValueOP*)&(*(op)))->value->to_str()->str_value;
             this->add_function(funcname, code);
             break;
         }
@@ -304,7 +294,7 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_IDENTIFIER: {
-            Value *sv = ((ValueOP*)op)->value;
+            Value *sv = ((ValueOP*)&(*(op)))->value;
             sv->retain();
             stack.push(sv);
             break;

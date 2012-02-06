@@ -45,7 +45,7 @@ void tora::Compiler::compile(Node *node) {
     case NODE_BLOCK: {
         this->push_block();
 
-        OP * enter = new OP;
+        SharedPtr<OP> enter = new OP;
         enter->op_type = OP_ENTER;
         ops->push_back(enter);
 
@@ -97,13 +97,7 @@ void tora::Compiler::compile(Node *node) {
         CodeValue *code = new CodeValue();
         code->code_name = strdup(funcname);
         code->code_params = params;
-        {
-            auto iter = funccomp.ops->begin();
-            for (; iter!=funccomp.ops->end(); iter++) {
-                (*iter)->retain();
-            }
-            code->code_opcodes = new std::vector<OP*>(*funccomp.ops);
-        }
+        code->code_opcodes = new std::vector<SharedPtr<OP>>(*funccomp.ops);
 
         ValueOP * putval = new ValueOP(OP_PUSH_VALUE, code);
         ops->push_back(putval);

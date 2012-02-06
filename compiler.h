@@ -18,22 +18,16 @@ public:
 
 class Compiler {
 public:
-    std::vector<OP*> *ops;
+    std::vector<SharedPtr<OP>> *ops;
     std::vector<Block*> *blocks;
     bool error;
     Compiler() {
         error = false;
         blocks = new std::vector<Block*>();
-        ops = new std::vector<OP*>();
+        ops = new std::vector<SharedPtr<OP>>();
     }
     ~Compiler() {
-        {
-            auto iter = ops->begin();
-            for (; iter!=ops->end() ; iter++) {
-                (*iter)->release();
-            }
-            delete ops;
-        }
+        delete ops;
 
         {
             auto iter = blocks->begin();
