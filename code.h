@@ -18,6 +18,8 @@ public:
         this->value_type = VALUE_TYPE_CODE;
     }
     ~CodeValue() {
+        free((void*)code_name);
+        delete code_params;
         delete code_opcodes;
     }
     void dump() {

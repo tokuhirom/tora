@@ -94,17 +94,16 @@ void tora::Compiler::compile(Node *node) {
         ret->op_type = OP_RETURN;
         funccomp.ops->push_back(ret);
 
+        CodeValue *code = new CodeValue();
+        code->code_name = strdup(funcname);
+        code->code_params = params;
         {
             auto iter = funccomp.ops->begin();
             for (; iter!=funccomp.ops->end(); iter++) {
                 (*iter)->retain();
             }
+            code->code_opcodes = new std::vector<OP*>(*funccomp.ops);
         }
-
-        CodeValue *code = new CodeValue();
-        code->code_name = strdup(funcname);
-        code->code_params = params;
-        code->code_opcodes = new std::vector<OP*>(*funccomp.ops);
 
         ValueOP * putval = new ValueOP(OP_PUSH_VALUE, code);
         ops->push_back(putval);

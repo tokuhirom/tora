@@ -238,10 +238,28 @@ struct ValueDeleter {
     }
 };
 
-typedef std::unique_ptr<Value, ValueDeleter> ValuePtr;
-typedef std::unique_ptr<ArrayValue, ValueDeleter> ArrayValuePtr;
-typedef std::unique_ptr<IntValue, ValueDeleter> IntValuePtr;
-typedef std::unique_ptr<StrValue, ValueDeleter> StrValuePtr;
+template <class T>
+class SharedPtr {
+    T *ptr;
+public:
+    SharedPtr(T *v) {
+        ptr = v;
+        v->retain();
+    }
+    ~SharedPtr() {
+        ptr->release();
+    }
+    T * operator->() const {
+        return ptr;
+    }
+    T & operator*() const {
+        return *ptr;
+    }
+};
+
+typedef SharedPtr<Value>    ValuePtr;
+typedef SharedPtr<IntValue> IntValuePtr;
+typedef SharedPtr<StrValue> StrValuePtr;
 
 };
 

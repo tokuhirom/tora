@@ -2,6 +2,7 @@
 #include "value.h"
 #include "code.h"
 #include <unistd.h>
+#include <algorithm>
 
 using namespace tora;
 

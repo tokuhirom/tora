@@ -6,5 +6,6 @@ sub fib($n) {
     }
 }
 
-say(fib(39));
+say("HOGE");
+// say(fib(0));
 
