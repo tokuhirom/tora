@@ -30,6 +30,14 @@ StrValue *IntValue::to_s() {
     return v;
 }
 
+StrValue *DoubleValue::to_s() {
+    StrValue *v = new StrValue();
+    std::ostringstream os;
+    os << this->double_value;
+    v->set_str(strdup(os.str().c_str()));
+    return v;
+}
+
 StrValue *BoolValue::to_s() {
     return new StrValue(strdup(this->bool_value ? "true" : "false"));
 }

@@ -20,10 +20,12 @@ typedef enum {
     VALUE_TYPE_STR = 3,
     VALUE_TYPE_CODE = 4,
     VALUE_TYPE_ARRAY = 5,
+    VALUE_TYPE_DOUBLE = 6,
 } value_type_t;
 
 class CodeValue;
 class IntValue;
+class DoubleValue;
 class StrValue;
 class BoolValue;
 class ArrayValue;
@@ -68,6 +70,10 @@ public:
     IntValue* to_int() {
         assert(this->value_type == VALUE_TYPE_INT);
         return (IntValue*)this;
+    }
+    DoubleValue* to_double() {
+        assert(this->value_type == VALUE_TYPE_DOUBLE);
+        return (DoubleValue*)this;
     }
     BoolValue* to_bool() {
         assert(this->value_type == VALUE_TYPE_BOOL);
@@ -123,6 +129,20 @@ public:
     const char *type_str() { return "int"; }
     StrValue *to_s();
     Value* tora__neg__();
+};
+
+class DoubleValue: public Value {
+public:
+    double  double_value;
+    DoubleValue(double d): Value() {
+        this->value_type = VALUE_TYPE_DOUBLE;
+        this->double_value = d;
+    }
+    void dump() {
+        printf("[dump] NV: %lf\n", double_value);
+    }
+    const char *type_str() { return "double"; }
+    StrValue *to_s();
 };
 
 class UndefValue: public Value {

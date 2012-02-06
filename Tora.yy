@@ -51,6 +51,7 @@ Node *root_node;
 
 %union {
     int int_value;
+    double double_value;
     const char *str_value;
     class Node *node;
     std::vector<Node*> *argument_list;
@@ -72,6 +73,7 @@ Node *root_node;
 %token IF ELSE
 %token L_PAREN R_PAREN L_BRACE R_BRACE
 %token <int_value> INT_LITERAL;
+%token <double_value> DOUBLE_LITERAL;
 %token <str_value> IDENTIFIER;
 %token <str_value> VARIABLE;
 %token <str_value>STRING_LITERAL
@@ -333,6 +335,10 @@ primary_expression
     : INT_LITERAL
     {
         $$ = new IntNode(NODE_INT, $1);
+    }
+    | DOUBLE_LITERAL
+    {
+        $$ = new DoubleNode(NODE_DOUBLE, $1);
     }
     | FALSE
     {

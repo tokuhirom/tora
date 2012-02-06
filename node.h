@@ -19,6 +19,7 @@ class ForNode;
 class FuncdefNode;
 class FuncallNode;
 class IntNode;
+class DoubleNode;
 class StrNode;
 class ArgsNode;
 
@@ -57,6 +58,9 @@ public:
     }
     IntNode *to_int_node() {
         return (IntNode*)this;
+    }
+    DoubleNode *to_double_node() {
+        return (DoubleNode*)this;
     }
     StrNode *to_str_node() {
         return (StrNode*)this;
@@ -109,6 +113,18 @@ public:
         int_value = i;
     }
     ~IntNode() {
+    }
+    void dump(int indent);
+};
+
+class DoubleNode: public Node {
+public:
+    double double_value;
+    DoubleNode(node_type_t type_, double d): Node() {
+        type = type_;
+        double_value = d;
+    }
+    ~DoubleNode() {
     }
     void dump(int indent);
 };

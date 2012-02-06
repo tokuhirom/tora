@@ -2,6 +2,7 @@
 
 const char*tora::node_type2name[] = {
     "NODE_INT",
+    "NODE_DOUBLE",
     "NODE_TRUE",
     "NODE_FALSE",
     "NODE_IDENTIFIER",

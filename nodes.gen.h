@@ -5,6 +5,7 @@ namespace tora {
 
 typedef enum {
     NODE_INT,
+    NODE_DOUBLE,
     NODE_TRUE,
     NODE_FALSE,
     NODE_IDENTIFIER,

@@ -8,6 +8,7 @@ use autodie;
 
 my @nodes = qw(
     NODE_INT
+    NODE_DOUBLE
     NODE_TRUE
     NODE_FALSE
     NODE_IDENTIFIER

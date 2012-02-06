@@ -128,6 +128,13 @@ void tora::Compiler::compile(Node *node) {
         ops->push_back(tmp);
         break;
     }
+    case NODE_DOUBLE: {
+        OP * tmp = new OP;
+        tmp->op_type = OP_PUSH_DOUBLE;
+        tmp->operand.double_value = node->to_double_node()->double_value;
+        ops->push_back(tmp);
+        break;
+    }
     case NODE_TRUE: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;

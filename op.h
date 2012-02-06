@@ -11,6 +11,7 @@ public:
     op_type_t op_type;
     union {
         int  int_value;
+        double double_value;
         bool bool_value;
     } operand;
     OP() {

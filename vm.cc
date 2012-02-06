@@ -96,6 +96,10 @@ void VM::execute() {
             stack.push(new IntValue(op->operand.int_value));
             break;
         }
+        case OP_PUSH_DOUBLE: {
+            stack.push(new DoubleValue(op->operand.double_value));
+            break;
+        }
         case OP_PUSH_STRING: {
             Value *sv = ((ValueOP*)op)->value;
             sv->retain();
@@ -116,15 +120,24 @@ void VM::execute() {
         }
 #define BINOP(optype, op) \
         case optype: { \
-            ValuePtr v1(stack.pop()); \
-            ValuePtr v2(stack.pop()); \
-            if (!v1->is_numeric()) {  \
-                ValuePtr s(v1->to_s()); \
+            ValuePtr v1(stack.pop()); /* rvalue */ \
+            ValuePtr v2(stack.pop()); /* lvalue */ \
+            if (v2->value_type == VALUE_TYPE_DOUBLE) { \
+                if (v1->value_type == VALUE_TYPE_DOUBLE) { \
+                    DoubleValue *v = new DoubleValue(v2->to_double()->double_value op v1->to_double()->double_value); \
+                    stack.push(v); \
+                } else if (v1->value_type == VALUE_TYPE_INT) {\
+                    DoubleValue *v = new DoubleValue(v2->to_double()->double_value op (double)v1->to_int()->int_value); \
+                    stack.push(v); \
+                } \
+            } else if (v2->value_type == VALUE_TYPE_INT) { \
+                IntValue *v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
+                stack.push(v); \
+            } else {  \
+                ValuePtr s(v2->to_s()); \
                 fprintf(stderr, "'%s' is not numeric.\n", s->to_str()->str_value); \
                 exit(1); /* TODO: die */ \
             } \
-            IntValue *v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
-            stack.push(v); \
             break; \
         }
         BINOP(OP_SUB, -);
@@ -274,6 +287,7 @@ void VM::execute() {
             }
             fframe->release();
 
+            lexical_vars_stack->back()->release();
             lexical_vars_stack->pop_back();
 
             continue;

@@ -70,6 +70,11 @@ void tora::IntNode::dump(int indent) {
     printf("[Int]%s(%d)\n", this->type_name_str(), this->int_value);
 }
 
+void tora::DoubleNode::dump(int indent) {
+    print_indent(indent);
+    printf("[Double]%s(%lf)\n", this->type_name_str(), this->double_value);
+}
+
 void tora::StrNode::dump(int indent) {
     print_indent(indent);
     printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value);

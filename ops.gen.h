@@ -11,6 +11,7 @@ typedef enum {
     OP_MUL,
     OP_PRINT,
     OP_PUSH_INT,
+    OP_PUSH_DOUBLE,
     OP_PUSH_TRUE,
     OP_PUSH_FALSE,
     OP_PUSH_IDENTIFIER,
