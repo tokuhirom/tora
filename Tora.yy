@@ -23,23 +23,6 @@ using namespace tora;
 extern int yylex();
 int yyerror(const char *err);
 
-static Node *tora_create_return(Node *child) {
-    return new NodeNode(NODE_RETURN, child);
-}
-
-static Node *tora_create_unary_expression(node_type_t type, Node *t1) {
-    return new NodeNode(type, t1);
-}
-
-static Node *tora_create_if(Node *cond, Node* if_body, Node *else_body) {
-    return new IfNode(NODE_IF, cond, if_body, else_body);
-}
-
-static Node *tora_create_funcall(Node *t1, std::vector<Node*> *args) {
-    return new FuncallNode(t1, args);
-}
-
-
 Node *root_node;
 
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
@@ -139,17 +122,17 @@ statement
 jump_statement
     : RETURN expression SEMICOLON
     {
-        $$ = tora_create_return($2);
+        $$ = new NodeNode(NODE_RETURN, $2);
     }
 
 if_statement
     : IF L_PAREN expression R_PAREN block
     {
-        $$ = tora_create_if($3, $5, NULL);
+        $$ = new IfNode(NODE_IF, $3, $5, NULL);
     }
     | IF L_PAREN expression R_PAREN block ELSE block
     {
-        $$ = tora_create_if($3, $5, $7);
+        $$ = new IfNode(NODE_IF, $3, $5, $7);
     }
 
 sub_stmt
@@ -303,7 +286,7 @@ unary_expression
     : postfix_expression
     | SUBTRACT unary_expression
     {
-        $$ = tora_create_unary_expression(NODE_UNARY_NEGATIVE, $2);
+        $$ = new NodeNode(NODE_UNARY_NEGATIVE, $2);
     }
 
 postfix_expression
@@ -314,12 +297,12 @@ postfix_expression
     }
     | identifier L_PAREN R_PAREN
     {
-        $$ = tora_create_funcall($1, new std::vector<Node*>());
+        $$ = new FuncallNode($1, new std::vector<Node*>());
     }
     | identifier L_PAREN argument_list R_PAREN
     {
         // TODO: support vargs
-        $$ = tora_create_funcall($1, $3);
+        $$ = new FuncallNode($1, $3);
     }
     | primary_expression DOT identifier L_PAREN argument_list R_PAREN
     {
