@@ -2,6 +2,8 @@
 #define TORA_SHARED_PTR_H_
 
 #include <assert.h>
+#include <stdio.h>
+#include <algorithm>
 
 namespace tora {
 

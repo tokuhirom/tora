@@ -3,6 +3,7 @@
 
 #include "tora.h"
 #include "shared_ptr.h"
+#include "prim.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -30,25 +31,6 @@ class DoubleValue;
 class StrValue;
 class BoolValue;
 class ArrayValue;
-
-class Prim {
-protected:
-    int refcnt; // reference count
-    Prim() {
-        refcnt = 1;
-    }
-public:
-    inline virtual void release() {
-        --refcnt;
-        if (refcnt == 0) {
-            delete this;
-        }
-    }
-    inline virtual void retain() {
-        ++refcnt;
-    }
-    virtual ~Prim() { }
-};
 
 /**
  * The value class

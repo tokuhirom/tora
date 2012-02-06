@@ -3,9 +3,7 @@
 
 class Prim {
 protected:
-    Prim() {
-        refcnt = 1;
-    }
+    Prim(): refcnt(0) { }
     int refcnt;
 public:
     virtual ~Prim() { }
