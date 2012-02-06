@@ -27,7 +27,7 @@ public:
     LexicalVarsFrame() : Prim() {
         up = NULL;
     }
-    LexicalVarsFrame(LexicalVarsFrame *up_) : Prim() {
+    LexicalVarsFrame(SharedPtr<LexicalVarsFrame> up_) : Prim() {
         this->up = up_;
     }
     ~LexicalVarsFrame() { }
@@ -71,12 +71,12 @@ public:
     std::vector<SharedPtr<OP>> *ops;
     std::map<std::string, SharedPtr<Value>> global_vars;
     std::map<std::string, SharedPtr<Value>> functions;
-    std::vector<FunctionFrame*> *function_frames;
+    std::vector<SharedPtr<FunctionFrame>> *function_frames;
 
     /*
      * stack for lexical variables.
      */
-    std::vector<LexicalVarsFrame *> *lexical_vars_stack;
+    std::vector<SharedPtr<LexicalVarsFrame>> *lexical_vars_stack;
 
     VM(std::vector<SharedPtr<OP>>* ops_);
     ~VM();

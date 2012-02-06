@@ -10,9 +10,9 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_) {
     sp = 0;
     pc = 0;
     ops = new std::vector<SharedPtr<OP>>(*ops_);
-    this->lexical_vars_stack = new std::vector<LexicalVarsFrame *>();
+    this->lexical_vars_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
-    this->function_frames = new std::vector<FunctionFrame*>();
+    this->function_frames = new std::vector<SharedPtr<FunctionFrame>>();
 }
 
 VM::~VM() {
@@ -80,8 +80,7 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_STRING: {
-            Value *sv = ((ValueOP*)&(*(op)))->value;
-            sv->retain();
+            SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
             stack.push(sv);
             break;
         }
@@ -99,8 +98,8 @@ void VM::execute() {
         }
 #define BINOP(optype, op) \
         case optype: { \
-            ValuePtr v1(stack.pop()); /* rvalue */ \
-            ValuePtr v2(stack.pop()); /* lvalue */ \
+            SharedPtr<Value> v1(stack.pop()); /* rvalue */ \
+            SharedPtr<Value> v2(stack.pop()); /* lvalue */ \
             if (v2->value_type == VALUE_TYPE_DOUBLE) { \
                 if (v1->value_type == VALUE_TYPE_DOUBLE) { \
                     DoubleValue *v = new DoubleValue(v2->to_double()->double_value op v1->to_double()->double_value); \
@@ -113,7 +112,7 @@ void VM::execute() {
                 IntValue *v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
                 stack.push(v); \
             } else {  \
-                ValuePtr s(v2->to_s()); \
+                SharedPtr<Value> s(v2->to_s()); \
                 fprintf(stderr, "'%s' is not numeric.\n", s->to_str()->str_value); \
                 exit(1); /* TODO: die */ \
             } \
@@ -124,28 +123,28 @@ void VM::execute() {
         BINOP(OP_MUL, *);
 #undef BINOP
         case OP_ADD: {
-            ValuePtr v1(stack.pop());
-            ValuePtr v2(stack.pop());
+            SharedPtr<Value> v1(stack.pop());
+            SharedPtr<Value> v2(stack.pop());
             if (v1->is_numeric()) {
-                ValuePtr i(v2->to_i());
+                SharedPtr<Value> i(v2->to_i());
                 IntValue *v = new IntValue(v2->to_int()->int_value + v1->to_int()->int_value);
                 stack.push(v);
             } else if (v1->value_type == VALUE_TYPE_STR) {
                 // TODO: support null terminated string
                 StrValue *v = new StrValue();
-                ValuePtr s(v2->to_s());
+                SharedPtr<Value> s(v2->to_s());
                 // strdup
                 v->set_str(strdup((std::string(s->to_str()->str_value) + std::string(v1->to_str()->str_value)).c_str()));
                 stack.push(v);
             } else {
-                ValuePtr s(v1->to_s());
+                SharedPtr<Value> s(v1->to_s());
                 fprintf(stderr, "'%s' is not numeric or string.\n", s->to_str()->str_value);
                 exit(1); // TODO : die
             }
             break;
         }
         case OP_FUNCALL: {
-            ValuePtr funname(stack.pop());
+            SharedPtr<Value> funname(stack.pop());
             const char *funname_c = funname->to_str()->str_value;
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
                 printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
@@ -155,23 +154,23 @@ void VM::execute() {
             assert(funname->value_type == VALUE_TYPE_STR);
             if (strcmp(funname->to_str()->str_value, "print") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
-                    ValuePtr v(stack.pop());
-                    ValuePtr s(v->to_s());
+                    SharedPtr<Value> v(stack.pop());
+                    SharedPtr<Value> s(v->to_s());
                     printf("%s", s->to_str()->str_value);
                 }
             } else if (strcmp(funname->to_str()->str_value, "p") == 0) {
-                ValuePtr v(stack.pop());
+                SharedPtr<Value> v(stack.pop());
                 v->dump();
             } else if (strcmp(funname->to_str()->str_value, "say") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
-                    ValuePtr v(stack.pop());
-                    ValuePtr s(v->to_s());
+                    SharedPtr<Value> v(stack.pop());
+                    SharedPtr<Value> s(v->to_s());
                     printf("%s\n", s->to_str()->str_value);
                 }
             } else if (strcmp(funname->to_str()->str_value, "getenv") == 0) {
                 assert(op->operand.int_value==1);
-                ValuePtr v(stack.pop());
-                ValuePtr s(v->to_s());
+                SharedPtr<Value> v(stack.pop());
+                SharedPtr<Value> s(v->to_s());
                 char *env = getenv(s->to_str()->str_value);
                 if (env) {
                     StrValue *ret = new StrValue();
@@ -182,14 +181,14 @@ void VM::execute() {
                 }
             } else if (strcmp(funname->to_str()->str_value, "usleep") == 0) {
                 // TODO: remove later
-                ValuePtr v(stack.pop());
+                SharedPtr<Value> v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
-                ValuePtr s(v->to_i());
+                SharedPtr<Value> s(v->to_i());
                 usleep(s->to_int()->int_value);
             } else if (strcmp(funname->to_str()->str_value, "exit") == 0) {
-                ValuePtr v(stack.pop());
+                SharedPtr<Value> v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
-                ValuePtr s(v->to_i());
+                SharedPtr<Value> s(v->to_i());
                 exit(s->to_int()->int_value);
             } else {
                 auto iter =  this->functions.find(funname->to_str()->str_value);
@@ -206,7 +205,7 @@ void VM::execute() {
                     pc = 0;
                     this->ops = code->code_opcodes;
 
-                    LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
+                    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
                     // TODO: vargs support
                     // TODO: kwargs support
                     assert(op->operand.int_value == (int)code->code_params->size());
@@ -229,8 +228,8 @@ void VM::execute() {
             break;
         }
         case OP_METHOD_CALL: {
-            ValuePtr object(stack.pop());
-            ValuePtr funname(stack.pop());
+            SharedPtr<Value> object(stack.pop());
+            SharedPtr<Value> funname(stack.pop());
             const char *funname_c = funname->to_str()->str_value;
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
                 printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
@@ -256,7 +255,7 @@ void VM::execute() {
         }
         case OP_RETURN: {
             assert(function_frames->size() > 0);
-            FunctionFrame *fframe = function_frames->back();
+            SharedPtr<FunctionFrame> fframe = function_frames->back();
             function_frames->pop_back();
             pc = fframe->return_address+1;
             ops = fframe->orig_ops;
@@ -282,8 +281,7 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_IDENTIFIER: {
-            Value *sv = ((ValueOP*)&(*(op)))->value;
-            sv->retain();
+            SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
             stack.push(sv);
             break;
         }
@@ -292,9 +290,9 @@ void VM::execute() {
             break;
         }
         case OP_JUMP_IF_FALSE: {
-            ValuePtr v(stack.pop());
+            SharedPtr<Value> v(stack.pop());
 
-            ValuePtr b(v->to_b());
+            SharedPtr<Value> b(v->to_b());
             if (!b->to_bool()->bool_value) {
                 pc = op->operand.int_value-1;
             }
@@ -306,14 +304,13 @@ void VM::execute() {
         }
 #define CMPOP(type, op) \
         case type: { \
-            ValuePtr v1(stack.pop()); \
-            ValuePtr v2(stack.pop()); \
+            SharedPtr<Value> v1(stack.pop()); \
+            SharedPtr<Value> v2(stack.pop()); \
             \
             switch (v1->value_type) { \
             case VALUE_TYPE_INT: { \
-                ValuePtr i2(v2->to_i()); \
-                BoolValue *result = BoolValue::instance(v1->to_int()->int_value op i2->to_int()->int_value); \
-                result->retain(); \
+                SharedPtr<Value> i2(v2->to_i()); \
+                SharedPtr<BoolValue> result = BoolValue::instance(v1->to_int()->int_value op i2->to_int()->int_value); \
                 stack.push(result); \
                 break; \
             } \
@@ -393,17 +390,17 @@ void VM::execute() {
         }
 
         case OP_GET_ITEM: {
-            ValuePtr index(stack.pop());
-            ValuePtr container(stack.pop());
+            SharedPtr<Value> index(stack.pop());
+            SharedPtr<Value> container(stack.pop());
 
             SharedPtr<Value> ret = container->get_item(&(*index));
             stack.push(ret);
             break;
         }
         case OP_SET_ITEM: {
-            ValuePtr rvalue(stack.pop());
-            ValuePtr index(stack.pop());
-            ValuePtr container(stack.pop());
+            SharedPtr<Value> rvalue(stack.pop());
+            SharedPtr<Value> index(stack.pop());
+            SharedPtr<Value> container(stack.pop());
 
             rvalue->retain();
             container->set_item(&(*index), &(*rvalue));
@@ -413,7 +410,7 @@ void VM::execute() {
         }
 
         case OP_UNARY_NEGATIVE: {
-            ValuePtr v(stack.pop());
+            SharedPtr<Value> v(stack.pop());
             Value * result = v->tora__neg__();
             stack.push(result);
             break;
