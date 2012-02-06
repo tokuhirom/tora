@@ -16,11 +16,11 @@ int tora::Compiler::find_localvar(std::string name, int &level) {
     return -1;
 }
 
-void tora::Compiler::compile(Node *node) {
+void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
-        this->compile(node->to_node_node()->node);
+        this->compile(node->upcast<NodeNode>()->node);
 
         {
             OP * tmp = new OP;
@@ -33,13 +33,13 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_MY: {
-        const char *name = node->to_node_node()->node->to_str_node()->str_value;
+        const char *name = node->upcast<NodeNode>()->node->upcast<StrNode>()->str_value;
         this->define_localvar(std::string(name));
-        // this->compile(node->to_node_node()->node);
+        // this->compile(node->upcast<NodeNode>()->node);
         break;
     }
     case NODE_RETURN: {
-        this->compile(node->to_node_node()->node);
+        this->compile(node->upcast<NodeNode>()->node);
         break;
     }
     case NODE_BLOCK: {
@@ -49,7 +49,7 @@ void tora::Compiler::compile(Node *node) {
         enter->op_type = OP_ENTER;
         ops->push_back(enter);
 
-        this->compile(node->to_node_node()->node);
+        this->compile(node->upcast<NodeNode>()->node);
 
         ops->push_back(new OP(OP_LEAVE));
 
@@ -69,15 +69,15 @@ void tora::Compiler::compile(Node *node) {
         make_function
         */
 
-        auto funcdef_node = node->to_funcdef_node();
+        auto funcdef_node = node->upcast<FuncdefNode>();
 
         // function name
-        const char *funcname = funcdef_node->name->to_str_node()->str_value;
+        const char *funcname = funcdef_node->name->upcast<StrNode>()->str_value;
 
         auto params = new std::vector<std::string *>();
         for (size_t i=0; i<funcdef_node->params->size(); i++) {
-            params->push_back(new std::string(funcdef_node->params->at(i)->to_str_node()->str_value));
-            this->define_localvar(std::string(funcdef_node->params->at(i)->to_str_node()->str_value));
+            params->push_back(new std::string(funcdef_node->params->at(i)->upcast<StrNode>()->str_value));
+            this->define_localvar(std::string(funcdef_node->params->at(i)->upcast<StrNode>()->str_value));
         }
 
         Compiler funccomp;
@@ -103,7 +103,7 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_STRING: {
-        StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
+        StrValue *sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
         ValueOP * tmp = new ValueOP(OP_PUSH_STRING, sv);
         ops->push_back(tmp);
         break;
@@ -111,14 +111,14 @@ void tora::Compiler::compile(Node *node) {
     case NODE_INT: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_INT;
-        tmp->operand.int_value = node->to_int_node()->int_value;
+        tmp->operand.int_value = node->upcast<IntNode>()->int_value;
         ops->push_back(tmp);
         break;
     }
     case NODE_DOUBLE: {
         OP * tmp = new OP;
         tmp->op_type = OP_PUSH_DOUBLE;
-        tmp->operand.double_value = node->to_double_node()->double_value;
+        tmp->operand.double_value = node->upcast<DoubleNode>()->double_value;
         ops->push_back(tmp);
         break;
     }
@@ -135,20 +135,20 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_IDENTIFIER: {
-        StrValue *sv = new StrValue(strdup(node->to_str_node()->str_value));
+        StrValue *sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
         ValueOP * tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
         ops->push_back(tmp);
         break;
     }
 
     case NODE_FUNCALL: {
-        std::vector<Node *>*args = node->to_funcall_node()->args;
+        auto args = node->upcast<FuncallNode>()->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(node->to_funcall_node()->name);
+        this->compile(node->upcast<FuncallNode>()->name);
 
         OP * tmp = new OP;
         tmp->op_type = OP_FUNCALL;
@@ -158,8 +158,8 @@ void tora::Compiler::compile(Node *node) {
     }
 #define C_OP_BINARY(type) \
     { \
-        this->compile(node->binary()->left); \
-        this->compile(node->binary()->right); \
+        this->compile(node->upcast<BinaryNode>()->left); \
+        this->compile(node->upcast<BinaryNode>()->right); \
         OP * tmp = new OP; \
         tmp->op_type = (type); \
         ops->push_back(tmp); \
@@ -178,8 +178,8 @@ void tora::Compiler::compile(Node *node) {
 #undef C_OP_BINARY
 
     case NODE_STMTS: {
-        this->compile(node->binary()->left);
-        this->compile(node->binary()->right);
+        this->compile(node->upcast<BinaryNode>()->left);
+        this->compile(node->upcast<BinaryNode>()->right);
         break;
     }
     case NODE_IF: {
@@ -205,7 +205,7 @@ void tora::Compiler::compile(Node *node) {
         ELSE_LABEL:
         END_LABEL:
         */
-        auto if_node = node->to_if_node();
+        auto if_node = node->upcast<IfNode>();
         this->compile(if_node->cond);
 
         OP * jump_else = new OP;
@@ -239,13 +239,13 @@ void tora::Compiler::compile(Node *node) {
         LABEL2:
         */
         int label1 = ops->size();
-        this->compile(node->binary()->left); // cond
+        this->compile(node->upcast<BinaryNode>()->left); // cond
 
         OP * jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_if_false);
 
-        this->compile(node->binary()->right); //body
+        this->compile(node->upcast<BinaryNode>()->right); //body
 
         OP * goto_ = new OP;
         goto_->op_type = OP_JUMP;
@@ -265,9 +265,9 @@ void tora::Compiler::compile(Node *node) {
         break;
     case NODE_GETVARIABLE: {
         int level;
-        int no = this->find_localvar(std::string(node->to_str_node()->str_value), level);
+        int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
         if (no<0) {
-            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->to_str_node()->str_value);
+            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value);
             error = true;
         }
 
@@ -285,9 +285,9 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_SETVARIABLE: {
-        switch (node->binary()->left->type) {
+        switch (node->upcast<BinaryNode>()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
-            const char*varname = node->binary()->left->to_str_node()->str_value;
+            const char*varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
             int level;
             int no = this->find_localvar(std::string(varname), level);
             if (no<0) {
@@ -296,7 +296,7 @@ void tora::Compiler::compile(Node *node) {
             }
 
             // fprintf(stderr, "set level: %d\n", level);
-            this->compile(node->binary()->right);
+            this->compile(node->upcast<BinaryNode>()->right);
 
             OP * tmp = new OP;
             if (level == 0) {
@@ -312,9 +312,9 @@ void tora::Compiler::compile(Node *node) {
             break;
         }
         case NODE_GET_ITEM: { // $a[$b] = $c
-            auto container = node->binary()->left->binary()->left;
-            auto index     = node->binary()->left->binary()->right;
-            auto rvalue    = node->binary()->right;
+            auto container = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->left;
+            auto index     = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->right;
+            auto rvalue    = node->upcast<BinaryNode>()->right;
             this->compile(container);
             this->compile(index);
             this->compile(rvalue);
@@ -334,7 +334,7 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_MAKE_ARRAY: {
-        auto args = node->to_args_node()->args;
+        auto args = node->upcast<ArgsNode>()->args;
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -348,8 +348,8 @@ void tora::Compiler::compile(Node *node) {
         break;
     }
     case NODE_GET_ITEM: {
-        this->compile(node->binary()->left);  // container
-        this->compile(node->binary()->right); // index
+        this->compile(node->upcast<BinaryNode>()->left);  // container
+        this->compile(node->upcast<BinaryNode>()->right); // index
 
         OP * tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
@@ -358,7 +358,7 @@ void tora::Compiler::compile(Node *node) {
     }
 
     case NODE_UNARY_NEGATIVE: {
-        this->compile(node->to_node_node()->node);
+        this->compile(node->upcast<NodeNode>()->node);
 
         ops->push_back(new OP(OP_UNARY_NEGATIVE));
 
@@ -384,16 +384,16 @@ void tora::Compiler::compile(Node *node) {
         LABEL2:
         */
 
-        this->compile(node->to_for_node()->initialize);
+        this->compile(node->upcast<ForNode>()->initialize);
         int label1 = ops->size();
-        this->compile(node->to_for_node()->cond);
+        this->compile(node->upcast<ForNode>()->cond);
 
         OP * jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_label2);
 
-        this->compile(node->to_for_node()->block);
-        this->compile(node->to_for_node()->postfix);
+        this->compile(node->upcast<ForNode>()->block);
+        this->compile(node->upcast<ForNode>()->postfix);
 
         OP * jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
@@ -410,7 +410,7 @@ void tora::Compiler::compile(Node *node) {
         node->method_call.method = $3;
         node->method_call.args   = $5;
         */
-        auto mcn = node->to_method_call_node();
+        auto mcn = node->upcast<MethodCallNode>();
         auto args = mcn->args;
         int args_len = args->size();
         while (args->size() > 0) {

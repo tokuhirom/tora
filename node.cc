@@ -2,7 +2,7 @@
 #include "node.h"
 #include <vector>
 
-// TODO: move to Node::dump()
+using namespace tora;
 
 static void print_indent(int indent) {
     for (int i=0; i<indent*2; i++) {
@@ -10,7 +10,7 @@ static void print_indent(int indent) {
     }
 }
 
-static void dump_args(std::vector<tora::Node*> *args, int indent) {
+static void dump_args(std::vector<SharedPtr<tora::Node>> *args, int indent) {
     for (size_t i=0; i<args->size(); i++) {
         args->at(i)->dump(indent+1);
     }

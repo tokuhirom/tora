@@ -30,7 +30,7 @@ public:
         delete ops;
         delete blocks;
     }
-    void compile(Node *node);
+    void compile(SharedPtr<Node> node);
     void push_block() {
         DBG("PUSH BLOCK: %d\n", this->blocks->size());
         this->blocks->push_back(new Block());

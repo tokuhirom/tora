@@ -15,8 +15,7 @@ public:
         double double_value;
         bool bool_value;
     } operand;
-    OP() {
-    }
+    OP() { }
     OP(op_type_t type)  {
         this->op_type = type;
     }

@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "node.h"
+#include "shared_ptr.h"
 #include "Tora.tab.hh"
 
 extern "C" int yywrap();

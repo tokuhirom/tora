@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
         }
         tora::VM vm(compiler.ops);
         // TODO: use delete
-        /// delete root_node; // AST is not needed after compiling.
+        // delete root_node; // AST is not needed after compiling.
         if (dump_ops) {
             vm.dump_ops();
         }

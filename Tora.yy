@@ -14,6 +14,7 @@
 #include "tora.h"
 #include "value.h"
 #include "vm.h"
+#include "shared_ptr.h"
 
 #define YYDEBUG 1
 #define YYERROR_VERBOSE 1
@@ -36,9 +37,9 @@ Node *root_node;
     int int_value;
     double double_value;
     const char *str_value;
-    class Node *node;
-    std::vector<Node*> *argument_list;
-    std::vector<Node*> *parameter_list;
+    class Node* node;
+    std::vector<tora::SharedPtr<Node>> *argument_list;
+    std::vector<tora::SharedPtr<Node>> *parameter_list;
 }
 
 %type <node> additive_expression multiplicative_expression primary_expression variable block postfix_expression sub_stmt if_statement array_creation unary_expression jump_statement translation_unit statement root statement_list inclusive_or_expression exclusive_or_expression and_expression
@@ -142,13 +143,13 @@ sub_stmt
     }
     | SUB identifier L_PAREN R_PAREN block
     {
-        $$ = new FuncdefNode($2, new std::vector<Node*>(), $5);
+        $$ = new FuncdefNode($2, new std::vector<SharedPtr<Node>>(), $5);
     }
 
 parameter_list
     : variable
     {
-        $$ = new std::vector<Node*>();
+        $$ = new std::vector<SharedPtr<Node>>();
         $$->push_back($1);
     }
     | parameter_list COMMA expression
@@ -166,7 +167,7 @@ array_creation
 argument_list
     : expression
     {
-        $$ = new std::vector<Node*>();
+        $$ = new std::vector<SharedPtr<Node>>();
         $$->push_back($1);
     }
     | argument_list COMMA expression
@@ -297,7 +298,7 @@ postfix_expression
     }
     | identifier L_PAREN R_PAREN
     {
-        $$ = new FuncallNode($1, new std::vector<Node*>());
+        $$ = new FuncallNode($1, new std::vector<SharedPtr<Node>>());
     }
     | identifier L_PAREN argument_list R_PAREN
     {
@@ -310,7 +311,7 @@ postfix_expression
     }
     | primary_expression DOT identifier L_PAREN R_PAREN
     {
-        $$ = new MethodCallNode($1, $3, new std::vector<Node*>());
+        $$ = new MethodCallNode($1, $3, new std::vector<SharedPtr<Node>>());
     }
     ;
 
