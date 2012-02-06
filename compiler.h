@@ -44,7 +44,7 @@ public:
     }
     void pop_block() {
         DBG("POP BLOCK: %d\n", this->blocks->size());
-        delete this->blocks->back();
+        // delete this->blocks->back();
         this->blocks->pop_back();
     }
     int find_localvar(std::string name, int &level);

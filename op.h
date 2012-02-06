@@ -3,6 +3,7 @@
 
 #include "ops.gen.h"
 #include "value.h"
+#include "shared_ptr.h"
 
 namespace tora {
 
@@ -19,7 +20,7 @@ public:
     OP(op_type_t type)  {
         this->op_type = type;
     }
-    ~OP() { }
+    virtual ~OP() { }
 };
 
 /**
@@ -27,12 +28,12 @@ public:
  **/
 class ValueOP : public OP {
 public:
-    Value *value;
-    ValueOP(op_type_t type, Value *v) {
+    SharedPtr<Value> value;
+    ValueOP(op_type_t type, SharedPtr<Value> v) {
         this->op_type = type;
         this->value = v;
     }
-    ~ValueOP();
+    ~ValueOP() { }
 };
 
 };

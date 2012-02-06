@@ -19,9 +19,6 @@ VM::~VM() {
     delete this->ops;
     delete this->lexical_vars_stack;
     delete this->function_frames;
-    while (this->stack.size() > 0) {
-        this->stack.pop()->release();
-    }
 }
 
 static void disasm_one(OP* op) {
@@ -85,7 +82,7 @@ void VM::execute() {
             break;
         }
         case OP_PUSH_VALUE: {
-            Value *v = ((ValueOP*)&(*(op)))->value;
+            SharedPtr<Value> v = ((ValueOP*)&(*(op)))->value;
             stack.push(v);
             break;
         }
@@ -263,9 +260,7 @@ void VM::execute() {
             if (fframe->top == (int)stack.size()) {
                 stack.push(UndefValue::instance());
             }
-            fframe->release();
 
-            lexical_vars_stack->back()->release();
             lexical_vars_stack->pop_back();
 
             continue;
@@ -276,7 +271,6 @@ void VM::execute() {
             break;
         }
         case OP_LEAVE: {
-            lexical_vars_stack->back()->release();
             lexical_vars_stack->pop_back();
             break;
         }
