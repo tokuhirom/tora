@@ -81,12 +81,6 @@ void tora::Compiler::compile(Node *node) {
         }
 
         Compiler funccomp;
-        {
-            auto iter = this->blocks->begin();
-            for (; iter!=this->blocks->end(); iter++) {
-                (*iter)->retain();
-            }
-        }
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block);
 
