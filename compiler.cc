@@ -6,7 +6,7 @@
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
     for (level = 0; level<this->blocks->size(); level++) {
-        Block *block = this->blocks->at(this->blocks->size()-1-level);
+        SharedPtr<Block> block = this->blocks->at(this->blocks->size()-1-level);
         for (size_t i=0; i<block->vars.size(); i++) {
             if (*(block->vars.at(i)) == name) {
                 return i;
@@ -87,7 +87,7 @@ void tora::Compiler::compile(Node *node) {
                 (*iter)->retain();
             }
         }
-        funccomp.blocks = new std::vector<Block*>(*(this->blocks));
+        funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block);
 
         OP * ret = new OP;
