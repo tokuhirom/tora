@@ -1,28 +1,29 @@
 #include <vector>
 #include "value.h"
+#include "shared_ptr.h"
 
 namespace tora {
 
 class Value;
 
 class Stack {
-    std::vector<Value*> container;
+    std::vector<SharedPtr<Value>> container;
 public:
-    Value *back() {
+    SharedPtr<Value> back() {
         return container.back();
     }
     void pop_back() {
         container.pop_back();
     }
-    Value *pop() {
-        Value * v = container.back();
+    SharedPtr<Value> pop() {
+        SharedPtr<Value> v = container.back();
         container.pop_back();
         return v;
     }
-    void push(Value *v) {
+    void push(SharedPtr<Value> v) {
         container.push_back(v);
     }
-    Value *at(int i) {
+    SharedPtr<Value> at(int i) {
         return container.at(i);
     }
     size_t size() {

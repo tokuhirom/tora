@@ -66,6 +66,16 @@ public:
         assert(ptr != NULL);
         return ptr;
     }
+
+    typedef T * this_type::*unspecified_bool_type;
+    operator unspecified_bool_type() const // never throws
+    {
+        return ptr == 0 ? 0: &this_type::ptr;
+    }
+
+    bool operator! () const {
+        return ptr == 0;
+    }
     
     void swap(SharedPtr & rhs) {
         T * tmp = ptr;

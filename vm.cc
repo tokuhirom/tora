@@ -17,20 +17,8 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_) {
 
 VM::~VM() {
     delete this->ops;
-    {
-        auto iter = this->lexical_vars_stack->begin();
-        for (; iter!=this->lexical_vars_stack->end(); iter++) {
-            (*iter)->release();
-        }
-        delete this->lexical_vars_stack;
-    }
-    {
-        auto iter = this->function_frames->begin();
-        for (; iter!=this->function_frames->end(); iter++) {
-            (*iter)->release();
-        }
-        delete this->function_frames;
-    }
+    delete this->lexical_vars_stack;
+    delete this->function_frames;
     while (this->stack.size() > 0) {
         this->stack.pop()->release();
     }
@@ -103,7 +91,7 @@ void VM::execute() {
             break;
         }
         case OP_DEFINE_METHOD: {
-            Value *code = stack.pop(); // code object
+            SharedPtr<Value> code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
             const char *funcname = ((ValueOP*)&(*(op)))->value->to_str()->str_value;
             this->add_function(funcname, code);
@@ -204,7 +192,7 @@ void VM::execute() {
                 ValuePtr s(v->to_i());
                 exit(s->to_int()->int_value);
             } else {
-                std::map<std::string, Value*>::iterator iter =  this->functions.find(funname->to_str()->str_value);
+                auto iter =  this->functions.find(funname->to_str()->str_value);
                 if (iter != this->functions.end()) {
                     CodeValue *code = iter->second->to_code();
                     // printf("calling %s\n", funname->to_str()->str_value);
@@ -223,7 +211,7 @@ void VM::execute() {
                     // TODO: kwargs support
                     assert(op->operand.int_value == (int)code->code_params->size());
                     for (int i=0; i<op->operand.int_value; i++) {
-                        Value* arg = stack.pop();
+                        SharedPtr<Value> arg = stack.pop();
                         /*
                         std::string *argname = code->code_params->at(i);
                         // printf("set lexical var: %d for %s\n", i, argname->c_str());
@@ -342,8 +330,7 @@ void VM::execute() {
 
         // variable
         case OP_SETLOCAL: {
-            Value * rvalue = stack.pop();
-            rvalue->retain();
+            SharedPtr<Value> rvalue = stack.pop();
             lexical_vars_stack->back()->setVar(
                 op->operand.int_value,
                 rvalue
@@ -353,15 +340,14 @@ void VM::execute() {
         }
         case OP_SETDYNAMIC: {
             // lexical_vars_stack->back()->dump_vars();
-            LexicalVarsFrame *frame = lexical_vars_stack->back();
+            SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
             int level = (op->operand.int_value >> 16) & 0x0000FFFF;
             int no    = op->operand.int_value & 0x0000ffff;
             DBG("SETDYNAMIC %d, %d\n", level, no);
             for (int i=0; i<level; i++) {
                 frame = frame->up;
             }
-            Value * rvalue = stack.pop();
-            rvalue->retain();
+            SharedPtr<Value> rvalue = stack.pop();
             frame->setVar(
                 no,
                 rvalue
@@ -371,11 +357,10 @@ void VM::execute() {
         }
         case OP_GETDYNAMIC: {
             // lexical vars
-            LexicalVarsFrame *frame = lexical_vars_stack->back();
+            SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
             int level = (op->operand.int_value >> 16) & 0x0000FFFF;
             int no    = op->operand.int_value & 0x0000ffff;
             for (int i=0; i<level; i++) {
-                DBG2("UP!\n");
                 frame = frame->up;
             }
             Value *v = frame->find(no);
@@ -411,8 +396,7 @@ void VM::execute() {
             ValuePtr index(stack.pop());
             ValuePtr container(stack.pop());
 
-            Value *ret = container->get_item(&(*index));
-            ret->retain();
+            SharedPtr<Value> ret = container->get_item(&(*index));
             stack.push(ret);
             break;
         }
@@ -436,10 +420,10 @@ void VM::execute() {
         }
 
         case OP_MAKE_ARRAY: {
-            ArrayValue *a = new ArrayValue();
+            SharedPtr<ArrayValue> a = new ArrayValue();
             int array_size = op->operand.int_value;
             for (int i=0; i<array_size; i++) {
-                Value *v = stack.pop();
+                SharedPtr<Value> v = stack.pop();
                 a->push(v);
             }
             stack.push(a);

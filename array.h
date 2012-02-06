@@ -7,28 +7,28 @@ namespace tora {
 
 class ArrayValue: public Value {
 public:
-    std::vector<Value*> *values;
+    std::vector<SharedPtr<Value>> *values;
     ArrayValue() : Value() {
         this->value_type = VALUE_TYPE_ARRAY;
-        this->values = new std::vector<Value*>;
+        this->values = new std::vector<SharedPtr<Value>>;
     }
     ~ArrayValue() {
         delete values;
     }
     // retain before push
-    void push(Value *v) {
+    void push(SharedPtr<Value> v) {
         this->values->push_back(v);
     }
     size_t size() {
         return this->values->size();
     }
     // release after pop by your hand
-    Value* pop() {
-        Value *v = this->values->back();
+    SharedPtr<Value> pop() {
+        SharedPtr<Value> v = this->values->back();
         this->values->pop_back();
         return v;
     }
-    Value *at(int i) {
+    SharedPtr<Value>at(int i) {
         return this->values->at(i);
     }
     void dump() {
@@ -38,8 +38,8 @@ public:
             values->at(i)->dump();
         }
     }
-    Value *get_item(Value *index);
-    void set_item(Value *index, Value *v);
+    SharedPtr<Value>get_item(SharedPtr<Value>index);
+    void set_item(SharedPtr<Value>index, SharedPtr<Value>v);
     const char *type_str() { return "array"; }
 };
 

@@ -3,7 +3,7 @@
 
 using namespace tora;
 
-Value *ArrayValue::get_item(Value *index) {
+SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     IntValue *iv = index->to_i();
     int i = iv->int_value;
     iv->release();
@@ -15,7 +15,7 @@ Value *ArrayValue::get_item(Value *index) {
     }
 }
 
-void ArrayValue::set_item(Value *index, Value *v) {
+void ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
     IntValuePtr iv(index->to_i());
     int i = iv->int_value;
     if ((int)this->values->size()-1 < i) {

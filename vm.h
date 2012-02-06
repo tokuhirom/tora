@@ -22,21 +22,16 @@ public:
 
 class LexicalVarsFrame : public Prim {
 public:
-    LexicalVarsFrame* up;
+    SharedPtr<LexicalVarsFrame> up;
     std::map<int, SharedPtr<Value>> vars;
     LexicalVarsFrame() : Prim() {
         up = NULL;
     }
     LexicalVarsFrame(LexicalVarsFrame *up_) : Prim() {
-        up_->retain();
         this->up = up_;
     }
-    ~LexicalVarsFrame() {
-        if (this->up) {
-            this->up->release();
-        }
-    }
-    void setVar(int id, Value * v) {
+    ~LexicalVarsFrame() { }
+    void setVar(int id, SharedPtr<Value> v) {
         this->vars[id] = v;
     }
     Value *find(int id) {
@@ -74,8 +69,8 @@ public:
     int sp; // stack pointer
     size_t pc; // program counter
     std::vector<SharedPtr<OP>> *ops;
-    std::map<std::string, Value*> global_vars;
-    std::map<std::string, Value*> functions;
+    std::map<std::string, SharedPtr<Value>> global_vars;
+    std::map<std::string, SharedPtr<Value>> functions;
     std::vector<FunctionFrame*> *function_frames;
 
     /*
@@ -102,8 +97,7 @@ public:
         }
         printf("----------------\n");
     }
-    void add_function(const char*name, Value*code) {
-        code->retain();
+    void add_function(const char*name, SharedPtr<Value> code) {
         functions[std::string(name)] = code;
     }
 };
