@@ -99,14 +99,14 @@ void VM::execute() {
             SharedPtr<Value> v2(stack.pop()); /* lvalue */ \
             if (v2->value_type == VALUE_TYPE_DOUBLE) { \
                 if (v1->value_type == VALUE_TYPE_DOUBLE) { \
-                    DoubleValue *v = new DoubleValue(v2->to_double()->double_value op v1->to_double()->double_value); \
+                    SharedPtr<DoubleValue>v = new DoubleValue(v2->to_double()->double_value op v1->to_double()->double_value); \
                     stack.push(v); \
                 } else if (v1->value_type == VALUE_TYPE_INT) {\
-                    DoubleValue *v = new DoubleValue(v2->to_double()->double_value op (double)v1->to_int()->int_value); \
+                    SharedPtr<DoubleValue>v = new DoubleValue(v2->to_double()->double_value op (double)v1->to_int()->int_value); \
                     stack.push(v); \
                 } \
             } else if (v2->value_type == VALUE_TYPE_INT) { \
-                IntValue *v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
+                SharedPtr<IntValue> v = new IntValue(v2->to_int()->int_value op v1->to_int()->int_value); \
                 stack.push(v); \
             } else {  \
                 SharedPtr<Value> s(v2->to_s()); \
@@ -128,7 +128,7 @@ void VM::execute() {
                 stack.push(v);
             } else if (v1->value_type == VALUE_TYPE_STR) {
                 // TODO: support null terminated string
-                StrValue *v = new StrValue();
+                SharedPtr<StrValue>v = new StrValue();
                 SharedPtr<Value> s(v2->to_s());
                 // strdup
                 v->set_str(strdup((std::string(s->to_str()->str_value) + std::string(v1->to_str()->str_value)).c_str()));
@@ -190,10 +190,10 @@ void VM::execute() {
             } else {
                 auto iter =  this->functions.find(funname->to_str()->str_value);
                 if (iter != this->functions.end()) {
-                    CodeValue *code = iter->second->to_code();
+                    SharedPtr<CodeValue> code = iter->second->to_code();
                     // printf("calling %s\n", funname->to_str()->str_value);
                     {
-                        FunctionFrame * fframe = new FunctionFrame();
+                        SharedPtr<FunctionFrame> fframe = new FunctionFrame();
                         fframe->return_address = pc;
                         fframe->orig_ops = ops;
                         fframe->top = stack.size() - op->operand.int_value;
@@ -266,7 +266,7 @@ void VM::execute() {
             continue;
         }
         case OP_ENTER: {
-            LexicalVarsFrame *frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
             lexical_vars_stack->push_back(frame);
             break;
         }
@@ -354,10 +354,9 @@ void VM::execute() {
             for (int i=0; i<level; i++) {
                 frame = frame->up;
             }
-            Value *v = frame->find(no);
+            SharedPtr<Value>v = frame->find(no);
             if (v) {
                 DBG2("found lexical var\n");
-                v->retain();
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword?
                 DBG2("There is no variable...\n");
@@ -369,15 +368,13 @@ void VM::execute() {
         }
         case OP_GETLOCAL: {
             // lexical vars
-            Value *v = lexical_vars_stack->back()->find(op->operand.int_value);
+            SharedPtr<Value>v = lexical_vars_stack->back()->find(op->operand.int_value);
             if (v) {
                 // printf("found lexical var\n");
-                v->retain();
                 stack.push(v);
             } else { // TODO: remove this and use 'my' keyword?
                 v = UndefValue::instance();
                 lexical_vars_stack->back()->setVar(op->operand.int_value, v);
-                v->retain();
                 stack.push(v);
             }
             break;
@@ -396,16 +393,14 @@ void VM::execute() {
             SharedPtr<Value> index(stack.pop());
             SharedPtr<Value> container(stack.pop());
 
-            rvalue->retain();
-            container->set_item(&(*index), &(*rvalue));
-            rvalue->retain();
+            container->set_item(index, rvalue);
             stack.push(&(*rvalue));
             break;
         }
 
         case OP_UNARY_NEGATIVE: {
             SharedPtr<Value> v(stack.pop());
-            Value * result = v->tora__neg__();
+            SharedPtr<Value> result = v->tora__neg__();
             stack.push(result);
             break;
         }
