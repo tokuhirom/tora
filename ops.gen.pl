@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use autodie;
-use Text::Xslate;
 use 5.10.0;
 
 my @ops = qw(
@@ -56,21 +55,13 @@ my @ops = qw(
     OP_UNARY_INCREMENT
 );
 
-my $xslate = Text::Xslate->new(
-    syntax => 'TTerse',
-);
-
-print $xslate->render_string(<<'...', { ops => \@ops });
+printf <<'...', join(", ", @ops);
 #ifndef OPS_GEN_H_
 #define OPS_GEN_H_
 
 namespace tora {
 
-typedef enum {
-[% FOR op IN ops -%]
-    [% op %],
-[% END -%]
-} op_type_t;
+typedef enum {%s} op_type_t;
 
 extern const char*opcode2name[];
 
@@ -80,13 +71,9 @@ extern const char*opcode2name[];
 ...
 
 open my $fh, '>', 'ops.gen.cc';
-print $fh $xslate->render_string(<<'...', { ops => \@ops });
+printf $fh (<<'...', join(", ", map{ qq{"$_"} } @ops));
 #include "ops.gen.h"
 
-const char*tora::opcode2name[] = {
-[% FOR op IN ops -%]
-    "[% op %]",
-[% END -%]
-};
+const char*tora::opcode2name[] = {%s};
 ...
 

@@ -6,9 +6,12 @@ import sys
 from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 
-# env = Environment(CXX='clang')
-env = Environment()
-env.Append(CCFLAGS=['-std=c++0x'])
+if os.uname()[0]=='Darwin':
+    env = Environment(CXX='clang++', CC='clang++')
+    env.Append(CXXFLAGS=['-std=c++0x'])
+else:
+    env = Environment(CXX='g++')
+    env.Append(CCFLAGS=['-std=c++0x'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CCFLAGS=['-O2'])
 env.Append(CCFLAGS=['-Wall'])
@@ -26,5 +29,5 @@ if 'test' in COMMAND_LINE_TARGETS:
 env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
 env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl > nodes.gen.h');
-env.CXXFile(target='lex.yy.c', source='Tora.ll')
-env.Program('tora', ['Tora.tab.cc lex.yy.c main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc'.split(' ')], CC='g++')
+env.CXXFile(target='lex.yy.cc', source='Tora.ll')
+env.Program('tora', ['Tora.tab.cc lex.yy.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc'.split(' ')])

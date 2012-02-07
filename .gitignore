@@ -1,7 +1,7 @@
 Tora.output
 Tora.tab.cc
 Tora.tab.hh
-lex.yy.c
+lex.yy.cc
 tora
 .sconsign.dblite
 hoge.tra
