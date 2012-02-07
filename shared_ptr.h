@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <algorithm>
+#include <utility> // std::move
 
 namespace tora {
 
@@ -35,10 +36,12 @@ public:
     SharedPtr(SharedPtr && rhs): ptr( rhs.ptr ) {
         rhs.ptr = 0;
     }
+#ifdef std::move
     SharedPtr & operator=(SharedPtr && rhs) {
         this_type(std::move(rhs)).swap(*this);
         return *this;
     }
+#endif
 
     SharedPtr & operator=(SharedPtr const & rhs) {
         this_type(rhs).swap(*this);

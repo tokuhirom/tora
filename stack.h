@@ -7,7 +7,7 @@ namespace tora {
 class Value;
 
 class Stack {
-    std::vector<SharedPtr<Value>> container;
+    std::vector< SharedPtr<Value>> container;
 public:
     SharedPtr<Value> back() {
         return container.back();

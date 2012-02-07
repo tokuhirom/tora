@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use 5.010000;
-use Text::Xslate;
 use autodie;
 
 my @nodes = qw(
@@ -44,23 +43,15 @@ my @nodes = qw(
     NODE_UNARY_INCREMENT
 );
 
-my $xslate = Text::Xslate->new(
-    syntax => 'TTerse',
-);
-
 open my $cc, '>', 'nodes.gen.cc';
 
-print $xslate->render_string(<<'...', { nodes => \@nodes });
+printf (<<'...', join(", ", @nodes));
 #ifndef NODES_GEN_H_
 #define NODES_GEN_H_
 
 namespace tora {
 
-typedef enum {
-[% FOR node IN nodes -%]
-    [% node %],
-[% END -%]
-} node_type_t;
+typedef enum {%s} node_type_t;
 
 extern const char*node_type2name[];
 
@@ -70,13 +61,10 @@ extern const char*node_type2name[];
 ...
 
 
-print $cc $xslate->render_string(<<'...', { nodes => \@nodes });
+printf $cc (<<'...', join(", ", map { qq{"$_"} } @nodes) );
 #include "nodes.gen.h"
 
-const char*tora::node_type2name[] = {
-[% FOR node IN nodes -%]
-    "[% node %]",
-[% END -%]
-};
+const char*tora::node_type2name[] = {%s};
 ...
+
 
