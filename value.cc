@@ -3,34 +3,28 @@
 
 using namespace tora;
 
-// singleton values
-UndefValue *UndefValue::undef_  = NULL;
-BoolValue *BoolValue::true_  = NULL;
-BoolValue *BoolValue::false_ = NULL;
-
-Value *Value::to_b() {
+SharedPtr<Value> Value::to_b() {
     switch (value_type) {
     case VALUE_TYPE_UNDEF: {
-        return BoolValue::false_instance();
+        return new BoolValue(false);
     }
     case VALUE_TYPE_BOOL:
-        this->retain();
         return this;
     default: {
-        return BoolValue::true_instance();
+        return new BoolValue(true);
     }
     }
 }
 
-StrValue *IntValue::to_s() {
+SharedPtr<StrValue> IntValue::to_s() {
     StrValue *v = new StrValue();
     std::ostringstream os;
-    os << this->to_int()->int_value;
+    os << this->upcast<IntValue>()->int_value;
     v->set_str(strdup(os.str().c_str()));
     return v;
 }
 
-StrValue *DoubleValue::to_s() {
+SharedPtr<StrValue> DoubleValue::to_s() {
     StrValue *v = new StrValue();
     std::ostringstream os;
     os << this->double_value;
@@ -38,18 +32,18 @@ StrValue *DoubleValue::to_s() {
     return v;
 }
 
-StrValue *BoolValue::to_s() {
+SharedPtr<StrValue> BoolValue::to_s() {
     return new StrValue(strdup(this->bool_value ? "true" : "false"));
 }
 
-StrValue *UndefValue::to_s() {
+SharedPtr<StrValue> UndefValue::to_s() {
     return new StrValue(strdup("undef"));
 }
-StrValue *CodeValue::to_s() {
+SharedPtr<StrValue> CodeValue::to_s() {
     return new StrValue(strdup("<code>"));
 }
 
-StrValue *Value::to_s() {
+SharedPtr<StrValue> Value::to_s() {
     printf("%s don't support stringification.\n", this->type_str());
     abort();
 }
@@ -57,7 +51,7 @@ StrValue *Value::to_s() {
 IntValue *Value::to_i() {
     switch (value_type) {
     case VALUE_TYPE_INT: {
-        IntValue *v = new IntValue(this->to_int()->int_value);
+        IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
         // TODO: this->clone()?
         return v;
     }

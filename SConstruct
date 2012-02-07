@@ -13,6 +13,10 @@ env.Append(CCFLAGS=['-g'])
 env.Append(CCFLAGS=['-O2'])
 env.Append(CCFLAGS=['-Wall'])
 
+if ARGUMENTS.get('profile', 0):
+    env.Append(CXXFLAGS=['-pg'])
+    env.Append(LINKFLAGS=['-pg'])
+
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
     env.Append(CCFLAGS=['-DDEBUG'])

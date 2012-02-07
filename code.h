@@ -31,7 +31,7 @@ public:
         printf("----------------\n");
     }
     const char *type_str() { return "code"; }
-    StrValue *to_s();
+    SharedPtr<StrValue> to_s();
 };
 
 };

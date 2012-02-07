@@ -7,13 +7,13 @@ protected:
     int refcnt;
 public:
     virtual ~Prim() { }
-    virtual void release() {
+    void release() {
         --refcnt;
         if (refcnt == 0) {
             delete this;
         }
     }
-    virtual void retain() {
+    void retain() {
         ++refcnt;
     }
 };

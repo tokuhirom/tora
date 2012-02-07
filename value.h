@@ -38,6 +38,7 @@ class ArrayValue;
 class Value : public Prim {
 protected:
     Value() : Prim() { }
+    virtual ~Value() { }
 public:
     value_type_t value_type;
 
@@ -50,33 +51,13 @@ public:
             exit(1); // BUG
         }
     }
-    IntValue* to_int() {
-        assert(this->value_type == VALUE_TYPE_INT);
-        return (IntValue*)this;
-    }
-    DoubleValue* to_double() {
-        assert(this->value_type == VALUE_TYPE_DOUBLE);
-        return (DoubleValue*)this;
-    }
-    BoolValue* to_bool() {
-        assert(this->value_type == VALUE_TYPE_BOOL);
-        return (BoolValue*)this;
-    }
-    StrValue* to_str() {
-        assert(this->value_type == VALUE_TYPE_STR);
-        return (StrValue*)this;
-    }
-    ArrayValue* to_array() {
-        assert(this->value_type == VALUE_TYPE_ARRAY);
-        return (ArrayValue*)this;
-    }
     virtual void dump() = 0;
     // TODO: rename to as_str
-    virtual StrValue *to_s();
+    virtual SharedPtr<StrValue> to_s();
     // TODO: rename to as_int
     IntValue *to_i();
     // TODO: rename to as_bool
-    Value *to_b();
+    SharedPtr<Value> to_b();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
     }
@@ -111,11 +92,12 @@ public:
         this->value_type = VALUE_TYPE_INT;
         this->int_value = i;
     }
+    ~IntValue() { }
     void dump() {
         printf("[dump] IV: %d\n", int_value);
     }
     const char *type_str() { return "int"; }
-    StrValue *to_s();
+    SharedPtr<StrValue> to_s();
     Value* tora__neg__();
     void tora__incr__() {
         this->int_value++;
@@ -133,7 +115,7 @@ public:
         printf("[dump] NV: %lf\n", double_value);
     }
     const char *type_str() { return "double"; }
-    StrValue *to_s();
+    SharedPtr<StrValue> to_s();
 };
 
 class UndefValue: public Value {
@@ -141,60 +123,39 @@ private:
     UndefValue(): Value() {
         this->value_type = VALUE_TYPE_UNDEF;
     }
-    static UndefValue *undef_;
 public:
-    void release() { } // DO NOT RELEASE
-    void retain()  { } // NOP
     static UndefValue *instance() {
-        if (!undef_) {
-            undef_ = new UndefValue();
-        }
-        return undef_;
+        return new UndefValue();
     }
     void dump() {
         printf("[dump] undef\n");
     }
     const char *type_str() { return "undef"; }
-    StrValue *to_s();
+    SharedPtr<StrValue> to_s();
 };
 
 // This is singleton
 class BoolValue: public Value {
-private:
+public:
     BoolValue(bool b): Value() {
         this->value_type = VALUE_TYPE_BOOL;
         this->bool_value = b;
     }
-    static BoolValue *true_;
-    static BoolValue *false_;
-public:
     bool bool_value;
-    void release() {
-        // DO NOT RELEASE
+    static SharedPtr<BoolValue> true_instance() {
+        return new BoolValue(true);
     }
-    void retain() {
-        // NOP
+    static SharedPtr<BoolValue> false_instance() {
+        return new BoolValue(false);
     }
-    static BoolValue *true_instance() {
-        if (!true_) {
-            true_ = new BoolValue(true);
-        }
-        return true_;
-    }
-    static BoolValue *false_instance() {
-        if (!false_) {
-            false_ = new BoolValue(false);
-        }
-        return false_;
-    }
-    static BoolValue *instance(bool b) {
+    static SharedPtr<BoolValue> instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
     void dump() {
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
     const char *type_str() { return "bool"; }
-    StrValue *to_s();
+    SharedPtr<StrValue>to_s();
 };
 
 class StrValue: public Value {
@@ -216,7 +177,7 @@ public:
         printf("[dump] str: %s\n", str_value);
     }
     const char *type_str() { return "str"; }
-    StrValue *to_s() {
+    SharedPtr<StrValue> to_s() {
         this->retain();
         return this;
     }
