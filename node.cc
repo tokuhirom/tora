@@ -18,7 +18,7 @@ static void dump_args(std::vector<SharedPtr<tora::Node>> *args, int indent) {
 
 void tora::ArgsNode::dump(int indent) {
     print_indent(indent);
-    printf("[Args]%s(%d)\n", this->type_name_str(), this->args->size());
+    printf("[Args]%s(%zd)\n", this->type_name_str(), this->args->size());
     dump_args(this->args, indent+1);
 }
 

@@ -24,6 +24,7 @@ class IntNode;
 class DoubleNode;
 class StrNode;
 class ArgsNode;
+class RangeNode;
 
 class Node : public Prim {
 public:
@@ -199,12 +200,15 @@ class BinaryNode: public Node {
 public:
     SharedPtr<Node>left;
     SharedPtr<Node>right;
-    BinaryNode(node_type_t t, Node* l, SharedPtr<Node>r) {
+    BinaryNode(node_type_t t, SharedPtr<Node> &l, SharedPtr<Node>& r) {
         type = t;
         left = l;
         right = r;
-        assert(l);
-        assert(r);
+    }
+    BinaryNode(node_type_t t, Node* l, Node* r) {
+        type = t;
+        left = l;
+        right = r;
     }
     ~BinaryNode() { }
     void dump(int indent);

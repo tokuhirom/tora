@@ -86,6 +86,12 @@ void VM::execute() {
             stack.push(v);
             break;
         }
+        case OP_NEW_RANGE: {
+            SharedPtr<Value> l = stack.pop();
+            SharedPtr<Value> r = stack.pop();
+            stack.push(new RangeValue(l->upcast<IntValue>(), r->upcast<IntValue>()));
+            break;
+        }
         case OP_DEFINE_METHOD: {
             SharedPtr<Value> code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
@@ -144,7 +150,7 @@ void VM::execute() {
             SharedPtr<Value> funname(stack.pop());
             const char *funname_c = funname->upcast<StrValue>()->str_value;
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
-                printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+                printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
                 abort();
             }
@@ -229,7 +235,7 @@ void VM::execute() {
             SharedPtr<Value> funname(stack.pop());
             const char *funname_c = funname->upcast<StrValue>()->str_value;
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
-                printf("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+                printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
                 abort();
             }

@@ -34,7 +34,7 @@ public:
     void dump() {
         printf("[dump] array:\n");
         for (size_t i=0; i<values->size(); i++) {
-            printf("[%d] ", i);
+            printf("[%zd] ", i);
             values->at(i)->dump();
         }
     }
