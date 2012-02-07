@@ -91,6 +91,7 @@ int yywrap(void)
 <INITIAL>"<=" return GE;
 <INITIAL>">=" return LE;
 <INITIAL>"==" return EQ;
+<INITIAL>"/=" return DIV_ASSIGN;
 <INITIAL>"(" return L_PAREN;
 <INITIAL>")" return R_PAREN;
 <INITIAL>"{" return L_BRACE;

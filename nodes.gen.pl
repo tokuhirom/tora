@@ -41,6 +41,7 @@ my @nodes = qw(
     NODE_UNARY_NEGATIVE
     NODE_METHOD_CALL
     NODE_UNARY_INCREMENT
+    NODE_DIV_ASSIGN
 );
 
 open my $cc, '>', 'nodes.gen.cc';

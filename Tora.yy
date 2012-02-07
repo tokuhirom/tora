@@ -68,6 +68,7 @@ Node *root_node;
 %token COMMA RETURN SEMICOLON
 %token SUB
 
+%left DIV_ASSIGN
 %left PLUSPLUS
 %left DOT
 %left DOTDOT
@@ -209,6 +210,10 @@ assignment_expression
     | conditional_expression ASSIGN conditional_expression
     {
         $$ = new BinaryNode(NODE_SETVARIABLE, $1, $3);
+    }
+    | conditional_expression DIV_ASSIGN conditional_expression
+    {
+        $$ = new BinaryNode(NODE_DIV_ASSIGN, $1, $3);
     }
 
 conditional_expression

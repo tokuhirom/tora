@@ -284,6 +284,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(tmp);
         break;
     }
+    case NODE_DIV_ASSIGN: {
+        // '$x /= 3;' => '$x = $x / 3'
+        // TODO: optimize
+        SharedPtr<BinaryNode> r = new BinaryNode(NODE_DIV,
+            &(*(node->upcast<BinaryNode>()->left)),
+            node->upcast<BinaryNode>()->right
+        );
+        SharedPtr<BinaryNode> p = new BinaryNode(NODE_SETVARIABLE, &(*(node->upcast<BinaryNode>()->left)), r);
+        this->compile(p);
+        break;
+    }
     case NODE_SETVARIABLE: {
         switch (node->upcast<BinaryNode>()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
