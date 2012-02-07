@@ -68,6 +68,7 @@ Node *root_node;
 %token COMMA RETURN SEMICOLON
 %token SUB
 
+%left PLUSPLUS
 %left DOT
 %left DOTDOT
 %left L_BRACKET R_BRACKET
@@ -285,6 +286,11 @@ multiplicative_expression
 
 unary_expression
     : postfix_expression
+    /* ++$i */
+    | PLUSPLUS unary_expression
+    {
+        $$ = new NodeNode(NODE_UNARY_INCREMENT, $2);
+    }
     | SUBTRACT unary_expression
     {
         $$ = new NodeNode(NODE_UNARY_NEGATIVE, $2);

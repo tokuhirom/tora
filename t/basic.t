@@ -96,6 +96,14 @@ while ($i<3) {
 }
 ...
 
+run_is(<<'...', "0\n1\n2\n");
+my $i=0;
+while ($i<3) {
+    say($i);
+    ++$i;
+}
+...
+
 TODO: {
     local $TODO = 'oops';
     run_is(<<'...', "OK\nHERE\n");

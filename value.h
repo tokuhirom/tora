@@ -81,6 +81,11 @@ public:
         return this->value_type == VALUE_TYPE_INT;
     }
 
+    template<class Y>
+    Y* upcast() {
+        return dynamic_cast<Y*>(&(*(this)));
+    }
+
     // GET type name in const char*
     virtual const char *type_str() = 0;
 
@@ -112,6 +117,9 @@ public:
     const char *type_str() { return "int"; }
     StrValue *to_s();
     Value* tora__neg__();
+    void tora__incr__() {
+        this->int_value++;
+    }
 };
 
 class DoubleValue: public Value {

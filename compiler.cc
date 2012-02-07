@@ -426,6 +426,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(tmp);
         break;
     }
+    case NODE_UNARY_INCREMENT: {
+        // ++$i
+        this->compile(node->upcast<NodeNode>()->node);
+
+        OP * tmp = new OP;
+        tmp->op_type = OP_UNARY_INCREMENT;
+        ops->push_back(tmp);
+        break;
+    }
 
     default:
         printf("Unknown node: %s\n", node->type_name_str());

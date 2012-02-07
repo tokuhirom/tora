@@ -38,4 +38,5 @@ const char*tora::opcode2name[] = {
     "OP_SET_ITEM",
     "OP_UNARY_NEGATIVE",
     "OP_METHOD_CALL",
+    "OP_UNARY_INCREMENT",
 };

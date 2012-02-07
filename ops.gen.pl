@@ -52,6 +52,8 @@ my @ops = qw(
     OP_UNARY_NEGATIVE
 
     OP_METHOD_CALL
+
+    OP_UNARY_INCREMENT
 );
 
 my $xslate = Text::Xslate->new(

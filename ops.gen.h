@@ -41,6 +41,7 @@ typedef enum {
     OP_SET_ITEM,
     OP_UNARY_NEGATIVE,
     OP_METHOD_CALL,
+    OP_UNARY_INCREMENT,
 } op_type_t;
 
 extern const char*opcode2name[];

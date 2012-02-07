@@ -416,6 +416,17 @@ void VM::execute() {
             break;
         }
 
+        case OP_UNARY_INCREMENT: {
+            SharedPtr<IntValue> i = stack.pop()->upcast<IntValue>();
+            if (i->value_type == VALUE_TYPE_INT) {
+                i->tora__incr__();
+                stack.push(i);
+            } else {
+                abort(); // TODO: throw exception
+            }
+            break;
+        }
+
         case OP_END: {
             goto END;
             break;

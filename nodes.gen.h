@@ -38,6 +38,7 @@ typedef enum {
     NODE_FOR,
     NODE_UNARY_NEGATIVE,
     NODE_METHOD_CALL,
+    NODE_UNARY_INCREMENT,
 } node_type_t;
 
 extern const char*node_type2name[];

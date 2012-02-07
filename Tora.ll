@@ -86,6 +86,7 @@ int yywrap(void)
 
 <INITIAL>"if" return IF;
 <INITIAL>"<" return GT;
+<INITIAL>"++" return PLUSPLUS;
 <INITIAL>">" return LT;
 <INITIAL>"<=" return GE;
 <INITIAL>">=" return LE;

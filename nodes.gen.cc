@@ -35,4 +35,5 @@ const char*tora::node_type2name[] = {
     "NODE_FOR",
     "NODE_UNARY_NEGATIVE",
     "NODE_METHOD_CALL",
+    "NODE_UNARY_INCREMENT",
 };
