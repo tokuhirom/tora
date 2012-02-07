@@ -103,8 +103,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_STRING: {
-        StrValue *sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
-        ValueOP * tmp = new ValueOP(OP_PUSH_STRING, sv);
+        SharedPtr<StrValue> sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
+        ops->push_back(tmp);
+        break;
+    }
+    case NODE_RANGE: {
+        this->compile(node->upcast<BinaryNode>()->right);
+        this->compile(node->upcast<BinaryNode>()->left);
+        SharedPtr<OP> tmp = new OP(OP_NEW_RANGE);
         ops->push_back(tmp);
         break;
     }

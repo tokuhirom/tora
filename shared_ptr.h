@@ -36,7 +36,7 @@ public:
     SharedPtr(SharedPtr && rhs): ptr( rhs.ptr ) {
         rhs.ptr = 0;
     }
-#ifdef std::move
+#ifdef move
     SharedPtr & operator=(SharedPtr && rhs) {
         this_type(std::move(rhs)).swap(*this);
         return *this;

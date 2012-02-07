@@ -24,6 +24,16 @@ SharedPtr<StrValue> IntValue::to_s() {
     return v;
 }
 
+SharedPtr<StrValue> RangeValue::to_s() {
+    SharedPtr<StrValue> v = new StrValue();
+    std::ostringstream os;
+    os << this->left->int_value;
+    os << "..";
+    os << this->right->int_value;
+    v->set_str(strdup(os.str().c_str()));
+    return &(*(v));
+}
+
 SharedPtr<StrValue> DoubleValue::to_s() {
     StrValue *v = new StrValue();
     std::ostringstream os;

@@ -13,7 +13,9 @@ else:
     env = Environment(CXX='g++')
     env.Append(CCFLAGS=['-std=c++0x'])
 env.Append(CCFLAGS=['-g'])
-env.Append(CCFLAGS=['-O2'])
+env.Append(CXXFLAGS=['-g'])
+env.Append(LDFLAGS=['-g'])
+env.Append(CCFLAGS=['-O0'])
 env.Append(CCFLAGS=['-Wall'])
 
 if ARGUMENTS.get('profile', 0):

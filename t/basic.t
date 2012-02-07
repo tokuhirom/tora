@@ -104,6 +104,10 @@ while ($i<3) {
 }
 ...
 
+run_is(<<'...', "0..10\n");
+say(0..10);
+...
+
 TODO: {
     local $TODO = 'oops';
     run_is(<<'...', "OK\nHERE\n");

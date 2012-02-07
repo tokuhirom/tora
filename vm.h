@@ -85,14 +85,14 @@ public:
     void dump_ops() {
         printf("-- OP DUMP    --\n");
         for (size_t i=0; i<ops->size(); i++) {
-            printf("[%02d] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
+            printf("[%02zd] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
         }
         printf("----------------\n");
     }
     void dump_stack() {
         printf("-- STACK DUMP --\nSP: %d\n", sp);
         for (size_t i=0; i<stack.size(); i++) {
-            printf("[%d] ", i);
+            printf("[%zd] ", i);
             stack.at(i)->dump();
         }
         printf("----------------\n");

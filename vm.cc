@@ -86,6 +86,12 @@ void VM::execute() {
             stack.push(v);
             break;
         }
+        case OP_NEW_RANGE: {
+            SharedPtr<Value> l = stack.pop();
+            SharedPtr<Value> r = stack.pop();
+            stack.push(new RangeValue(l->upcast<IntValue>(), r->upcast<IntValue>()));
+            break;
+        }
         case OP_DEFINE_METHOD: {
             SharedPtr<Value> code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);

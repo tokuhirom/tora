@@ -8,7 +8,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     int i = iv->int_value;
     iv->release();
     if (i > (int)this->values->size()) {
-        fprintf(stderr, "IndexError: %d, %d\n", i, this->values->size());
+        fprintf(stderr, "IndexError: %d, %zd\n", i, this->values->size());
         abort();
     } else {
         return this->at(i);

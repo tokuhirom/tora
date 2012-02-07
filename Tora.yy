@@ -51,6 +51,7 @@ Node *root_node;
 %type <node> relational_expression
 %type <node> shift_expression
 %type <node> identifier
+%type <node> int
 %type <argument_list> argument_list
 %type <parameter_list> parameter_list
 
@@ -322,13 +323,14 @@ postfix_expression
     ;
 
 primary_expression
-    : INT_LITERAL
-    {
-        $$ = new IntNode(NODE_INT, $1);
-    }
+    : int
     | DOUBLE_LITERAL
     {
         $$ = new DoubleNode(NODE_DOUBLE, $1);
+    }
+    | int DOTDOT int
+    {
+        $$ = new BinaryNode(NODE_RANGE, $1, $3);
     }
     | FALSE
     {
@@ -349,6 +351,12 @@ primary_expression
         $$ = $2;
     }
     ;
+
+int
+    : INT_LITERAL
+    {
+        $$ = new IntNode(NODE_INT, $1);
+    }
 
 identifier
     : IDENTIFIER
