@@ -9,6 +9,7 @@ from types import DictType, StringTypes
 if os.uname()[0]=='Darwin':
     env = Environment(CXX='clang++', CC='clang++')
     env.Append(CXXFLAGS=['-std=c++0x'])
+    # env.Append(CXXFLAGS=['-Werror'])
 else:
     env = Environment(CXX='g++')
     env.Append(CCFLAGS=['-std=c++0x'])

@@ -26,7 +26,7 @@ public:
     void dump() {
         printf("[dump] code: name: %s\n", this->code_name);
         for (size_t i=0; i<this->code_opcodes->size(); i++) {
-            printf("    [%d] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
+            printf("    [%zd] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
         }
         printf("----------------\n");
     }

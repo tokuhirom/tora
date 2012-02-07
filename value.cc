@@ -77,6 +77,5 @@ Value *IntValue::tora__neg__() {
 }
 
 StrValue::~StrValue() {
-    free((void*)str_value);
 }
 
