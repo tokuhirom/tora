@@ -1,0 +1,11 @@
+if ("HOGE".match(/O/)) {
+    say("OK");
+}
+if ("HOGE".match(/x/)) {
+    say("NOT OK");
+} else {
+    say("OK");
+}
+__END__
+OK
+OK

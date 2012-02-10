@@ -50,6 +50,6 @@ env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl > nodes.gen.h');
 env.CXXFile(target='lex.yy.cc', source='Tora.ll')
 env.Program('tora', [
-    'Tora.tab.cc lex.yy.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc'.split(' '),
+    'Tora.tab.cc lex.yy.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc'.split(' '),
     re2files
 ])

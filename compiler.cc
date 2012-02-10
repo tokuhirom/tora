@@ -2,6 +2,7 @@
 #include "node.h"
 #include "compiler.h"
 #include "code.h"
+#include "regexp.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
@@ -105,6 +106,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_STRING: {
         SharedPtr<StrValue> sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
         SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
+        ops->push_back(tmp);
+        break;
+    }
+    case NODE_REGEXP: {
+        SharedPtr<AbstractRegexpValue> sv = new RE2RegexpValue(node->upcast<RegexpNode>()->regexp_value);
+        if (!sv->ok()) {
+            fprintf(stderr, "Regexp compilation failed: /%s/ : %s\n", sv->pattern().c_str(), sv->error().c_str());
+            error = true;
+            break;
+        }
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_VALUE, sv);
         ops->push_back(tmp);
         break;
     }

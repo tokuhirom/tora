@@ -46,7 +46,7 @@ void tora::ForNode::dump(int indent) {
 
 void tora::FuncallNode::dump(int indent) {
     print_indent(indent);
-    printf("[Binary]%s\n", this->type_name_str());
+    printf("[Binary]%s(args: %zd)\n", this->type_name_str(), this->args->size());
     dump_args(this->args, indent+1);
 }
 
@@ -78,6 +78,11 @@ void tora::DoubleNode::dump(int indent) {
 void tora::StrNode::dump(int indent) {
     print_indent(indent);
     printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value);
+}
+
+void tora::RegexpNode::dump(int indent) {
+    print_indent(indent);
+    printf("[Regexp] %s\n", this->regexp_value.c_str());
 }
 
 void tora::NodeNode::dump(int indent) {

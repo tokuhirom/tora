@@ -43,6 +43,7 @@ my @nodes = qw(
     NODE_UNARY_INCREMENT
     NODE_DIV_ASSIGN
     NODE_RANGE
+    NODE_REGEXP
 );
 
 open my $cc, '>', 'nodes.gen.cc';

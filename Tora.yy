@@ -15,6 +15,7 @@
 #include "value.h"
 #include "vm.h"
 #include "shared_ptr.h"
+#include "regexp.h"
 
 #define YYDEBUG 1
 #define YYERROR_VERBOSE 1
@@ -62,6 +63,7 @@ Node *root_node;
 %token <str_value> IDENTIFIER;
 %token <str_value> VARIABLE;
 %token <str_value>STRING_LITERAL
+%token <str_value>REGEXP_LITERAL
 %token FOR WHILE
 %nonassoc TRUE FALSE
 %right ASSIGN
@@ -344,6 +346,10 @@ primary_expression
     | TRUE
     {
         $$ = new VoidNode(NODE_TRUE);
+    }
+    | REGEXP_LITERAL
+    {
+        $$ = new RegexpNode(NODE_REGEXP, $1);
     }
     | STRING_LITERAL
     {

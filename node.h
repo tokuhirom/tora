@@ -6,6 +6,7 @@
 #include "shared_ptr.h"
 #include "prim.h"
 
+#include <string>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -67,6 +68,17 @@ public:
     ~StrNode() {
         free((void*)this->str_value);
     }
+    void dump(int indent);
+};
+
+class RegexpNode : public Node {
+public:
+    std::string regexp_value;
+    RegexpNode(node_type_t type_, const std::string &str) {
+        this->type = type_;
+        this->regexp_value = str;
+    }
+    ~RegexpNode() { }
     void dump(int indent);
 };
 

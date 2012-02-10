@@ -23,6 +23,7 @@ typedef enum {
     VALUE_TYPE_CODE = 4,
     VALUE_TYPE_ARRAY = 5,
     VALUE_TYPE_DOUBLE = 6,
+    VALUE_TYPE_REGEXP,
 } value_type_t;
 
 class CodeValue;
@@ -198,6 +199,7 @@ public:
     const char *type_str() { return "range"; }
 };
 
+// TODO: remove following things
 typedef SharedPtr<Value>    ValuePtr;
 typedef SharedPtr<IntValue> IntValuePtr;
 typedef SharedPtr<StrValue> StrValuePtr;

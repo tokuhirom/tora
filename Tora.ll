@@ -49,101 +49,124 @@ int yywrap(void)
 
 %}
 
-%start C_COMMENT CC_COMMENT STRING_LITERAL_STATE PERL_COMMENT END
+%start C_COMMENT CC_COMMENT STRING_LITERAL_STATE PERL_COMMENT END REGEXP DIVABLE
 %%
 
-<INITIAL>"+"        return ADD;
-<INITIAL>"-"        return SUBTRACT;
-<INITIAL>"*"        return MUL;
-<INITIAL>"/"        return DIV;
-<INITIAL>"\n"       {
+<INITIAL,DIVABLE>"+"        return ADD;
+<INITIAL,DIVABLE>"-"        return SUBTRACT;
+<INITIAL,DIVABLE>"*"        return MUL;
+<DIVABLE>"/"        return DIV;
+<INITIAL,DIVABLE>"\n"       {
     increment_line_number();
 }
-<INITIAL>";"       return SEMICOLON;
-<INITIAL>"sub"       return SUB;
-<INITIAL>"for"       return FOR;
-<INITIAL>","       return COMMA;
-<INITIAL>".."       return DOTDOT;
-<INITIAL>"."       return DOT;
+<INITIAL,DIVABLE>";" {
+    BEGIN INITIAL;
+    return SEMICOLON;
+}
+<INITIAL,DIVABLE>"sub"       return SUB;
+<INITIAL,DIVABLE>"for"       return FOR;
+<INITIAL,DIVABLE>","       return COMMA;
+<INITIAL,DIVABLE>".."       return DOTDOT;
+<INITIAL,DIVABLE>"."       return DOT;
 
-<INITIAL>0 {
+<INITIAL,DIVABLE>0 {
     yylval.int_value = 0;
+    BEGIN DIVABLE;
     return INT_LITERAL;
 }
 
-<INITIAL>[1-9][0-9]* {
+<INITIAL,DIVABLE>[1-9][0-9]* {
     int tmp;
     sscanf(yytext, "%d", &tmp);
     yylval.int_value = tmp;
+    BEGIN DIVABLE;
     return INT_LITERAL;
 }
-<INITIAL>[1-9][0-9]*\.[0-9]+ {
+<INITIAL,DIVABLE>[1-9][0-9]*\.[0-9]+ {
     double tmp;
     sscanf(yytext, "%lf", &tmp);
     yylval.double_value = tmp;
+    BEGIN DIVABLE;
     return DOUBLE_LITERAL;
 }
 
-<INITIAL>"if" return IF;
-<INITIAL>"<" return GT;
-<INITIAL>"++" return PLUSPLUS;
-<INITIAL>">" return LT;
-<INITIAL>"<=" return GE;
-<INITIAL>">=" return LE;
-<INITIAL>"==" return EQ;
-<INITIAL>"/=" return DIV_ASSIGN;
-<INITIAL>"(" return L_PAREN;
-<INITIAL>")" return R_PAREN;
-<INITIAL>"{" return L_BRACE;
-<INITIAL>"}" return R_BRACE;
-<INITIAL>"[" return L_BRACKET;
-<INITIAL>"]" return R_BRACKET;
-<INITIAL>"=" return ASSIGN;
-<INITIAL>"true" return TRUE;
-<INITIAL>"my" return MY;
-<INITIAL>"false" return FALSE;
-<INITIAL>"while" return WHILE;
-<INITIAL>"return" return RETURN;
-<INITIAL>"else" return ELSE;
-<INITIAL>[ \t] ;
-<INITIAL>[ \t\r\n] {
+<INITIAL,DIVABLE>"if" return IF;
+<INITIAL,DIVABLE>"<" return GT;
+<INITIAL,DIVABLE>"++" return PLUSPLUS;
+<INITIAL,DIVABLE>">" return LT;
+<INITIAL,DIVABLE>"<=" return GE;
+<INITIAL,DIVABLE>">=" return LE;
+<INITIAL,DIVABLE>"==" return EQ;
+<INITIAL,DIVABLE>"/=" return DIV_ASSIGN;
+<INITIAL,DIVABLE>"(" {
+    BEGIN INITIAL;
+    return L_PAREN;
+}
+<INITIAL,DIVABLE>")" {
+    BEGIN DIVABLE;
+    return R_PAREN;
+}
+<INITIAL,DIVABLE>"{" return L_BRACE;
+<INITIAL,DIVABLE>"}" return R_BRACE;
+<INITIAL,DIVABLE>"[" return L_BRACKET;
+<INITIAL,DIVABLE>"]" {
+    BEGIN DIVABLE;
+    return R_BRACKET;
+}
+<INITIAL,DIVABLE>"=" return ASSIGN;
+<INITIAL,DIVABLE>"true" return TRUE;
+<INITIAL,DIVABLE>"my" return MY;
+<INITIAL,DIVABLE>"false" return FALSE;
+<INITIAL,DIVABLE>"while" return WHILE;
+<INITIAL,DIVABLE>"return" return RETURN;
+<INITIAL,DIVABLE>"else" return ELSE;
+<INITIAL,DIVABLE>[ \t] ;
+<INITIAL,DIVABLE>[ \t\r\n] {
     increment_line_number();
 }
 
-<INITIAL>"\n__END__\n" {
+<INITIAL,DIVABLE>"\n__END__\n" {
     increment_line_number();
     increment_line_number();
     BEGIN END;
 }
 
-<INITIAL>[A-Za-z_][A-Za-z0-9_]* {
+<INITIAL,DIVABLE>[A-Za-z_][A-Za-z0-9_]* {
     char *tmp = new char [strlen(yytext)+1];
     strcpy(tmp, yytext);
     yylval.str_value = tmp;
+    BEGIN DIVABLE;
     return IDENTIFIER;
 }
 
-<INITIAL>[$][A-Za-z_][A-Za-z0-9_]* {
+<INITIAL,DIVABLE>[$][A-Za-z_][A-Za-z0-9_]* {
     char *tmp = new char [strlen(yytext)+1];
     strcpy(tmp, yytext);
     yylval.str_value = tmp;
+    BEGIN DIVABLE;
     return VARIABLE;
 }
 
-<INITIAL>\" {
+<INITIAL,DIVABLE>\" {
     tora_open_string_literal();
     BEGIN STRING_LITERAL_STATE;
 }
 
-<INITIAL>"/*" {
+<INITIAL,DIVABLE>"/*" {
+    /* TODO save last state for DIVABLE? */
     BEGIN C_COMMENT;
 }
-<INITIAL>"//" {
+<INITIAL,DIVABLE>"//" {
     BEGIN CC_COMMENT;
 }
-<INITIAL>"#" {
+<INITIAL,DIVABLE>"#" {
     BEGIN PERL_COMMENT;
 }
+<INITIAL>"/" {
+    tora_open_string_literal();
+    BEGIN REGEXP;
+}
+
 
 <C_COMMENT>\n     increment_line_number();
 <C_COMMENT>"*/"     {
@@ -182,5 +205,16 @@ int yywrap(void)
   tora_add_string_literal(yytext[1]);
 }
 <STRING_LITERAL_STATE>.         tora_add_string_literal(yytext[0]);
+
+<REGEXP>[/] {
+    // # <REGEXP>"\\/" tora_add_string_literal('/');
+    /* TODO: options like /xsmi */
+    yylval.str_value = tora_close_string_literal();
+    BEGIN INITIAL;
+    return REGEXP_LITERAL;
+}
+<REGEXP>. {
+    tora_add_string_literal(yytext[0]);
+}
 
 %%

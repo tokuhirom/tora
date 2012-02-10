@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "value.h"
 #include "code.h"
+#include "regexp.h"
 #include <unistd.h>
 #include <algorithm>
 
@@ -242,10 +243,24 @@ void VM::execute() {
             assert(funname->value_type == VALUE_TYPE_STR);
             switch (object->value_type) {
             case VALUE_TYPE_ARRAY: {
-                ArrayValue*av = object->upcast<ArrayValue>();
+                SharedPtr<ArrayValue>av = object->upcast<ArrayValue>();
                 if (strcmp(funname->upcast<StrValue>()->str_value, "size") == 0) {
-                    IntValue *size = new IntValue(av->size());
+                    SharedPtr<IntValue> size = new IntValue(av->size());
                     stack.push(size);
+                }
+                break;
+            }
+            case VALUE_TYPE_STR: {
+                SharedPtr<StrValue>sv = object->upcast<StrValue>();
+                if (strcmp(funname->upcast<StrValue>()->str_value, "match") == 0) {
+                    if (op->operand.int_value == 1) {
+                        SharedPtr<AbstractRegexpValue> regex = stack.pop()->upcast<AbstractRegexpValue>();
+                        SharedPtr<BoolValue> b = new BoolValue(regex->match(std::string(sv->str_value)));
+                        stack.push(b);
+                    } else {
+                        fprintf(stderr, "Missing args for 'match'\n");
+                        abort();
+                    }
                 }
                 break;
             }
@@ -315,6 +330,9 @@ void VM::execute() {
                 break; \
             } \
             default: \
+                printf("UNKNOWN MATCHING PATTERN:: " # op "\n"); \
+                v1->dump(); \
+                v2->dump(); \
                 abort(); \
             } \
             break; \
