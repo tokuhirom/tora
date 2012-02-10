@@ -16,7 +16,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
 }
 
 void ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
-    IntValuePtr iv(index->to_i());
+    SharedPtr<IntValue> iv(index->to_i());
     int i = iv->int_value;
     if ((int)this->values->size()-1 < i) {
         for (int j=this->values->size()-1; j<i-1; j++) {

@@ -96,7 +96,7 @@ void VM::execute() {
         case OP_DEFINE_METHOD: {
             SharedPtr<Value> code = stack.pop(); // code object
             assert(code->value_type == VALUE_TYPE_CODE);
-            const char *funcname = ((ValueOP*)&(*(op)))->value->upcast<StrValue>()->str_value;
+            const char *funcname = ((ValueOP*)&(*(op)))->value->upcast<StrValue>()->str_value.c_str();
             this->add_function(funcname, code);
             break;
         }
@@ -117,7 +117,7 @@ void VM::execute() {
                 stack.push(v); \
             } else {  \
                 SharedPtr<Value> s(v2->to_s()); \
-                fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value); \
+                fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str()); \
                 exit(1); /* TODO: die */ \
             } \
             break; \
@@ -138,44 +138,44 @@ void VM::execute() {
                 SharedPtr<StrValue>v = new StrValue();
                 SharedPtr<Value> s(v2->to_s());
                 // strdup
-                v->set_str(strdup((std::string(s->upcast<StrValue>()->str_value) + std::string(v1->upcast<StrValue>()->str_value)).c_str()));
+                v->set_str(strdup((std::string(s->upcast<StrValue>()->str_value.c_str()) + std::string(v1->upcast<StrValue>()->str_value.c_str())).c_str()));
                 stack.push(v);
             } else {
                 SharedPtr<Value> s(v1->to_s());
-                fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value);
+                fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
                 exit(1); // TODO : die
             }
             break;
         }
         case OP_FUNCALL: {
             SharedPtr<Value> funname(stack.pop());
-            const char *funname_c = funname->upcast<StrValue>()->str_value;
+            const char *funname_c = funname->upcast<StrValue>()->str_value.c_str();
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
                 printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
                 abort();
             }
             assert(funname->value_type == VALUE_TYPE_STR);
-            if (strcmp(funname->upcast<StrValue>()->str_value, "print") == 0) {
+            if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "print") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
                     SharedPtr<Value> v(stack.pop());
                     SharedPtr<Value> s(v->to_s());
-                    printf("%s", s->upcast<StrValue>()->str_value);
+                    printf("%s", s->upcast<StrValue>()->str_value.c_str());
                 }
-            } else if (strcmp(funname->upcast<StrValue>()->str_value, "p") == 0) {
+            } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "p") == 0) {
                 SharedPtr<Value> v(stack.pop());
                 v->dump();
-            } else if (strcmp(funname->upcast<StrValue>()->str_value, "say") == 0) {
+            } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "say") == 0) {
                 for (int i=0; i<op->operand.int_value; i++) {
                     SharedPtr<Value> v(stack.pop());
                     SharedPtr<Value> s(v->to_s());
-                    printf("%s\n", s->upcast<StrValue>()->str_value);
+                    printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
                 }
-            } else if (strcmp(funname->upcast<StrValue>()->str_value, "getenv") == 0) {
+            } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "getenv") == 0) {
                 assert(op->operand.int_value==1);
                 SharedPtr<Value> v(stack.pop());
                 SharedPtr<Value> s(v->to_s());
-                char *env = getenv(s->upcast<StrValue>()->str_value);
+                char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
                 if (env) {
                     StrValue *ret = new StrValue();
                     ret->set_str(strdup(env));
@@ -183,22 +183,22 @@ void VM::execute() {
                 } else {
                     stack.push(UndefValue::instance());
                 }
-            } else if (strcmp(funname->upcast<StrValue>()->str_value, "usleep") == 0) {
+            } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "usleep") == 0) {
                 // TODO: remove later
                 SharedPtr<Value> v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
                 SharedPtr<Value> s(v->to_i());
                 usleep(s->upcast<IntValue>()->int_value);
-            } else if (strcmp(funname->upcast<StrValue>()->str_value, "exit") == 0) {
+            } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "exit") == 0) {
                 SharedPtr<Value> v(stack.pop());
                 assert(v->value_type == VALUE_TYPE_INT);
                 SharedPtr<Value> s(v->to_i());
                 exit(s->upcast<IntValue>()->int_value);
             } else {
-                auto iter =  this->functions.find(funname->upcast<StrValue>()->str_value);
+                auto iter =  this->functions.find(funname->upcast<StrValue>()->str_value.c_str());
                 if (iter != this->functions.end()) {
                     SharedPtr<CodeValue> code = iter->second->to_code();
-                    // printf("calling %s\n", funname->upcast<StrValue>()->str_value);
+                    // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
                     {
                         SharedPtr<FunctionFrame> fframe = new FunctionFrame();
                         fframe->return_address = pc;
@@ -226,7 +226,7 @@ void VM::execute() {
 
                     continue;
                 } else {
-                    fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value);
+                    fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value.c_str());
                 }
             }
             break;
@@ -234,7 +234,7 @@ void VM::execute() {
         case OP_METHOD_CALL: {
             SharedPtr<Value> object(stack.pop());
             SharedPtr<Value> funname(stack.pop());
-            const char *funname_c = funname->upcast<StrValue>()->str_value;
+            const char *funname_c = funname->upcast<StrValue>()->str_value.c_str();
             if (!(stack.size() >= (size_t) op->operand.int_value)) {
                 printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
                 dump_stack();
@@ -244,7 +244,7 @@ void VM::execute() {
             switch (object->value_type) {
             case VALUE_TYPE_ARRAY: {
                 SharedPtr<ArrayValue>av = object->upcast<ArrayValue>();
-                if (strcmp(funname->upcast<StrValue>()->str_value, "size") == 0) {
+                if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "size") == 0) {
                     SharedPtr<IntValue> size = new IntValue(av->size());
                     stack.push(size);
                 }
@@ -252,10 +252,10 @@ void VM::execute() {
             }
             case VALUE_TYPE_STR: {
                 SharedPtr<StrValue>sv = object->upcast<StrValue>();
-                if (strcmp(funname->upcast<StrValue>()->str_value, "match") == 0) {
+                if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "match") == 0) {
                     if (op->operand.int_value == 1) {
                         SharedPtr<AbstractRegexpValue> regex = stack.pop()->upcast<AbstractRegexpValue>();
-                        SharedPtr<BoolValue> b = new BoolValue(regex->match(std::string(sv->str_value)));
+                        SharedPtr<BoolValue> b = new BoolValue(regex->match(std::string(sv->str_value.c_str())));
                         stack.push(b);
                     } else {
                         fprintf(stderr, "Missing args for 'match'\n");
@@ -265,7 +265,7 @@ void VM::execute() {
                 break;
             }
             default:
-                fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value, object->type_str());
+                fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value.c_str(), object->type_str());
                 // TODO throw exception
                 break;
             }

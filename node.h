@@ -60,14 +60,12 @@ public:
 
 class StrNode : public Node {
 public:
-    const char*str_value;
+    std::string str_value;
     StrNode(node_type_t type_, const char *str) {
         this->type = type_;
-        this->str_value = strdup(str);
+        this->str_value = str;
     }
-    ~StrNode() {
-        free((void*)this->str_value);
-    }
+    ~StrNode() { }
     void dump(int indent);
 };
 

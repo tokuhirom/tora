@@ -161,12 +161,15 @@ public:
 
 class StrValue: public Value {
 public:
-    const char*str_value;
+    std::string str_value;
     StrValue(): Value() {
         this->value_type = VALUE_TYPE_STR;
-        this->str_value = NULL;
     }
     StrValue(const char *str): Value() {
+        this->value_type = VALUE_TYPE_STR;
+        this->str_value = str;
+    }
+    StrValue(std::string &str): Value() {
         this->value_type = VALUE_TYPE_STR;
         this->str_value = str;
     }
@@ -175,7 +178,7 @@ public:
         str_value = s;
     }
     void dump() {
-        printf("[dump] str: %s\n", str_value);
+        printf("[dump] str: %s\n", str_value.c_str());
     }
     const char *type_str() { return "str"; }
     SharedPtr<StrValue> to_s() {
@@ -198,11 +201,6 @@ public:
     SharedPtr<StrValue> to_s();
     const char *type_str() { return "range"; }
 };
-
-// TODO: remove following things
-typedef SharedPtr<Value>    ValuePtr;
-typedef SharedPtr<IntValue> IntValuePtr;
-typedef SharedPtr<StrValue> StrValuePtr;
 
 };
 

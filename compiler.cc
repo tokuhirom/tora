@@ -34,8 +34,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_MY: {
-        const char *name = node->upcast<NodeNode>()->node->upcast<StrNode>()->str_value;
-        this->define_localvar(std::string(name));
+        std::string &name = node->upcast<NodeNode>()->node->upcast<StrNode>()->str_value;
+        this->define_localvar(name);
         // this->compile(node->upcast<NodeNode>()->node);
         break;
     }
@@ -73,7 +73,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         auto funcdef_node = node->upcast<FuncdefNode>();
 
         // function name
-        const char *funcname = funcdef_node->name->upcast<StrNode>()->str_value;
+        std::string &funcname = funcdef_node->name->upcast<StrNode>()->str_value;
 
         auto params = new std::vector<std::string *>();
         for (size_t i=0; i<funcdef_node->params->size(); i++) {
@@ -90,21 +90,21 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         funccomp.ops->push_back(ret);
 
         CodeValue *code = new CodeValue();
-        code->code_name = strdup(funcname);
+        code->code_name = funcname;
         code->code_params = params;
         code->code_opcodes = new std::vector<SharedPtr<OP>>(*funccomp.ops);
 
-        ValueOP * putval = new ValueOP(OP_PUSH_VALUE, code);
+        SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
         ops->push_back(putval);
 
-        StrValue *funcname_value = new StrValue(strdup(funcname));
+        StrValue *funcname_value = new StrValue(funcname);
         ValueOP * define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
         ops->push_back(define_method);
 
         break;
     }
     case NODE_STRING: {
-        SharedPtr<StrValue> sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
+        SharedPtr<StrValue> sv = new StrValue(node->upcast<StrNode>()->str_value);
         SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
         ops->push_back(tmp);
         break;
@@ -154,7 +154,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_IDENTIFIER: {
-        StrValue *sv = new StrValue(strdup(node->upcast<StrNode>()->str_value));
+        SharedPtr<StrValue>sv = new StrValue(node->upcast<StrNode>()->str_value);
         ValueOP * tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
         ops->push_back(tmp);
         break;
@@ -286,7 +286,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         int level;
         int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
         if (no<0) {
-            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value);
+            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
             error = true;
         }
 
@@ -317,11 +317,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_SETVARIABLE: {
         switch (node->upcast<BinaryNode>()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
-            const char*varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
+            std::string varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
             int level;
-            int no = this->find_localvar(std::string(varname), level);
+            int no = this->find_localvar(varname, level);
             if (no<0) {
-                fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname);
+                fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname.c_str());
                 error = true;
             }
 

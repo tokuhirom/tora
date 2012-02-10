@@ -11,7 +11,7 @@ namespace tora {
 
 class CodeValue: public Value {
 public:
-    const char *code_name;
+    std::string code_name;
     std::vector<std::string*> *code_params;
     std::vector<SharedPtr<OP>> *code_opcodes;
 
@@ -19,12 +19,11 @@ public:
         this->value_type = VALUE_TYPE_CODE;
     }
     ~CodeValue() {
-        free((void*)code_name);
         delete code_params;
         delete code_opcodes;
     }
     void dump() {
-        printf("[dump] code: name: %s\n", this->code_name);
+        printf("[dump] code: name: %s\n", this->code_name.c_str());
         for (size_t i=0; i<this->code_opcodes->size(); i++) {
             printf("    [%zd] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
         }
