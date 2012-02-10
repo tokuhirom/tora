@@ -1,21 +1,38 @@
 #include <stdio.h>
+#include <iostream>
+#include <istream>
+#include <fstream>
 #include <unistd.h>
 #include <stdlib.h>
 #include <cassert>
+#include <sstream>
 
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
 #include "node.h"
+#include "lexer.gen.cc"
 
 using namespace tora;
 
-extern Node *root_node;
+extern tora::Node *root_node;
+
+Scanner *scanner;
+int yylex() {
+    int n = scanner->scan();
+    // printf("TOKEN: %d\n", n);
+    return n;
+}
+
+// yywrap?
+int yywrap(void)
+{
+    return 1;
+}
+
 
 int main(int argc, char **argv) {
     extern int yyparse(void);
-    extern FILE *yyin;
-    yyin = stdin;
 #ifdef YYDEBUG
     extern int yydebug;
     yydebug = 1;
@@ -49,23 +66,20 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::ifstream *ifs;
     if (code) {
-        FILE *fh = tmpfile();
-        fprintf(fh, "%s;", code);
-        rewind(fh);
-        yyin = fh;
+        scanner = new Scanner(new std::stringstream(std::string(code)));
     } else if (optind < argc) { // source code
-        FILE *fh = fopen(argv[optind], "rb");
-        if (!fh) { perror(argv[optind]); exit(EXIT_FAILURE); }
-        yyin = fh;
+        ifs = new std::ifstream(argv[optind], std::ios::in);
+        if (!ifs) { perror(argv[optind]); exit(EXIT_FAILURE); }
+        scanner = new Scanner(ifs);
     } else {
-        yyin = stdin;
+        scanner = new Scanner(&std::cin);
     }
 
     root_node = NULL;
     if (yyparse()) {
-        extern int tora_line_number;
-        fprintf(stderr, "Error! at line %d\n", tora_line_number);
+        fprintf(stderr, "Syntax Error!! at line %d\n", scanner->lineno());
         exit(1);
     } else {
         if (compile_only) {

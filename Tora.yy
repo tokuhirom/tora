@@ -69,7 +69,8 @@ Node *root_node;
 %right ASSIGN
 %right MY
 %token COMMA RETURN SEMICOLON
-%token SUB
+%token FUNCSUB
+%token TOKEN_EOF
 
 %left DIV_ASSIGN
 %left PLUSPLUS
@@ -78,7 +79,7 @@ Node *root_node;
 %left L_BRACKET R_BRACKET
 %left EQ
 %left LT GT LE GE
-%left ADD SUBTRACT
+%left ADD SUB
 %left MUL DIV
 %right '!'        /* 右結合で優先順位1 */
 
@@ -142,11 +143,11 @@ if_statement
     }
 
 sub_stmt
-    : SUB identifier L_PAREN parameter_list R_PAREN block
+    : FUNCSUB identifier L_PAREN parameter_list R_PAREN block
     {
         $$ = new FuncdefNode($2, $4, $6);
     }
-    | SUB identifier L_PAREN R_PAREN block
+    | FUNCSUB identifier L_PAREN R_PAREN block
     {
         $$ = new FuncdefNode($2, new std::vector<SharedPtr<Node>>(), $5);
     }
@@ -274,7 +275,7 @@ additive_expression
     {
         $$ = new BinaryNode(NODE_ADD, $1, $3);
     }
-    | additive_expression SUBTRACT multiplicative_expression
+    | additive_expression SUB multiplicative_expression
     {
         $$ = new BinaryNode(NODE_SUB, $1, $3);
     }
@@ -299,7 +300,7 @@ unary_expression
     {
         $$ = new NodeNode(NODE_UNARY_INCREMENT, $2);
     }
-    | SUBTRACT unary_expression
+    | SUB unary_expression
     {
         $$ = new NodeNode(NODE_UNARY_NEGATIVE, $2);
     }
@@ -386,9 +387,9 @@ variable
 %%
 
 int yyerror(const char *err) {
-    extern char *yytext;
+    // extern char *yytext;
     extern int tora_line_number;
-    fprintf(stderr, "%s near '%s' at line %d\n", err, yytext, tora_line_number);
+    // fprintf(stderr, "%s near '%s' at line %d\n", err, yytext, tora_line_number);
     return 0;
 }
 

@@ -9,3 +9,4 @@ nodes.gen.cc
 nodes.gen.h
 ops.gen.cc
 gmon.out
+*.gen.*

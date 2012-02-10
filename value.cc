@@ -47,10 +47,10 @@ SharedPtr<StrValue> BoolValue::to_s() {
 }
 
 SharedPtr<StrValue> UndefValue::to_s() {
-    return new StrValue(strdup("undef"));
+    return new StrValue(strdup("undef")); // TODO
 }
 SharedPtr<StrValue> CodeValue::to_s() {
-    return new StrValue(strdup("<code>"));
+    return new StrValue(strdup("<code>")); // TODO
 }
 
 SharedPtr<StrValue> Value::to_s() {

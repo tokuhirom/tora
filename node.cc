@@ -77,7 +77,7 @@ void tora::DoubleNode::dump(int indent) {
 
 void tora::StrNode::dump(int indent) {
     print_indent(indent);
-    printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value);
+    printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value.c_str());
 }
 
 void tora::RegexpNode::dump(int indent) {
