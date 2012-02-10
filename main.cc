@@ -24,13 +24,6 @@ int yylex() {
     return n;
 }
 
-// yywrap?
-int yywrap(void)
-{
-    return 1;
-}
-
-
 int main(int argc, char **argv) {
     extern int yyparse(void);
 #ifdef YYDEBUG
