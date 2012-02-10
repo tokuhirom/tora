@@ -61,7 +61,8 @@ int main(int argc, char **argv) {
 
     std::ifstream *ifs;
     if (code) {
-        scanner = new Scanner(new std::stringstream(std::string(code)));
+        std::stringstream *s = new std::stringstream(std::string(code) + ";");
+        scanner = new Scanner(s);
     } else if (optind < argc) { // source code
         ifs = new std::ifstream(argv[optind], std::ios::in);
         if (!ifs) { perror(argv[optind]); exit(EXIT_FAILURE); }
