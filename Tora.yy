@@ -388,8 +388,7 @@ variable
 
 int yyerror(const char *err) {
     // extern char *yytext;
-    extern int tora_line_number;
-    // fprintf(stderr, "%s near '%s' at line %d\n", err, yytext, tora_line_number);
+    // fprintf(stderr, "%s near '%s' at line \n", err, yytext);
     return 0;
 }
 

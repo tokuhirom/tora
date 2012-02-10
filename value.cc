@@ -30,7 +30,7 @@ SharedPtr<StrValue> RangeValue::to_s() {
     os << this->left->int_value;
     os << "..";
     os << this->right->int_value;
-    v->set_str(strdup(os.str().c_str()));
+    v->set_str(os.str());
     return &(*(v));
 }
 
@@ -38,19 +38,19 @@ SharedPtr<StrValue> DoubleValue::to_s() {
     StrValue *v = new StrValue();
     std::ostringstream os;
     os << this->double_value;
-    v->set_str(strdup(os.str().c_str()));
+    v->set_str(os.str());
     return v;
 }
 
 SharedPtr<StrValue> BoolValue::to_s() {
-    return new StrValue(strdup(this->bool_value ? "true" : "false"));
+    return new StrValue(this->bool_value ? "true" : "false");
 }
 
 SharedPtr<StrValue> UndefValue::to_s() {
-    return new StrValue(strdup("undef")); // TODO
+    return new StrValue("undef"); // TODO
 }
 SharedPtr<StrValue> CodeValue::to_s() {
-    return new StrValue(strdup("<code>")); // TODO
+    return new StrValue("<code>"); // TODO
 }
 
 SharedPtr<StrValue> Value::to_s() {

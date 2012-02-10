@@ -177,6 +177,9 @@ public:
     void set_str(const char*s) {
         str_value = s;
     }
+    void set_str(std::string s) {
+        str_value = s;
+    }
     void dump() {
         printf("[dump] str: %s\n", str_value.c_str());
     }

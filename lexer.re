@@ -1,3 +1,6 @@
+#ifndef TORA_SCANNER_H_
+#define TORA_SCANNER_H_
+
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -9,9 +12,7 @@
 #include <iostream>
 #include <fstream>
 
-extern "C" int yywrap();
-
-
+namespace tora {
 
 class Scanner {
 private:
@@ -355,3 +356,7 @@ regexp_literal:
 }
 
 };
+
+};
+
+#endif
