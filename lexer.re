@@ -5,7 +5,6 @@
 #include <vector>
 #include "node.h"
 #include "shared_ptr.h"
-#include "lexer.h"
 #include "Tora.tab.hh"
 #include <iostream>
 #include <fstream>
