@@ -4,6 +4,14 @@
 
 #include "util/util.h"
 
+// HACK by tokuhirom
+/* GCC always defines __va_copy, but does not define va_copy unless in c99 mode
+ * or -ansi is not specified, since it was not part of C90.
+ */
+#ifndef va_copy
+#define va_copy(dest, src)  __builtin_va_copy(dest, src)
+#endif // va_copy
+
 namespace re2 { 
 
 static void StringAppendV(string* dst, const char* format, va_list ap) {
