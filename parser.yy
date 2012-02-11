@@ -11,7 +11,7 @@
 %left MUL DIV.
 /* %right '!'. */
 
-%token_type { YYSTYPE }
+%token_type { Node* }
 
 %include {
 #include <stdio.h>
@@ -59,223 +59,223 @@ using namespace tora;
 %start_symbol root
 
 root ::= translation_unit(A). {
-    state->root_node = new NodeNode(NODE_ROOT, A.node);
+    state->root_node = new NodeNode(NODE_ROOT, A);
 }
 root ::= . {
     state->root_node = new NodeNode(NODE_ROOT, new VoidNode(NODE_VOID));
 }
 
-translation_unit(A) ::= statement(B). { A.node = B.node; }
+translation_unit(A) ::= statement(B). { A = B; }
 translation_unit(A) ::= translation_unit(B) statement(C). {
-    A.node = new BinaryNode(NODE_STMTS, B.node, C.node);
+    A = new BinaryNode(NODE_STMTS, B, C);
 }
 
 statement(A) ::= expression(B) SEMICOLON . {
-    A.node = B.node;
+    A = B;
 }
 statement(A) ::= SEMICOLON. {
-    A.node = new VoidNode(NODE_VOID);
+    A = new VoidNode(NODE_VOID);
 }
-statement(A) ::= jump_statement(B). { A.node = B.node; }
-statement(A) ::= if_statement(B).   { A.node = B.node; }
+statement(A) ::= jump_statement(B). { A = B; }
+statement(A) ::= if_statement(B).   { A = B; }
 statement(A) ::= WHILE L_PAREN expression(B) R_PAREN block(C). {
-    A.node = new BinaryNode(NODE_WHILE, B.node, C.node);
+    A = new BinaryNode(NODE_WHILE, B, C);
 }
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN block(E). {
-    A.node = new ForNode(B.node, C.node, D.node, E.node);
+    A = new ForNode(B, C, D, E);
 }
-statement(A) ::= sub_stmt(B).   { A.node = B.node; }
-statement(A) ::= block(B).   { A.node = B.node; }
+statement(A) ::= sub_stmt(B).   { A = B; }
+statement(A) ::= block(B).   { A = B; }
 
 jump_statement(A) ::= RETURN expression(B) SEMICOLON. {
-    A.node = new NodeNode(NODE_RETURN, B.node);
+    A = new NodeNode(NODE_RETURN, B);
 }
 
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
-    A.node = new IfNode(NODE_IF, B.node, C.node, NULL);
+    A = new IfNode(NODE_IF, B, C, NULL);
 }
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) ELSE block(D). {
-    A.node = new IfNode(NODE_IF, B.node, C.node, D.node);
+    A = new IfNode(NODE_IF, B, C, D);
 }
 
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {
-    A.node = new FuncdefNode(B.node, C.node->upcast<ListNode>(), D.node);
+    A = new FuncdefNode(B, C->upcast<ListNode>(), D);
 }
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN block(C). {
-    A.node = new FuncdefNode(B.node, new ListNode(), C.node);
+    A = new FuncdefNode(B, new ListNode(), C);
 }
 
 parameter_list(A) ::= variable(B). {
-    A.node = new ListNode();
-    A.node->upcast<ListNode>()->push_back(B.node);
+    A = new ListNode();
+    A->upcast<ListNode>()->push_back(B);
 }
 parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
-    A.node = B.node;
-    A.node->upcast<ListNode>()->push_back(C.node);
+    A = B;
+    A->upcast<ListNode>()->push_back(C);
 }
 
 /* array constructor [a, b] */
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
-    A.node = new ArgsNode(NODE_MAKE_ARRAY, B.node->upcast<ListNode>());
+    A = new ArgsNode(NODE_MAKE_ARRAY, B->upcast<ListNode>());
 }
 
 argument_list(A) ::= expression(B). {
-    A.node = new ListNode();
-    A.node->upcast<ListNode>()->push_back(B.node);
+    A = new ListNode();
+    A->upcast<ListNode>()->push_back(B);
 }
 argument_list(A) ::= argument_list(B) COMMA expression(C). {
-    A.node = B.node;
-    A.node->upcast<ListNode>()->push_back(C.node);
+    A = B;
+    A->upcast<ListNode>()->push_back(C);
 }
 
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
-    A.node = new NodeNode(NODE_BLOCK, B.node);
+    A = new NodeNode(NODE_BLOCK, B);
 }
 block(A) ::= L_BRACE R_BRACE. {
-    A.node = new VoidNode(NODE_VOID);
+    A = new VoidNode(NODE_VOID);
 }
 
 statement_list(A) ::= statement(B). {
-    A.node = B.node;
+    A = B;
 }
 statement_list(A) ::= statement_list(B) statement(C).  {
-    A.node = new BinaryNode(NODE_STMTS, B.node, C.node);
+    A = new BinaryNode(NODE_STMTS, B, C);
 }
 
 expression(A) ::= assignment_expression(B). {
-    A.node = B.node;
+    A = B;
 }
 
 assignment_expression(A) ::= conditional_expression(B). {
-    A.node = B.node;
+    A = B;
 }
 assignment_expression(A) ::= MY variable(B) ASSIGN expression(C).  {
     // TODO: REMOVE THIS NODE
-    Node *n1 = new NodeNode(NODE_MY, B.node);
-    Node *node = new BinaryNode(NODE_SETVARIABLE, B.node, C.node);
-    A.node = new BinaryNode(NODE_STMTS, n1, node);
+    Node *n1 = new NodeNode(NODE_MY, B);
+    Node *node = new BinaryNode(NODE_SETVARIABLE, B, C);
+    A = new BinaryNode(NODE_STMTS, n1, node);
 }
 assignment_expression(A) ::= conditional_expression(B) ASSIGN conditional_expression(C).  {
-    A.node = new BinaryNode(NODE_SETVARIABLE, B.node, C.node);
+    A = new BinaryNode(NODE_SETVARIABLE, B, C);
 }
 assignment_expression(A) ::= conditional_expression(B) DIV_ASSIGN conditional_expression(C).  {
-    A.node = new BinaryNode(NODE_DIV_ASSIGN, B.node, C.node);
+    A = new BinaryNode(NODE_DIV_ASSIGN, B, C);
 }
 
-conditional_expression(A) ::= logical_or_expression(B). { A.node = B.node; }
+conditional_expression(A) ::= logical_or_expression(B). { A = B; }
 
-logical_or_expression(A) ::= logical_and_expression(B). { A.node = B.node; }
+logical_or_expression(A) ::= logical_and_expression(B). { A = B; }
 
-logical_and_expression(A) ::= inclusive_or_expression(B). { A.node = B.node; }
+logical_and_expression(A) ::= inclusive_or_expression(B). { A = B; }
 
-inclusive_or_expression(A) ::= exclusive_or_expression(B). { A.node = B.node; }
+inclusive_or_expression(A) ::= exclusive_or_expression(B). { A = B; }
 
-exclusive_or_expression(A) ::= and_expression(B). { A.node = B.node; }
+exclusive_or_expression(A) ::= and_expression(B). { A = B; }
 
-and_expression(A) ::= equality_expression(B). { A.node = B.node; }
+and_expression(A) ::= equality_expression(B). { A = B; }
 
-equality_expression(A) ::= relational_expression(B). { A.node = B.node; }
+equality_expression(A) ::= relational_expression(B). { A = B; }
 equality_expression(A) ::= equality_expression(B) EQ relational_expression(C). {
-    A.node = new BinaryNode(NODE_EQ, B.node, C.node);
+    A = new BinaryNode(NODE_EQ, B, C);
 }
 
-relational_expression(A) ::= shift_expression(B). { A.node = B.node; }
+relational_expression(A) ::= shift_expression(B). { A = B; }
 relational_expression(A) ::= relational_expression(B) LT shift_expression(C). {
-    A.node = new BinaryNode(NODE_LT, B.node, C.node);
+    A = new BinaryNode(NODE_LT, B, C);
 }
 relational_expression(A) ::= relational_expression(B) GT shift_expression(C). {
-    A.node = new BinaryNode(NODE_GT, B.node, C.node);
+    A = new BinaryNode(NODE_GT, B, C);
 }
 relational_expression(A) ::= relational_expression(B) LE shift_expression(C). {
-    A.node = new BinaryNode(NODE_LE, B.node, C.node);
+    A = new BinaryNode(NODE_LE, B, C);
 }
 relational_expression(A) ::= relational_expression(B) GE shift_expression(C). {
-    A.node = new BinaryNode(NODE_GE, B.node, C.node);
+    A = new BinaryNode(NODE_GE, B, C);
 }
 
-shift_expression(A) ::= additive_expression(B). { A.node = B.node; }
+shift_expression(A) ::= additive_expression(B). { A = B; }
 
-additive_expression(A) ::= multiplicative_expression(B). { A.node = B.node; }
+additive_expression(A) ::= multiplicative_expression(B). { A = B; }
 additive_expression(A) ::= additive_expression(B) ADD multiplicative_expression(C). {
-    A.node = new BinaryNode(NODE_ADD, B.node, C.node);
+    A = new BinaryNode(NODE_ADD, B, C);
 }
 additive_expression(A) ::= additive_expression(B) SUB multiplicative_expression(C). {
-    A.node = new BinaryNode(NODE_SUB, B.node, C.node);
+    A = new BinaryNode(NODE_SUB, B, C);
 }
 
-multiplicative_expression(A) ::= unary_expression(B). { A.node = B.node; }
+multiplicative_expression(A) ::= unary_expression(B). { A = B; }
 multiplicative_expression(A) ::= multiplicative_expression(B) MUL unary_expression(C). {
-    A.node = new BinaryNode(NODE_MUL, B.node, C.node);
+    A = new BinaryNode(NODE_MUL, B, C);
 }
 multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expression(C). {
-    A.node = new BinaryNode(NODE_DIV, B.node, C.node);
+    A = new BinaryNode(NODE_DIV, B, C);
 }
 
-unary_expression(A) ::= postfix_expression(B). { A.node = B.node; }
+unary_expression(A) ::= postfix_expression(B). { A = B; }
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
-    A.node = new NodeNode(NODE_UNARY_INCREMENT, B.node);
+    A = new NodeNode(NODE_UNARY_INCREMENT, B);
 }
 unary_expression(A) ::= SUB unary_expression(B). {
-    A.node = new NodeNode(NODE_UNARY_NEGATIVE, B.node);
+    A = new NodeNode(NODE_UNARY_NEGATIVE, B);
 }
 
-postfix_expression(A) ::= primary_expression(B). { A.node = B.node; }
+postfix_expression(A) ::= primary_expression(B). { A = B; }
 postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKET. {
-    A.node = new BinaryNode(NODE_GET_ITEM, B.node, C.node);
+    A = new BinaryNode(NODE_GET_ITEM, B, C);
 }
 postfix_expression(A) ::= identifier(B) L_PAREN R_PAREN. {
-    A.node = new FuncallNode(B.node, new ListNode());
+    A = new FuncallNode(B, new ListNode());
 }
 postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
-    A.node = new FuncallNode(B.node, C.node->upcast<ListNode>());
+    A = new FuncallNode(B, C->upcast<ListNode>());
 }
 postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
-    A.node = new MethodCallNode(B.node, C.node, D.node->upcast<ListNode>());
+    A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
 postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
-    A.node = new MethodCallNode(B.node, C.node, new ListNode());
+    A = new MethodCallNode(B, C, new ListNode());
 }
 
-primary_expression(A) ::= int(B). { A.node = B.node; }
+primary_expression(A) ::= int(B). { A = B; }
 primary_expression(A) ::= DOUBLE_LITERAL(B). {
-    A.node = B.node;
+    A = B;
 }
 primary_expression(A) ::= int(B) DOTDOT int(C). {
-    A.node = new BinaryNode(NODE_RANGE, B.node, C.node);
+    A = new BinaryNode(NODE_RANGE, B, C);
 }
 primary_expression(A) ::= FALSE. {
-    A.node = new VoidNode(NODE_FALSE);
+    A = new VoidNode(NODE_FALSE);
 }
 primary_expression(A) ::= TRUE. {
-    A.node = new VoidNode(NODE_TRUE);
+    A = new VoidNode(NODE_TRUE);
 }
 primary_expression(A) ::= REGEXP_LITERAL(B). {
-    B.node->type = NODE_REGEXP;
-    A.node = B.node;
+    B->type = NODE_REGEXP;
+    A = B;
 }
 primary_expression(A) ::= STRING_LITERAL(B). {
-    B.node->type = NODE_STRING;
-    A.node = B.node;
+    B->type = NODE_STRING;
+    A = B;
 }
-primary_expression(A) ::= variable(B). { A.node = B.node; }
-primary_expression(A) ::= array_creation(B). { A.node = B.node; }
+primary_expression(A) ::= variable(B). { A = B; }
+primary_expression(A) ::= array_creation(B). { A = B; }
 primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
-    A.node = B.node;
+    A = B;
 }
 
 int(A) ::= INT_LITERAL(B). {
-    B.node->type = NODE_INT;
-    A.node = B.node;
+    B->type = NODE_INT;
+    A = B;
 }
 
 identifier(A) ::= IDENTIFIER(B). {
-    B.node->type = NODE_IDENTIFIER;
-    A.node = B.node;
+    B->type = NODE_IDENTIFIER;
+    A = B;
 }
 
 variable(A) ::= VARIABLE(B). {
-    B.node->type = NODE_GETVARIABLE;
-    A.node = B.node;
+    B->type = NODE_GETVARIABLE;
+    A = B;
 }
 

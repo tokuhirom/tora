@@ -5,11 +5,6 @@
 
 namespace tora {
 
-// TODO: return StrNode, IntNode, DoubleNode in lexer!
-typedef union {
-    class tora::Node* node;
-} YYSTYPE;
-
 struct ParserState {
     int errors;
     bool failure;

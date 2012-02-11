@@ -21,7 +21,7 @@ extern void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
 extern void Parse(
   void *yyp,                   /* The parser */
   int yymajor,                 /* The major token code number */
-  YYSTYPE yyminor       /* The value for the token */
+  Node* yyminor       /* The value for the token */
   , ParserState *state
 );
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     }
 
 
-    YYSTYPE yylval;
+    Node *yylval;
     int token_number;
     void *parser = ParseAlloc(malloc);
     ParserState parser_state;

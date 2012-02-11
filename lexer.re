@@ -132,7 +132,7 @@ public:
         return m_lineno;
     }
  
-    int scan(YYSTYPE *yylval) {
+    int scan(Node **yylval) {
 std:
         m_token = m_cursor;
  
@@ -193,13 +193,13 @@ std:
         for (double n = 0.1; head<m_cursor; head++, n*=0.1) {
             tmp = tmp + (*head-'0')*n;
         }
-        yylval->node = new DoubleNode(NODE_DOUBLE, tmp);
+        *yylval = new DoubleNode(NODE_DOUBLE, tmp);
         divable = true;
         return DOUBLE_LITERAL;
     }
     "." { return DOT; }
     "0" {
-        yylval->node = new IntNode(NODE_INT, 0);
+        *yylval = new IntNode(NODE_INT, 0);
         divable = true;
         return INT_LITERAL;
     }
@@ -208,7 +208,7 @@ std:
         for (char *head=m_token; head<m_cursor; head++) {
             tmp = tmp*10 + (*head - '0');
         }
-        yylval->node = new IntNode(NODE_INT, tmp);
+        *yylval = new IntNode(NODE_INT, tmp);
         divable = true;
         return INT_LITERAL;
     }
@@ -254,13 +254,13 @@ std:
     }
     IDENTIFIER {
         std::string token(m_token, m_cursor-m_token);
-        yylval->node = new StrNode(NODE_IDENTIFIER, token);
+        *yylval = new StrNode(NODE_IDENTIFIER, token);
         divable = true;
         return IDENTIFIER;
     }
     VARNAME {
         std::string token(m_token, m_cursor-m_token);
-        yylval->node = new StrNode(NODE_GETVARIABLE, token);
+        *yylval = new StrNode(NODE_GETVARIABLE, token);
         divable = true;
         return VARIABLE;
     }
@@ -311,7 +311,7 @@ end:
 string_literal:
 /*!re2c
     "\"" {
-        yylval->node = new StrNode(NODE_STRING, tora_close_string_literal());
+        *yylval = new StrNode(NODE_STRING, tora_close_string_literal());
         return STRING_LITERAL;
     }
     "\n" {
@@ -343,7 +343,7 @@ regexp_literal:
     "/" {
         // # <REGEXP>"\\/" tora_add_string_literal('/');
         /* TODO: options like /xsmi */
-        yylval->node = new RegexpNode(NODE_REGEXP, tora_close_string_literal());
+        *yylval = new RegexpNode(NODE_REGEXP, tora_close_string_literal());
         return REGEXP_LITERAL;
     }
     ANY_CHARACTER {
