@@ -120,7 +120,7 @@ class FuncallNode: public Node {
 public:
     SharedPtr<Node>name;
     SharedPtr<ListNode> args;
-    FuncallNode(Node * name_, SharedPtr<ListNode> args_) {
+    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_) {
         this->type = NODE_FUNCALL;
         this->name = name_;
         this->args = args_;
@@ -134,7 +134,7 @@ public:
     SharedPtr<Node>name;
     SharedPtr<ListNode> params;
     SharedPtr<Node>block;
-    FuncdefNode(Node *n, SharedPtr<ListNode> p, Node *b):Node() {
+    FuncdefNode(SharedPtr<Node> n, SharedPtr<ListNode> p, SharedPtr<Node> b):Node() {
         this->type = NODE_FUNCDEF;
         name = n;
         params = p;
@@ -217,7 +217,7 @@ public:
     SharedPtr<Node>method;
     SharedPtr<ListNode> args;
 
-    MethodCallNode(Node*o, Node*m, SharedPtr<ListNode> a) : Node() {
+    MethodCallNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<ListNode> a) : Node() {
         type = NODE_METHOD_CALL;
         object = o;
         method = m;
@@ -231,12 +231,7 @@ class BinaryNode: public Node {
 public:
     SharedPtr<Node>left;
     SharedPtr<Node>right;
-    BinaryNode(node_type_t t, SharedPtr<Node> &l, SharedPtr<Node>& r) {
-        type = t;
-        left = l;
-        right = r;
-    }
-    BinaryNode(node_type_t t, Node* l, Node* r) {
+    BinaryNode(node_type_t t, SharedPtr<Node> l, SharedPtr<Node> r) {
         type = t;
         left = l;
         right = r;
