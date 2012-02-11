@@ -7,8 +7,7 @@
 #include <sstream>
 #include <vector>
 #include "node.h"
-#include "shared_ptr.h"
-#include "Tora.tab.hh"
+#include "parser.h"
 #include <iostream>
 #include <fstream>
 
@@ -132,7 +131,7 @@ public:
         return m_lineno;
     }
  
-    int scan(void) {
+    int scan(YYSTYPE *yylval) {
 std:
         m_token = m_cursor;
  
@@ -193,13 +192,13 @@ std:
         for (double n = 0.1; head<m_cursor; head++, n*=0.1) {
             tmp = tmp + (*head-'0')*n;
         }
-        yylval.double_value = tmp;
+        yylval->double_value = tmp;
         divable = true;
         return DOUBLE_LITERAL;
     }
     "." { return DOT; }
     "0" {
-        yylval.int_value = 0;
+        yylval->int_value = 0;
         divable = true;
         return INT_LITERAL;
     }
@@ -208,7 +207,7 @@ std:
         for (char *head=m_token; head<m_cursor; head++) {
             tmp = tmp*10 + (*head - '0');
         }
-        yylval.int_value = tmp;
+        yylval->int_value = tmp;
         divable = true;
         return INT_LITERAL;
     }
@@ -254,13 +253,13 @@ std:
     }
     IDENTIFIER {
         std::string token(m_token, m_cursor-m_token);
-        yylval.str_value = strdup(token.c_str());
+        yylval->str_value = strdup(token.c_str());
         divable = true;
         return IDENTIFIER;
     }
     VARNAME {
         std::string token(m_token, m_cursor-m_token);
-        yylval.str_value = strdup(token.c_str());
+        yylval->str_value = strdup(token.c_str());
         divable = true;
         return VARIABLE;
     }
@@ -311,7 +310,7 @@ end:
 string_literal:
 /*!re2c
     "\"" {
-        yylval.str_value = tora_close_string_literal();
+        yylval->str_value = tora_close_string_literal();
         return STRING_LITERAL;
     }
     "\n" {
@@ -343,7 +342,7 @@ regexp_literal:
     "/" {
         // # <REGEXP>"\\/" tora_add_string_literal('/');
         /* TODO: options like /xsmi */
-        yylval.str_value = tora_close_string_literal();
+        yylval->str_value = tora_close_string_literal();
         return REGEXP_LITERAL;
     }
     ANY_CHARACTER {

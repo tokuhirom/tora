@@ -10,3 +10,6 @@ nodes.gen.h
 ops.gen.cc
 gmon.out
 *.gen.*
+parser.cc
+parser.h
+parser.out

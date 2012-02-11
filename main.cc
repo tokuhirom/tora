@@ -11,18 +11,13 @@
 #include "vm.h"
 #include "compiler.h"
 #include "node.h"
+#include "lexer.h"
 #include "lexer.gen.cc"
+#include "parser.cc"
 
 using namespace tora;
 
 extern tora::Node *root_node;
-
-Scanner *scanner;
-int yylex() {
-    int n = scanner->scan();
-    // printf("TOKEN: %d\n", n);
-    return n;
-}
 
 int main(int argc, char **argv) {
     extern int yyparse(void);
@@ -35,8 +30,9 @@ int main(int argc, char **argv) {
     bool dump_ops = false;
     bool dump_ast = false;
     bool compile_only = false;
+    bool parse_trace = false;
     char *code = NULL;
-    while ((opt = getopt(argc, argv, "vdtce:")) != -1) {
+    while ((opt = getopt(argc, argv, "yvdtce:")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
@@ -53,6 +49,9 @@ int main(int argc, char **argv) {
         case 'c':
             compile_only = true;
             break;
+        case 'y':
+            parse_trace = true;
+            break;
         default:
             fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
             exit(EXIT_FAILURE);
@@ -60,6 +59,7 @@ int main(int argc, char **argv) {
     }
 
     std::ifstream *ifs;
+    Scanner *scanner;
     if (code) {
         std::stringstream *s = new std::stringstream(std::string(code) + ";");
         scanner = new Scanner(s);
@@ -71,32 +71,47 @@ int main(int argc, char **argv) {
         scanner = new Scanner(&std::cin);
     }
 
-    root_node = NULL;
-    if (yyparse()) {
-        fprintf(stderr, "Syntax Error!! at line %d\n", scanner->lineno());
-        exit(1);
-    } else {
-        if (compile_only) {
-            printf("Syntax OK\n");
-            return 0;
-        }
-        assert(root_node);
-        if (dump_ast) {
-            root_node->dump();
-        }
-
-        tora::Compiler compiler;
-        compiler.compile(root_node);
-        if (compiler.error) {
-            fprintf(stderr, "Compilation failed\n");
-            exit(1);
-        }
-        tora::VM vm(compiler.ops);
-        // TODO: use delete
-        // delete root_node; // AST is not needed after compiling.
-        if (dump_ops) {
-            vm.dump_ops();
-        }
-        vm.execute();
+    if (parse_trace) {
+        ParseTrace(stderr, (char*)"[Parser] >> ");
     }
+
+    root_node = NULL;
+
+    YYSTYPE yylval;
+    int token_number;
+    void *parser = ParseAlloc(malloc);
+    do {
+        token_number = scanner->scan(&yylval);
+        Parse(parser, token_number, yylval);
+    } while (token_number != 0);
+    ParseFree(parser, free);
+
+    if (compile_only) {
+        printf("Syntax OK\n");
+        return 0;
+    }
+
+    assert(root_node);
+    if (dump_ast) {
+        root_node->dump();
+    }
+
+    tora::Compiler compiler;
+    compiler.compile(root_node);
+    if (compiler.error) {
+        fprintf(stderr, "Compilation failed\n");
+        exit(1);
+    }
+    tora::VM vm(compiler.ops);
+    // TODO: use delete
+    // delete root_node; // AST is not needed after compiling.
+    if (dump_ops) {
+        vm.dump_ops();
+    }
+    vm.execute();
+
+    /*
+    fprintf(stderr, "Syntax Error!! at line %d\n", scanner->lineno());
+    exit(1);
+    */
 }
