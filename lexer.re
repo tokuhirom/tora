@@ -173,6 +173,7 @@ std:
     "sub" {return FUNCSUB; }
     "for" { return FOR; }
     "," { return COMMA; }
+    "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }
     DOUBLE {
         double tmp = 0;

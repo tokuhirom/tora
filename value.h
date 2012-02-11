@@ -205,6 +205,19 @@ public:
     const char *type_str() { return "range"; }
 };
 
+class HashValue: public Value {
+    std::map<std::string, SharedPtr<Value> > data;
+public:
+    HashValue() {
+    }
+    SharedPtr<Value> get(const std::string &key) {
+        return data[key];
+    }
+    void set(const std::string & key , SharedPtr<Value>&val) {
+        data[key] = val;
+    }
+};
+
 };
 
 #include "array.h"

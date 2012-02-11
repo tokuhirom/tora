@@ -36,6 +36,7 @@ my @nodes = qw(
     NODE_BLOCK
     NODE_MY
     NODE_MAKE_ARRAY
+    NODE_MAKE_HASH
     NODE_GET_ITEM
     NODE_FOR
     NODE_UNARY_NEGATIVE

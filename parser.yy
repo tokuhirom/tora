@@ -119,6 +119,10 @@ array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
     A = new ArgsNode(NODE_MAKE_ARRAY, B->upcast<ListNode>());
 }
 
+hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
+    A = new ArgsNode(NODE_MAKE_HASH, B->upcast<ListNode>());
+}
+
 argument_list(A) ::= expression(B). {
     A = new ListNode();
     A->upcast<ListNode>()->push_back(B);
@@ -126,6 +130,18 @@ argument_list(A) ::= expression(B). {
 argument_list(A) ::= argument_list(B) COMMA expression(C). {
     A = B;
     A->upcast<ListNode>()->push_back(C);
+}
+
+/* B => C */
+pair_list(A) ::= expression(B) FAT_COMMA expression(C). {
+    A = new ListNode();
+    A->upcast<ListNode>()->push_back(B);
+    A->upcast<ListNode>()->push_back(C);
+}
+pair_list(A) ::= pair_list(B) COMMA expression(C) FAT_COMMA expression(D). {
+    A = B;
+    A->upcast<ListNode>()->push_back(C);
+    A->upcast<ListNode>()->push_back(D);
 }
 
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
@@ -260,6 +276,7 @@ primary_expression(A) ::= STRING_LITERAL(B). {
 }
 primary_expression(A) ::= variable(B). { A = B; }
 primary_expression(A) ::= array_creation(B). { A = B; }
+primary_expression(A) ::= hash_creation(B). { A = B; }
 primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
     A = B;
 }
