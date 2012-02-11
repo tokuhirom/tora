@@ -51,6 +51,6 @@ env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl 
 env.Command(['lexer.gen.h'], 'lexer.re', 're2c lexer.re > lexer.gen.h');
 env.Command('parser.cc', 'parser.yy', 'lemon parser.yy && mv parser.c parser.cc');
 env.Program('tora', [
-    'main.cc parser.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc'.split(' '),
+    'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc'.split(' '),
     re2files
 ])
