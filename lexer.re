@@ -146,6 +146,7 @@ std:
         VARNAME                = [$][A-Za-z_][A-Za-z0-9_]*;
         IDENTIFIER             = [A-Za-z_][A-Za-z0-9_]*;
         DOUBLE                 = [1-9][0-9]*[.][0-9]+;
+        LF                     = "\\n";
 
     */
 
@@ -262,6 +263,10 @@ std:
         tora_open_string_literal();
         goto string_literal;
     }
+    "'" {
+        tora_open_string_literal();
+        goto single_string_literal;
+    }
     "/*" {
         goto c_comment;
     }
@@ -302,6 +307,27 @@ end:
     ANY_CHARACTER { goto end; }
     */
 
+single_string_literal:
+/*!re2c
+    "'" {
+        *yylval = new StrNode(NODE_STRING, string_buffer->str());
+        delete string_buffer; string_buffer = NULL;
+        return STRING_LITERAL;
+    }
+    "\\\\" {
+        tora_add_string_literal('\\');
+        goto single_string_literal;
+    }
+    "\\'" {
+        tora_add_string_literal('\'');
+        goto single_string_literal;
+    }
+    ANY_CHARACTER {
+        tora_add_string_literal(*(m_cursor-1));
+        goto single_string_literal;
+    }
+*/
+
 string_literal:
 /*!re2c
     "\"" {
@@ -309,9 +335,8 @@ string_literal:
         delete string_buffer; string_buffer = NULL;
         return STRING_LITERAL;
     }
-    "\n" {
+    LF {
         tora_add_string_literal('\n');
-        increment_line_number();
         goto string_literal;
     }
     "\\\"" {

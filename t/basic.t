@@ -8,6 +8,14 @@ run_is(<<'...', "5\n");
 say(7-2);
 ...
 
+run_is(<<'...', "HELLO\n");
+print("HELLO\n");
+...
+
+run_is(<<'...', 'HELLO\t\n');
+print('HELLO\t\n');
+...
+
 run_is(<<'...', "14\n");
 say(7*2);
 ...
