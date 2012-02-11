@@ -12,20 +12,27 @@
 #include "compiler.h"
 #include "node.h"
 #include "lexer.h"
-#include "lexer.gen.cc"
-#include "parser.cc"
+#include "lexer.gen.h"
 
 using namespace tora;
 
-extern tora::Node *root_node;
+extern void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
+
+extern void Parse(
+  void *yyp,                   /* The parser */
+  int yymajor,                 /* The major token code number */
+  YYSTYPE yyminor       /* The value for the token */
+  , ParserState *state
+);
+
+extern void ParseFree(
+  void *p,                    /* The parser to be deleted */
+  void (*freeProc)(void*)     /* Function used to reclaim memory */
+);
+
+extern void *ParseAlloc(void *(*mallocProc)(size_t));
 
 int main(int argc, char **argv) {
-    extern int yyparse(void);
-#ifdef YYDEBUG
-    extern int yydebug;
-    yydebug = 1;
-#endif
-
     char opt;
     bool dump_ops = false;
     bool dump_ast = false;
@@ -75,29 +82,33 @@ int main(int argc, char **argv) {
         ParseTrace(stderr, (char*)"[Parser] >> ");
     }
 
-    root_node = NULL;
-
     YYSTYPE yylval;
     int token_number;
     void *parser = ParseAlloc(malloc);
+    ParserState parser_state;
     do {
         token_number = scanner->scan(&yylval);
-        Parse(parser, token_number, yylval);
+        parser_state.lineno = scanner->lineno();
+        Parse(parser, token_number, yylval, &parser_state);
     } while (token_number != 0);
     ParseFree(parser, free);
+
+    if (parser_state.failure) {
+        return 1;
+    }
 
     if (compile_only) {
         printf("Syntax OK\n");
         return 0;
     }
 
-    assert(root_node);
+    assert(parser_state.root_node);
     if (dump_ast) {
-        root_node->dump();
+        parser_state.root_node->dump();
     }
 
     tora::Compiler compiler;
-    compiler.compile(root_node);
+    compiler.compile(parser_state.root_node);
     if (compiler.error) {
         fprintf(stderr, "Compilation failed\n");
         exit(1);
@@ -109,9 +120,5 @@ int main(int argc, char **argv) {
         vm.dump_ops();
     }
     vm.execute();
-
-    /*
-    fprintf(stderr, "Syntax Error!! at line %d\n", scanner->lineno());
-    exit(1);
-    */
 }
+

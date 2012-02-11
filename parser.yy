@@ -36,30 +36,33 @@
 
 using namespace tora;
 
-tora::Node *root_node;
-
 // see http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 }
 
 %parse_failure {
-    fprintf(stderr, "Syntax error.\n");
+    state->failure = true;
+    fprintf(stderr, "Syntax error at line %d.\n", state->lineno);
 }
 %syntax_error {
-    fprintf(stderr, "Syntax error.\n");
+    state->errors++;
+    fprintf(stderr, "Syntax error at line %d.\n", state->lineno);
 }
 
+%extra_argument { ParserState *state }
+
 %stack_overflow {
+    state->errors++;
     fprintf(stderr,"Giving up.  Parser stack overflow?n");
 }
 
 %start_symbol root
 
 root ::= translation_unit(A). {
-    root_node = new NodeNode(NODE_ROOT, A.node);
+    state->root_node = new NodeNode(NODE_ROOT, A.node);
 }
 root ::= . {
-    root_node = new NodeNode(NODE_ROOT, new VoidNode(NODE_VOID));
+    state->root_node = new NodeNode(NODE_ROOT, new VoidNode(NODE_VOID));
 }
 
 translation_unit(A) ::= statement(B). { A.node = B.node; }
