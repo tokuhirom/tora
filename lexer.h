@@ -8,7 +8,7 @@ namespace tora {
 struct ParserState {
     int errors;
     bool failure;
-    tora::Node *root_node;
+    SharedPtr<tora::Node> root_node;
     int lineno;
     ParserState() : errors(0), failure(false) { }
     ~ParserState() { }
