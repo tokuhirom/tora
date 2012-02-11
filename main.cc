@@ -82,6 +82,7 @@ int main(int argc, char **argv) {
         ParseTrace(stderr, (char*)"[Parser] >> ");
     }
 
+
     YYSTYPE yylval;
     int token_number;
     void *parser = ParseAlloc(malloc);
@@ -107,6 +108,7 @@ int main(int argc, char **argv) {
         parser_state.root_node->dump();
     }
 
+
     tora::Compiler compiler;
     compiler.compile(parser_state.root_node);
     if (compiler.error) {
@@ -115,7 +117,7 @@ int main(int argc, char **argv) {
     }
     tora::VM vm(compiler.ops);
     // TODO: use delete
-    // delete root_node; // AST is not needed after compiling.
+    // delete parser_state.root_node; // AST is not needed after compiling.
     if (dump_ops) {
         vm.dump_ops();
     }

@@ -54,7 +54,9 @@ printf (<<'...', join(", ", @nodes));
 
 namespace tora {
 
-typedef enum {%s} node_type_t;
+typedef enum {
+    NODE_UNKNOWN = 0,
+%s} node_type_t;
 
 extern const char*node_type2name[];
 
@@ -67,7 +69,7 @@ extern const char*node_type2name[];
 printf $cc (<<'...', join(", ", map { qq{"$_"} } @nodes) );
 #include "nodes.gen.h"
 
-const char*tora::node_type2name[] = {%s};
+const char*tora::node_type2name[] = {"NODE_UNKNOWN", %s};
 ...
 
 

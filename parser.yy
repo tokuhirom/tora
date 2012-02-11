@@ -99,33 +99,33 @@ if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) ELSE block(D). {
 }
 
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {
-    A.node = new FuncdefNode(B.node, C.node_list, D.node);
+    A.node = new FuncdefNode(B.node, C.node->upcast<ListNode>(), D.node);
 }
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN block(C). {
-    A.node = new FuncdefNode(B.node, new std::vector<SharedPtr<Node>>(), C.node);
+    A.node = new FuncdefNode(B.node, new ListNode(), C.node);
 }
 
 parameter_list(A) ::= variable(B). {
-    A.node_list = new std::vector<SharedPtr<Node>>();
-    A.node_list->push_back(B.node);
+    A.node = new ListNode();
+    A.node->upcast<ListNode>()->push_back(B.node);
 }
 parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
-    A.node_list = B.node_list;
-    A.node_list->push_back(C.node);
+    A.node = B.node;
+    A.node->upcast<ListNode>()->push_back(C.node);
 }
 
 /* array constructor [a, b] */
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
-    A.node = new ArgsNode(NODE_MAKE_ARRAY, B.node_list);
+    A.node = new ArgsNode(NODE_MAKE_ARRAY, B.node->upcast<ListNode>());
 }
 
 argument_list(A) ::= expression(B). {
-    A.node_list = new std::vector<SharedPtr<Node>>();
-    A.node_list->push_back(B.node);
+    A.node = new ListNode();
+    A.node->upcast<ListNode>()->push_back(B.node);
 }
 argument_list(A) ::= argument_list(B) COMMA expression(C). {
-    A.node_list = B.node_list;
-    A.node_list->push_back(C.node);
+    A.node = B.node;
+    A.node->upcast<ListNode>()->push_back(C.node);
 }
 
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
@@ -224,17 +224,17 @@ postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKE
     A.node = new BinaryNode(NODE_GET_ITEM, B.node, C.node);
 }
 postfix_expression(A) ::= identifier(B) L_PAREN R_PAREN. {
-    A.node = new FuncallNode(B.node, new std::vector<SharedPtr<Node>>());
+    A.node = new FuncallNode(B.node, new ListNode());
 }
 postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
-    A.node = new FuncallNode(B.node, C.node_list);
+    A.node = new FuncallNode(B.node, C.node->upcast<ListNode>());
 }
 postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
-    A.node = new MethodCallNode(B.node, C.node, D.node_list);
+    A.node = new MethodCallNode(B.node, C.node, D.node->upcast<ListNode>());
 }
 postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
-    A.node = new MethodCallNode(B.node, C.node, new std::vector<SharedPtr<Node>>());
+    A.node = new MethodCallNode(B.node, C.node, new ListNode());
 }
 
 primary_expression(A) ::= int(B). { A.node = B.node; }

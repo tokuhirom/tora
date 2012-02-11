@@ -10,16 +10,16 @@ static void print_indent(int indent) {
     }
 }
 
-static void dump_args(std::vector<SharedPtr<tora::Node>> *args, int indent) {
-    for (size_t i=0; i<args->size(); i++) {
-        args->at(i)->dump(indent+1);
+void tora::ListNode::dump(int indent) {
+    for (size_t i=0; i<this->size(); i++) {
+        this->at(i)->dump(indent+1);
     }
 }
 
 void tora::ArgsNode::dump(int indent) {
     print_indent(indent);
     printf("[Args]%s(%zd)\n", this->type_name_str(), this->args->size());
-    dump_args(this->args, indent+1);
+    this->args->dump(indent+1);
 }
 
 void tora::VoidNode::dump(int indent) {
@@ -31,7 +31,7 @@ void tora::FuncdefNode::dump(int indent) {
     print_indent(indent);
     printf("[Funcdef]%s\n", this->type_name_str());
     this->name->dump(indent+1);
-    dump_args(params, indent+1);
+    this->params->dump(indent+1);
     this->block->dump(indent+1);
 }
 
@@ -47,7 +47,7 @@ void tora::ForNode::dump(int indent) {
 void tora::FuncallNode::dump(int indent) {
     print_indent(indent);
     printf("[Binary]%s(args: %zd)\n", this->type_name_str(), this->args->size());
-    dump_args(this->args, indent+1);
+    this->args->dump(indent+1);
 }
 
 void tora::BinaryNode::dump(int indent) {
@@ -62,7 +62,7 @@ void tora::MethodCallNode::dump(int indent) {
     printf("[MethodCall]%s\n", this->type_name_str());
     this->object->dump(indent+1);
     this->method->dump(indent+1);
-    dump_args(this->args, indent);
+    this->args->dump(indent+1);
 }
 
 void tora::IntNode::dump(int indent) {

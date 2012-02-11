@@ -26,6 +26,7 @@ class DoubleNode;
 class StrNode;
 class ArgsNode;
 class RangeNode;
+class ListNode;
 
 class Node : public Prim {
 public:
@@ -47,14 +48,12 @@ public:
 
 class ArgsNode: public Node {
 public:
-    std::vector<SharedPtr<Node>> *args;
-    ArgsNode(node_type_t type_, std::vector<SharedPtr<Node>> *args_) {
+    SharedPtr<ListNode> args;
+    ArgsNode(node_type_t type_, SharedPtr<ListNode> args_) {
         this->type = type_;
         this->args = args_;
     }
-    ~ArgsNode() {
-        delete args;
-    }
+    ~ArgsNode() { }
     void dump(int indent);
 };
 
@@ -116,32 +115,52 @@ public:
 class FuncallNode: public Node {
 public:
     SharedPtr<Node>name;
-    std::vector<SharedPtr<Node>> *args;
-    FuncallNode(Node * name_, std::vector<SharedPtr<Node>>*args_) {
+    SharedPtr<ListNode> args;
+    FuncallNode(Node * name_, SharedPtr<ListNode> args_) {
         this->type = NODE_FUNCALL;
         this->name = name_;
         this->args = args_;
     }
-    ~FuncallNode() {
-        delete args;
-    }
+    ~FuncallNode() { }
     void dump(int indent);
 };
 
 class FuncdefNode: public Node {
 public:
     SharedPtr<Node>name;
-    std::vector<SharedPtr<Node>> *params;
+    SharedPtr<ListNode> params;
     SharedPtr<Node>block;
-    FuncdefNode(Node *n, std::vector<SharedPtr<Node>>*p, Node *b):Node() {
+    FuncdefNode(Node *n, SharedPtr<ListNode> p, Node *b):Node() {
         this->type = NODE_FUNCDEF;
         name = n;
         params = p;
         block = b;
     }
-    ~FuncdefNode() {
-        delete params;
+    ~FuncdefNode() { }
+    void dump(int indent);
+};
+
+class ListNode: public Node {
+public:
+    std::vector<SharedPtr<Node>> *list;
+    ListNode() :Node() {
+        type = NODE_UNKNOWN;
+        list = new std::vector<SharedPtr<Node>>();
     }
+    ListNode(node_type_t n) : Node() {
+        type = n;
+        list = new std::vector<SharedPtr<Node>>();
+    }
+    ~ListNode() {
+        delete list;
+    }
+    void push_back(SharedPtr<Node> n) {
+        list->push_back(n);
+    }
+    size_t size() { return list->size(); }
+    SharedPtr<Node> at(int i) { return list->at(i); }
+    SharedPtr<Node> back() { return list->back(); }
+    void pop_back() { list->pop_back(); }
     void dump(int indent);
 };
 
@@ -192,17 +211,15 @@ class MethodCallNode: public Node {
 public:
     SharedPtr<Node>object;
     SharedPtr<Node>method;
-    std::vector<SharedPtr<Node>> *args;
+    SharedPtr<ListNode> args;
 
-    MethodCallNode(Node*o, Node*m, std::vector<SharedPtr<Node>>*a):Node() {
+    MethodCallNode(Node*o, Node*m, SharedPtr<ListNode> a) : Node() {
         type = NODE_METHOD_CALL;
         object = o;
         method = m;
         args = a;
     }
-    ~MethodCallNode() {
-        delete args;
-    }
+    ~MethodCallNode() { }
     void dump(int indent);
 };
 

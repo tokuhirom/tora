@@ -10,7 +10,6 @@ typedef union {
     double double_value;
     const char *str_value;
     class tora::Node* node;
-    std::vector<tora::SharedPtr<tora::Node>> *node_list;
 } YYSTYPE;
 
 struct ParserState {
