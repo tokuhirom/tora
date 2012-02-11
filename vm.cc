@@ -131,7 +131,7 @@ void VM::execute() {
             SharedPtr<Value> v2(stack.pop());
             if (v1->is_numeric()) {
                 SharedPtr<Value> i(v2->to_i());
-                IntValue *v = new IntValue(v2->upcast<IntValue>()->int_value + v1->upcast<IntValue>()->int_value);
+                SharedPtr<IntValue>v = new IntValue(v2->upcast<IntValue>()->int_value + v1->upcast<IntValue>()->int_value);
                 stack.push(v);
             } else if (v1->value_type == VALUE_TYPE_STR) {
                 // TODO: support null terminated string

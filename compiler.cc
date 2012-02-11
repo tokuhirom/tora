@@ -23,11 +23,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         this->push_block();
         this->compile(node->upcast<NodeNode>()->node);
 
-        {
-            OP * tmp = new OP;
-            tmp->op_type = OP_END;
-            ops->push_back(tmp);
-        }
+        ops->push_back(new OP(OP_END));
 
         this->pop_block();
 
@@ -46,9 +42,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_BLOCK: {
         this->push_block();
 
-        SharedPtr<OP> enter = new OP;
-        enter->op_type = OP_ENTER;
-        ops->push_back(enter);
+        ops->push_back(new OP(OP_ENTER));
 
         this->compile(node->upcast<NodeNode>()->node);
 
@@ -85,20 +79,19 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block);
 
-        OP * ret = new OP;
-        ret->op_type = OP_RETURN;
-        funccomp.ops->push_back(ret);
+        funccomp.ops->push_back(new OP(OP_RETURN));
 
-        CodeValue *code = new CodeValue();
+        SharedPtr<CodeValue> code = new CodeValue();
         code->code_name = funcname;
         code->code_params = params;
+        // TODO memory leaks?
         code->code_opcodes = new std::vector<SharedPtr<OP>>(*funccomp.ops);
 
         SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
         ops->push_back(putval);
 
-        StrValue *funcname_value = new StrValue(funcname);
-        ValueOP * define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
+        SharedPtr<StrValue> funcname_value = new StrValue(funcname);
+        SharedPtr<ValueOP> define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
         ops->push_back(define_method);
 
         break;
@@ -116,46 +109,44 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             error = true;
             break;
         }
-        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_VALUE, sv);
-        ops->push_back(tmp);
+        ops->push_back(new ValueOP(OP_PUSH_VALUE, sv));
         break;
     }
     case NODE_RANGE: {
         this->compile(node->upcast<BinaryNode>()->right);
         this->compile(node->upcast<BinaryNode>()->left);
-        SharedPtr<OP> tmp = new OP(OP_NEW_RANGE);
-        ops->push_back(tmp);
+        ops->push_back(new OP(OP_NEW_RANGE));
         break;
     }
     case NODE_INT: {
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_INT;
         tmp->operand.int_value = node->upcast<IntNode>()->int_value;
         ops->push_back(tmp);
         break;
     }
     case NODE_DOUBLE: {
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_DOUBLE;
         tmp->operand.double_value = node->upcast<DoubleNode>()->double_value;
         ops->push_back(tmp);
         break;
     }
     case NODE_TRUE: {
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;
         ops->push_back(tmp);
         break;
     }
     case NODE_FALSE: {
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_FALSE;
         ops->push_back(tmp);
         break;
     }
     case NODE_IDENTIFIER: {
         SharedPtr<StrValue>sv = new StrValue(node->upcast<StrNode>()->str_value);
-        ValueOP * tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
         ops->push_back(tmp);
         break;
     }
@@ -169,7 +160,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
         this->compile(node->upcast<FuncallNode>()->name);
 
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_FUNCALL;
         tmp->operand.int_value = args_len; // the number of args
         ops->push_back(tmp);
@@ -179,7 +170,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     { \
         this->compile(node->upcast<BinaryNode>()->left); \
         this->compile(node->upcast<BinaryNode>()->right); \
-        OP * tmp = new OP; \
+        SharedPtr<OP> tmp = new OP; \
         tmp->op_type = (type); \
         ops->push_back(tmp); \
         break; \
@@ -227,13 +218,13 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         auto if_node = node->upcast<IfNode>();
         this->compile(if_node->cond);
 
-        OP * jump_else = new OP;
+        SharedPtr<OP> jump_else = new OP;
         jump_else->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_else);
 
         this->compile(if_node->if_body);
 
-        OP * jump_end = new OP;
+        SharedPtr<OP> jump_end = new OP;
         jump_end->op_type = OP_JUMP;
         ops->push_back(jump_end);
 
@@ -260,13 +251,13 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         int label1 = ops->size();
         this->compile(node->upcast<BinaryNode>()->left); // cond
 
-        OP * jump_if_false = new OP;
+        SharedPtr<OP> jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_if_false);
 
         this->compile(node->upcast<BinaryNode>()->right); //body
 
-        OP * goto_ = new OP;
+        SharedPtr<OP> goto_ = new OP;
         goto_->op_type = OP_JUMP;
         goto_->operand.int_value = label1;
         ops->push_back(goto_);
@@ -290,7 +281,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             error = true;
         }
 
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         if (level == 0) {
             DBG2("LOCAL\n");
             tmp->op_type = OP_GETLOCAL;
@@ -328,7 +319,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             // fprintf(stderr, "set level: %d\n", level);
             this->compile(node->upcast<BinaryNode>()->right);
 
-            OP * tmp = new OP;
+            SharedPtr<OP> tmp = new OP;
             if (level == 0) {
                 DBG2("LOCAL\n");
                 tmp->op_type = OP_SETLOCAL;
@@ -349,7 +340,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->compile(index);
             this->compile(rvalue);
 
-            OP * tmp = new OP;
+            SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_SET_ITEM;
             ops->push_back(tmp);
             break;
@@ -371,7 +362,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             args->pop_back();
         }
 
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_MAKE_ARRAY;
         tmp->operand.int_value = args_len; // the number of args
         ops->push_back(tmp);
@@ -381,7 +372,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         this->compile(node->upcast<BinaryNode>()->left);  // container
         this->compile(node->upcast<BinaryNode>()->right); // index
 
-        OP * tmp = new OP;
+        SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
         ops->push_back(tmp);
         break;
@@ -418,14 +409,14 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         int label1 = ops->size();
         this->compile(node->upcast<ForNode>()->cond);
 
-        OP * jump_label2 = new OP;
+        SharedPtr<OP> jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_label2);
 
         this->compile(node->upcast<ForNode>()->block);
         this->compile(node->upcast<ForNode>()->postfix);
 
-        OP * jump_label1 = new OP;
+        SharedPtr<OP> jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
         jump_label1->operand.int_value = label1;
         ops->push_back(jump_label1);
@@ -450,23 +441,20 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         this->compile(mcn->method);
         this->compile(mcn->object);
 
-        OP * tmp = new OP;
-        tmp->op_type = OP_METHOD_CALL;
-        tmp->operand.int_value = args_len; // the number of args
-        ops->push_back(tmp);
+        SharedPtr<OP> op = new OP(OP_METHOD_CALL);
+        op->operand.int_value = args_len;
+        ops->push_back(op);
         break;
     }
     case NODE_UNARY_INCREMENT: {
         // ++$i
         this->compile(node->upcast<NodeNode>()->node);
-
-        OP * tmp = new OP;
-        tmp->op_type = OP_UNARY_INCREMENT;
-        ops->push_back(tmp);
+        ops->push_back(new OP(OP_UNARY_INCREMENT));
         break;
     }
 
     default:
+        this->error = true;
         printf("Unknown node: %s\n", node->type_name_str());
         abort();
         break;
