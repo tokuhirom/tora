@@ -64,6 +64,10 @@ public:
         this->type = type_;
         this->str_value = str;
     }
+    StrNode(node_type_t type_, std::string &str) {
+        this->type = type_;
+        this->str_value = str;
+    }
     ~StrNode() { }
     void dump(int indent);
 };

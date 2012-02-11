@@ -5,10 +5,8 @@
 
 namespace tora {
 
+// TODO: return StrNode, IntNode, DoubleNode in lexer!
 typedef union {
-    int int_value;
-    double double_value;
-    const char *str_value;
     class tora::Node* node;
 } YYSTYPE;
 

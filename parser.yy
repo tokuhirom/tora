@@ -239,7 +239,7 @@ postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN R_PARE
 
 primary_expression(A) ::= int(B). { A.node = B.node; }
 primary_expression(A) ::= DOUBLE_LITERAL(B). {
-    A.node = new DoubleNode(NODE_DOUBLE, B.double_value);
+    A.node = B.node;
 }
 primary_expression(A) ::= int(B) DOTDOT int(C). {
     A.node = new BinaryNode(NODE_RANGE, B.node, C.node);
@@ -251,10 +251,12 @@ primary_expression(A) ::= TRUE. {
     A.node = new VoidNode(NODE_TRUE);
 }
 primary_expression(A) ::= REGEXP_LITERAL(B). {
-    A.node = new RegexpNode(NODE_REGEXP, B.str_value);
+    B.node->type = NODE_REGEXP;
+    A.node = B.node;
 }
 primary_expression(A) ::= STRING_LITERAL(B). {
-    A.node = new StrNode(NODE_STRING, B.str_value);
+    B.node->type = NODE_STRING;
+    A.node = B.node;
 }
 primary_expression(A) ::= variable(B). { A.node = B.node; }
 primary_expression(A) ::= array_creation(B). { A.node = B.node; }
@@ -263,14 +265,17 @@ primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
 }
 
 int(A) ::= INT_LITERAL(B). {
-    A.node = new IntNode(NODE_INT, B.int_value);
+    B.node->type = NODE_INT;
+    A.node = B.node;
 }
 
 identifier(A) ::= IDENTIFIER(B). {
-    A.node = new StrNode(NODE_IDENTIFIER, B.str_value);
+    B.node->type = NODE_IDENTIFIER;
+    A.node = B.node;
 }
 
 variable(A) ::= VARIABLE(B). {
-    A.node = new StrNode(NODE_GETVARIABLE, B.str_value);
+    B.node->type = NODE_GETVARIABLE;
+    A.node = B.node;
 }
 
