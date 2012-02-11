@@ -71,7 +71,7 @@ public:
     // GET type name in const char*
     virtual const char *type_str() = 0;
 
-    virtual Value* tora__neg__() {
+    virtual SharedPtr<Value> tora__neg__() {
         printf("%s is not a numeric. You cannot apply unary negative operator.\n", this->type_str());
         abort();
     }
@@ -99,7 +99,7 @@ public:
     }
     const char *type_str() { return "int"; }
     SharedPtr<StrValue> to_s();
-    Value* tora__neg__();
+    SharedPtr<Value> tora__neg__();
     void tora__incr__() {
         this->int_value++;
     }

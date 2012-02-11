@@ -64,7 +64,7 @@ public:
         this->type = type_;
         this->str_value = str;
     }
-    StrNode(node_type_t type_, std::string &str) {
+    StrNode(node_type_t type_, const std::string &str) {
         this->type = type_;
         this->str_value = str;
     }

@@ -17,10 +17,10 @@ SharedPtr<Value> Value::to_b() {
 }
 
 SharedPtr<StrValue> IntValue::to_s() {
-    StrValue *v = new StrValue();
+    SharedPtr<StrValue> v = new StrValue();
     std::ostringstream os;
     os << this->upcast<IntValue>()->int_value;
-    v->set_str(strdup(os.str().c_str()));
+    v->set_str(os.str());
     return v;
 }
 
@@ -35,7 +35,7 @@ SharedPtr<StrValue> RangeValue::to_s() {
 }
 
 SharedPtr<StrValue> DoubleValue::to_s() {
-    StrValue *v = new StrValue();
+    SharedPtr<StrValue> v = new StrValue();
     std::ostringstream os;
     os << this->double_value;
     v->set_str(os.str());
@@ -72,7 +72,7 @@ IntValue *Value::to_i() {
     }
 }
 
-Value *IntValue::tora__neg__() {
+SharedPtr<Value> IntValue::tora__neg__() {
     return new IntValue(-this->int_value);
 }
 

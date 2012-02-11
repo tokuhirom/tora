@@ -22,7 +22,7 @@ env.Append(CXXFLAGS=['-I./vendor/re2/'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CXXFLAGS=['-g'])
 env.Append(LDFLAGS=['-g'])
-env.Append(CCFLAGS=['-O0'])
+env.Append(CCFLAGS=['-O2'])
 env.Append(CCFLAGS=['-Wall'])
 
 if ARGUMENTS.get('profile', 0):

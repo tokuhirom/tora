@@ -51,12 +51,6 @@ public:
     void tora_add_string_literal(char c) {
         (*string_buffer) << c;
     }
-    const char *tora_close_string_literal() {
-        const char * ret = strdup(string_buffer->str().c_str());
-        delete string_buffer;
-        string_buffer = NULL;
-        return ret;
-    }
  
     Scanner( std::istream *ifs_, int init_size=1024 )
         : m_buffer(0)
@@ -311,7 +305,8 @@ end:
 string_literal:
 /*!re2c
     "\"" {
-        *yylval = new StrNode(NODE_STRING, tora_close_string_literal());
+        *yylval = new StrNode(NODE_STRING, string_buffer->str());
+        delete string_buffer; string_buffer = NULL;
         return STRING_LITERAL;
     }
     "\n" {
@@ -343,7 +338,8 @@ regexp_literal:
     "/" {
         // # <REGEXP>"\\/" tora_add_string_literal('/');
         /* TODO: options like /xsmi */
-        *yylval = new RegexpNode(NODE_REGEXP, tora_close_string_literal());
+        *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str());
+        delete string_buffer; string_buffer = NULL;
         return REGEXP_LITERAL;
     }
     ANY_CHARACTER {

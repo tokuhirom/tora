@@ -137,8 +137,7 @@ void VM::execute() {
                 // TODO: support null terminated string
                 SharedPtr<StrValue>v = new StrValue();
                 SharedPtr<Value> s(v2->to_s());
-                // strdup
-                v->set_str(strdup((std::string(s->upcast<StrValue>()->str_value.c_str()) + std::string(v1->upcast<StrValue>()->str_value.c_str())).c_str()));
+                v->set_str(std::string(s->upcast<StrValue>()->str_value.c_str()) + std::string(v1->upcast<StrValue>()->str_value.c_str()));
                 stack.push(v);
             } else {
                 SharedPtr<Value> s(v1->to_s());
@@ -177,8 +176,8 @@ void VM::execute() {
                 SharedPtr<Value> s(v->to_s());
                 char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
                 if (env) {
-                    StrValue *ret = new StrValue();
-                    ret->set_str(strdup(env));
+                    SharedPtr<StrValue> ret = new StrValue();
+                    ret->set_str(env);
                     stack.push(ret);
                 } else {
                     stack.push(UndefValue::instance());
