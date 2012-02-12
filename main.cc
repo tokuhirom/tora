@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
         parser_state.root_node->dump();
     }
 
-
+    // compile
     tora::Compiler compiler;
     compiler.init_globals();
     compiler.compile(parser_state.root_node);
@@ -116,6 +116,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Compilation failed\n");
         exit(1);
     }
+
+    // run it
     tora::VM vm(compiler.ops);
     vm.init_globals(argc-optind, argv+optind);
     if (dump_ops) {
