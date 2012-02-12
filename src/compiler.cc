@@ -35,8 +35,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_MY: {
-        std::string &name = node->upcast<NodeNode>()->node->upcast<StrNode>()->str_value;
-        this->define_localvar(name);
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        for (size_t i=0; i < ln->size(); i++) {
+            std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
+            this->define_localvar(name);
+        }
         // this->compile(node->upcast<NodeNode>()->node);
         break;
     }
@@ -369,6 +372,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
 
         break;
+    }
+    case SET_VARIABLE_MULTI: {
+        // TODO NOT IMPLEMENTED YET
+        abort();
     }
     case NODE_MAKE_ARRAY: {
         auto args = node->upcast<ArgsNode>()->args;

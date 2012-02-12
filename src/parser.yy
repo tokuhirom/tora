@@ -86,7 +86,11 @@ statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON exp
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
-statement(A) ::= MY variable(B).   { A = new NodeNode(NODE_MY, B); }
+statement(A) ::= MY variable(B).   {
+    ListNode*nl = new ListNode(NODE_MY);
+    nl->push_back(B);
+    A = nl;
+}
 
 jump_statement(A) ::= RETURN expression(B) SEMICOLON. {
     A = new NodeNode(NODE_RETURN, B);
@@ -114,6 +118,7 @@ parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
     A = B;
     A->upcast<ListNode>()->push_back(C);
 }
+/* allow [a,b,c,] */
 
 /* array constructor [a, b] */
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
@@ -168,9 +173,16 @@ assignment_expression(A) ::= conditional_expression(B). {
 }
 assignment_expression(A) ::= MY variable(B) ASSIGN expression(C).  {
     // TODO: REMOVE THIS NODE
-    Node *n1 = new NodeNode(NODE_MY, B);
+    SharedPtr<ListNode> n1 = new ListNode(NODE_MY);
+    n1->push_back(B);
     Node *node = new BinaryNode(NODE_SETVARIABLE, B, C);
     A = new BinaryNode(NODE_STMTS, n1, node);
+}
+/* my ($a, $b, $c) = ... */
+assignment_expression(A) ::= MY L_PAREN parameter_list(B) R_PAREN ASSIGN expression(C).  {
+    B->type = NODE_MY;
+    Node *node = new BinaryNode(NODE_SETVARIABLE_MULTI, B, C);
+    A = new BinaryNode(NODE_STMTS, B, node);
 }
 assignment_expression(A) ::= conditional_expression(B) ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_SETVARIABLE, B, C);
