@@ -1,5 +1,5 @@
 #include "value.h"
-#include "code.h"
+#include "value/code.h"
 
 using namespace tora;
 
@@ -49,10 +49,6 @@ SharedPtr<StrValue> BoolValue::to_s() {
 SharedPtr<StrValue> UndefValue::to_s() {
     return new StrValue("undef"); // TODO
 }
-SharedPtr<StrValue> CodeValue::to_s() {
-    return new StrValue("<code>"); // TODO
-}
-
 SharedPtr<StrValue> Value::to_s() {
     printf("%s don't support stringification.\n", this->type_str());
     abort();
@@ -76,11 +72,4 @@ SharedPtr<Value> IntValue::tora__neg__() {
     return new IntValue(-this->int_value);
 }
 
-void HashValue::dump() {
-    printf("[dump] hash(%zd)\n", this->data.size());
-    for (auto iter = this->data.begin(); iter!=this->data.end(); iter++) {
-        printf("%s: ", iter->first.c_str());
-        iter->second->dump();
-    }
-}
 

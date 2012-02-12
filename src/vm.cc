@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "value.h"
-#include "code.h"
+#include "value/hash.h"
+#include "value/code.h"
 #include "regexp.h"
 #include <unistd.h>
 #include <algorithm>

@@ -3,9 +3,9 @@
 
 #include <cstdio>
 #include <vector>
-#include "value.h"
-#include "op.h"
-#include "shared_ptr.h"
+#include "../value.h"
+#include "../op.h"
+#include "../shared_ptr.h"
 
 namespace tora {
 
