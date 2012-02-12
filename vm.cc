@@ -14,39 +14,23 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_) {
     this->lexical_vars_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
     this->function_frames = new std::vector<SharedPtr<FunctionFrame>>();
+    this->global_vars = new std::vector<SharedPtr<Value>>();
 }
 
 VM::~VM() {
+    delete this->global_vars;
     delete this->ops;
     delete this->lexical_vars_stack;
     delete this->function_frames;
 }
 
-static void disasm_one(OP* op) {
-    printf("OP: %s", opcode2name[op->op_type]);
-    switch (op->op_type) {
-    case OP_SETLOCAL: {
-        printf(" %d", op->operand.int_value);
-        break;
+void VM::init_globals(int argc, char**argv) {
+    // $ARGV
+    SharedPtr<ArrayValue> avalue = new ArrayValue();
+    for (int i=0; i<argc; i++) {
+        avalue->push(new StrValue(argv[i]));
     }
-    case OP_GETLOCAL: {
-        printf(" %d", op->operand.int_value);
-        break;
-    }
-    case OP_GETDYNAMIC: {
-        int level = (op->operand.int_value >> 16) & 0x0000FFFF;
-        int no    = op->operand.int_value & 0x0000ffff;
-        printf(" level: %d, no: %d", level, no);
-        break;
-    }
-    case OP_PUSH_INT: {
-        printf(" %d", op->operand.int_value);
-        break;
-    }
-    default:
-        break;
-    }
-    printf("\n");
+    this->global_vars->push_back(avalue);
 }
 
 // run program
@@ -447,6 +431,11 @@ void VM::execute() {
             } else {
                 abort(); // TODO: throw exception
             }
+            break;
+        }
+        case OP_GETGLOBAL: {
+            int globalvarno = op->operand.int_value;
+            stack.push(this->global_vars->at(globalvarno));
             break;
         }
 

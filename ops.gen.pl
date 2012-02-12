@@ -39,6 +39,7 @@ my @ops = qw(
 
     OP_SETLOCAL
     OP_SETDYNAMIC
+    OP_GETGLOBAL
     OP_GETLOCAL
     OP_GETDYNAMIC
 

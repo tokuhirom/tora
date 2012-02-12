@@ -14,7 +14,7 @@ if os.uname()[0]=='Darwin':
     env.Append(CXXFLAGS=['-Wno-unneeded-internal-declaration'])
 else:
     env = Environment(CXX='g++')
-    env.Append(CCFLAGS=['-std=c++0x'])
+    env.Append(CXXFLAGS=['-std=c++0x'])
     env.Append(CXXFLAGS=['-pthread', '-Wno-sign-compare'])
     env.Append(LDFLAGS=['-pthread'])
     env.Append(LINKFLAGS=['-lpthread'])
@@ -49,8 +49,10 @@ if 'test' in COMMAND_LINE_TARGETS:
 env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
 env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl > nodes.gen.h');
 env.Command(['lexer.gen.h'], 'lexer.re', 're2c lexer.re > lexer.gen.h');
-env.Command('parser.cc', 'parser.yy', 'lemon parser.yy && mv parser.c parser.cc');
+env.Command(['parser.h', 'parser.cc'], ['parser.yy', 'lempar.c'], './lemon parser.yy && mv parser.c parser.cc');
 env.Program('tora', [
-    'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc'.split(' '),
+    'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' '),
     re2files
 ])
+env.Program('lemon', ['tools/lemon/lemon.c']);
+

@@ -17,6 +17,11 @@ int tora::Compiler::find_localvar(std::string name, int &level) {
     return -1;
 }
 
+void tora::Compiler::init_globals() {
+    this->define_global_var("$ARGV");
+    this->define_global_var("$ENV");
+}
+
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
@@ -274,24 +279,35 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         // nop
         break;
     case NODE_GETVARIABLE: {
-        int level;
-        int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
-        if (no<0) {
-            fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
-            error = true;
-        }
-
-        SharedPtr<OP> tmp = new OP;
-        if (level == 0) {
-            DBG2("LOCAL\n");
-            tmp->op_type = OP_GETLOCAL;
-            tmp->operand.int_value = no;
+        int global = this->find_global_var(node->upcast<StrNode>()->str_value);
+        if (global >= 0) {
+            SharedPtr<OP> tmp = new OP();
+            tmp->op_type = OP_GETGLOBAL;
+            tmp->operand.int_value = global;
+            ops->push_back(tmp);
         } else {
-            DBG2("DYNAMIC\n");
-            tmp->op_type = OP_GETDYNAMIC;
-            tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+            // find local variable
+            int level;
+            int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
+            if (no<0) {
+                fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
+                error = true;
+            }
+
+            if (level == 0) {
+                DBG2("LOCAL\n");
+                SharedPtr<OP> tmp = new OP;
+                tmp->op_type = OP_GETLOCAL;
+                tmp->operand.int_value = no;
+                ops->push_back(tmp);
+            } else {
+                SharedPtr<OP> tmp = new OP;
+                DBG2("DYNAMIC\n");
+                tmp->op_type = OP_GETDYNAMIC;
+                tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+                ops->push_back(tmp);
+            }
         }
-        ops->push_back(tmp);
         break;
     }
     case NODE_DIV_ASSIGN: {

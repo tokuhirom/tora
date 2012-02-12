@@ -69,7 +69,7 @@ public:
     int sp; // stack pointer
     size_t pc; // program counter
     std::vector<SharedPtr<OP>> *ops;
-    std::map<std::string, SharedPtr<Value>> global_vars;
+    std::vector<SharedPtr<Value>> *global_vars;
     std::map<std::string, SharedPtr<Value>> functions;
     std::vector<SharedPtr<FunctionFrame>> *function_frames;
 
@@ -81,6 +81,8 @@ public:
     VM(std::vector<SharedPtr<OP>>* ops_);
     ~VM();
     void execute();
+
+    void init_globals(int argc, char**argv);
 
     void dump_ops() {
         printf("-- OP DUMP    --\n");

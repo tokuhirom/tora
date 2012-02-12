@@ -110,12 +110,14 @@ int main(int argc, char **argv) {
 
 
     tora::Compiler compiler;
+    compiler.init_globals();
     compiler.compile(parser_state.root_node);
     if (compiler.error) {
         fprintf(stderr, "Compilation failed\n");
         exit(1);
     }
     tora::VM vm(compiler.ops);
+    vm.init_globals(argc-optind, argv+optind);
     if (dump_ops) {
         vm.dump_ops();
     }

@@ -13,3 +13,4 @@ gmon.out
 parser.cc
 parser.h
 parser.out
+lemon
