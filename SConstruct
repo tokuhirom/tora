@@ -49,10 +49,11 @@ if 'test' in COMMAND_LINE_TARGETS:
 env.Command('src/ops.gen.h', 'src/ops.gen.pl', 'perl src/ops.gen.pl > src/ops.gen.h');
 env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl src/nodes.gen.pl > src/nodes.gen.h');
 env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.h');
+env.Command(['src/vm.gen.cc'], 'src/vm.gen.pl', 'perl src/vm.gen.pl > src/vm.gen.cc');
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
 Clean(t, 'parser.out')
 env.Program('tora', [
-    ["src/" + x for x in 'value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc main.cc value.cc compiler.cc vm.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' ')],
+    ["src/" + x for x in 'vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc main.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' ')],
     re2files
 ])
 env.Program('lemon', ['tools/lemon/lemon.c']);
