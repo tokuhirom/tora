@@ -4,6 +4,7 @@
 #include "regexp.h"
 #include <unistd.h>
 #include <algorithm>
+#include <functional>
 
 using namespace tora;
 
@@ -31,6 +32,49 @@ void VM::init_globals(int argc, char**argv) {
         avalue->push(new StrValue(argv[i]));
     }
     this->global_vars->push_back(avalue);
+}
+
+template <class operationI, class operationD>
+void VM::binop(operationI operation_i, operationD operation_d) {
+    SharedPtr<Value> v1(stack.pop()); /* rvalue */
+    SharedPtr<Value> v2(stack.pop()); /* lvalue */
+
+    if (v2->value_type == VALUE_TYPE_DOUBLE) {
+        if (v1->value_type == VALUE_TYPE_DOUBLE) {
+            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
+            stack.push(v);
+        } else if (v1->value_type == VALUE_TYPE_INT) {
+            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
+            stack.push(v);
+        }
+    } else if (v2->value_type == VALUE_TYPE_INT) {
+        SharedPtr<IntValue> v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
+        stack.push(v);
+    } else { 
+        SharedPtr<Value> s(v2->to_s());
+        fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str());
+        exit(1); /* TODO: die */
+    }
+}
+
+template <class operationI, class operationD>
+void VM::cmpop(operationI operation_i, operationD operation_d) {
+    SharedPtr<Value> v1(stack.pop());
+    SharedPtr<Value> v2(stack.pop());
+ 
+    switch (v1->value_type) {
+    case VALUE_TYPE_INT: {
+        SharedPtr<Value> i2(v2->to_i());
+        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, i2->upcast<IntValue>()->int_value));
+        stack.push(result);
+        break;
+    }
+    default:
+        printf("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
+        v1->dump();
+        v2->dump();
+        abort();
+    }
 }
 
 // run program
@@ -84,32 +128,24 @@ void VM::execute() {
             this->add_function(funcname, code);
             break;
         }
-#define BINOP(optype, op) \
-        case optype: { \
-            SharedPtr<Value> v1(stack.pop()); /* rvalue */ \
-            SharedPtr<Value> v2(stack.pop()); /* lvalue */ \
-            if (v2->value_type == VALUE_TYPE_DOUBLE) { \
-                if (v1->value_type == VALUE_TYPE_DOUBLE) { \
-                    SharedPtr<DoubleValue>v = new DoubleValue(v2->upcast<DoubleValue>()->double_value op v1->upcast<DoubleValue>()->double_value); \
-                    stack.push(v); \
-                } else if (v1->value_type == VALUE_TYPE_INT) {\
-                    SharedPtr<DoubleValue>v = new DoubleValue(v2->upcast<DoubleValue>()->double_value op (double)v1->upcast<IntValue>()->int_value); \
-                    stack.push(v); \
-                } \
-            } else if (v2->value_type == VALUE_TYPE_INT) { \
-                SharedPtr<IntValue> v = new IntValue(v2->upcast<IntValue>()->int_value op v1->upcast<IntValue>()->int_value); \
-                stack.push(v); \
-            } else {  \
-                SharedPtr<Value> s(v2->to_s()); \
-                fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str()); \
-                exit(1); /* TODO: die */ \
-            } \
-            break; \
+        case OP_SUB: {
+            std::minus<int>    i;
+            std::minus<double> d;
+            this->binop(i, d);
+            break;
         }
-        BINOP(OP_SUB, -);
-        BINOP(OP_DIV, /);
-        BINOP(OP_MUL, *);
-#undef BINOP
+        case OP_DIV: {
+            std::divides<int>    i;
+            std::divides<double> d;
+            this->binop(i, d);
+            break;
+        }
+        case OP_MUL: {
+            std::multiplies<int>    i;
+            std::multiplies<double> d;
+            this->binop(i, d);
+            break;
+        }
         case OP_ADD: {
             SharedPtr<Value> v1(stack.pop());
             SharedPtr<Value> v2(stack.pop());
@@ -300,31 +336,36 @@ void VM::execute() {
             pc = op->operand.int_value-1;
             break;
         }
-#define CMPOP(type, op) \
-        case type: { \
-            SharedPtr<Value> v1(stack.pop()); \
-            SharedPtr<Value> v2(stack.pop()); \
-            \
-            switch (v1->value_type) { \
-            case VALUE_TYPE_INT: { \
-                SharedPtr<Value> i2(v2->to_i()); \
-                SharedPtr<BoolValue> result = BoolValue::instance(v1->upcast<IntValue>()->int_value op i2->upcast<IntValue>()->int_value); \
-                stack.push(result); \
-                break; \
-            } \
-            default: \
-                printf("UNKNOWN MATCHING PATTERN:: " # op "\n"); \
-                v1->dump(); \
-                v2->dump(); \
-                abort(); \
-            } \
-            break; \
+        case OP_EQ: {
+            std::equal_to<int> i;
+            std::equal_to<double> d;
+            this->cmpop(i, d);
+            break;
         }
-        CMPOP(OP_EQ, ==)
-        CMPOP(OP_GT, >)
-        CMPOP(OP_LT, <)
-        CMPOP(OP_GE, >=)
-        CMPOP(OP_LE, <=)
+        case OP_GT: {
+            std::greater<int> i;
+            std::greater<double> d;
+            this->cmpop(i, d);
+            break;
+        }
+        case OP_LT: {
+            std::less<int> i;
+            std::less<double> d;
+            this->cmpop(i, d);
+            break;
+        }
+        case OP_GE: {
+            std::greater_equal<int> i;
+            std::greater_equal<double> d;
+            this->cmpop(i, d);
+            break;
+        }
+        case OP_LE: {
+            std::less_equal<int> i;
+            std::less_equal<double> d;
+            this->cmpop(i, d);
+            break;
+        }
 
         // variable
         case OP_SETLOCAL: {

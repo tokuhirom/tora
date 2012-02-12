@@ -82,6 +82,9 @@ public:
     ~VM();
     void execute();
 
+    template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
+    template <class operationI, class operationD> void cmpop(operationI operation_i, operationD operation_d);
+
     void init_globals(int argc, char**argv);
 
     void dump_ops() {
