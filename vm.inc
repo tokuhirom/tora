@@ -125,7 +125,7 @@ OP_FUNCALL {
     } else {
         auto iter =  this->functions.find(funname->upcast<StrValue>()->str_value.c_str());
         if (iter != this->functions.end()) {
-            SharedPtr<CodeValue> code = iter->second->to_code();
+            SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
             // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
             {
                 SharedPtr<FunctionFrame> fframe = new FunctionFrame();

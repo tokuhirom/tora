@@ -373,7 +373,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         break;
     }
-    case SET_VARIABLE_MULTI: {
+    case NODE_SETVARIABLE_MULTI: {
         // TODO NOT IMPLEMENTED YET
         abort();
     }

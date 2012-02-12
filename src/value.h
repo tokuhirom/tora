@@ -24,6 +24,7 @@ typedef enum {
     VALUE_TYPE_ARRAY = 5,
     VALUE_TYPE_DOUBLE = 6,
     VALUE_TYPE_REGEXP,
+    VALUE_TYPE_TUPLE,
 } value_type_t;
 
 class CodeValue;
@@ -43,15 +44,6 @@ protected:
 public:
     value_type_t value_type;
 
-    CodeValue* to_code() {
-        if (this->value_type == VALUE_TYPE_CODE) {
-            return (CodeValue*)this;
-        } else {
-            printf("[BUG] %d is not a code value\n", this->value_type);
-            this->dump();
-            exit(1); // BUG
-        }
-    }
     virtual void dump() = 0;
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
