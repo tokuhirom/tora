@@ -9,7 +9,8 @@ nodes.gen.cc
 nodes.gen.h
 ops.gen.cc
 gmon.out
-*.gen.*
+*.gen.h
+*.gen.cc
 parser.cc
 parser.h
 parser.out
