@@ -86,6 +86,7 @@ statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON exp
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
+statement(A) ::= MY variable(B).   { A = new NodeNode(NODE_MY, B); }
 
 jump_statement(A) ::= RETURN expression(B) SEMICOLON. {
     A = new NodeNode(NODE_RETURN, B);

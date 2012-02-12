@@ -122,6 +122,12 @@ run_is(<<'...', "0..10\n");
 say(0..10);
 ...
 
+run_is(<<'...', "1\n");
+my $a;
+$a = 1;
+say($a);
+...
+
 TODO: {
     local $TODO = 'oops';
     run_is(<<'...', "OK\nHERE\n");
