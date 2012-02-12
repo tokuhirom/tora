@@ -13,24 +13,9 @@
 #include "node.h"
 #include "lexer.h"
 #include "lexer.gen.h"
+#include "parser.class.h"
 
 using namespace tora;
-
-extern void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
-
-extern void Parse(
-  void *yyp,                   /* The parser */
-  int yymajor,                 /* The major token code number */
-  Node* yyminor       /* The value for the token */
-  , ParserState *state
-);
-
-extern void ParseFree(
-  void *p,                    /* The parser to be deleted */
-  void (*freeProc)(void*)     /* Function used to reclaim memory */
-);
-
-extern void *ParseAlloc(void *(*mallocProc)(size_t));
 
 int main(int argc, char **argv) {
     char opt;
@@ -79,20 +64,20 @@ int main(int argc, char **argv) {
     }
 
     if (parse_trace) {
-        ParseTrace(stderr, (char*)"[Parser] >> ");
+        tora::Parser::ParseTrace(stderr, (char*)"[Parser] >> ");
     }
 
 
     Node *yylval;
     int token_number;
-    void *parser = ParseAlloc(malloc);
+    void *parser = tora::Parser::ParseAlloc(malloc);
     ParserState parser_state;
     do {
         token_number = scanner->scan(&yylval);
         parser_state.lineno = scanner->lineno();
-        Parse(parser, token_number, yylval, &parser_state);
+        tora::Parser::Parse(parser, token_number, yylval, &parser_state);
     } while (token_number != 0);
-    ParseFree(parser, free);
+    tora::Parser::ParseFree(parser, free);
 
     if (parser_state.failure) {
         return 1;
