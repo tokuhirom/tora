@@ -84,6 +84,3 @@ void HashValue::dump() {
     }
 }
 
-StrValue::~StrValue() {
-}
-

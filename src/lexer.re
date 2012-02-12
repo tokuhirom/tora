@@ -344,6 +344,10 @@ string_literal:
         tora_add_string_literal('"');
         goto string_literal;
     }
+    "\\0" {
+        tora_add_string_literal('\0');
+        goto string_literal;
+    }
     "\\t" {
         tora_add_string_literal('\t');
         goto string_literal;

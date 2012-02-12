@@ -52,7 +52,7 @@ env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
 Clean(t, 'parser.out')
 env.Program('tora', [
-    ["src/" + x for x in 'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' ')],
+    ["src/" + x for x in 'value/str.cc parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' ')],
     re2files
 ])
 env.Program('lemon', ['tools/lemon/lemon.c']);

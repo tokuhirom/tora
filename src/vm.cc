@@ -280,6 +280,13 @@ void VM::execute() {
                         fprintf(stderr, "Missing args for 'match'\n");
                         abort();
                     }
+                } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "length") == 0) {
+                    if (op->operand.int_value == 0) {
+                        stack.push(new IntValue(sv->length()));
+                    } else {
+                        fprintf(stderr, "length needs 0 argument\n");
+                        abort();
+                    }
                 }
                 break;
             }

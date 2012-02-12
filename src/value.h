@@ -178,6 +178,7 @@ public:
     void set_str(const char*s) {
         str_value = s;
     }
+    int length();
     void set_str(std::string s) {
         str_value = s;
     }

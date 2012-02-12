@@ -1,0 +1,10 @@
+say("あ過ｻタな".length());
+say("ほげほげ".length());
+say("abc".length());
+say("a\0bc".length());
+
+__END__
+5
+4
+3
+4
