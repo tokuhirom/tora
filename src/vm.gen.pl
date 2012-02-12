@@ -57,7 +57,7 @@ using namespace tora;
 
     {
         for my $k (@$dat) {
-            $ret .= "void VM::PP_$k->[0]() {\n";
+            $ret .= "inline void VM::PP_$k->[0]() {\n";
             $ret .= "SharedPtr<OP> op = ops->at(pc);\n";
             $ret .= "$k->[1]\n";
             $ret .= "}\n";
@@ -77,7 +77,7 @@ void VM::execute() {
 #endif
 
         SharedPtr<OP> op = ops->at(pc);
-        switch (ops->at(pc)->op_type) {
+        switch (op->op_type) {
 ...
 
     for my $k (@$dat) {
