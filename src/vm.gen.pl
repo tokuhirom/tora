@@ -5,9 +5,10 @@ use utf8;
 use autodie;
 
 my $dat = parse();
-write_file('src/vm.gen.cc', mk_vm_gen_cc($dat));
+write_file('src/vm.gen.cc', vm_gen_cc($dat));
 write_file('src/ops.gen.h', ops_gen_h($dat));
 write_file('src/ops.gen.cc', ops_gen_cc($dat));
+write_file('src/vm.ops.inc.h', vm_ops_inc_h($dat));
 
 sub write_file {
     my ($fname, $body) = @_;
@@ -37,7 +38,7 @@ sub parse {
     return \@ret;
 }
 
-sub mk_vm_gen_cc {
+sub vm_gen_cc {
     my $dat = shift;
 
     my $ret .= <<'...';
@@ -123,5 +124,11 @@ sub ops_gen_cc {
 
 const char*tora::opcode2name[] = {%s,"OP_END"};
 ...
+}
+
+sub vm_ops_inc_h {
+    my $dat = shift;
+
+    join('', map { qq{void PP_$_->[0]();\n} } @$dat);
 }
 
