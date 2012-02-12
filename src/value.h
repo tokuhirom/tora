@@ -32,6 +32,7 @@ class DoubleValue;
 class StrValue;
 class BoolValue;
 class ArrayValue;
+class HashValue;
 
 /**
  * The value class
@@ -215,6 +216,17 @@ public:
     }
     void set(const std::string & key , SharedPtr<Value>&val) {
         data[key] = val;
+    }
+    void dump();
+    const char *type_str() { return "hash"; }
+
+    void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+        SharedPtr<StrValue> s = index->to_s();
+        this->set(s->str_value, v);
+    }
+    SharedPtr<Value> get_item(SharedPtr<Value> index) {
+        SharedPtr<StrValue> s = index->to_s();
+        return this->get(s->str_value);
     }
 };
 

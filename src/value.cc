@@ -76,6 +76,14 @@ SharedPtr<Value> IntValue::tora__neg__() {
     return new IntValue(-this->int_value);
 }
 
+void HashValue::dump() {
+    printf("[dump] hash(%zd)\n", this->data.size());
+    for (auto iter = this->data.begin(); iter!=this->data.end(); iter++) {
+        printf("%s: ", iter->first.c_str());
+        iter->second->dump();
+    }
+}
+
 StrValue::~StrValue() {
 }
 

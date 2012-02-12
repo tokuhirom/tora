@@ -412,6 +412,18 @@ void VM::execute() {
             break;
         }
 
+        case OP_MAKE_HASH: {
+            SharedPtr<HashValue> h = new HashValue();
+            int size = op->operand.int_value;
+            for (int i=0; i<size; i+=2) {
+                SharedPtr<StrValue> k = stack.pop()->to_s();
+                SharedPtr<Value> v = stack.pop();
+                h->set(k->str_value, v);
+            }
+            stack.push(h);
+            break;
+        }
+
         case OP_MAKE_ARRAY: {
             SharedPtr<ArrayValue> a = new ArrayValue();
             int array_size = op->operand.int_value;
