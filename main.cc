@@ -70,16 +70,14 @@ int main(int argc, char **argv) {
 
     Node *yylval;
     int token_number;
-    void *parser = tora::Parser::ParseAlloc(malloc);
-    ParserState parser_state;
+    tora::Parser parser;
     do {
         token_number = scanner->scan(&yylval);
-        parser_state.lineno = scanner->lineno();
-        tora::Parser::Parse(parser, token_number, yylval, &parser_state);
+        parser.set_lineno(scanner->lineno());
+        parser.parse(token_number, yylval);
     } while (token_number != 0);
-    tora::Parser::ParseFree(parser, free);
 
-    if (parser_state.failure) {
+    if (parser.is_failure()) {
         return 1;
     }
 
@@ -88,15 +86,15 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    assert(parser_state.root_node);
+    assert(parser.root_node());
     if (dump_ast) {
-        parser_state.root_node->dump();
+        parser.root_node()->dump();
     }
 
     // compile
     tora::Compiler compiler;
     compiler.init_globals();
-    compiler.compile(parser_state.root_node);
+    compiler.compile(parser.root_node());
     if (compiler.error) {
         fprintf(stderr, "Compilation failed\n");
         exit(1);
