@@ -7,10 +7,11 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 
 if os.uname()[0]=='Darwin':
-    env = Environment(CXX='clang++', CC='clang++')
+    env = Environment(CXX='clang++', CC='clang')
     env.Append(CXXFLAGS=['-std=c++0x'])
+    env.Append(CCFLAGS=['-Wall'])
     # env.Append(CXXFLAGS=['-Werror'])
-    env.Append(CXXFLAGS=['-Wno-unused-function'])
+    env.Append(CCFLAGS=['-Wno-unused-function'])
     env.Append(CXXFLAGS=['-Wno-unneeded-internal-declaration'])
 else:
     env = Environment(CXX='g++')
@@ -18,12 +19,12 @@ else:
     env.Append(CXXFLAGS=['-pthread', '-Wno-sign-compare'])
     env.Append(LDFLAGS=['-pthread'])
     env.Append(LINKFLAGS=['-lpthread'])
+    env.Append(CCFLAGS=['-Wall'])
 env.Append(CXXFLAGS=['-I./vendor/re2/'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CXXFLAGS=['-g'])
 env.Append(LDFLAGS=['-g'])
 env.Append(CCFLAGS=['-O2'])
-env.Append(CCFLAGS=['-Wall'])
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg'])
@@ -45,13 +46,13 @@ re2files = [
 
 if 'test' in COMMAND_LINE_TARGETS:
     env.Command('test', 'tora', 'prove -r t')
-# env.CXXFile(target='Tora.tab.cc', source='Tora.yy', YACCFLAGS='-dv')
-env.Command('ops.gen.h', 'ops.gen.pl', 'perl ops.gen.pl > ops.gen.h');
-env.Command(['nodes.gen.h', 'nodes.gen.cc'], 'nodes.gen.pl', 'perl nodes.gen.pl > nodes.gen.h');
-env.Command(['lexer.gen.h'], 'lexer.re', 're2c lexer.re > lexer.gen.h');
-env.Command(['parser.h', 'parser.cc'], ['parser.yy', 'lempar.c'], './lemon parser.yy && mv parser.c parser.cc');
+env.Command('src/ops.gen.h', 'src/ops.gen.pl', 'perl src/ops.gen.pl > src/ops.gen.h');
+env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl src/nodes.gen.pl > src/nodes.gen.h');
+env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.h');
+t = env.Command(['src/parser.h', 'src/parser.cc'], ['src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
+Clean(t, 'parser.out')
 env.Program('tora', [
-    'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' '),
+    ["src/" + x for x in 'parser.cc main.cc value.cc compiler.cc vm.cc array.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc'.split(' ')],
     re2files
 ])
 env.Program('lemon', ['tools/lemon/lemon.c']);
