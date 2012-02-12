@@ -426,20 +426,19 @@ print <<'...';
 
 using namespace tora;
 
-#define op (this->ops->at(this->pc))
 ...
 
 {
     my $src2 = $SRC;
     while ($src2 =~ s/^(OP_[A-Z_]+)\s+\{(.+?)\n\}//sm) {
         print "inline void VM::PP_$1() {\n";
+        print "SharedPtr<OP> op = ops->at(pc);\n";
         print "$2
         }\n";
     }
 }
 
 print <<'...';
-#undef op
 
 // run program
 void VM::execute() {
@@ -452,7 +451,7 @@ void VM::execute() {
 #endif
 
         SharedPtr<OP> op = ops->at(pc);
-        switch (op->op_type) {
+        switch (ops->at(pc)->op_type) {
 ...
 
 while ($SRC =~ s/^(OP_[A-Z_]+)\s+\{(.+?)\n\}//sm) {
@@ -462,6 +461,7 @@ while ($SRC =~ s/^(OP_[A-Z_]+)\s+\{(.+?)\n\}//sm) {
 print <<'...';
         case OP_END: { goto END; }
         default: {
+            SharedPtr<OP> op = ops->at(pc);
             fprintf(stderr, "[BUG] OOPS. unknown op code: %d(%s)\n", op->op_type, opcode2name[op->op_type]);
             abort();
             break;
