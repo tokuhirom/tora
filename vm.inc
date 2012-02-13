@@ -417,3 +417,8 @@ OP_GETGLOBAL {
     int globalvarno = op->operand.int_value;
     stack.push(this->global_vars->at(globalvarno));
 }
+
+OP_POP_TOP {
+    stack.pop();
+}
+

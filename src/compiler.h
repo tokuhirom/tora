@@ -21,9 +21,9 @@ public:
     std::vector<SharedPtr<OP>> *ops;
     std::vector<SharedPtr<Block>> *blocks;
     std::vector<std::string> *global_vars;
-    bool error;
+    int error;
     Compiler() {
-        error = false;
+        error = 0;
         blocks = new std::vector<SharedPtr<Block>>();
         global_vars = new std::vector<std::string>();
         ops = new std::vector<SharedPtr<OP>>();
@@ -62,6 +62,7 @@ public:
         DBG("POP BLOCK: %d\n", this->blocks->size());
         this->blocks->pop_back();
     }
+    void set_variable(std::string &varname);
     int find_localvar(std::string name, int &level);
     void define_localvar(const char* name) {
         this->define_localvar(std::string(name));

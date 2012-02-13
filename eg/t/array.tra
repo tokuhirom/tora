@@ -11,6 +11,8 @@ my $b=5;
 $b = 4;
 say($b);
 
+my $empty_array = [];
+
 __END__
 hoge
 [dump] array:

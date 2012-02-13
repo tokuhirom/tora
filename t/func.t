@@ -60,12 +60,24 @@ say(foo());
 ...
 
 # return multiple, and assign
-run_is(<<'...', "1\n2\n3\n");
+run_is(<<'...', "3\n2\n1\n");
 sub foo() {
     return 1,2,3;
 }
 
 my ($a, $b, $c) = foo();
+
+say($c, $b, $a);
+...
+
+# return multiple, and assign to array
+run_is(<<'...', "3\n2\n1\n");
+sub foo() {
+    return 1,2,3;
+}
+
+my $a = [];
+($a[3], $a[4], $a[1]) = foo();
 
 say($a);
 ...

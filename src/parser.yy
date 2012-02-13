@@ -125,6 +125,9 @@ parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
     A = new ArgsNode(NODE_MAKE_ARRAY, B->upcast<ListNode>());
 }
+array_creation(A) ::= L_BRACKET R_BRACKET. {
+    A = new ArgsNode(NODE_MAKE_ARRAY, new ListNode());
+}
 
 hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
     A = new ArgsNode(NODE_MAKE_HASH, B->upcast<ListNode>());
