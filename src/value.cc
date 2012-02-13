@@ -50,7 +50,7 @@ SharedPtr<StrValue> UndefValue::to_s() {
     return new StrValue("undef"); // TODO
 }
 SharedPtr<StrValue> Value::to_s() {
-    printf("%s don't support stringification.\n", this->type_str());
+    fprintf(stderr, "%s don't support stringification.\n", this->type_str());
     abort();
 }
 

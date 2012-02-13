@@ -50,5 +50,25 @@ sub foo($n) {
 say(foo(5));
 ...
 
+# return multiple
+run_is(<<'...', "1\n2\n3\n");
+sub foo() {
+    return 1,2,3;
+}
+
+say(foo());
+...
+
+# return multiple, and assign
+run_is(<<'...', "1\n2\n3\n");
+sub foo() {
+    return 1,2,3;
+}
+
+my ($a, $b, $c) = foo();
+
+say($a);
+...
+
 done_testing;
 

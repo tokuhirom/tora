@@ -47,6 +47,7 @@ sub vm_gen_cc {
 #include "value.h"
 #include "value/hash.h"
 #include "value/code.h"
+#include "value/tuple.h"
 #include "regexp.h"
 #include <unistd.h>
 #include <algorithm>

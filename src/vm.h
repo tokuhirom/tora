@@ -102,8 +102,8 @@ public:
         }
         printf("----------------\n");
     }
-    void add_function(const char*name, SharedPtr<Value> code) {
-        functions[std::string(name)] = code;
+    void add_function(std::string &name, SharedPtr<Value> code) {
+        functions[name] = code;
     }
 
 #include "vm.ops.inc.h"

@@ -92,8 +92,9 @@ statement(A) ::= MY variable(B).   {
     A = nl;
 }
 
-jump_statement(A) ::= RETURN expression(B) SEMICOLON. {
-    A = new NodeNode(NODE_RETURN, B);
+jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
+    B->type = NODE_RETURN;
+    A = B;
 }
 
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {

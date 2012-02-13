@@ -12,6 +12,7 @@ namespace tora {
 class TupleValue : public ArrayValue {
 public:
     TupleValue() : ArrayValue() {
+        this->value_type = VALUE_TYPE_TUPLE;
     }
     ~TupleValue() { }
     void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {

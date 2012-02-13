@@ -33,7 +33,7 @@ OP_NEW_RANGE {
 OP_DEFINE_METHOD {
     SharedPtr<Value> code = stack.pop(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
-    const char *funcname = ((ValueOP*)&(*(op)))->value->upcast<StrValue>()->str_value.c_str();
+    std::string &funcname = ((ValueOP*)&(*(op)))->value->upcast<StrValue>()->str_value;
     this->add_function(funcname, code);
 }
 
@@ -77,30 +77,36 @@ OP_ADD {
 
 OP_FUNCALL {
     SharedPtr<Value> funname(stack.pop());
-    const char *funname_c = funname->upcast<StrValue>()->str_value.c_str();
-    if (!(stack.size() >= (size_t) op->operand.int_value)) {
-        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+    std::string &funname_c = funname->upcast<StrValue>()->str_value;
+    int argcnt = op->operand.int_value;
+    if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
+        SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
+        argcnt = t->size();
+        stack.extract_tuple(t);
+    }
+    if (!(stack.size() >= (size_t) argcnt)) {
+        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c.c_str(), argcnt, stack.size());
         dump_stack();
         abort();
     }
     assert(funname->value_type == VALUE_TYPE_STR);
-    if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "print") == 0) {
-        for (int i=0; i<op->operand.int_value; i++) {
+    if (funname_c == "print") {
+        for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> v(stack.pop());
             SharedPtr<Value> s(v->to_s());
             printf("%s", s->upcast<StrValue>()->str_value.c_str());
         }
-    } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "p") == 0) {
+    } else if (funname_c == "p") {
         SharedPtr<Value> v(stack.pop());
         v->dump();
-    } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "say") == 0) {
-        for (int i=0; i<op->operand.int_value; i++) {
+    } else if (funname_c == "say") {
+        for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> v(stack.pop());
             SharedPtr<Value> s(v->to_s());
             printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
         }
-    } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "getenv") == 0) {
-        assert(op->operand.int_value==1);
+    } else if (funname_c == "getenv") {
+        assert(argcnt==1);
         SharedPtr<Value> v(stack.pop());
         SharedPtr<Value> s(v->to_s());
         char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
@@ -111,13 +117,13 @@ OP_FUNCALL {
         } else {
             stack.push(UndefValue::instance());
         }
-    } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "usleep") == 0) {
+    } else if (funname_c == "usleep") {
         // TODO: remove later
         SharedPtr<Value> v(stack.pop());
         assert(v->value_type == VALUE_TYPE_INT);
         SharedPtr<Value> s(v->to_i());
         usleep(s->upcast<IntValue>()->int_value);
-    } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "exit") == 0) {
+    } else if (funname_c == "exit") {
         SharedPtr<Value> v(stack.pop());
         assert(v->value_type == VALUE_TYPE_INT);
         SharedPtr<Value> s(v->to_i());
@@ -131,7 +137,7 @@ OP_FUNCALL {
                 SharedPtr<FunctionFrame> fframe = new FunctionFrame();
                 fframe->return_address = pc;
                 fframe->orig_ops = ops;
-                fframe->top = stack.size() - op->operand.int_value;
+                fframe->top = stack.size() - argcnt;
                 function_frames->push_back(fframe);
             }
             pc = -1;
@@ -140,8 +146,8 @@ OP_FUNCALL {
             SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
             // TODO: vargs support
             // TODO: kwargs support
-            assert(op->operand.int_value == (int)code->code_params->size());
-            for (int i=0; i<op->operand.int_value; i++) {
+            assert(argcnt == (int)code->code_params->size());
+            for (int i=0; i<argcnt; i++) {
                 SharedPtr<Value> arg = stack.pop();
                 /*
                 std::string *argname = code->code_params->at(i);
@@ -380,6 +386,21 @@ OP_MAKE_ARRAY {
         a->push(v);
     }
     stack.push(a);
+}
+
+OP_MAKE_TUPLE {
+    SharedPtr<TupleValue> t = new TupleValue();
+    int tuple_size = op->operand.int_value;
+    for (int i=0; i<tuple_size; i++) {
+        SharedPtr<Value> v = stack.pop();
+        t->push(v);
+    }
+    stack.push(t);
+}
+
+OP_EXTRACT_TUPLE {
+    SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
+    stack.extract_tuple(t);
 }
 
 OP_UNARY_INCREMENT {

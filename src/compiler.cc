@@ -44,7 +44,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_RETURN: {
-        this->compile(node->upcast<NodeNode>()->node);
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        for (size_t i=0; i < ln->size(); i++) {
+            this->compile(ln->at(i));
+        }
+
+        SharedPtr<OP> op = new OP(OP_MAKE_TUPLE);
+        op->operand.int_value = ln->size();
+        ops->push_back(op);
+
+        ops->push_back(new OP(OP_RETURN));
+
         break;
     }
     case NODE_BLOCK: {
@@ -374,8 +384,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_SETVARIABLE_MULTI: {
-        // TODO NOT IMPLEMENTED YET
+        fprintf(stderr, " TODO NOT IMPLEMENTED YET\n");
         abort();
+        break;
     }
     case NODE_MAKE_ARRAY: {
         auto args = node->upcast<ArgsNode>()->args;
