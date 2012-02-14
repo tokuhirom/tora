@@ -96,6 +96,9 @@ OP_FUNCALL {
             SharedPtr<Value> s(v->to_s());
             printf("%s", s->upcast<StrValue>()->str_value.c_str());
         }
+    } else if (funname_c == "p") {
+        SharedPtr<Value> v(stack.pop());
+        v->dump();
     } else if (funname_c == "open") {
         SharedPtr<Value> filename(stack.pop());
         std::string mode;
