@@ -42,7 +42,7 @@ using namespace tora;
 
 %parse_failure {
     state->failure = true;
-    fprintf(stderr, "Syntax error at line %d.\n", state->lineno);
+    fprintf(stderr, "Parse aborted at line %d.\n", state->lineno);
 }
 %syntax_error {
     state->errors++;
@@ -111,7 +111,7 @@ sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN block(C). {
     A = new FuncdefNode(B, new ListNode(), C);
 }
 
-parameter_list(A) ::= variable(B). {
+parameter_list(A) ::= expression(B). {
     A = new ListNode();
     A->upcast<ListNode>()->push_back(B);
 }
@@ -294,7 +294,9 @@ primary_expression(A) ::= STRING_LITERAL(B). {
 primary_expression(A) ::= variable(B). { A = B; }
 primary_expression(A) ::= array_creation(B). { A = B; }
 primary_expression(A) ::= hash_creation(B). { A = B; }
-primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
+/* tuple */
+primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
+    B->type = NODE_TUPLE;
     A = B;
 }
 

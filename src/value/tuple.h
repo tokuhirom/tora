@@ -2,6 +2,7 @@
 #define TORA_TUPLE_H_
 
 #include "../value.h"
+#include "array.h"
 
 namespace tora {
 

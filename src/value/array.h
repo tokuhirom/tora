@@ -31,11 +31,12 @@ public:
     SharedPtr<Value>at(int i) {
         return this->values->at(i);
     }
-    void dump() {
-        printf("[dump] array:\n");
+    void dump(int indent) {
+        print_indent(indent);
+        printf("[dump] array(%zd):\n", values->size());
         for (size_t i=0; i<values->size(); i++) {
             printf("[%zd] ", i);
-            values->at(i)->dump();
+            values->at(i)->dump(indent+1);
         }
     }
     SharedPtr<Value>get_item(SharedPtr<Value>index);

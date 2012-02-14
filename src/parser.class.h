@@ -33,7 +33,7 @@ public:
         Parser::Parse(yyp, yymajor, yyminor, &state_);
     }
     bool is_failure() {
-        return state_.failure;
+        return state_.failure || state_.errors > 0;
     }
     void set_lineno(int n) {
         state_.lineno = n;

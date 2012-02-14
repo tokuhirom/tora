@@ -11,6 +11,7 @@ my @nodes = qw(
     NODE_TRUE
     NODE_FALSE
     NODE_IDENTIFIER
+    NODE_TUPLE
     NODE_FUNCALL
     NODE_STRING
     NODE_ADD

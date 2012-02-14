@@ -71,7 +71,7 @@ say($c, $b, $a);
 ...
 
 # return multiple, and assign to array
-run_is(<<'...', "3\n2\n1\n");
+run_is(<<'...', "undef\n3\nundef\n1\n2\n");
 sub foo() {
     return 1,2,3;
 }
@@ -79,7 +79,9 @@ sub foo() {
 my $a = [];
 ($a[3], $a[4], $a[1]) = foo();
 
-say($a);
+for (my $i=0; $i<$a.size(); ++$i) {
+    say($a[$i]);
+}
 ...
 
 done_testing;

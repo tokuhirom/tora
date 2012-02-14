@@ -371,13 +371,51 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             auto container = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->left;
             auto index     = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->right;
             auto rvalue    = node->upcast<BinaryNode>()->right;
+            this->compile(rvalue);
             this->compile(container);
             this->compile(index);
-            this->compile(rvalue);
 
             SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_SET_ITEM;
             ops->push_back(tmp);
+            break;
+        }
+        case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
+            this->compile(node->upcast<BinaryNode>()->right);
+
+            SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left->upcast<ListNode>();
+
+            // extract
+            OP* op = new OP(OP_EXTRACT_TUPLE);
+            op->operand.int_value = ln->size();
+            ops->push_back(op);
+
+            // and set to variables
+            for (size_t i=0; i < ln->size(); i++) {
+                // ($a, $b) = foo();
+                // ($a[0], $b) = foo();
+                switch (ln->at(i)->type) {
+                    case NODE_GETVARIABLE: { // $a = $b;
+                        std::string varname = ln->at(i)->upcast<StrNode>()->str_value;
+                        this->set_variable(varname);
+                        break;
+                    }
+                    case NODE_GET_ITEM: { // $a[$b] = $c
+                        auto container = ln->at(i)->upcast<BinaryNode>()->left;
+                        auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                        this->compile(container);
+                        this->compile(index);
+                        ops->push_back(new OP(OP_SET_ITEM));
+                        break;
+                    }
+                    default: {
+                        fprintf(stderr, "Compilation failed\n");
+                        this->error++;
+                        break;
+                    }
+                }
+                ops->push_back(new OP(OP_POP_TOP));
+            }
             break;
         }
         default:

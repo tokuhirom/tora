@@ -22,10 +22,12 @@ public:
         delete code_params;
         delete code_opcodes;
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] code: name: %s\n", this->code_name.c_str());
         for (size_t i=0; i<this->code_opcodes->size(); i++) {
-            printf("    [%zd] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
+            print_indent(indent+1);
+            printf("[%zd] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
         }
         printf("----------------\n");
     }

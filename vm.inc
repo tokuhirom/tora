@@ -353,12 +353,12 @@ OP_GET_ITEM {
 }
 
 OP_SET_ITEM {
-    SharedPtr<Value> rvalue(stack.pop());
     SharedPtr<Value> index(stack.pop());
     SharedPtr<Value> container(stack.pop());
+    SharedPtr<Value> rvalue(stack.pop());
 
     container->set_item(index, rvalue);
-    stack.push(&(*rvalue));
+    stack.push(rvalue);
 }
 
 OP_UNARY_NEGATIVE {
