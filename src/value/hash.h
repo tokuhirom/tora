@@ -17,7 +17,7 @@ public:
     void set(const std::string & key , SharedPtr<Value>&val) {
         data[key] = val;
     }
-    void dump();
+    void dump(int indent);
     const char *type_str() { return "hash"; }
 
     void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {

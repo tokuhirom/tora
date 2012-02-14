@@ -11,6 +11,8 @@ static void print_indent(int indent) {
 }
 
 void tora::ListNode::dump(int indent) {
+    print_indent(indent);
+    printf("[List](%zd)\n", this->size());
     for (size_t i=0; i<this->size(); i++) {
         this->at(i)->dump(indent+1);
     }

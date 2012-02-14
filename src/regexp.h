@@ -45,7 +45,10 @@ public:
     bool match(std::string &str) {
         return RE2::PartialMatch(str, this->re_value->pattern().c_str());
     }
-    void dump() { printf("/%s/", re_value->pattern().c_str()); }
+    void dump(int indent) {
+        print_indent(indent);
+        printf("/%s/", re_value->pattern().c_str());
+    }
     const char * type_str() { return "Regexp"; }
 };
 

@@ -22,6 +22,28 @@ void tora::Compiler::init_globals() {
     this->define_global_var("$ENV");
 }
 
+void tora::Compiler::set_variable(std::string &varname) {
+    int level;
+    int no = this->find_localvar(varname, level);
+    if (no<0) {
+        fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname.c_str());
+        this->error++;
+        return;
+    }
+
+    SharedPtr<OP> tmp = new OP;
+    if (level == 0) {
+        DBG2("LOCAL\n");
+        tmp->op_type = OP_SETLOCAL;
+        tmp->operand.int_value = no;
+    } else {
+        DBG2("DYNAMIC\n");
+        tmp->op_type = OP_SETDYNAMIC;
+        tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+    }
+    ops->push_back(tmp);
+}
+
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
@@ -124,7 +146,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         SharedPtr<AbstractRegexpValue> sv = new RE2RegexpValue(node->upcast<RegexpNode>()->regexp_value);
         if (!sv->ok()) {
             fprintf(stderr, "Regexp compilation failed: /%s/ : %s\n", sv->pattern().c_str(), sv->error().c_str());
-            error = true;
+            this->error++;
             break;
         }
         ops->push_back(new ValueOP(OP_PUSH_VALUE, sv));
@@ -304,7 +326,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
             if (no<0) {
                 fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
-                error = true;
+                this->error++;
+                return;
             }
 
             if (level == 0) {
@@ -337,55 +360,110 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_SETVARIABLE: {
         switch (node->upcast<BinaryNode>()->left->type) {
         case NODE_GETVARIABLE: { // $a = $b;
-            std::string varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
-            int level;
-            int no = this->find_localvar(varname, level);
-            if (no<0) {
-                fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname.c_str());
-                error = true;
-            }
-
             // fprintf(stderr, "set level: %d\n", level);
             this->compile(node->upcast<BinaryNode>()->right);
 
-            SharedPtr<OP> tmp = new OP;
-            if (level == 0) {
-                DBG2("LOCAL\n");
-                tmp->op_type = OP_SETLOCAL;
-                tmp->operand.int_value = no;
-            } else {
-                DBG2("DYNAMIC\n");
-                tmp->op_type = OP_SETDYNAMIC;
-                tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
-            }
-            ops->push_back(tmp);
+            std::string varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
+            this->set_variable(varname);
             break;
         }
         case NODE_GET_ITEM: { // $a[$b] = $c
             auto container = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->left;
             auto index     = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->right;
             auto rvalue    = node->upcast<BinaryNode>()->right;
+            this->compile(rvalue);
             this->compile(container);
             this->compile(index);
-            this->compile(rvalue);
 
             SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_SET_ITEM;
             ops->push_back(tmp);
             break;
         }
+        case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
+            this->compile(node->upcast<BinaryNode>()->right);
+
+            SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left->upcast<ListNode>();
+
+            // extract
+            OP* op = new OP(OP_EXTRACT_TUPLE);
+            op->operand.int_value = ln->size();
+            ops->push_back(op);
+
+            // and set to variables
+            for (size_t i=0; i < ln->size(); i++) {
+                // ($a, $b) = foo();
+                // ($a[0], $b) = foo();
+                switch (ln->at(i)->type) {
+                    case NODE_GETVARIABLE: { // $a = $b;
+                        std::string varname = ln->at(i)->upcast<StrNode>()->str_value;
+                        this->set_variable(varname);
+                        break;
+                    }
+                    case NODE_GET_ITEM: { // $a[$b] = $c
+                        auto container = ln->at(i)->upcast<BinaryNode>()->left;
+                        auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                        this->compile(container);
+                        this->compile(index);
+                        ops->push_back(new OP(OP_SET_ITEM));
+                        break;
+                    }
+                    default: {
+                        fprintf(stderr, "Compilation failed\n");
+                        this->error++;
+                        break;
+                    }
+                }
+                ops->push_back(new OP(OP_POP_TOP));
+            }
+            break;
+        }
         default:
             printf("This is not lvalue\n");
             node->dump(1);
-            error = true;
+            this->error++;
             break;
         }
 
         break;
     }
     case NODE_SETVARIABLE_MULTI: {
-        fprintf(stderr, " TODO NOT IMPLEMENTED YET\n");
-        abort();
+        this->compile(node->upcast<BinaryNode>()->right);
+
+        SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left->upcast<ListNode>();
+
+        // extract
+        OP* op = new OP(OP_EXTRACT_TUPLE);
+        op->operand.int_value = ln->size();
+        ops->push_back(op);
+
+        // and set to variables
+        for (size_t i=0; i < ln->size(); i++) {
+            // ($a, $b) = foo();
+            // ($a[0], $b) = foo();
+            switch (ln->at(i)->type) {
+                case NODE_GETVARIABLE: { // $a = $b;
+                    std::string varname = ln->at(i)->upcast<StrNode>()->str_value;
+                    this->set_variable(varname);
+                    break;
+                }
+                case NODE_GET_ITEM: { // $a[$b] = $c
+                    auto container = ln->at(i)->upcast<BinaryNode>()->left;
+                    auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                    this->compile(container);
+                    this->compile(index);
+                    ops->push_back(new OP(OP_SET_ITEM));
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "Compilation failed\n");
+                    this->error++;
+                    break;
+                }
+            }
+            ops->push_back(new OP(OP_POP_TOP));
+        }
+
         break;
     }
     case NODE_MAKE_ARRAY: {
@@ -502,7 +580,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     }
 
     default:
-        this->error = true;
+        this->error++;
         printf("Unknown node: %s\n", node->type_name_str());
         abort();
         break;

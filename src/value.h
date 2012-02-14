@@ -43,10 +43,16 @@ protected:
     Value() : Prim(), value_type(VALUE_TYPE_UNDEF) { }
     Value(value_type_t t) : Prim(), value_type(t) { }
     virtual ~Value() { }
+    void print_indent(int indent) {
+        for (int i=0; i<indent; i++) {
+            printf("    ");
+        }
+    }
 public:
     value_type_t value_type;
 
-    virtual void dump() = 0;
+    void dump() { this->dump(0); }
+    virtual void dump(int indent) = 0;
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
     // TODO: rename to as_int
@@ -72,6 +78,7 @@ public:
 
     virtual void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
+        this->dump();
         abort();
     }
     virtual SharedPtr<Value> get_item(SharedPtr<Value> index) {
@@ -88,7 +95,8 @@ public:
         this->int_value = i;
     }
     ~IntValue() { }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] IV: %d\n", int_value);
     }
     const char *type_str() { return "int"; }
@@ -106,7 +114,8 @@ public:
         this->value_type = VALUE_TYPE_DOUBLE;
         this->double_value = d;
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] NV: %lf\n", double_value);
     }
     const char *type_str() { return "double"; }
@@ -122,7 +131,8 @@ public:
     static UndefValue *instance() {
         return new UndefValue();
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] undef\n");
     }
     const char *type_str() { return "undef"; }
@@ -146,7 +156,8 @@ public:
     static SharedPtr<BoolValue> instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
     const char *type_str() { return "bool"; }
@@ -175,7 +186,8 @@ public:
     void set_str(std::string s) {
         str_value = s;
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] str: %s\n", str_value.c_str());
     }
     const char *type_str() { return "str"; }
@@ -193,7 +205,8 @@ public:
         left = l;
         right = r;
     }
-    void dump() {
+    void dump(int indent) {
+        print_indent(indent);
         printf("[dump] range: %d..%d\n", left->int_value, right->int_value);
     }
     SharedPtr<StrValue> to_s();
@@ -201,7 +214,5 @@ public:
 };
 
 };
-
-#include "value/array.h"
 
 #endif // VALUE_H_
