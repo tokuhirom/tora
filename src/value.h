@@ -25,6 +25,7 @@ typedef enum {
     VALUE_TYPE_DOUBLE = 6,
     VALUE_TYPE_REGEXP,
     VALUE_TYPE_TUPLE,
+    VALUE_TYPE_FILE,
 } value_type_t;
 
 class CodeValue;
@@ -39,7 +40,8 @@ class ArrayValue;
  */
 class Value : public Prim {
 protected:
-    Value() : Prim() { }
+    Value() : Prim(), value_type(VALUE_TYPE_UNDEF) { }
+    Value(value_type_t t) : Prim(), value_type(t) { }
     virtual ~Value() { }
 public:
     value_type_t value_type;

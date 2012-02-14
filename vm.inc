@@ -96,9 +96,24 @@ OP_FUNCALL {
             SharedPtr<Value> s(v->to_s());
             printf("%s", s->upcast<StrValue>()->str_value.c_str());
         }
-    } else if (funname_c == "p") {
-        SharedPtr<Value> v(stack.pop());
-        v->dump();
+    } else if (funname_c == "open") {
+        SharedPtr<Value> filename(stack.pop());
+        std::string mode;
+        if (argcnt >= 2) {
+            mode = stack.pop()->upcast<StrValue>()->str_value.c_str();
+        } else {
+            mode = "rb";
+        }
+        // TODO: check \0
+        SharedPtr<FileValue> file = new FileValue();
+        if (file->open(
+            filename->upcast<StrValue>()->str_value,
+            mode
+        )) {
+            stack.push(file);
+        } else {
+            abort(); // todo: throw exception
+        }
     } else if (funname_c == "say") {
         for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> v(stack.pop());
@@ -179,6 +194,14 @@ OP_METHOD_CALL {
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "size") == 0) {
             SharedPtr<IntValue> size = new IntValue(av->size());
             stack.push(size);
+        }
+        break;
+    }
+    case VALUE_TYPE_FILE: {
+        SharedPtr<FileValue>file = object->upcast<FileValue>();
+        if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "read") == 0) {
+            SharedPtr<StrValue> str = file->read();
+            stack.push(str);
         }
         break;
     }

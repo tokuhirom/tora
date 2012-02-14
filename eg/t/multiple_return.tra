@@ -1,0 +1,11 @@
+sub foo() {
+    return 1,2;
+}
+
+my ($a, $b) = foo();
+say($a);
+say($b);
+
+__END__
+1
+2

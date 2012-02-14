@@ -1,0 +1,4 @@
+add MAKE_TUPLE op
+return TUPLE
+UNPACK_TUPLE op
+compile NODE_SET_MULTI_VALUE
