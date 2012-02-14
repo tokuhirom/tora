@@ -179,6 +179,48 @@ OP_METHOD_CALL {
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "size") == 0) {
             SharedPtr<IntValue> size = new IntValue(av->size());
             stack.push(size);
+        } else if (funname->upcast<StrValue>()->str_value == "__iter__") {
+            /**
+             my ($next, $val) = [].__iter__();
+             */
+            SharedPtr<TupleValue> t = new TupleValue();
+            if (av->size()!=0) {
+                if (av->size() == 1) {
+                    t->push(UndefValue::instance());
+                } else {
+                    t->push(new IntValue(1));
+                }
+                t->push(av->at(0));
+            } else {
+                t->push(UndefValue::instance());
+                t->push(UndefValue::instance());
+            }
+            stack.push(t);
+        } else if (funname->upcast<StrValue>()->str_value == "__next__") {
+            SharedPtr<Value> iter_val = stack.pop();
+            if (iter_val->value_type == VALUE_TYPE_INT) {
+                SharedPtr<IntValue> iter = iter_val->upcast<IntValue>();
+                /**
+                (my $next, $iter) = $array.__next__($iter);
+                */
+                SharedPtr<TupleValue> t = new TupleValue();
+                if (av->size()-1>=iter->int_value) {
+                    t->push(new IntValue(iter->int_value+1));
+                    t->push(av->at(iter->int_value));
+                } else {
+                    t->push(UndefValue::instance());
+                    t->push(UndefValue::instance());
+                }
+                stack.push(t);
+            } else {
+                SharedPtr<TupleValue> t = new TupleValue();
+                t->push(UndefValue::instance());
+                t->push(UndefValue::instance());
+                stack.push(t);
+            }
+        } else {
+            fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value.c_str(), object->type_str());
+            break;
         }
         break;
     }
