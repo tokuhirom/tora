@@ -1,4 +1,71 @@
-add MAKE_TUPLE op
-return TUPLE
-UNPACK_TUPLE op
-compile NODE_SET_MULTI_VALUE
+TODO
+====
+
+builtin functions
+-----------------
+
+
+
+builtin objects
+---------------
+
+Array.new()
+Array#sort()
+Array#sort!()
+Array#reverse()
+Array#map()
+Array#any()
+Array#shuffle()
+Array#flatten()
+Array#push()
+Array#pop()
+Array#shift()
+Array#unshift()
+
+open()
+File#write()
+File#read(n)
+File#sync()
+File#seek()
+File#rewind()
+File#tell()
+
+opendir()
+Dir#__next__
+Dir#__iter__
+
+String#substr(n)
+String#substr(n, m)
+String#replace(regexp|str, code)
+String#replace(regexp|str, str)
+String#match(regexp|str, code)
+
+syntax
+-------
+
+ * open($fname).read();
+ * elsif
+ * given-when
+ * for-each iterator
+
+feature
+-------
+
+  * require
+  * import
+  * ENV
+  * <DATA>
+  * -n option
+  * -p option
+  * -i option
+
+Library
+-------
+
+ * Socket
+ * flock
+ * readline
+ * ANSIColor
+ * HTTP client
+ * HTTP server
+
