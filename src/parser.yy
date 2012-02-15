@@ -157,15 +157,23 @@ pair_list(A) ::= pair_list(B) COMMA expression(C) FAT_COMMA expression(D). {
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
     A = new NodeNode(NODE_BLOCK, B);
 }
+block(A) ::= L_BRACE expression(B) R_BRACE. {
+    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    ln->push_back(B);
+    A = new NodeNode(NODE_BLOCK, ln);
+}
 block(A) ::= L_BRACE R_BRACE. {
     A = new VoidNode(NODE_VOID);
 }
 
 statement_list(A) ::= statement(B). {
-    A = B;
+    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    ln->push_back(B);
+    A = ln;
 }
 statement_list(A) ::= statement_list(B) statement(C).  {
-    A = new BinaryNode(NODE_STMTS, B, C);
+    B->upcast<ListNode>()->push_back(C);
+    A = B;
 }
 
 expression(A) ::= assignment_expression(B). {

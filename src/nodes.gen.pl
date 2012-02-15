@@ -19,6 +19,7 @@ my @nodes = qw(
     NODE_MUL
     NODE_DIV
     NODE_STMTS
+    NODE_STMTS_LIST
     NODE_NEWLINE
     NODE_IF
     NODE_LT
