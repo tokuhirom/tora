@@ -61,7 +61,8 @@ using namespace tora;
 
     {
         for my $k (@$dat) {
-            $ret .= "inline void VM::PP_$k->[0]() {\n";
+            $ret .= "void VM::PP_$k->[0]() {\n";
+            # $ret .= "inline void VM::PP_$k->[0]() {\n";
             $ret .= "SharedPtr<OP> op = ops->at(pc);\n";
             $ret .= "$k->[1]\n";
             $ret .= "}\n";
@@ -74,13 +75,41 @@ using namespace tora;
 void VM::execute() {
     DBG2("************** VM::execute\n");
 
+#ifdef __GNUC__
+    static const void *JUMPTABLE [] = {
+...
+
+    for my $k (@$dat) {
+        $ret .= sprintf("&&CODE_%s,", $k->[0]);
+    }
+
+    $ret .= <<'...';
+    &&CODE_OP_END};
+
+    for (;;) {
+        goto *JUMPTABLE[ops->at(pc)->op_type];
+...
+
+    for my $k (@$dat) {
+        $ret .= "CODE_$k->[0]:\n";
+        $ret .= "    { /* printf(\"calling PP_$k->[0](%d).\\n\", ops->at(pc)->op_type); */\n";
+        $ret .= "PP_$k->[0]();\n pc++; goto *JUMPTABLE[ops->at(pc)->op_type]; }\n";
+    }
+
+    $ret .= <<'...';
+CODE_OP_END:
+        goto END;
+    }
+
+#else
+
     for (;;) {
 #ifdef DEBUG
         DBG2("[DEBUG] ");
         disasm_one(ops->at(pc));
 #endif
 
-        SharedPtr<OP> op = ops->at(pc);
+        OP* op = ops->at(pc);
         switch (op->op_type) {
 ...
 
@@ -94,6 +123,8 @@ void VM::execute() {
         // dump_stack();
         pc++;
     }
+#endif // __GNUC__
+
 END:
     return;
 }
