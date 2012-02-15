@@ -24,7 +24,7 @@ env.Append(CXXFLAGS=['-I./vendor/re2/'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CXXFLAGS=['-g'])
 env.Append(LDFLAGS=['-g'])
-env.Append(CCFLAGS=['-O2'])
+env.Append(CCFLAGS=['-O0'])
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg'])
@@ -52,7 +52,7 @@ env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.p
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
 Clean(t, 'parser.out')
 env.Program('tora', [
-    ["src/" + x for x in 'vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc main.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc stack.cc'.split(' ')],
+    ["src/" + x for x in 'value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc main.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc regexp.cc disasm.cc stack.cc'.split(' ')],
     re2files
 ])
 env.Program('lemon', ['tools/lemon/lemon.c']);
