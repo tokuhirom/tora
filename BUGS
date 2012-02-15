@@ -1,0 +1,8 @@
+KNOWN BUGS LIST
+===============
+
+* open($fname).read() causes syntax error
+
+* { say("HELLO") } should works.
+* for (my $i in [1]) { ... } should works
+

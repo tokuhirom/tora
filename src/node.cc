@@ -39,10 +39,17 @@ void tora::FuncdefNode::dump(int indent) {
 
 void tora::ForNode::dump(int indent) {
     print_indent(indent);
-    printf("[Funcdef]%s\n", this->type_name_str());
+    printf("[For]%s\n", this->type_name_str());
     this->initialize->dump(indent+1);
     this->cond->dump(indent+1);
     this->postfix->dump(indent+1);
+    this->block->dump(indent+1);
+}
+void tora::ForEachNode::dump(int indent) {
+    print_indent(indent);
+    printf("[ForEach]%s\n", this->type_name_str());
+    this->vars->dump(indent+1);
+    this->source->dump(indent+1);
     this->block->dump(indent+1);
 }
 

@@ -42,6 +42,22 @@ public:
     SharedPtr<Value>get_item(SharedPtr<Value>index);
     void set_item(SharedPtr<Value>index, SharedPtr<Value>v);
     const char *type_str() { return "array"; }
+
+    class iterator : public Value {
+    public:
+        int counter;
+        SharedPtr<ArrayValue> parent;
+        iterator() {
+            counter = 0;
+            value_type = VALUE_TYPE_ARRAY_ITERATOR;
+        }
+        void dump(int indent) {
+            print_indent(indent);
+            printf("[dump] array_iterator(%d):\n", counter);
+            parent->dump(indent+1);
+        }
+        const char *type_str() { return "array_iterator"; }
+    };
 };
 
 };

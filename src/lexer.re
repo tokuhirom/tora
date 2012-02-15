@@ -209,6 +209,7 @@ std:
         return INT_LITERAL;
     }
     "if" { return IF; }
+    "in" { return IN; }
     "<" { return GT; }
     ">" { return LT; }
     "<=" { return GE; }

@@ -25,7 +25,14 @@ typedef enum {
     VALUE_TYPE_DOUBLE = 6,
     VALUE_TYPE_REGEXP,
     VALUE_TYPE_TUPLE,
+    VALUE_TYPE_ARRAY_ITERATOR,
+    VALUE_TYPE_EXCEPTION,
 } value_type_t;
+
+typedef enum {
+    EXCEPTION_TYPE_UNDEF,
+    EXCEPTION_TYPE_STOP_ITERATION,
+} exception_type_t;
 
 class CodeValue;
 class IntValue;
@@ -209,6 +216,19 @@ public:
     }
     SharedPtr<StrValue> to_s();
     const char *type_str() { return "range"; }
+};
+
+class ExceptionValue : public Value {
+public:
+    exception_type_t exception_type;
+    ExceptionValue(exception_type_t e) : exception_type(e) {
+        this->value_type = VALUE_TYPE_EXCEPTION;
+    }
+    void dump(int indent) {
+        print_indent(indent);
+        printf("[dump] exception(%d)\n", exception_type);
+    }
+    const char *type_str() { return "exception"; }
 };
 
 };

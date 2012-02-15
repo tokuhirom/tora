@@ -464,3 +464,47 @@ OP_POP_TOP {
     stack.pop();
 }
 
+OP_GET_ITER {
+    // Binary operations remove the top of the stack (TOS) and the second top-most stack item (TOS1) from the stack. They perform the operation, and put the result back on the stack.
+    SharedPtr<Value>a = stack.pop();
+    if (a->value_type == VALUE_TYPE_ARRAY) {
+        SharedPtr<ArrayValue::iterator> iter = new ArrayValue::iterator();
+        iter->parent = a->upcast<ArrayValue>();
+        iter->counter = 0;
+        stack.push(iter);
+    } else {
+        fprintf(stderr, "This object doesn't support iteration\n");
+        a->dump();
+        abort();
+    }
+}
+
+OP_FOR_ITER {
+    // TOS is an iterator. Call its next() method. If this yields a new value, push it on the stack (leaving the iterator below it). If the iterator indicates it is exhausted TOS is popped, and the byte code counter is incremented by delta.
+
+    SharedPtr<Value> iter = stack.back();
+    if (iter->value_type == VALUE_TYPE_ARRAY_ITERATOR) {
+        SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();
+        if (aiter->counter < aiter->parent->size()) {
+            SharedPtr<Value> val = aiter->parent->at(aiter->counter);
+            aiter->counter++;
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(val);
+            stack.push(t);
+        } else {
+            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+        }
+    } else {
+        fprintf(stderr, "[BUG] TOS is not a iterator object.\n");
+        iter->dump();
+        abort();
+    }
+}
+
+OP_JUMP_IF_STOP_EXCEPTION {
+    SharedPtr<Value> top = stack.back();
+    if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
+        pc = op->operand.int_value-1;
+    }
+}
+
