@@ -144,6 +144,7 @@ OP_FUNCALL {
             this->ops = code->code_opcodes;
 
             SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            frame->top = stack.size();
             // TODO: vargs support
             // TODO: kwargs support
             assert(argcnt == (int)code->code_params->size());
@@ -268,10 +269,15 @@ OP_RETURN {
 
 OP_ENTER {
     SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
+    frame->top = stack.size();
     lexical_vars_stack->push_back(frame);
 }
 
 OP_LEAVE {
+    SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    while (stack.size() > frame->top) {
+        stack.pop();
+    }
     lexical_vars_stack->pop_back();
 }
 

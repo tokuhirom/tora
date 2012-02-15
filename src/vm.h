@@ -22,6 +22,7 @@ public:
 
 class LexicalVarsFrame : public Prim {
 public:
+    int top;
     SharedPtr<LexicalVarsFrame> up;
     std::map<int, SharedPtr<Value>> vars;
     LexicalVarsFrame() : Prim() {
