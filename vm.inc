@@ -472,6 +472,9 @@ OP_GET_ITER {
         iter->parent = a->upcast<ArrayValue>();
         iter->counter = 0;
         stack.push(iter);
+    } else if (a->value_type == VALUE_TYPE_RANGE) {
+        SharedPtr<RangeValue::iterator> iter = new RangeValue::iterator(a->upcast<RangeValue>());
+        stack.push(iter);
     } else {
         fprintf(stderr, "This object doesn't support iteration\n");
         a->dump();
@@ -488,6 +491,17 @@ OP_FOR_ITER {
         if (aiter->counter < aiter->parent->size()) {
             SharedPtr<Value> val = aiter->parent->at(aiter->counter);
             aiter->counter++;
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(val);
+            stack.push(t);
+        } else {
+            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+        }
+    } else if (iter->value_type == VALUE_TYPE_RANGE_ITERATOR) {
+        SharedPtr<RangeValue::iterator> riter = iter->upcast<RangeValue::iterator>();
+        if (riter->counter <= riter->parent->right->int_value) {
+            SharedPtr<IntValue> val = new IntValue(riter->counter);
+            riter->counter++;
             SharedPtr<TupleValue> t = new TupleValue();
             t->push(val);
             stack.push(t);
