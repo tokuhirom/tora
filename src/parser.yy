@@ -100,8 +100,23 @@ jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
     A = new IfNode(NODE_IF, B, C, NULL);
 }
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) ELSE block(D). {
+if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
+}
+if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C). {
+    A = new IfNode(NODE_IF, B, C, NULL);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+else_clause(A) ::= ELSE block(B). {
+    A = B;
 }
 
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {

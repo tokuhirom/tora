@@ -235,6 +235,7 @@ std:
     "while" { return WHILE; }
     "return" { return RETURN; }
     "else" { return ELSE; }
+    "elsif" { return ELSIF; }
     [ \t\r] {
         // skip white space
         goto std;
