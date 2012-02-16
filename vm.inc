@@ -302,9 +302,11 @@ OP_ENTER {
 
 OP_LEAVE {
     SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    /*
     while (stack.size() > frame->top) {
         stack.pop();
     }
+    */
     lexical_vars_stack->pop_back();
 }
 
