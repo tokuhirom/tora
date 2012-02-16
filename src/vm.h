@@ -95,7 +95,7 @@ public:
     /*
      * stack for lexical variables.
      */
-    std::vector<SharedPtr<LexicalVarsFrame>> *lexical_vars_stack;
+    std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
 
     VM(std::vector<SharedPtr<OP>>* ops_);
     ~VM();

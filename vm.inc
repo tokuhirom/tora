@@ -156,7 +156,7 @@ OP_FUNCALL {
             SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
             // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-            SharedPtr<FunctionFrame> fframe = new FunctionFrame(lexical_vars_stack->back());
+            SharedPtr<FunctionFrame> fframe = new FunctionFrame(frame_stack->back());
             fframe->return_address = pc;
             fframe->orig_ops = ops;
             fframe->top = stack.size() - argcnt;
@@ -176,7 +176,7 @@ OP_FUNCALL {
                 */
                 fframe->setVar(i, arg);
             }
-            lexical_vars_stack->push_back(fframe);
+            frame_stack->push_back(fframe);
         } else {
             fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value.c_str());
             abort();
@@ -284,41 +284,41 @@ OP_METHOD_CALL {
 OP_RETURN {
     SharedPtr<Value> retval = stack.pop();
 
-    // lexical_vars_stack->back()->dump();
+    // frame_stack->back()->dump();
     while (1) {
-        assert(lexical_vars_stack->size() > 0);
-        SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+        assert(frame_stack->size() > 0);
+        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
         if (frame->type == FRAME_TYPE_FUNCTION) {
             SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
             pc = fframe->return_address;
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
 
-            lexical_vars_stack->pop_back();
+            frame_stack->pop_back();
 
             stack.push(retval);
             break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
-            lexical_vars_stack->pop_back();
+            frame_stack->pop_back();
         }
     }
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(frame_stack->back());
     frame->top = stack.size();
-    lexical_vars_stack->push_back(frame);
+    frame_stack->push_back(frame);
 }
 
 OP_LEAVE {
-    SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
     /*
     while (stack.size() > frame->top) {
         stack.pop();
     }
     */
-    lexical_vars_stack->pop_back();
+    frame_stack->pop_back();
 }
 
 OP_PUSH_IDENTIFIER {
@@ -375,7 +375,7 @@ OP_LE {
 
 OP_SETLOCAL {
     SharedPtr<Value> rvalue = stack.pop();
-    lexical_vars_stack->back()->setVar(
+    frame_stack->back()->setVar(
         op->operand.int_value,
         rvalue
     );
@@ -383,8 +383,8 @@ OP_SETLOCAL {
 }
 
 OP_SETDYNAMIC {
-    // lexical_vars_stack->back()->dump_vars();
-    SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    // frame_stack->back()->dump_vars();
+    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
     int level = (op->operand.int_value >> 16) & 0x0000FFFF;
     int no    = op->operand.int_value & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
@@ -401,7 +401,7 @@ OP_SETDYNAMIC {
 
 OP_GETDYNAMIC {
     // lexical vars
-    SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
     int level = (op->operand.int_value >> 16) & 0x0000FFFF;
     int no    = op->operand.int_value & 0x0000ffff;
     for (int i=0; i<level; i++) {
@@ -414,20 +414,20 @@ OP_GETDYNAMIC {
     } else { // TODO: remove this and use 'my' keyword?
         DBG2("There is no variable...\n");
         v = UndefValue::instance();
-        lexical_vars_stack->back()->setVar(op->operand.int_value, v);
+        frame_stack->back()->setVar(op->operand.int_value, v);
         stack.push(v);
     }
 }
 
 OP_GETLOCAL {
     // lexical vars
-    SharedPtr<Value>v = lexical_vars_stack->back()->find(op->operand.int_value);
+    SharedPtr<Value>v = frame_stack->back()->find(op->operand.int_value);
     if (v) {
         // printf("found lexical var\n");
         stack.push(v);
     } else { // TODO: remove this and use 'my' keyword?
         v = UndefValue::instance();
-        lexical_vars_stack->back()->setVar(op->operand.int_value, v);
+        frame_stack->back()->setVar(op->operand.int_value, v);
         stack.push(v);
     }
 }
