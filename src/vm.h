@@ -21,11 +21,12 @@ typedef enum {
 
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame : public Prim {
+private:
+    std::map<int, SharedPtr<Value>> vars;
 public:
     frame_type_t type;
     int top;
     SharedPtr<LexicalVarsFrame> up;
-    std::map<int, SharedPtr<Value>> vars;
     LexicalVarsFrame() : Prim() {
         up = NULL;
         type = FRAME_TYPE_LEXICAL;
@@ -43,9 +44,6 @@ public:
         if (iter != vars.end()) {
             return &(*(iter->second));
         } else {
-            if (this->up) {
-                return this->up->find(id);
-            }
             return NULL;
         }
     }
