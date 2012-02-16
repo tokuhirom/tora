@@ -104,8 +104,23 @@ jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
     A = new IfNode(NODE_IF, B, C, NULL);
 }
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) ELSE block(D). {
+if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
+}
+if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C). {
+    A = new IfNode(NODE_IF, B, C, NULL);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
+else_clause(A) ::= ELSE block(B). {
+    A = B;
 }
 
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {
@@ -161,15 +176,23 @@ pair_list(A) ::= pair_list(B) COMMA expression(C) FAT_COMMA expression(D). {
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
     A = new NodeNode(NODE_BLOCK, B);
 }
+block(A) ::= L_BRACE expression(B) R_BRACE. {
+    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    ln->push_back(B);
+    A = new NodeNode(NODE_BLOCK, ln);
+}
 block(A) ::= L_BRACE R_BRACE. {
     A = new VoidNode(NODE_VOID);
 }
 
 statement_list(A) ::= statement(B). {
-    A = B;
+    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    ln->push_back(B);
+    A = ln;
 }
 statement_list(A) ::= statement_list(B) statement(C).  {
-    A = new BinaryNode(NODE_STMTS, B, C);
+    B->upcast<ListNode>()->push_back(C);
+    A = B;
 }
 
 expression(A) ::= assignment_expression(B). {

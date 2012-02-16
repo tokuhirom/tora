@@ -291,9 +291,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_EQ:  C_OP_BINARY(OP_EQ);
 #undef C_OP_BINARY
 
+    // TODO: deprecate?
     case NODE_STMTS: {
         this->compile(node->upcast<BinaryNode>()->left);
         this->compile(node->upcast<BinaryNode>()->right);
+        break;
+    }
+    case NODE_STMTS_LIST: {
+        SharedPtr<ListNode> ln = node->upcast<ListNode>();
+        for (int i=0; i<ln->size(); i++) {
+            this->compile(ln->at(i));
+        }
         break;
     }
     case NODE_IF: {
