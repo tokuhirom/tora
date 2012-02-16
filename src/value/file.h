@@ -29,7 +29,7 @@ public:
         const int bufsiz = 4096;
         char buffer[bufsiz];
         size_t n;
-        while ((n = fread(buffer, bufsiz, sizeof(char), this->fp)) != 0) {
+        while ((n = fread(buffer, sizeof(char), bufsiz, this->fp)) != 0) {
             s.append(buffer, n);
         }
         if (feof(this->fp)) {

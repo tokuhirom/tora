@@ -278,10 +278,10 @@ postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
     A = new FuncallNode(B, C->upcast<ListNode>());
 }
-postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
+postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
-postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
+postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
     A = new MethodCallNode(B, C, new ListNode());
 }
 
