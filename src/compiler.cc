@@ -685,6 +685,10 @@ if (ln->size() == 1) {
         }
         break;
     }
+    case NODE_DOTDOTDOT: {
+        ops->push_back(new OP(OP_DOTDOTDOT));
+        break;
+    }
 
     default:
         this->error++;

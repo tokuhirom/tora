@@ -175,6 +175,7 @@ std:
     "," { return COMMA; }
     "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }
+    "..." { return DOTDOTDOT; }
     DOUBLE {
         double tmp = 0;
         char *head;

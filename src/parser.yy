@@ -312,6 +312,9 @@ primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
     B->type = NODE_TUPLE;
     A = B;
 }
+primary_expression(A) ::= DOTDOTDOT. {
+    A = new VoidNode(NODE_DOTDOTDOT);
+}
 
 int(A) ::= INT_LITERAL(B). {
     B->type = NODE_INT;

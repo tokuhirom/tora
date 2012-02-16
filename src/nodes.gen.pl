@@ -49,6 +49,7 @@ my @nodes = qw(
     NODE_DIV_ASSIGN
     NODE_RANGE
     NODE_REGEXP
+    NODE_DOTDOTDOT
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';

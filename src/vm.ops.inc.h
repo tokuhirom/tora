@@ -42,3 +42,4 @@ void PP_OP_POP_TOP();
 void PP_OP_GET_ITER();
 void PP_OP_FOR_ITER();
 void PP_OP_JUMP_IF_STOP_EXCEPTION();
+void PP_OP_DOTDOTDOT();

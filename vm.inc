@@ -573,3 +573,7 @@ OP_JUMP_IF_STOP_EXCEPTION {
     }
 }
 
+OP_DOTDOTDOT {
+    fprintf(stderr, "This is not implemented yet.\n");
+    exit(1);
+}
