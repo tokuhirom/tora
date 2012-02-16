@@ -91,8 +91,10 @@ void VM::execute() {
 ...
 
     for my $k (@$dat) {
-        $ret .= "CODE_$k->[0]:\n";
-        $ret .= "    { /* printf(\"calling PP_$k->[0](%d).\\n\", ops->at(pc)->op_type); */\n";
+        $ret .= "CODE_$k->[0]: {\n";
+        if (0) {
+            $ret .= "    printf(\"calling PP_$k->[0](%d).\\n\", ops->at(pc)->op_type);\n";
+        }
         $ret .= "PP_$k->[0]();\n pc++; goto *JUMPTABLE[ops->at(pc)->op_type]; }\n";
     }
 
