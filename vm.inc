@@ -6,6 +6,10 @@ OP_PUSH_FALSE {
     stack.push(new BoolValue(false));
 }
 
+OP_PUSH_UNDEF {
+    stack.push(UndefValue::instance());
+}
+
 OP_PUSH_INT {
     stack.push(new IntValue(op->operand.int_value));
 }
