@@ -341,26 +341,37 @@ if (ln->size() == 1) {
         END_LABEL:
         */
         auto if_node = node->upcast<IfNode>();
-        this->compile(if_node->cond);
 
-        SharedPtr<OP> jump_else = new OP;
-        jump_else->op_type = OP_JUMP_IF_FALSE;
-        ops->push_back(jump_else);
+        this->push_block();
+        ops->push_back(new OP(OP_ENTER));
 
-        this->compile(if_node->if_body);
+        {
 
-        SharedPtr<OP> jump_end = new OP;
-        jump_end->op_type = OP_JUMP;
-        ops->push_back(jump_end);
+            this->compile(if_node->cond);
 
-        int else_label = ops->size();
-        jump_else->operand.int_value = else_label;
-        if (if_node->else_body) {
-            this->compile(if_node->else_body);
+            SharedPtr<OP> jump_else = new OP;
+            jump_else->op_type = OP_JUMP_IF_FALSE;
+            ops->push_back(jump_else);
+
+            this->compile(if_node->if_body);
+
+            SharedPtr<OP> jump_end = new OP;
+            jump_end->op_type = OP_JUMP;
+            ops->push_back(jump_end);
+
+            int else_label = ops->size();
+            jump_else->operand.int_value = else_label;
+            if (if_node->else_body) {
+                this->compile(if_node->else_body);
+            }
+
+            int end_label = ops->size();
+            jump_end->operand.int_value = end_label;
+
         }
 
-        int end_label = ops->size();
-        jump_end->operand.int_value = end_label;
+        ops->push_back(new OP(OP_LEAVE));
+        this->pop_block();
 
         break;
     }
