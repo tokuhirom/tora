@@ -86,7 +86,7 @@ void VM::execute() {
     $ret .= <<'...';
     &&CODE_OP_END};
 
-    for (;;) {
+    {
         goto *JUMPTABLE[ops->at(pc)->op_type];
 ...
 
