@@ -25,8 +25,6 @@ class FuncallNode;
 class IntNode;
 class DoubleNode;
 class StrNode;
-class ArgsNode;
-class RangeNode;
 class ListNode;
 
 class Node : public Prim {
@@ -45,17 +43,6 @@ public:
     Y* upcast() {
         return dynamic_cast<Y*>(&(*(this)));
     }
-};
-
-class ArgsNode: public Node {
-public:
-    SharedPtr<ListNode> args;
-    ArgsNode(node_type_t type_, SharedPtr<ListNode> args_) {
-        this->type = type_;
-        this->args = args_;
-    }
-    ~ArgsNode() { }
-    void dump(int indent);
 };
 
 class StrNode : public Node {

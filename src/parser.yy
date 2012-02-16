@@ -136,14 +136,16 @@ parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
 
 /* array constructor [a, b] */
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
-    A = new ArgsNode(NODE_MAKE_ARRAY, B->upcast<ListNode>());
+    B->type = NODE_MAKE_ARRAY;
+    A = B;
 }
 array_creation(A) ::= L_BRACKET R_BRACKET. {
-    A = new ArgsNode(NODE_MAKE_ARRAY, new ListNode());
+    A = new ListNode(NODE_MAKE_ARRAY);
 }
 
 hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
-    A = new ArgsNode(NODE_MAKE_HASH, B->upcast<ListNode>());
+    B->type = NODE_MAKE_HASH;
+    A = B;
 }
 
 argument_list(A) ::= expression(B). {

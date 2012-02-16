@@ -522,7 +522,7 @@ if (ln->size() == 1) {
         break;
     }
     case NODE_MAKE_ARRAY: {
-        auto args = node->upcast<ArgsNode>()->args;
+        auto args = node->upcast<ListNode>();
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -536,7 +536,7 @@ if (ln->size() == 1) {
         break;
     }
     case NODE_MAKE_HASH: {
-        auto args = node->upcast<ArgsNode>()->args;
+        auto args = node->upcast<ListNode>();
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());

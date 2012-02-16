@@ -18,12 +18,6 @@ void tora::ListNode::dump(int indent) {
     }
 }
 
-void tora::ArgsNode::dump(int indent) {
-    print_indent(indent);
-    printf("[Args]%s(%zd)\n", this->type_name_str(), this->args->size());
-    this->args->dump(indent+1);
-}
-
 void tora::VoidNode::dump(int indent) {
     print_indent(indent);
     printf("[Void]%s\n", this->type_name_str());
