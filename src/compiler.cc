@@ -101,6 +101,29 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         }
         break;
     }
+    case NODE_MY: {
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        for (size_t i=0; i < ln->size(); i++) {
+            if (ln->at(i)->type == NODE_TUPLE) {
+                SharedPtr<ListNode> ln2 = ln->at(i)->upcast<ListNode>();
+                for (size_t i=0; i < ln2->size(); i++) {
+                    std::string &name = ln2->at(i)->upcast<StrNode>()->str_value;
+                    this->define_localvar(name);
+                }
+            } else {
+                std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
+                this->define_localvar(name);
+            }
+        }
+        if (ln->size() == 1) {
+            this->set_lvalue(ln->at(0));
+        } else {
+            printf("This is not lvalue(MY):\n");
+            node->dump(1);
+            this->error++;
+        }
+        break;
+    }
     default:
         printf("This is not lvalue:\n");
         node->dump(1);
@@ -653,6 +676,13 @@ if (ln->size() == 1) {
         // ++$i
         this->compile(node->upcast<NodeNode>()->node);
         ops->push_back(new OP(OP_UNARY_INCREMENT));
+        break;
+    }
+    case NODE_TUPLE: {
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        for (size_t i=0; i < ln->size(); i++) {
+            this->compile(ln->at(i));
+        }
         break;
     }
 

@@ -89,11 +89,6 @@ statement(A) ::= FOR L_PAREN parameter_list(B) IN expression(C) R_PAREN block(D)
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
-statement(A) ::= MY variable(B).   {
-    ListNode*nl = new ListNode(NODE_MY);
-    nl->push_back(B);
-    A = nl;
-}
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;
@@ -201,19 +196,6 @@ expression(A) ::= assignment_expression(B). {
 assignment_expression(A) ::= conditional_expression(B). {
     A = B;
 }
-assignment_expression(A) ::= MY variable(B) ASSIGN expression(C).  {
-    // TODO: REMOVE THIS NODE
-    SharedPtr<ListNode> n1 = new ListNode(NODE_MY);
-    n1->push_back(B);
-    Node *node = new BinaryNode(NODE_SETVARIABLE, B, C);
-    A = new BinaryNode(NODE_STMTS, n1, node);
-}
-/* my ($a, $b, $c) = ... */
-assignment_expression(A) ::= MY L_PAREN parameter_list(B) R_PAREN ASSIGN expression(C).  {
-    B->type = NODE_MY;
-    Node *node = new BinaryNode(NODE_SETVARIABLE_MULTI, B, C);
-    A = new BinaryNode(NODE_STMTS, B, node);
-}
 assignment_expression(A) ::= conditional_expression(B) ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_SETVARIABLE, B, C);
 }
@@ -222,6 +204,11 @@ assignment_expression(A) ::= conditional_expression(B) DIV_ASSIGN conditional_ex
 }
 
 conditional_expression(A) ::= logical_or_expression(B). { A = B; }
+conditional_expression(A) ::= MY conditional_expression(B).   {
+    ListNode*nl = new ListNode(NODE_MY);
+    nl->push_back(B);
+    A = nl;
+}
 
 logical_or_expression(A) ::= logical_and_expression(B). { A = B; }
 
