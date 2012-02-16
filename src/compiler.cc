@@ -131,6 +131,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     }
     case NODE_RETURN: {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
+if (ln->size() == 1) {
+    this->compile(ln->at(0));
+} else {
         for (size_t i=0; i < ln->size(); i++) {
             this->compile(ln->at(i));
         }
@@ -140,6 +143,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(op);
 
         ops->push_back(new OP(OP_RETURN));
+}
 
         break;
     }

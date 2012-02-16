@@ -33,7 +33,7 @@ public:
     }
     void dump(int indent) {
         print_indent(indent);
-        printf("[dump] array(%zd):\n", values->size());
+        printf("[dump] %s(%zd):\n", this->type_str(), values->size());
         for (size_t i=0; i<values->size(); i++) {
             printf("[%zd] ", i);
             values->at(i)->dump(indent+1);

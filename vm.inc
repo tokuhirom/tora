@@ -58,15 +58,15 @@ OP_MUL {
 OP_ADD {
     SharedPtr<Value> v1(stack.pop());
     SharedPtr<Value> v2(stack.pop());
-    if (v1->is_numeric()) {
+    if (v2->is_numeric()) {
         SharedPtr<Value> i(v2->to_i());
         SharedPtr<IntValue>v = new IntValue(v2->upcast<IntValue>()->int_value + v1->upcast<IntValue>()->int_value);
         stack.push(v);
-    } else if (v1->value_type == VALUE_TYPE_STR) {
+    } else if (v2->value_type == VALUE_TYPE_STR) {
         // TODO: support null terminated string
         SharedPtr<StrValue>v = new StrValue();
-        SharedPtr<Value> s(v2->to_s());
-        v->set_str(std::string(s->upcast<StrValue>()->str_value.c_str()) + std::string(v1->upcast<StrValue>()->str_value.c_str()));
+        SharedPtr<Value> s(v1->to_s());
+        v->set_str(v2->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
         stack.push(v);
     } else {
         SharedPtr<Value> s(v1->to_s());
@@ -178,6 +178,7 @@ OP_FUNCALL {
             lexical_vars_stack->push_back(frame);
         } else {
             fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value.c_str());
+            abort();
         }
     }
 }
@@ -301,9 +302,11 @@ OP_ENTER {
 
 OP_LEAVE {
     SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    /*
     while (stack.size() > frame->top) {
         stack.pop();
     }
+    */
     lexical_vars_stack->pop_back();
 }
 
