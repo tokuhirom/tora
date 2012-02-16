@@ -134,7 +134,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
 if (ln->size() == 1) {
     this->compile(ln->at(0));
-    // ops->push_back(new OP(OP_RETURN));
+    ops->push_back(new OP(OP_RETURN));
 } else if (ln->size() == 1) {
     ops->push_back(new OP(OP_PUSH_UNDEF));
     ops->push_back(new OP(OP_RETURN));
@@ -192,7 +192,7 @@ if (ln->size() == 1) {
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block);
 
-        // funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
+        funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
         funccomp.ops->push_back(new OP(OP_RETURN));
 #if 0
         Disasm::disasm(funccomp.ops);

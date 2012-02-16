@@ -13,23 +13,26 @@ namespace tora {
 
 class Stack;
 
-class FunctionFrame : public Prim {
-public:
-    int return_address;
-    int top;
-    std::vector<SharedPtr<OP>> *orig_ops;
-};
+typedef enum {
+    FRAME_TYPE_LEXICAL = 1,
+    FRAME_TYPE_FUNCTION,
+    FRAME_TYPE_TRY,
+} frame_type_t;
 
+// TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame : public Prim {
 public:
+    frame_type_t type;
     int top;
     SharedPtr<LexicalVarsFrame> up;
     std::map<int, SharedPtr<Value>> vars;
     LexicalVarsFrame() : Prim() {
         up = NULL;
+        type = FRAME_TYPE_LEXICAL;
     }
     LexicalVarsFrame(SharedPtr<LexicalVarsFrame> up_) : Prim() {
         this->up = up_;
+        type = FRAME_TYPE_LEXICAL;
     }
     ~LexicalVarsFrame() { }
     void setVar(int id, SharedPtr<Value> v) {
@@ -47,7 +50,7 @@ public:
         }
     }
     void dump(int i) {
-        printf("[%d]\n", i);
+        printf("type: %s [%d]\n", this->type == FRAME_TYPE_FUNCTION ? "function" : "lexical", i);
         auto iter = this->vars.begin();
         for (; iter!=this->vars.end(); ++iter) {
             printf("  %d\n", iter->first);
@@ -58,11 +61,27 @@ public:
         }
     }
     void dump() {
-        printf("-- dump vars(refcnt: %d) --\n", this->refcnt);
+        printf("-- dump vars (refcnt: %d) --\n", this->refcnt);
         this->dump(0);
         printf("---------------\n");
     }
+
+    template<class Y>
+    Y* upcast() {
+        return dynamic_cast<Y*>(&(*(this)));
+    }
+
 };
+
+class FunctionFrame : public LexicalVarsFrame {
+public:
+    int return_address;
+    std::vector<SharedPtr<OP>> *orig_ops;
+    FunctionFrame(SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(up_) {
+        this->type = FRAME_TYPE_FUNCTION;
+    }
+};
+
 
 class VM {
 public:
@@ -72,7 +91,6 @@ public:
     std::vector<SharedPtr<OP>> *ops;
     std::vector<SharedPtr<Value>> *global_vars;
     std::map<std::string, SharedPtr<Value>> functions;
-    std::vector<SharedPtr<FunctionFrame>> *function_frames;
 
     /*
      * stack for lexical variables.

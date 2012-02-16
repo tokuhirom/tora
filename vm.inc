@@ -155,18 +155,15 @@ OP_FUNCALL {
         if (iter != this->functions.end()) {
             SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
             // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
-            {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame();
-                fframe->return_address = pc;
-                fframe->orig_ops = ops;
-                fframe->top = stack.size() - argcnt;
-                function_frames->push_back(fframe);
-            }
+
+            SharedPtr<FunctionFrame> fframe = new FunctionFrame(lexical_vars_stack->back());
+            fframe->return_address = pc;
+            fframe->orig_ops = ops;
+            fframe->top = stack.size() - argcnt;
+
             pc = -1;
             this->ops = code->code_opcodes;
 
-            SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
-            frame->top = stack.size();
             // TODO: vargs support
             // TODO: kwargs support
             assert(argcnt == (int)code->code_params->size());
@@ -177,9 +174,9 @@ OP_FUNCALL {
                 // printf("set lexical var: %d for %s\n", i, argname->c_str());
                 frame->setVar(argname, arg);
                 */
-                frame->setVar(i, arg);
+                fframe->setVar(i, arg);
             }
-            lexical_vars_stack->push_back(frame);
+            lexical_vars_stack->push_back(fframe);
         } else {
             fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value.c_str());
             abort();
@@ -285,17 +282,27 @@ OP_METHOD_CALL {
 }
 
 OP_RETURN {
-    assert(function_frames->size() > 0);
-    SharedPtr<FunctionFrame> fframe = function_frames->back();
-    function_frames->pop_back();
-    pc = fframe->return_address;
-    ops = fframe->orig_ops;
-    // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
-    if (fframe->top == (int)stack.size()) {
-        stack.push(UndefValue::instance());
-    }
+    SharedPtr<Value> retval = stack.pop();
 
-    lexical_vars_stack->pop_back();
+    // lexical_vars_stack->back()->dump();
+    while (1) {
+        assert(lexical_vars_stack->size() > 0);
+        SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+        if (frame->type == FRAME_TYPE_FUNCTION) {
+            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
+            pc = fframe->return_address;
+            ops = fframe->orig_ops;
+            // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
+
+            lexical_vars_stack->pop_back();
+
+            stack.push(retval);
+            break;
+        } else {
+            // printf("THIS IS NOT A FUNCTION FRAME\n");
+            lexical_vars_stack->pop_back();
+        }
+    }
 }
 
 OP_ENTER {

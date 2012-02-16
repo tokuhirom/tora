@@ -15,7 +15,6 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_) {
     ops = new std::vector<SharedPtr<OP>>(*ops_);
     this->lexical_vars_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->lexical_vars_stack->push_back(new LexicalVarsFrame());
-    this->function_frames = new std::vector<SharedPtr<FunctionFrame>>();
     this->global_vars = new std::vector<SharedPtr<Value>>();
 }
 
@@ -23,7 +22,6 @@ VM::~VM() {
     delete this->global_vars;
     delete this->ops;
     delete this->lexical_vars_stack;
-    delete this->function_frames;
 }
 
 void VM::init_globals(int argc, char**argv) {

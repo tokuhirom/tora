@@ -28,7 +28,6 @@
 #include "node.h"
 #include "tora.h"
 #include "value.h"
-#include "vm.h"
 #include "shared_ptr.h"
 #include "regexp.h"
 #include "parser.h"

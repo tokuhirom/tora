@@ -1,0 +1,14 @@
+sub fib($n) {
+    if ($n<2) {
+        return $n;
+        say("SHOULD NOT REACH HERE");
+    } else {
+        return fib($n-1) + fib($n-2);
+        say("SHOULD NOT REACH HERE");
+    }
+}
+
+say(fib(4)); # => 3
+
+__END__
+3
