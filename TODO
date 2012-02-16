@@ -47,6 +47,9 @@ syntax
  * elsif
  * given-when
  * for-each iterator
+ * qw()
+ * q{}
+ * qq{}
 
 feature
 -------
