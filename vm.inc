@@ -99,6 +99,24 @@ OP_FUNCALL {
     } else if (funname_c == "p") {
         SharedPtr<Value> v(stack.pop());
         v->dump();
+    } else if (funname_c == "open") {
+        SharedPtr<Value> filename(stack.pop());
+        std::string mode;
+        if (argcnt >= 2) {
+            mode = stack.pop()->upcast<StrValue>()->str_value.c_str();
+        } else {
+            mode = "rb";
+        }
+        // TODO: check \0
+        SharedPtr<FileValue> file = new FileValue();
+        if (file->open(
+            filename->upcast<StrValue>()->str_value,
+            mode
+        )) {
+            stack.push(file);
+        } else {
+            abort(); // todo: throw exception
+        }
     } else if (funname_c == "say") {
         for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> v(stack.pop());
@@ -144,6 +162,7 @@ OP_FUNCALL {
             this->ops = code->code_opcodes;
 
             SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
+            frame->top = stack.size();
             // TODO: vargs support
             // TODO: kwargs support
             assert(argcnt == (int)code->code_params->size());
@@ -179,6 +198,56 @@ OP_METHOD_CALL {
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "size") == 0) {
             SharedPtr<IntValue> size = new IntValue(av->size());
             stack.push(size);
+        } else if (funname->upcast<StrValue>()->str_value == "__iter__") {
+            /**
+             my ($next, $val) = [].__iter__();
+             */
+            SharedPtr<TupleValue> t = new TupleValue();
+            if (av->size()!=0) {
+                if (av->size() == 1) {
+                    t->push(UndefValue::instance());
+                } else {
+                    t->push(new IntValue(1));
+                }
+                t->push(av->at(0));
+            } else {
+                t->push(UndefValue::instance());
+                t->push(UndefValue::instance());
+            }
+            stack.push(t);
+        } else if (funname->upcast<StrValue>()->str_value == "__next__") {
+            SharedPtr<Value> iter_val = stack.pop();
+            if (iter_val->value_type == VALUE_TYPE_INT) {
+                SharedPtr<IntValue> iter = iter_val->upcast<IntValue>();
+                /**
+                (my $next, $iter) = $array.__next__($iter);
+                */
+                SharedPtr<TupleValue> t = new TupleValue();
+                if (av->size()-1>=iter->int_value) {
+                    t->push(new IntValue(iter->int_value+1));
+                    t->push(av->at(iter->int_value));
+                } else {
+                    t->push(UndefValue::instance());
+                    t->push(UndefValue::instance());
+                }
+                stack.push(t);
+            } else {
+                SharedPtr<TupleValue> t = new TupleValue();
+                t->push(UndefValue::instance());
+                t->push(UndefValue::instance());
+                stack.push(t);
+            }
+        } else {
+            fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value.c_str(), object->type_str());
+            break;
+        }
+        break;
+    }
+    case VALUE_TYPE_FILE: {
+        SharedPtr<FileValue>file = object->upcast<FileValue>();
+        if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "read") == 0) {
+            SharedPtr<StrValue> str = file->read();
+            stack.push(str);
         }
         break;
     }
@@ -226,10 +295,15 @@ OP_RETURN {
 
 OP_ENTER {
     SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(lexical_vars_stack->back());
+    frame->top = stack.size();
     lexical_vars_stack->push_back(frame);
 }
 
 OP_LEAVE {
+    SharedPtr<LexicalVarsFrame> frame = lexical_vars_stack->back();
+    while (stack.size() > frame->top) {
+        stack.pop();
+    }
     lexical_vars_stack->pop_back();
 }
 
@@ -420,5 +494,63 @@ OP_GETGLOBAL {
 
 OP_POP_TOP {
     stack.pop();
+}
+
+OP_GET_ITER {
+    // Binary operations remove the top of the stack (TOS) and the second top-most stack item (TOS1) from the stack. They perform the operation, and put the result back on the stack.
+    SharedPtr<Value>a = stack.pop();
+    if (a->value_type == VALUE_TYPE_ARRAY) {
+        SharedPtr<ArrayValue::iterator> iter = new ArrayValue::iterator();
+        iter->parent = a->upcast<ArrayValue>();
+        iter->counter = 0;
+        stack.push(iter);
+    } else if (a->value_type == VALUE_TYPE_RANGE) {
+        SharedPtr<RangeValue::iterator> iter = new RangeValue::iterator(a->upcast<RangeValue>());
+        stack.push(iter);
+    } else {
+        fprintf(stderr, "This object doesn't support iteration\n");
+        a->dump();
+        abort();
+    }
+}
+
+OP_FOR_ITER {
+    // TOS is an iterator. Call its next() method. If this yields a new value, push it on the stack (leaving the iterator below it). If the iterator indicates it is exhausted TOS is popped, and the byte code counter is incremented by delta.
+
+    SharedPtr<Value> iter = stack.back();
+    if (iter->value_type == VALUE_TYPE_ARRAY_ITERATOR) {
+        SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();
+        if (aiter->counter < aiter->parent->size()) {
+            SharedPtr<Value> val = aiter->parent->at(aiter->counter);
+            aiter->counter++;
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(val);
+            stack.push(t);
+        } else {
+            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+        }
+    } else if (iter->value_type == VALUE_TYPE_RANGE_ITERATOR) {
+        SharedPtr<RangeValue::iterator> riter = iter->upcast<RangeValue::iterator>();
+        if (riter->counter <= riter->parent->right->int_value) {
+            SharedPtr<IntValue> val = new IntValue(riter->counter);
+            riter->counter++;
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(val);
+            stack.push(t);
+        } else {
+            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+        }
+    } else {
+        fprintf(stderr, "[BUG] TOS is not a iterator object.\n");
+        iter->dump();
+        abort();
+    }
+}
+
+OP_JUMP_IF_STOP_EXCEPTION {
+    SharedPtr<Value> top = stack.back();
+    if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
+        pc = op->operand.int_value-1;
+    }
 }
 

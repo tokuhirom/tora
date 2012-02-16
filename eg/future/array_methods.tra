@@ -1,5 +1,23 @@
-my $a = [1,2,3];
+my $a = ["A","B","C"];
 say($a.size());
+
+say("---");
+my ($val, $iter) = $a.__iter__();
+say($val);
+($val, $iter) = $a.__next__($iter);
+say($val);
+($val, $iter) = $a.__next__($iter);
+say($val);
+($val, $iter) = $a.__next__($iter);
+say($val);
+($val, $iter) = $a.__next__($iter);
+say($val);
 
 __END__
 3
+---
+1
+2
+3
+undef
+undef

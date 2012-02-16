@@ -19,6 +19,7 @@ class MethodCallNode;
 class NodeNode;
 class IfNode;
 class ForNode;
+class ForEachNode;
 class FuncdefNode;
 class FuncallNode;
 class IntNode;
@@ -182,6 +183,21 @@ public:
         block = b;
     }
     ~ForNode() { }
+    void dump(int indent);
+};
+
+class ForEachNode: public Node {
+public:
+    SharedPtr<ListNode> vars;
+    SharedPtr<Node> source;
+    SharedPtr<Node> block;
+    ForEachNode(SharedPtr<ListNode> i, SharedPtr<Node> s, SharedPtr<Node> b): Node() {
+        this->type = NODE_FOREACH;
+        vars = i;
+        source = s;
+        block = b;
+    }
+    ~ForEachNode() { }
     void dump(int indent);
 };
 

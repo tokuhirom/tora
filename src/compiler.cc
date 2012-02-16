@@ -44,6 +44,70 @@ void tora::Compiler::set_variable(std::string &varname) {
     ops->push_back(tmp);
 }
 
+void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
+    switch (node->type) {
+    case NODE_GETVARIABLE: { // $a = $b;
+        // fprintf(stderr, "set level: %d\n", level);
+
+        std::string varname = node->upcast<StrNode>()->str_value;
+        this->set_variable(varname);
+        break;
+    }
+    case NODE_GET_ITEM: { // $a[$b] = $c
+        auto container = node->upcast<BinaryNode>()->left;
+        auto index     = node->upcast<BinaryNode>()->right;
+        this->compile(container);
+        this->compile(index);
+
+        SharedPtr<OP> tmp = new OP;
+        tmp->op_type = OP_SET_ITEM;
+        ops->push_back(tmp);
+        break;
+    }
+    case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+
+        // extract
+        OP* op = new OP(OP_EXTRACT_TUPLE);
+        op->operand.int_value = ln->size();
+        ops->push_back(op);
+
+        // and set to variables
+        for (size_t i=0; i < ln->size(); i++) {
+            // ($a, $b) = foo();
+            // ($a[0], $b) = foo();
+            switch (ln->at(i)->type) {
+                case NODE_GETVARIABLE: { // $a = $b;
+                    std::string varname = ln->at(i)->upcast<StrNode>()->str_value;
+                    this->set_variable(varname);
+                    break;
+                }
+                case NODE_GET_ITEM: { // $a[$b] = $c
+                    auto container = ln->at(i)->upcast<BinaryNode>()->left;
+                    auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                    this->compile(container);
+                    this->compile(index);
+                    ops->push_back(new OP(OP_SET_ITEM));
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "Compilation failed\n");
+                    this->error++;
+                    break;
+                }
+            }
+            ops->push_back(new OP(OP_POP_TOP));
+        }
+        break;
+    }
+    default:
+        printf("This is not lvalue:\n");
+        node->dump(1);
+        this->error++;
+        break;
+    }
+}
+
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
@@ -366,73 +430,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_SETVARIABLE: {
-        switch (node->upcast<BinaryNode>()->left->type) {
-        case NODE_GETVARIABLE: { // $a = $b;
-            // fprintf(stderr, "set level: %d\n", level);
-            this->compile(node->upcast<BinaryNode>()->right);
-
-            std::string varname = node->upcast<BinaryNode>()->left->upcast<StrNode>()->str_value;
-            this->set_variable(varname);
-            break;
-        }
-        case NODE_GET_ITEM: { // $a[$b] = $c
-            auto container = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->left;
-            auto index     = node->upcast<BinaryNode>()->left->upcast<BinaryNode>()->right;
-            auto rvalue    = node->upcast<BinaryNode>()->right;
-            this->compile(rvalue);
-            this->compile(container);
-            this->compile(index);
-
-            SharedPtr<OP> tmp = new OP;
-            tmp->op_type = OP_SET_ITEM;
-            ops->push_back(tmp);
-            break;
-        }
-        case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
-            this->compile(node->upcast<BinaryNode>()->right);
-
-            SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left->upcast<ListNode>();
-
-            // extract
-            OP* op = new OP(OP_EXTRACT_TUPLE);
-            op->operand.int_value = ln->size();
-            ops->push_back(op);
-
-            // and set to variables
-            for (size_t i=0; i < ln->size(); i++) {
-                // ($a, $b) = foo();
-                // ($a[0], $b) = foo();
-                switch (ln->at(i)->type) {
-                    case NODE_GETVARIABLE: { // $a = $b;
-                        std::string varname = ln->at(i)->upcast<StrNode>()->str_value;
-                        this->set_variable(varname);
-                        break;
-                    }
-                    case NODE_GET_ITEM: { // $a[$b] = $c
-                        auto container = ln->at(i)->upcast<BinaryNode>()->left;
-                        auto index     = ln->at(i)->upcast<BinaryNode>()->right;
-                        this->compile(container);
-                        this->compile(index);
-                        ops->push_back(new OP(OP_SET_ITEM));
-                        break;
-                    }
-                    default: {
-                        fprintf(stderr, "Compilation failed\n");
-                        this->error++;
-                        break;
-                    }
-                }
-                ops->push_back(new OP(OP_POP_TOP));
-            }
-            break;
-        }
-        default:
-            printf("This is not lvalue\n");
-            node->dump(1);
-            this->error++;
-            break;
-        }
-
+        this->compile(node->upcast<BinaryNode>()->right);
+        this->set_lvalue(node->upcast<BinaryNode>()->left);
         break;
     }
     case NODE_SETVARIABLE_MULTI: {
@@ -446,6 +445,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(op);
 
         // and set to variables
+        // TODO use set_lvalue method?
         for (size_t i=0; i < ln->size(); i++) {
             // ($a, $b) = foo();
             // ($a[0], $b) = foo();
@@ -557,6 +557,51 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         int label2 = ops->size();
         jump_label2->operand.int_value = label2;
+        break;
+    }
+    case NODE_FOREACH: {
+        /*
+        struct {
+            Node *vars;
+            Node *source;
+            Node *block;
+        } for_stmt;
+
+        for ($x IN $array) { ... }
+
+            GET_ITER source
+        LABEL1:
+            FOR_ITER iter
+            jump_if_stop LABEL2
+            STORE $x
+            (block)
+            goto LABEL1
+        LABEL2:
+        */
+
+        this->compile(node->upcast<ForEachNode>()->source);
+        ops->push_back(new OP(OP_GET_ITER));
+
+        size_t label1 = ops->size();
+
+        ops->push_back(new OP(OP_FOR_ITER));
+        SharedPtr<OP> jump_label2 = new OP();
+        jump_label2->op_type = OP_JUMP_IF_STOP_EXCEPTION;
+        ops->push_back(jump_label2); // FIX ME?
+
+        // store variables
+        this->set_lvalue(node->upcast<ForEachNode>()->vars);
+
+        this->compile(node->upcast<ForEachNode>()->block);
+
+        SharedPtr<OP> jump_label1 = new OP;
+        jump_label1->op_type = OP_JUMP;
+        jump_label1->operand.int_value = label1;
+        ops->push_back(jump_label1);
+
+        size_t label2 = ops->size();
+        jump_label2->operand.int_value = label2;
+
         break;
     }
     case NODE_METHOD_CALL: {

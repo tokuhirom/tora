@@ -62,6 +62,7 @@ public:
         DBG("POP BLOCK: %d\n", this->blocks->size());
         this->blocks->pop_back();
     }
+    void set_lvalue(SharedPtr<Node> node);
     void set_variable(std::string &varname);
     int find_localvar(std::string name, int &level);
     void define_localvar(const char* name) {
