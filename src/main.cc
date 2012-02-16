@@ -14,6 +14,7 @@
 #include "lexer.h"
 #include "lexer.gen.h"
 #include "parser.class.h"
+#include "disasm.h"
 
 using namespace tora;
 
@@ -104,7 +105,7 @@ int main(int argc, char **argv) {
     tora::VM vm(compiler.ops);
     vm.init_globals(argc-optind, argv+optind);
     if (dump_ops) {
-        vm.dump_ops();
+        Disasm::disasm(compiler.ops);
     }
     vm.execute();
 }

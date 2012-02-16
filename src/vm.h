@@ -88,13 +88,6 @@ public:
 
     void init_globals(int argc, char**argv);
 
-    void dump_ops() {
-        printf("-- OP DUMP    --\n");
-        for (size_t i=0; i<ops->size(); i++) {
-            printf("[%02zd] %s(%d)\n", i, opcode2name[ops->at(i)->op_type], ops->at(i)->op_type);
-        }
-        printf("----------------\n");
-    }
     void dump_stack() {
         printf("-- STACK DUMP --\nSP: %d\n", sp);
         for (size_t i=0; i<stack.size(); i++) {

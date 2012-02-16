@@ -3,6 +3,7 @@
 #include "compiler.h"
 #include "value/code.h"
 #include "regexp.h"
+#include "disasm.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
@@ -193,6 +194,9 @@ if (ln->size() == 1) {
 
         // funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
         funccomp.ops->push_back(new OP(OP_RETURN));
+#if 0
+        Disasm::disasm(funccomp.ops);
+#endif
 
         SharedPtr<CodeValue> code = new CodeValue();
         code->code_name = funcname;
