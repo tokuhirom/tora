@@ -294,12 +294,19 @@ OP_RETURN {
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
 
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+
             frame_stack->pop_back();
 
             stack.push(retval);
             break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
             frame_stack->pop_back();
         }
     }
@@ -313,11 +320,9 @@ OP_ENTER {
 
 OP_LEAVE {
     SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-    /*
     while (stack.size() > frame->top) {
         stack.pop();
     }
-    */
     frame_stack->pop_back();
 }
 
