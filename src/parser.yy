@@ -266,6 +266,9 @@ unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
 unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
 }
+unary_expression(A) ::= TRY block(B) CATCH L_PAREN variable(C) R_PAREN block(D). {
+    A = new TryNode(B, C, D);
+}
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }
 postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKET. {

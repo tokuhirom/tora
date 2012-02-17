@@ -59,6 +59,8 @@ feature
   * -n option
   * -p option
   * -i option
+  * __LINE__
+  * __FILE__
 
 Library
 -------

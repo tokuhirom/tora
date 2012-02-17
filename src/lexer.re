@@ -171,6 +171,7 @@ std:
     }
     ";" { return SEMICOLON; }
     "sub" {return FUNCSUB; }
+    "try" {return TRY; }
     "for" { return FOR; }
     "," { return COMMA; }
     "=>" { return FAT_COMMA; }

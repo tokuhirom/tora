@@ -689,6 +689,36 @@ if (ln->size() == 1) {
         ops->push_back(new OP(OP_DOTDOTDOT));
         break;
     }
+    case NODE_TRY: {
+        OP *try_op = new OP(OP_TRY);
+        ops->push_back(try_op);
+
+        SharedPtr<TryNode> n = node->upcast<TryNode>();
+        this->compile(n->try_block());
+
+        OP * jump = new OP(OP_JUMP);
+        ops->push_back(jump);
+
+        this->push_block();
+        ops->push_back(new OP(OP_ENTER));
+
+        size_t label1 = ops->size();
+        try_op->operand.int_value = label1;
+
+        {
+            std::string &name = n->variable()->upcast<StrNode>()->str_value;
+            this->define_localvar(name);
+            this->compile(n->catch_block());
+        }
+
+        ops->push_back(new OP(OP_LEAVE));
+        this->pop_block();
+
+        size_t label2 = ops->size();
+        jump->operand.int_value = label2;
+
+        break;
+    }
 
     default:
         this->error++;

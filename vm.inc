@@ -578,3 +578,8 @@ OP_DOTDOTDOT {
     fprintf(stderr, "This is not implemented yet.\n");
     exit(1);
 }
+
+OP_TRY {
+    fprintf(stderr, "This is not implemented yet.\n");
+    abort();
+}
