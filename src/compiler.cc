@@ -55,8 +55,8 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         break;
     }
     case NODE_GET_ITEM: { // $a[$b] = $c
-        auto container = node->upcast<BinaryNode>()->left;
-        auto index     = node->upcast<BinaryNode>()->right;
+        auto container = node->upcast<BinaryNode>()->left();
+        auto index     = node->upcast<BinaryNode>()->right();
         this->compile(container);
         this->compile(index);
 
@@ -84,8 +84,8 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
                     break;
                 }
                 case NODE_GET_ITEM: { // $a[$b] = $c
-                    auto container = ln->at(i)->upcast<BinaryNode>()->left;
-                    auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                    auto container = ln->at(i)->upcast<BinaryNode>()->left();
+                    auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
                     this->compile(index);
                     ops->push_back(new OP(OP_SET_ITEM));
@@ -136,7 +136,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
-        this->compile(node->upcast<NodeNode>()->node);
+        this->compile(node->upcast<NodeNode>()->node());
 
         ops->push_back(new OP(OP_END));
 
@@ -150,7 +150,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
             this->define_localvar(name);
         }
-        // this->compile(node->upcast<NodeNode>()->node);
+        // this->compile(node->upcast<NodeNode>()->node());
         break;
     }
     case NODE_RETURN: {
@@ -180,7 +180,7 @@ if (ln->size() == 1) {
 
         ops->push_back(new OP(OP_ENTER));
 
-        this->compile(node->upcast<NodeNode>()->node);
+        this->compile(node->upcast<NodeNode>()->node());
 
         ops->push_back(new OP(OP_LEAVE));
 
@@ -203,17 +203,17 @@ if (ln->size() == 1) {
         auto funcdef_node = node->upcast<FuncdefNode>();
 
         // function name
-        std::string &funcname = funcdef_node->name->upcast<StrNode>()->str_value;
+        std::string &funcname = funcdef_node->name()->upcast<StrNode>()->str_value;
 
         auto params = new std::vector<std::string *>();
-        for (size_t i=0; i<funcdef_node->params->size(); i++) {
-            params->push_back(new std::string(funcdef_node->params->at(i)->upcast<StrNode>()->str_value));
-            this->define_localvar(std::string(funcdef_node->params->at(i)->upcast<StrNode>()->str_value));
+        for (size_t i=0; i<funcdef_node->params()->size(); i++) {
+            params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+            this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
         }
 
         Compiler funccomp;
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
-        funccomp.compile(funcdef_node->block);
+        funccomp.compile(funcdef_node->block());
 
         funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
         funccomp.ops->push_back(new OP(OP_RETURN));
@@ -253,8 +253,8 @@ if (ln->size() == 1) {
         break;
     }
     case NODE_RANGE: {
-        this->compile(node->upcast<BinaryNode>()->right);
-        this->compile(node->upcast<BinaryNode>()->left);
+        this->compile(node->upcast<BinaryNode>()->right());
+        this->compile(node->upcast<BinaryNode>()->left());
         ops->push_back(new OP(OP_NEW_RANGE));
         break;
     }
@@ -292,13 +292,13 @@ if (ln->size() == 1) {
     }
 
     case NODE_FUNCALL: {
-        auto args = node->upcast<FuncallNode>()->args;
+        auto args = node->upcast<FuncallNode>()->args();
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(node->upcast<FuncallNode>()->name);
+        this->compile(node->upcast<FuncallNode>()->name());
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_FUNCALL;
@@ -308,8 +308,8 @@ if (ln->size() == 1) {
     }
 #define C_OP_BINARY(type) \
     { \
-        this->compile(node->upcast<BinaryNode>()->left); \
-        this->compile(node->upcast<BinaryNode>()->right); \
+        this->compile(node->upcast<BinaryNode>()->left()); \
+        this->compile(node->upcast<BinaryNode>()->right()); \
         SharedPtr<OP> tmp = new OP; \
         tmp->op_type = (type); \
         ops->push_back(tmp); \
@@ -329,8 +329,8 @@ if (ln->size() == 1) {
 
     // TODO: deprecate?
     case NODE_STMTS: {
-        this->compile(node->upcast<BinaryNode>()->left);
-        this->compile(node->upcast<BinaryNode>()->right);
+        this->compile(node->upcast<BinaryNode>()->left());
+        this->compile(node->upcast<BinaryNode>()->right());
         break;
     }
     case NODE_STMTS_LIST: {
@@ -370,13 +370,13 @@ if (ln->size() == 1) {
 
         {
 
-            this->compile(if_node->cond);
+            this->compile(if_node->cond());
 
             SharedPtr<OP> jump_else = new OP;
             jump_else->op_type = OP_JUMP_IF_FALSE;
             ops->push_back(jump_else);
 
-            this->compile(if_node->if_body);
+            this->compile(if_node->if_body());
 
             SharedPtr<OP> jump_end = new OP;
             jump_end->op_type = OP_JUMP;
@@ -384,8 +384,8 @@ if (ln->size() == 1) {
 
             int else_label = ops->size();
             jump_else->operand.int_value = else_label;
-            if (if_node->else_body) {
-                this->compile(if_node->else_body);
+            if (if_node->else_body()) {
+                this->compile(if_node->else_body());
             }
 
             int end_label = ops->size();
@@ -408,13 +408,13 @@ if (ln->size() == 1) {
         LABEL2:
         */
         int label1 = ops->size();
-        this->compile(node->upcast<BinaryNode>()->left); // cond
+        this->compile(node->upcast<BinaryNode>()->left()); // cond
 
         SharedPtr<OP> jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_if_false);
 
-        this->compile(node->upcast<BinaryNode>()->right); //body
+        this->compile(node->upcast<BinaryNode>()->right()); //body
 
         SharedPtr<OP> goto_ = new OP;
         goto_->op_type = OP_JUMP;
@@ -469,22 +469,22 @@ if (ln->size() == 1) {
         // '$x /= 3;' => '$x = $x / 3'
         // TODO: optimize
         SharedPtr<BinaryNode> r = new BinaryNode(NODE_DIV,
-            node->upcast<BinaryNode>()->left,
-            node->upcast<BinaryNode>()->right
+            node->upcast<BinaryNode>()->left(),
+            node->upcast<BinaryNode>()->right()
         );
-        SharedPtr<BinaryNode> p = new BinaryNode(NODE_SETVARIABLE, &(*(node->upcast<BinaryNode>()->left)), &(*(r->upcast<Node>())));
+        SharedPtr<BinaryNode> p = new BinaryNode(NODE_SETVARIABLE, &(*(node->upcast<BinaryNode>()->left())), &(*(r->upcast<Node>())));
         this->compile(p);
         break;
     }
     case NODE_SETVARIABLE: {
-        this->compile(node->upcast<BinaryNode>()->right);
-        this->set_lvalue(node->upcast<BinaryNode>()->left);
+        this->compile(node->upcast<BinaryNode>()->right());
+        this->set_lvalue(node->upcast<BinaryNode>()->left());
         break;
     }
     case NODE_SETVARIABLE_MULTI: {
-        this->compile(node->upcast<BinaryNode>()->right);
+        this->compile(node->upcast<BinaryNode>()->right());
 
-        SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left->upcast<ListNode>();
+        SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left()->upcast<ListNode>();
 
         // extract
         OP* op = new OP(OP_EXTRACT_TUPLE);
@@ -503,8 +503,8 @@ if (ln->size() == 1) {
                     break;
                 }
                 case NODE_GET_ITEM: { // $a[$b] = $c
-                    auto container = ln->at(i)->upcast<BinaryNode>()->left;
-                    auto index     = ln->at(i)->upcast<BinaryNode>()->right;
+                    auto container = ln->at(i)->upcast<BinaryNode>()->left();
+                    auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
                     this->compile(index);
                     ops->push_back(new OP(OP_SET_ITEM));
@@ -550,8 +550,8 @@ if (ln->size() == 1) {
         break;
     }
     case NODE_GET_ITEM: {
-        this->compile(node->upcast<BinaryNode>()->left);  // container
-        this->compile(node->upcast<BinaryNode>()->right); // index
+        this->compile(node->upcast<BinaryNode>()->left());  // container
+        this->compile(node->upcast<BinaryNode>()->right()); // index
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
@@ -560,7 +560,7 @@ if (ln->size() == 1) {
     }
 
     case NODE_UNARY_NEGATIVE: {
-        this->compile(node->upcast<NodeNode>()->node);
+        this->compile(node->upcast<NodeNode>()->node());
 
         ops->push_back(new OP(OP_UNARY_NEGATIVE));
 
@@ -586,16 +586,16 @@ if (ln->size() == 1) {
         LABEL2:
         */
 
-        this->compile(node->upcast<ForNode>()->initialize);
+        this->compile(node->upcast<ForNode>()->initialize());
         int label1 = ops->size();
-        this->compile(node->upcast<ForNode>()->cond);
+        this->compile(node->upcast<ForNode>()->cond());
 
         SharedPtr<OP> jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_label2);
 
-        this->compile(node->upcast<ForNode>()->block);
-        this->compile(node->upcast<ForNode>()->postfix);
+        this->compile(node->upcast<ForNode>()->block());
+        this->compile(node->upcast<ForNode>()->postfix());
 
         SharedPtr<OP> jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
@@ -626,7 +626,7 @@ if (ln->size() == 1) {
         LABEL2:
         */
 
-        this->compile(node->upcast<ForEachNode>()->source);
+        this->compile(node->upcast<ForEachNode>()->source());
         ops->push_back(new OP(OP_GET_ITER));
 
         size_t label1 = ops->size();
@@ -637,9 +637,9 @@ if (ln->size() == 1) {
         ops->push_back(jump_label2); // FIX ME?
 
         // store variables
-        this->set_lvalue(node->upcast<ForEachNode>()->vars);
+        this->set_lvalue(node->upcast<ForEachNode>()->vars());
 
-        this->compile(node->upcast<ForEachNode>()->block);
+        this->compile(node->upcast<ForEachNode>()->block());
 
         SharedPtr<OP> jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
@@ -658,14 +658,14 @@ if (ln->size() == 1) {
         node->method_call.args   = $5;
         */
         auto mcn = node->upcast<MethodCallNode>();
-        auto args = mcn->args;
+        auto args = mcn->args();
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(mcn->method);
-        this->compile(mcn->object);
+        this->compile(mcn->method());
+        this->compile(mcn->object());
 
         SharedPtr<OP> op = new OP(OP_METHOD_CALL);
         op->operand.int_value = args_len;
@@ -674,7 +674,7 @@ if (ln->size() == 1) {
     }
     case NODE_UNARY_INCREMENT: {
         // ++$i
-        this->compile(node->upcast<NodeNode>()->node);
+        this->compile(node->upcast<NodeNode>()->node());
         ops->push_back(new OP(OP_UNARY_INCREMENT));
         break;
     }
