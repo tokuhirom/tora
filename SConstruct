@@ -56,4 +56,6 @@ env.Program('tora', [
     re2files
 ])
 env.Program('lemon', ['tools/lemon/lemon.c']);
+env.Install('/usr/local/bin/', 'tora');
+env.Alias('install', '/usr/local/bin/')
 
