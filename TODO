@@ -48,6 +48,10 @@ syntax
  * qw()
  * q{}
  * qq{}
+ * say $_ for $array;
+ * return if $_;
+ * $array.map({ say($_); });
+ * $array.sort({ $_[0] <=> $_[1] }).reverse();
 
 feature
 -------
@@ -71,4 +75,5 @@ Library
  * ANSIColor
  * HTTP client
  * HTTP server
+ * B::Deparse
 
