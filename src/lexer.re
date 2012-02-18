@@ -172,6 +172,7 @@ std:
     ";" { return SEMICOLON; }
     "sub" {return FUNCSUB; }
     "try" {return TRY; }
+    "die" {return DIE; }
     "for" { return FOR; }
     "," { return COMMA; }
     "=>" { return FAT_COMMA; }

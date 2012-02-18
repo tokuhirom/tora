@@ -71,6 +71,14 @@ public:
 
 };
 
+class TryFrame : public LexicalVarsFrame {
+public:
+    int return_address;
+    TryFrame(SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(up_) {
+        this->type = FRAME_TYPE_TRY;
+    }
+};
+
 class FunctionFrame : public LexicalVarsFrame {
 public:
     int return_address;

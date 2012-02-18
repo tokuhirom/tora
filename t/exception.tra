@@ -1,0 +1,27 @@
+use t::Util;
+
+run_is(<<'...', "undef\n3\n");
+my ($e, $x) = try { return 3; };
+say($e);
+say($x)
+...
+
+run_is(<<'...', "4\nundef\n");
+my ($e, $x) = try { throw 4; return 3; };
+say($e);
+say($x)
+...
+
+run_is(<<'...', "REACH HERE\nOK!\n");
+sub foo {
+    say("REACH HERE");
+    throw "OK!";
+    say("NOT REACH HERE");
+}
+my ($e, $x) = try { foo(); say("SHOULD NOT REACH HERE"); };
+say($e);
+say($x)
+...
+
+done_testing;
+

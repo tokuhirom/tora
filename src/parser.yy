@@ -194,6 +194,9 @@ statement_list(A) ::= statement_list(B) statement(C).  {
 expression(A) ::= assignment_expression(B). {
     A = B;
 }
+expression(A) ::= DIE expression(B). {
+    A = new NodeNode(NODE_DIE, B);
+}
 
 assignment_expression(A) ::= conditional_expression(B). {
     A = B;
@@ -266,8 +269,9 @@ unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
 unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
 }
-unary_expression(A) ::= TRY block(B) CATCH L_PAREN variable(C) R_PAREN block(D). {
-    A = new TryNode(B, C, D);
+/* my ($err, $ret) = try { }; */
+unary_expression(A) ::= TRY block(B). {
+    A = new NodeNode(NODE_TRY, B);
 }
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }

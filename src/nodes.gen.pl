@@ -10,6 +10,7 @@ my @nodes = qw(
     NODE_DOUBLE
     NODE_TRUE
     NODE_FALSE
+    NODE_UNDEF
     NODE_IDENTIFIER
     NODE_TUPLE
     NODE_FUNCALL
@@ -50,7 +51,9 @@ my @nodes = qw(
     NODE_RANGE
     NODE_REGEXP
     NODE_DOTDOTDOT
+
     NODE_TRY
+    NODE_DIE
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';

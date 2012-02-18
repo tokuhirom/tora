@@ -22,11 +22,14 @@ public:
     std::vector<SharedPtr<Block>> *blocks;
     std::vector<std::string> *global_vars;
     int error;
+    bool in_try_block;
+
     Compiler() {
         error = 0;
         blocks = new std::vector<SharedPtr<Block>>();
         global_vars = new std::vector<std::string>();
         ops = new std::vector<SharedPtr<OP>>();
+        in_try_block = false;
     }
     ~Compiler() {
         delete global_vars;
@@ -91,6 +94,23 @@ public:
         }
         printf("--------------------\n");
     }
+
+    /**
+     * This is RAII guard object.
+     */
+    class TryGuard {
+    private:
+        Compiler *c;
+        bool orig;
+    public:
+        TryGuard(Compiler *c_, bool b) : c(c_) {
+            orig = c_->in_try_block;
+            c->in_try_block = b;
+        }
+        ~TryGuard() {
+            c->in_try_block = orig; //restore
+        }
+    };
 };
 
 };

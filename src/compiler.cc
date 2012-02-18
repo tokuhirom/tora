@@ -155,23 +155,28 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     }
     case NODE_RETURN: {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
-if (ln->size() == 1) {
-    this->compile(ln->at(0));
-    ops->push_back(new OP(OP_RETURN));
-} else if (ln->size() == 1) {
-    ops->push_back(new OP(OP_PUSH_UNDEF));
-    ops->push_back(new OP(OP_RETURN));
-} else {
-        for (size_t i=0; i < ln->size(); i++) {
-            this->compile(ln->at(i));
+
+        if (this->in_try_block) {
+            ln->list->insert(ln->list->begin(), new VoidNode(NODE_UNDEF));
         }
 
-        SharedPtr<OP> op = new OP(OP_MAKE_TUPLE);
-        op->operand.int_value = ln->size();
-        ops->push_back(op);
+        if (ln->size() == 1) {
+            this->compile(ln->at(0));
+            ops->push_back(new OP(OP_RETURN));
+        } else if (ln->size() == 0) {
+            ops->push_back(new OP(OP_PUSH_UNDEF));
+            ops->push_back(new OP(OP_RETURN));
+        } else {
+            for (size_t i=0; i < ln->size(); i++) {
+                this->compile(ln->at(i));
+            }
 
-        ops->push_back(new OP(OP_RETURN));
-}
+            SharedPtr<OP> op = new OP(OP_MAKE_TUPLE);
+            op->operand.int_value = ln->size();
+            ops->push_back(op);
+
+            ops->push_back(new OP(OP_RETURN));
+        }
 
         break;
     }
@@ -199,6 +204,8 @@ if (ln->size() == 1) {
         putcodevalue v
         make_function
         */
+
+        Compiler::TryGuard guard(this, false);
 
         auto funcdef_node = node->upcast<FuncdefNode>();
 
@@ -276,6 +283,10 @@ if (ln->size() == 1) {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;
         ops->push_back(tmp);
+        break;
+    }
+    case NODE_UNDEF: {
+        ops->push_back(new OP(OP_PUSH_UNDEF));
         break;
     }
     case NODE_FALSE: {
@@ -690,33 +701,28 @@ if (ln->size() == 1) {
         break;
     }
     case NODE_TRY: {
+        Compiler::TryGuard guard(this, true);
+
         OP *try_op = new OP(OP_TRY);
         ops->push_back(try_op);
 
-        SharedPtr<TryNode> n = node->upcast<TryNode>();
-        this->compile(n->try_block());
+        SharedPtr<NodeNode> n = node->upcast<NodeNode>();
+        this->compile(n->node());
 
-        OP * jump = new OP(OP_JUMP);
-        ops->push_back(jump);
+        ops->push_back(new OP(OP_PUSH_UNDEF));
+        ops->push_back(new OP(OP_PUSH_UNDEF));
+        OP *op = new OP(OP_MAKE_TUPLE);
+        op->operand.int_value = 2;
+        ops->push_back(op);
+        ops->push_back(new OP(OP_RETURN));
 
-        this->push_block();
-        ops->push_back(new OP(OP_ENTER));
+        try_op->operand.int_value = ops->size();
 
-        size_t label1 = ops->size();
-        try_op->operand.int_value = label1;
-
-        {
-            std::string &name = n->variable()->upcast<StrNode>()->str_value;
-            this->define_localvar(name);
-            this->compile(n->catch_block());
-        }
-
-        ops->push_back(new OP(OP_LEAVE));
-        this->pop_block();
-
-        size_t label2 = ops->size();
-        jump->operand.int_value = label2;
-
+        break;
+    }
+    case NODE_DIE: {
+        this->compile(node->upcast<NodeNode>()->node());
+        ops->push_back(new OP(OP_DIE));
         break;
     }
 

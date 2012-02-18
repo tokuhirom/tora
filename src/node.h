@@ -221,21 +221,6 @@ public:
     ~MethodCallNode() { }
 };
 
-class TryNode: public Node {
-public:
-    SharedPtr<Node>try_block () { return this->list->at(0); }
-    SharedPtr<Node>variable() { return this->list->at(1); }
-    SharedPtr<Node>catch_block() { return this->list->at(1); }
-
-    TryNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<Node> a) : Node() {
-        type = NODE_TRY;
-        this->list->push_back(o);
-        this->list->push_back(m);
-        this->list->push_back(a);
-    }
-    ~TryNode() { }
-};
-
 class BinaryNode: public Node {
 public:
     SharedPtr<Node>left () { return this->list->at(0); }

@@ -1,6 +1,10 @@
 #include "disasm.h"
+#include "shared_ptr.h"
+#include "op.h"
 
-void tora::Disasm::disasm_op(OP* op) {
+using namespace tora;
+
+void Disasm::disasm_op(OP* op) {
     printf("OP: %s", opcode2name[op->op_type]);
     switch (op->op_type) {
     case OP_SETLOCAL: {
@@ -26,3 +30,12 @@ void tora::Disasm::disasm_op(OP* op) {
     }
     printf("\n");
 }
+
+void Disasm::disasm(std::vector<SharedPtr<OP>> *ops) {
+    printf("-- OP DUMP    --\n");
+    for (size_t i=0; i<ops->size(); i++) {
+        printf("[%03zd] %s\n", i, opcode2name[ops->at(i)->op_type]);
+    }
+    printf("----------------\n");
+}
+

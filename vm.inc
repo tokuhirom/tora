@@ -303,6 +303,19 @@ OP_RETURN {
 
             stack.push(retval);
             break;
+        } else if (frame->type == FRAME_TYPE_TRY) {
+            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
+            pc = tframe->return_address;
+            printf("RETURN :orig: %d, current: %d\n", tframe->top, stack.size());
+
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+
+            frame_stack->pop_back();
+
+            stack.push(retval);
+            break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
             while (stack.size() > frame->top) {
@@ -580,6 +593,56 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    fprintf(stderr, "This is not implemented yet.\n");
-    abort();
+    SharedPtr<TryFrame> fframe = new TryFrame(frame_stack->back());
+    fframe->return_address = op->operand.int_value-1;
+    fframe->top = stack.size();
+    frame_stack->push_back(fframe);
 }
+
+OP_DIE {
+    SharedPtr<Value> exception = stack.pop();
+
+    while (1) {
+        if (frame_stack->size() == 1) {
+            fprintf(stderr, "died\n");
+            exception->dump();
+            break;
+        }
+
+        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        if (frame->type == FRAME_TYPE_FUNCTION) {
+            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
+            pc = fframe->return_address;
+            ops = fframe->orig_ops;
+
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+
+            frame_stack->pop_back();
+        } else if (frame->type == FRAME_TYPE_TRY) {
+            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
+            pc = tframe->return_address;
+
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(UndefValue::instance());
+            t->push(exception);
+
+            frame_stack->pop_back();
+
+            stack.push(t);
+
+            break;
+        } else {
+            // printf("THIS IS NOT A FUNCTION FRAME\n");
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+            frame_stack->pop_back();
+        }
+    }
+}
+
