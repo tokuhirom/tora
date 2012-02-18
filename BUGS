@@ -5,4 +5,6 @@ KNOWN BUGS LIST
 
 * { say("HELLO") } should works.
 * for (my $i in [1]) { ... } should works
+* 3/0.5 segv
+* zero divided error
 

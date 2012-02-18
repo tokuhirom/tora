@@ -76,3 +76,48 @@ void VM::cmpop(operationI operation_i, operationD operation_d) {
     }
 }
 
+void VM::die(SharedPtr<Value> & exception) {
+    while (1) {
+        if (frame_stack->size() == 1) {
+            fprintf(stderr, "died\n");
+            exception->dump();
+            break;
+        }
+
+        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        if (frame->type == FRAME_TYPE_FUNCTION) {
+            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
+            pc = fframe->return_address;
+            ops = fframe->orig_ops;
+
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+
+            frame_stack->pop_back();
+        } else if (frame->type == FRAME_TYPE_TRY) {
+            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
+            pc = tframe->return_address;
+
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(UndefValue::instance());
+            t->push(exception);
+
+            frame_stack->pop_back();
+
+            stack.push(t);
+
+            break;
+        } else {
+            // printf("THIS IS NOT A FUNCTION FRAME\n");
+            while (stack.size() > frame->top) {
+                stack.pop();
+            }
+            frame_stack->pop_back();
+        }
+    }
+}
+
