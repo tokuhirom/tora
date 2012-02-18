@@ -89,11 +89,6 @@ statement(A) ::= FOR L_PAREN parameter_list(B) IN expression(C) R_PAREN block(D)
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
-statement(A) ::= MY variable(B).   {
-    ListNode*nl = new ListNode(NODE_MY);
-    nl->push_back(B);
-    A = nl;
-}
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;
@@ -141,14 +136,16 @@ parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
 
 /* array constructor [a, b] */
 array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
-    A = new ArgsNode(NODE_MAKE_ARRAY, B->upcast<ListNode>());
+    B->type = NODE_MAKE_ARRAY;
+    A = B;
 }
 array_creation(A) ::= L_BRACKET R_BRACKET. {
-    A = new ArgsNode(NODE_MAKE_ARRAY, new ListNode());
+    A = new ListNode(NODE_MAKE_ARRAY);
 }
 
 hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
-    A = new ArgsNode(NODE_MAKE_HASH, B->upcast<ListNode>());
+    B->type = NODE_MAKE_HASH;
+    A = B;
 }
 
 argument_list(A) ::= expression(B). {
@@ -201,19 +198,6 @@ expression(A) ::= assignment_expression(B). {
 assignment_expression(A) ::= conditional_expression(B). {
     A = B;
 }
-assignment_expression(A) ::= MY variable(B) ASSIGN expression(C).  {
-    // TODO: REMOVE THIS NODE
-    SharedPtr<ListNode> n1 = new ListNode(NODE_MY);
-    n1->push_back(B);
-    Node *node = new BinaryNode(NODE_SETVARIABLE, B, C);
-    A = new BinaryNode(NODE_STMTS, n1, node);
-}
-/* my ($a, $b, $c) = ... */
-assignment_expression(A) ::= MY L_PAREN parameter_list(B) R_PAREN ASSIGN expression(C).  {
-    B->type = NODE_MY;
-    Node *node = new BinaryNode(NODE_SETVARIABLE_MULTI, B, C);
-    A = new BinaryNode(NODE_STMTS, B, node);
-}
 assignment_expression(A) ::= conditional_expression(B) ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_SETVARIABLE, B, C);
 }
@@ -222,6 +206,11 @@ assignment_expression(A) ::= conditional_expression(B) DIV_ASSIGN conditional_ex
 }
 
 conditional_expression(A) ::= logical_or_expression(B). { A = B; }
+conditional_expression(A) ::= MY conditional_expression(B).   {
+    ListNode*nl = new ListNode(NODE_MY);
+    nl->push_back(B);
+    A = nl;
+}
 
 logical_or_expression(A) ::= logical_and_expression(B). { A = B; }
 
@@ -277,6 +266,9 @@ unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
 unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
 }
+unary_expression(A) ::= TRY block(B) CATCH L_PAREN variable(C) R_PAREN block(D). {
+    A = new TryNode(B, C, D);
+}
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }
 postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKET. {
@@ -289,10 +281,10 @@ postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
     A = new FuncallNode(B, C->upcast<ListNode>());
 }
-postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
+postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
-postfix_expression(A) ::= primary_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
+postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
     A = new MethodCallNode(B, C, new ListNode());
 }
 
@@ -324,6 +316,9 @@ primary_expression(A) ::= hash_creation(B). { A = B; }
 primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
     B->type = NODE_TUPLE;
     A = B;
+}
+primary_expression(A) ::= DOTDOTDOT. {
+    A = new VoidNode(NODE_DOTDOTDOT);
 }
 
 int(A) ::= INT_LITERAL(B). {

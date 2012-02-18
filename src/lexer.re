@@ -171,10 +171,12 @@ std:
     }
     ";" { return SEMICOLON; }
     "sub" {return FUNCSUB; }
+    "try" {return TRY; }
     "for" { return FOR; }
     "," { return COMMA; }
     "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }
+    "..." { return DOTDOTDOT; }
     DOUBLE {
         double tmp = 0;
         char *head;

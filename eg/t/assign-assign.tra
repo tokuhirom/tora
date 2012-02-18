@@ -1,4 +1,4 @@
-my $a = my $b = 3;
+my $a = (my $b = 3);
 say($a);
 say($b);
 

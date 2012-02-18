@@ -44,9 +44,7 @@ syntax
 -------
 
  * open($fname).read();
- * elsif
  * given-when
- * for-each iterator
  * qw()
  * q{}
  * qq{}
@@ -61,6 +59,8 @@ feature
   * -n option
   * -p option
   * -i option
+  * __LINE__
+  * __FILE__
 
 Library
 -------

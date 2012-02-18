@@ -249,6 +249,7 @@ OP_METHOD_CALL {
         SharedPtr<FileValue>file = object->upcast<FileValue>();
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "read") == 0) {
             SharedPtr<StrValue> str = file->read();
+            str->dump(0);
             stack.push(str);
         }
         break;
@@ -573,3 +574,12 @@ OP_JUMP_IF_STOP_EXCEPTION {
     }
 }
 
+OP_DOTDOTDOT {
+    fprintf(stderr, "This is not implemented yet.\n");
+    exit(1);
+}
+
+OP_TRY {
+    fprintf(stderr, "This is not implemented yet.\n");
+    abort();
+}
