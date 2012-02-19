@@ -1,8 +1,7 @@
 #ifndef TORA_REGEXP_H_
 #define TORA_REGEXP_H_
 
-#include "node.h"
-#include "value.h"
+#include "../value.h"
 #include <re2/re2.h>
 
 namespace tora {

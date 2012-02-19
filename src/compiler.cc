@@ -3,7 +3,7 @@
 #include "compiler.h"
 #include "value/code.h"
 #include "value/symbol.h"
-#include "regexp.h"
+#include "value/regexp.h"
 #include "disasm.h"
 
 int tora::Compiler::find_localvar(std::string name, int &level) {

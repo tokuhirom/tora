@@ -2,7 +2,7 @@
 #include "value.h"
 #include "value/hash.h"
 #include "value/code.h"
-#include "regexp.h"
+#include "value/regexp.h"
 #include <unistd.h>
 #include <algorithm>
 #include <functional>

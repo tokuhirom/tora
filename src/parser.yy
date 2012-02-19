@@ -29,7 +29,7 @@
 #include "tora.h"
 #include "value.h"
 #include "shared_ptr.h"
-#include "regexp.h"
+#include "value/regexp.h"
 #include "parser.h"
 #include "lexer.h"
 
