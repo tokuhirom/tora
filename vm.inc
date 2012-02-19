@@ -234,11 +234,6 @@ OP_METHOD_CALL {
         }
         break;
     }
-    case VALUE_TYPE_STR: {
-        SharedPtr<StrValue>sv = object->upcast<StrValue>();
-        if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "match") == 0) {
-        break;
-    }
     */
     default:
         fprintf(stderr, "Unknown method %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
