@@ -2,6 +2,7 @@
 #include "node.h"
 #include "compiler.h"
 #include "value/code.h"
+#include "value/symbol.h"
 #include "regexp.h"
 #include "disasm.h"
 
@@ -218,7 +219,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
         }
 
-        Compiler funccomp;
+        Compiler funccomp(this->symbol_table);
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block());
 
@@ -306,6 +307,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         auto args = node->upcast<FuncallNode>()->args();
         int args_len = args->size();
         while (args->size() > 0) {
+            assert(args->back());
             this->compile(args->back());
             args->pop_back();
         }
@@ -675,7 +677,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(mcn->method());
+        if (mcn->method()->type == NODE_IDENTIFIER) {
+            ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
+            SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+            ops->push_back(o);
+        } else {
+            fprintf(stderr, "Compilation error. This is not a id.\n");
+            error++;
+            break;
+        }
         this->compile(mcn->object());
 
         SharedPtr<OP> op = new OP(OP_METHOD_CALL);

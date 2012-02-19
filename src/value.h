@@ -30,6 +30,7 @@ typedef enum {
     VALUE_TYPE_ARRAY_ITERATOR,
     VALUE_TYPE_RANGE_ITERATOR,
     VALUE_TYPE_EXCEPTION,
+    VALUE_TYPE_SYMBOL,
 } value_type_t;
 
 typedef enum {

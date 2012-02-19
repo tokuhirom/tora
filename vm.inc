@@ -186,65 +186,45 @@ OP_FUNCALL {
 
 OP_METHOD_CALL {
     SharedPtr<Value> object(stack.pop());
-    SharedPtr<Value> funname(stack.pop());
-    const char *funname_c = funname->upcast<StrValue>()->str_value.c_str();
+    SharedPtr<Value> funid(stack.pop());
     if (!(stack.size() >= (size_t) op->operand.int_value)) {
-        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+        // printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
         dump_stack();
         abort();
     }
-    assert(funname->value_type == VALUE_TYPE_STR);
+    assert(funid->value_type == VALUE_TYPE_SYMBOL);
+
     switch (object->value_type) {
+    case VALUE_TYPE_STR:
     case VALUE_TYPE_ARRAY: {
-        SharedPtr<ArrayValue>av = object->upcast<ArrayValue>();
-        if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "size") == 0) {
-            SharedPtr<IntValue> size = new IntValue(av->size());
-            stack.push(size);
-        } else if (funname->upcast<StrValue>()->str_value == "__iter__") {
-            /**
-             my ($next, $val) = [].__iter__();
-             */
-            SharedPtr<TupleValue> t = new TupleValue();
-            if (av->size()!=0) {
-                if (av->size() == 1) {
-                    t->push(UndefValue::instance());
-                } else {
-                    t->push(new IntValue(1));
-                }
-                t->push(av->at(0));
-            } else {
-                t->push(UndefValue::instance());
-                t->push(UndefValue::instance());
-            }
-            stack.push(t);
-        } else if (funname->upcast<StrValue>()->str_value == "__next__") {
-            SharedPtr<Value> iter_val = stack.pop();
-            if (iter_val->value_type == VALUE_TYPE_INT) {
-                SharedPtr<IntValue> iter = iter_val->upcast<IntValue>();
-                /**
-                (my $next, $iter) = $array.__next__($iter);
-                */
-                SharedPtr<TupleValue> t = new TupleValue();
-                if (av->size()-1>=iter->int_value) {
-                    t->push(new IntValue(iter->int_value+1));
-                    t->push(av->at(iter->int_value));
-                } else {
-                    t->push(UndefValue::instance());
-                    t->push(UndefValue::instance());
-                }
-                stack.push(t);
-            } else {
-                SharedPtr<TupleValue> t = new TupleValue();
-                t->push(UndefValue::instance());
-                t->push(UndefValue::instance());
-                stack.push(t);
-            }
-        } else {
-            fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value.c_str(), object->type_str());
+        auto iter = this->standard[object->value_type]->find(funid->upcast<SymbolValue>()->id);
+        if (iter == this->standard[object->value_type]->end()) {
+            // TODO throw exception
+            fprintf(stderr, "Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), object->type_str());
             break;
+        } else {
+            if (iter->second->argc==0) {
+                if (op->operand.int_value == 0) {
+                    SharedPtr<Value> v = iter->second->func0(object);
+                    stack.push(v);
+                } else {
+                    fprintf(stderr, "Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
+                    break;
+                }
+            } else if (iter->second->argc==1) {
+                if (op->operand.int_value == 1) {
+                    SharedPtr<Value> arg1 = stack.pop();
+                    SharedPtr<Value> v = iter->second->func1(object, arg1);
+                    stack.push(v);
+                } else {
+                    fprintf(stderr, "Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
+                    break;
+                }
+            }
         }
         break;
     }
+    /*
     case VALUE_TYPE_FILE: {
         SharedPtr<FileValue>file = object->upcast<FileValue>();
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "read") == 0) {
@@ -257,26 +237,11 @@ OP_METHOD_CALL {
     case VALUE_TYPE_STR: {
         SharedPtr<StrValue>sv = object->upcast<StrValue>();
         if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "match") == 0) {
-            if (op->operand.int_value == 1) {
-                SharedPtr<AbstractRegexpValue> regex = stack.pop()->upcast<AbstractRegexpValue>();
-                SharedPtr<BoolValue> b = new BoolValue(regex->match(std::string(sv->str_value.c_str())));
-                stack.push(b);
-            } else {
-                fprintf(stderr, "Missing args for 'match'\n");
-                abort();
-            }
-        } else if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "length") == 0) {
-            if (op->operand.int_value == 0) {
-                stack.push(new IntValue(sv->length()));
-            } else {
-                fprintf(stderr, "length needs 0 argument\n");
-                abort();
-            }
-        }
         break;
     }
+    */
     default:
-        fprintf(stderr, "Unknown method %s for %s\n", funname->upcast<StrValue>()->str_value.c_str(), object->type_str());
+        fprintf(stderr, "Unknown method %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
         // TODO throw exception
         break;
     }
@@ -341,6 +306,7 @@ OP_LEAVE {
 }
 
 OP_PUSH_IDENTIFIER {
+    // deprecate?
     SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
     stack.push(sv);
 }

@@ -8,6 +8,7 @@
 #include <map>
 #include "stack.h"
 #include "shared_ptr.h"
+#include "symbol_table.h"
 
 namespace tora {
 
@@ -88,6 +89,25 @@ public:
     }
 };
 
+typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
+
+class VM;
+
+struct Callback {
+    typedef SharedPtr<Value> (*func0_t)(SharedPtr<Value>&);
+    typedef SharedPtr<Value> (*func1_t)(SharedPtr<Value>&, SharedPtr<Value>&);
+    union {
+        func0_t func0;
+        func1_t func1;
+    };
+    int argc;
+    Callback(func0_t func_) : argc(0) {
+        func0 = func_;
+    }
+    Callback(func1_t func_) : argc(1) {
+        func1 = func_;
+    }
+};
 
 class VM {
 public:
@@ -97,13 +117,16 @@ public:
     std::vector<SharedPtr<OP>> *ops;
     std::vector<SharedPtr<Value>> *global_vars;
     std::map<std::string, SharedPtr<Value>> functions;
+    SharedPtr<SymbolTable> symbol_table;
+
+    std::map<value_type_t, std::map<ID, Callback*>*> standard;
 
     /*
      * stack for lexical variables.
      */
     std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
 
-    VM(std::vector<SharedPtr<OP>>* ops_);
+    VM(std::vector<SharedPtr<OP>>* ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();
     void execute();
 
@@ -123,9 +146,29 @@ public:
     void add_function(std::string &name, SharedPtr<Value> code) {
         functions[name] = code;
     }
+    void die(SharedPtr<Value> & exception);
+
+    void register_standard_methods();
 
 #include "vm.ops.inc.h"
 };
+
+class MetaClass {
+    VM *vm_;
+    value_type_t type;
+    std::map<ID, Callback*> *methods;
+public:
+    MetaClass(VM *v, value_type_t t) : vm_(v), type(t) {
+        this->methods = new std::map<ID, Callback*>();
+        vm_->standard[t] = this->methods;
+    }
+    template <class T>
+    void add_method(const std::string &name, T func) {
+        ID id = vm_->symbol_table->get_id(name);
+        this->methods->insert(std::make_pair(id, new Callback(func)));
+    }
+};
+
 
 };
 

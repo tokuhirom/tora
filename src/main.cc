@@ -93,7 +93,8 @@ int main(int argc, char **argv) {
     }
 
     // compile
-    tora::Compiler compiler;
+    SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+    tora::Compiler compiler(symbol_table);
     compiler.init_globals();
     compiler.compile(parser.root_node());
     if (compiler.error) {
@@ -102,8 +103,9 @@ int main(int argc, char **argv) {
     }
 
     // run it
-    tora::VM vm(compiler.ops);
+    tora::VM vm(compiler.ops, symbol_table);
     vm.init_globals(argc-optind, argv+optind);
+    vm.register_standard_methods();
     if (dump_ops) {
         Disasm::disasm(compiler.ops);
     }

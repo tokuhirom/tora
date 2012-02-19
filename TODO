@@ -52,6 +52,7 @@ syntax
  * return if $_;
  * $array.map({ say($_); });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
+ * lambda syntax: ^{ }
 
 feature
 -------

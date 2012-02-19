@@ -17,7 +17,6 @@ public:
     virtual const std::string& error() = 0;
     virtual const std::string& pattern() = 0;
     virtual bool match(std::string &str) = 0;
-    virtual bool match(std::string str) = 0;
 };
 
 class RE2RegexpValue : public AbstractRegexpValue {
@@ -39,9 +38,6 @@ public:
     const std::string& error() {
         return this->re_value->error();
     }
-    bool match(std::string str) {
-        return RE2::PartialMatch(str, this->re_value->pattern().c_str());
-    }
     bool match(std::string &str) {
         return RE2::PartialMatch(str, this->re_value->pattern().c_str());
     }
@@ -49,7 +45,7 @@ public:
         print_indent(indent);
         printf("/%s/", re_value->pattern().c_str());
     }
-    const char * type_str() { return "Regexp"; }
+    const char * type_str() { return "regexp"; }
 };
 
 };

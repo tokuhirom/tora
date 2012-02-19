@@ -50,6 +50,7 @@ sub vm_gen_cc {
 #include "value/tuple.h"
 #include "value/file.h"
 #include "value/range.h"
+#include "value/symbol.h"
 #include "regexp.h"
 #include <unistd.h>
 #include <algorithm>

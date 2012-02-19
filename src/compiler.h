@@ -3,6 +3,8 @@
 
 #include "node.h"
 #include "vm.h"
+#include "symbol_table.h"
+#include "shared_ptr.h"
 
 namespace tora {
 
@@ -21,15 +23,17 @@ public:
     std::vector<SharedPtr<OP>> *ops;
     std::vector<SharedPtr<Block>> *blocks;
     std::vector<std::string> *global_vars;
+    SharedPtr<SymbolTable> symbol_table;
     int error;
     bool in_try_block;
 
-    Compiler() {
+    Compiler(SharedPtr<SymbolTable> &symbol_table_) {
         error = 0;
         blocks = new std::vector<SharedPtr<Block>>();
         global_vars = new std::vector<std::string>();
         ops = new std::vector<SharedPtr<OP>>();
         in_try_block = false;
+        symbol_table = symbol_table_;
     }
     ~Compiler() {
         delete global_vars;

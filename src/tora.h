@@ -14,5 +14,7 @@
 #define DBG2(...)
 #endif
 
+typedef unsigned int ID;
+
 #endif // TORA_H_
 
