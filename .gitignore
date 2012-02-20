@@ -16,3 +16,4 @@ parser.h
 parser.out
 lemon
 !tools/lemon
+tests/*.t
