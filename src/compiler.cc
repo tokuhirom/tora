@@ -137,9 +137,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
+
+        OP *enter = new OP(OP_ENTER);
+        ops->push_back(enter);
+
         this->compile(node->upcast<NodeNode>()->node());
 
         ops->push_back(new OP(OP_END));
+
+        enter->operand.int_value = this->blocks->back()->vars.size();
 
         this->pop_block();
 
@@ -184,11 +190,14 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_BLOCK: {
         this->push_block();
 
-        ops->push_back(new OP(OP_ENTER));
+        OP *enter = new OP(OP_ENTER);
+        ops->push_back(enter);
 
         this->compile(node->upcast<NodeNode>()->node());
 
         ops->push_back(new OP(OP_LEAVE));
+
+        enter->operand.int_value = this->blocks->back()->vars.size();
 
         this->pop_block();
 
@@ -383,7 +392,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         auto if_node = node->upcast<IfNode>();
 
         this->push_block();
-        ops->push_back(new OP(OP_ENTER));
+        OP *enter = new OP(OP_ENTER);
+        ops->push_back(enter);
 
         {
 
@@ -411,6 +421,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
 
         ops->push_back(new OP(OP_LEAVE));
+
+        enter->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
         break;
@@ -720,6 +732,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         OP *try_op = new OP(OP_TRY);
         ops->push_back(try_op);
 
+        this->push_block();
+        OP *enter_op = new OP(OP_ENTER);
+        ops->push_back(enter_op);
+
         SharedPtr<NodeNode> n = node->upcast<NodeNode>();
         this->compile(n->node());
 
@@ -729,6 +745,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         op->operand.int_value = 2;
         ops->push_back(op);
         ops->push_back(new OP(OP_RETURN));
+
+        enter_op->operand.int_value = this->blocks->back()->vars.size();
+
+        this->pop_block();
 
         try_op->operand.int_value = ops->size();
 

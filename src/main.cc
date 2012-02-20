@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
         parser.set_lineno(scanner->lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);
+    delete scanner;
 
     if (parser.is_failure()) {
         return 1;

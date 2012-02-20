@@ -23,37 +23,35 @@ typedef enum {
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame : public Prim {
 private:
-    std::map<int, SharedPtr<Value>> vars;
+    std::vector<SharedPtr<Value>> *vars;
 public:
     frame_type_t type;
     int top;
     SharedPtr<LexicalVarsFrame> up;
-    LexicalVarsFrame() : Prim() {
+    LexicalVarsFrame(int vars_cnt) : Prim() {
         up = NULL;
         type = FRAME_TYPE_LEXICAL;
+        vars = new std::vector<SharedPtr<Value>>(vars_cnt);
     }
-    LexicalVarsFrame(SharedPtr<LexicalVarsFrame> up_) : Prim() {
+    LexicalVarsFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : Prim() {
         this->up = up_;
         type = FRAME_TYPE_LEXICAL;
+        vars = new std::vector<SharedPtr<Value>>(vars_cnt);
     }
-    ~LexicalVarsFrame() { }
+    ~LexicalVarsFrame() {
+        delete vars;
+    }
     void setVar(int id, SharedPtr<Value> v) {
-        this->vars[id] = v;
+        (*this->vars)[id] = v;
     }
-    Value *find(int id) {
-        auto iter = this->vars.find(id);
-        if (iter != vars.end()) {
-            return &(*(iter->second));
-        } else {
-            return NULL;
-        }
+    SharedPtr<Value> find(int id) {
+        return (*this->vars)[id];
     }
     void dump(int i) {
         printf("type: %s [%d]\n", this->type == FRAME_TYPE_FUNCTION ? "function" : "lexical", i);
-        auto iter = this->vars.begin();
-        for (; iter!=this->vars.end(); ++iter) {
-            printf("  %d\n", iter->first);
-            iter->second->dump();
+        for (size_t n=0; n<this->vars->size(); n++) {
+            printf("  %d\n", n);
+            this->vars->at(n)->dump();
         }
         if (this->up) {
             this->up->dump(i+1);
@@ -75,7 +73,8 @@ public:
 class TryFrame : public LexicalVarsFrame {
 public:
     int return_address;
-    TryFrame(SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(up_) {
+    // try frame does not have variables.
+    TryFrame(SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(0, up_) {
         this->type = FRAME_TYPE_TRY;
     }
 };
@@ -84,7 +83,7 @@ class FunctionFrame : public LexicalVarsFrame {
 public:
     int return_address;
     std::vector<SharedPtr<OP>> *orig_ops;
-    FunctionFrame(SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(up_) {
+    FunctionFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
         this->type = FRAME_TYPE_FUNCTION;
     }
 };

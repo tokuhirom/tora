@@ -16,7 +16,7 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_, SharedPtr<SymbolTable> &symbol_table_) 
     symbol_table = symbol_table_;
     ops = new std::vector<SharedPtr<OP>>(*ops_);
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
-    this->frame_stack->push_back(new LexicalVarsFrame());
+    this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
 }
 
@@ -24,6 +24,26 @@ VM::~VM() {
     delete this->global_vars;
     delete this->ops;
     delete this->frame_stack;
+
+    {
+        auto iter = standard.begin();
+        for (; iter!=standard.end(); iter++) {
+            auto mp = iter->second;
+            auto iter2 = mp->begin();
+            for (; iter2!=mp->end(); iter2++) {
+                delete iter2->second;
+            }
+            delete mp;
+        }
+    }
+
+    {
+        // std::map<ID, CallbackFunction*> builtin_functions;
+        auto iter = builtin_functions.begin();
+        for (;iter != builtin_functions.end(); iter++) {
+            delete iter->second;
+        }
+    }
 }
 
 void VM::init_globals(int argc, char**argv) {

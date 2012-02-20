@@ -117,7 +117,7 @@ OP_FUNCALL {
             SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
             // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-            SharedPtr<FunctionFrame> fframe = new FunctionFrame(frame_stack->back());
+            SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
             fframe->return_address = pc;
             fframe->orig_ops = ops;
             fframe->top = stack.size() - argcnt;
@@ -248,7 +248,7 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(frame_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(op->operand.int_value, frame_stack->back());
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
