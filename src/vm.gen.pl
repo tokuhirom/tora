@@ -12,8 +12,10 @@ write_file('src/vm.ops.inc.h', vm_ops_inc_h($dat));
 
 sub write_file {
     my ($fname, $body) = @_;
+    unlink $fname if -f $fname;
     open my $fh, '>', $fname;
     print $fh $body;
+    chmod 0444, $fname;
 }
 
 sub parse {
@@ -62,10 +64,14 @@ using namespace tora;
 
     {
         for my $k (@$dat) {
-            $ret .= "void VM::PP_$k->[0]() {\n";
+            $ret .= "inline void VM::PP_$k->[0]() {\n";
             # $ret .= "inline void VM::PP_$k->[0]() {\n";
-            $ret .= "SharedPtr<OP> op = ops->at(pc);\n";
+            if ($k->[1] =~ /op/) {
+                $ret .= "SharedPtr<OP> op = ops->at(pc);\n";
+            }
+            # $ret .= qq{#line @{[ $k->[2] + 1 ]} "vm.inc"\n};
             $ret .= "$k->[1]\n";
+            # $ret .= qq{#line @{[ $k->[2] + 1 + split(/\n/, $k->[1]) ]} "<stdout>"\n};
             $ret .= "}\n";
         }
     }

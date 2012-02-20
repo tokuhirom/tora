@@ -216,7 +216,7 @@ OP_RETURN {
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
 
-            while (stack.size() > frame->top) {
+            while (stack.size() > (size_t)frame->top) {
                 stack.pop();
             }
 
@@ -255,7 +255,7 @@ OP_ENTER {
 
 OP_LEAVE {
     SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-    while (stack.size() > frame->top) {
+    while (stack.size() > (size_t)frame->top) {
         stack.pop();
     }
     frame_stack->pop_back();
