@@ -109,6 +109,27 @@ struct Callback {
     }
 };
 
+struct CallbackFunction {
+    typedef SharedPtr<Value> (*func0_t)();
+    typedef SharedPtr<Value> (*func1_t)(SharedPtr<Value>&);
+    typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
+    union {
+        func0_t func0;
+        func1_t func1;
+        funcv_t funcv;
+    };
+    int argc;
+    CallbackFunction(func0_t func_) : argc(0) {
+        func0 = func_;
+    }
+    CallbackFunction(func1_t func_) : argc(1) {
+        func1 = func_;
+    }
+    CallbackFunction(funcv_t func_) : argc(-1) {
+        funcv = func_;
+    }
+};
+
 class VM {
 public:
     tora::Stack stack;
@@ -116,8 +137,15 @@ public:
     size_t pc; // program counter
     std::vector<SharedPtr<OP>> *ops;
     std::vector<SharedPtr<Value>> *global_vars;
-    std::map<std::string, SharedPtr<Value>> functions;
+    std::map<ID, SharedPtr<Value>> functions;
     SharedPtr<SymbolTable> symbol_table;
+
+    std::map<ID, CallbackFunction*> builtin_functions;
+    template <class T>
+    void add_builtin_function(const char *name, T func) {
+        ID id = this->symbol_table->get_id(std::string(name));
+        this->builtin_functions.insert(std::make_pair(id, new CallbackFunction(func)));
+    }
 
     std::map<value_type_t, std::map<ID, Callback*>*> standard;
 
@@ -143,8 +171,11 @@ public:
         }
         printf("----------------\n");
     }
+    void add_function(ID id, SharedPtr<Value> code) {
+        functions[id] = code;
+    }
     void add_function(std::string &name, SharedPtr<Value> code) {
-        functions[name] = code;
+        this->add_function(this->symbol_table->get_id(name), code);
     }
     void die(SharedPtr<Value> & exception);
 

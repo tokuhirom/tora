@@ -231,6 +231,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         SharedPtr<CodeValue> code = new CodeValue();
         code->code_name = funcname;
+        code->code_id = this->symbol_table->get_id(funcname);
         code->code_params = params;
         // TODO memory leaks?
         code->code_opcodes = new std::vector<SharedPtr<OP>>(*funccomp.ops);
@@ -311,7 +312,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->compile(args->back());
             args->pop_back();
         }
-        this->compile(node->upcast<FuncallNode>()->name());
+
+        ID id = this->symbol_table->get_id(node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value);
+        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+        ops->push_back(o);
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_FUNCALL;

@@ -3,6 +3,7 @@
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/regexp.h"
+#include "value/file.h"
 #include <unistd.h>
 #include <algorithm>
 #include <functional>
@@ -137,6 +138,70 @@ static SharedPtr<Value> str_match(SharedPtr<Value>&self, SharedPtr<Value>&arg1) 
     return b;
 }
 
+static SharedPtr<Value> builtin_p(SharedPtr<Value>&arg1) {
+    arg1->dump();
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> builtin_getenv(SharedPtr<Value> &v) {
+    SharedPtr<Value> s(v->to_s());
+    char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
+    if (env) {
+        SharedPtr<StrValue> ret = new StrValue();
+        ret->set_str(env);
+        return ret;
+    } else {
+        return UndefValue::instance();
+    }
+}
+
+static SharedPtr<Value> builtin_exit(SharedPtr<Value> &v) {
+    assert(v->value_type == VALUE_TYPE_INT);
+    SharedPtr<Value> s(v->to_i());
+    exit(s->upcast<IntValue>()->int_value);
+}
+
+static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
+    SharedPtr<Value> filename(args.at(1));
+    std::string mode;
+    if (args.size() >= 2) {
+        mode = args.at(1)->upcast<StrValue>()->str_value.c_str();
+    } else {
+        mode = "rb";
+    }
+    // TODO: check \0
+    SharedPtr<FileValue> file = new FileValue();
+    if (file->open(
+        filename->upcast<StrValue>()->str_value,
+        mode
+    )) {
+        return file;
+    } else {
+        abort(); // todo: throw exception
+    }
+}
+
+
+static SharedPtr<Value> builtin_print(const std::vector<SharedPtr<Value>> & args) {
+    auto iter = args.begin();
+    for (; iter!=args.end(); iter++) {
+        SharedPtr<Value> v(*iter);
+        SharedPtr<Value> s(v->to_s());
+        printf("%s", s->upcast<StrValue>()->str_value.c_str());
+    }
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> builtin_say(const std::vector<SharedPtr<Value>> & args) {
+    auto iter = args.begin();
+    for (; iter!=args.end(); iter++) {
+        SharedPtr<Value> v(*iter);
+        SharedPtr<Value> s(v->to_s());
+        printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
+    }
+    return UndefValue::instance();
+}
+
 void VM::register_standard_methods() {
     {
         MetaClass meta(this, VALUE_TYPE_ARRAY);
@@ -147,5 +212,11 @@ void VM::register_standard_methods() {
         meta.add_method("length", str_length);
         meta.add_method("match", str_match);
     }
+    // this->add_builtin_function("print");
+    this->add_builtin_function("p", builtin_p);
+    this->add_builtin_function("getenv", builtin_getenv);
+    this->add_builtin_function("exit", builtin_exit);
+    this->add_builtin_function("say", builtin_say);
+    this->add_builtin_function("print", builtin_print);
 }
 

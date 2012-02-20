@@ -37,8 +37,7 @@ OP_NEW_RANGE {
 OP_DEFINE_METHOD {
     SharedPtr<Value> code = stack.pop(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
-    std::string &funcname = ((ValueOP*)&(*(op)))->value->upcast<StrValue>()->str_value;
-    this->add_function(funcname, code);
+    this->add_function(code->upcast<CodeValue>()->code_id, code);
 }
 
 OP_SUB {
@@ -81,7 +80,6 @@ OP_ADD {
 
 OP_FUNCALL {
     SharedPtr<Value> funname(stack.pop());
-    std::string &funname_c = funname->upcast<StrValue>()->str_value;
     int argcnt = op->operand.int_value;
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
@@ -89,69 +87,32 @@ OP_FUNCALL {
         stack.extract_tuple(t);
     }
     if (!(stack.size() >= (size_t) argcnt)) {
-        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c.c_str(), argcnt, stack.size());
+        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
         dump_stack();
         abort();
     }
-    assert(funname->value_type == VALUE_TYPE_STR);
-    if (funname_c == "print") {
-        for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> v(stack.pop());
-            SharedPtr<Value> s(v->to_s());
-            printf("%s", s->upcast<StrValue>()->str_value.c_str());
-        }
-    } else if (funname_c == "p") {
-        SharedPtr<Value> v(stack.pop());
-        v->dump();
-    } else if (funname_c == "open") {
-        SharedPtr<Value> filename(stack.pop());
-        std::string mode;
-        if (argcnt >= 2) {
-            mode = stack.pop()->upcast<StrValue>()->str_value.c_str();
-        } else {
-            mode = "rb";
-        }
-        // TODO: check \0
-        SharedPtr<FileValue> file = new FileValue();
-        if (file->open(
-            filename->upcast<StrValue>()->str_value,
-            mode
-        )) {
-            stack.push(file);
-        } else {
-            abort(); // todo: throw exception
-        }
-    } else if (funname_c == "say") {
-        for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> v(stack.pop());
-            SharedPtr<Value> s(v->to_s());
-            printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
-        }
-    } else if (funname_c == "getenv") {
-        assert(argcnt==1);
-        SharedPtr<Value> v(stack.pop());
-        SharedPtr<Value> s(v->to_s());
-        char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
-        if (env) {
-            SharedPtr<StrValue> ret = new StrValue();
-            ret->set_str(env);
+    ID id = funname->upcast<SymbolValue>()->id;
+    assert(funname->value_type == VALUE_TYPE_SYMBOL);
+    auto iter = this->builtin_functions.find(id);
+    if (iter != this->builtin_functions.end()) {
+        if (iter->second->argc==0) {
+            SharedPtr<Value> ret = iter->second->func0();
             stack.push(ret);
-        } else {
-            stack.push(UndefValue::instance());
+        } else if (iter->second->argc==1) {
+            SharedPtr<Value> v = stack.pop();
+            SharedPtr<Value> ret = iter->second->func1(v);
+            stack.push(ret);
+        } else if (iter->second->argc==-1) {
+            std::vector<SharedPtr<Value>> vec;
+            for (int i=0; i<argcnt; i++) {
+                SharedPtr<Value> arg = stack.pop();
+                vec.push_back(arg);
+            }
+            SharedPtr<Value> ret = iter->second->funcv(vec);
+            stack.push(ret);
         }
-    } else if (funname_c == "usleep") {
-        // TODO: remove later
-        SharedPtr<Value> v(stack.pop());
-        assert(v->value_type == VALUE_TYPE_INT);
-        SharedPtr<Value> s(v->to_i());
-        usleep(s->upcast<IntValue>()->int_value);
-    } else if (funname_c == "exit") {
-        SharedPtr<Value> v(stack.pop());
-        assert(v->value_type == VALUE_TYPE_INT);
-        SharedPtr<Value> s(v->to_i());
-        exit(s->upcast<IntValue>()->int_value);
     } else {
-        auto iter =  this->functions.find(funname->upcast<StrValue>()->str_value.c_str());
+        auto iter =  this->functions.find(id);
         if (iter != this->functions.end()) {
             SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
             // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
@@ -178,7 +139,7 @@ OP_FUNCALL {
             }
             frame_stack->push_back(fframe);
         } else {
-            fprintf(stderr, "Unknown function: %s\n", funname->upcast<StrValue>()->str_value.c_str());
+            fprintf(stderr, "Unknown function: %s\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
             abort();
         }
     }
