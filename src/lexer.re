@@ -30,6 +30,8 @@ private:
     int m_lineno;
     bool divable;
     std::stringstream *string_buffer;
+    unsigned char qw_mode;
+    int next_token;
  
 public:
 
@@ -62,6 +64,8 @@ public:
         , m_lineno(1)
         , divable(false)
         , string_buffer(NULL)
+        , qw_mode('\0')
+        , next_token(0)
     {
         m_buffer = new char[m_buffer_size];
         m_cursor = m_limit = m_token = m_marker = m_buffer;
@@ -129,7 +133,17 @@ public:
     int scan(Node **yylval) {
 std:
         m_token = m_cursor;
- 
+
+        if (next_token) {
+            int n = next_token;
+            next_token = 0;
+            return n;
+        }
+
+        if (qw_mode) {
+            goto qw_literal;
+        }
+
     /*!re2c
         re2c:define:YYCTYPE = "char";
         re2c:define:YYCURSOR = m_cursor;
@@ -151,6 +165,14 @@ std:
     */
 
 /*!re2c
+    "qw(" {
+        qw_mode = '(';
+        return QW_START;
+    }
+    "qw[" {
+        qw_mode = '[';
+        return QW_START;
+    }
     "+" { return ADD; }
     "-" { return SUB; }
     "*" { return MUL; }
@@ -380,6 +402,61 @@ regexp_literal:
     ANY_CHARACTER {
         tora_add_string_literal(*(m_cursor-1));
         goto regexp_literal;
+    }
+*/
+
+qw_literal:
+/*!re2c
+    ")" {
+        if (qw_mode == '(') {
+            qw_mode = '\0';
+
+            if (string_buffer) {
+                this->next_token = QW_END;
+
+                *yylval = new StrNode(NODE_STRING, string_buffer->str());
+                delete string_buffer; string_buffer = NULL;
+                return QW_WORD;
+            } else {
+                return QW_END;
+            }
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto regexp_literal;
+        }
+    }
+    "]" {
+        if (qw_mode == '[') {
+            qw_mode = '\0';
+
+            if (string_buffer) {
+                this->next_token = QW_END;
+
+                *yylval = new StrNode(NODE_STRING, string_buffer->str());
+                delete string_buffer; string_buffer = NULL;
+                return QW_WORD;
+            } else {
+                return QW_END;
+            }
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto regexp_literal;
+        }
+    }
+    [ \t\f\b\n] {
+        if (string_buffer) {
+            *yylval = new StrNode(NODE_STRING, string_buffer->str());
+            delete string_buffer; string_buffer = NULL;
+            return QW_WORD;
+        }
+        goto qw_literal; // skip
+    }
+    ANY_CHARACTER {
+        if (!string_buffer) {
+            tora_open_string_literal();
+        }
+        tora_add_string_literal(*(m_cursor-1));
+        goto qw_literal;
     }
 */
 

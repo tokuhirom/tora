@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
     tora::Parser parser;
     do {
         token_number = scanner->scan(&yylval);
+        // printf("TOKEN: %d\n", token_number);
         parser.set_lineno(scanner->lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);

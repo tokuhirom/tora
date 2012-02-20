@@ -4,6 +4,7 @@
 %left PLUSPLUS.
 %left DOT.
 %left DOTDOT.
+%left QW_START QW_END.
 %left L_BRACKET R_BRACKET.
 %left EQ.
 %left LT GT LE GE.
@@ -315,6 +316,7 @@ primary_expression(A) ::= STRING_LITERAL(B). {
 }
 primary_expression(A) ::= variable(B). { A = B; }
 primary_expression(A) ::= array_creation(B). { A = B; }
+primary_expression(A) ::= qw_creation(B). { A = B; }
 primary_expression(A) ::= hash_creation(B). { A = B; }
 /* tuple */
 primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
@@ -323,6 +325,24 @@ primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
 }
 primary_expression(A) ::= DOTDOTDOT. {
     A = new VoidNode(NODE_DOTDOTDOT);
+}
+
+/* qw */
+qw_creation(A) ::= QW_START qw_list(B) QW_END. {
+    B->type = NODE_MAKE_ARRAY;
+    A = B;
+}
+qw_creation(A) ::= QW_START QW_END. {
+    A = new ListNode(NODE_MAKE_ARRAY);
+}
+qw_list(A) ::= QW_WORD(B). {
+    ListNode *n = new ListNode();
+    n->push_back(B);
+    A = n;
+}
+qw_list(A) ::= qw_list(B) QW_WORD(C). {
+    B->upcast<ListNode>()->push_back(C);
+    A = B;
 }
 
 int(A) ::= INT_LITERAL(B). {
