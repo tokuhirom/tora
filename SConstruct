@@ -51,13 +51,14 @@ libfiles = [
 ########
 # tests.
 if 'test' in COMMAND_LINE_TARGETS:
+    programs = ['tora']
     for src in glob("tests/test_*.cc"):
-        env.Program(src.rstrip(".cc") + '.t', [
+        programs.append(env.Program(src.rstrip(".cc") + '.t', [
             libfiles,
             re2files,
             src,
-        ])
-    env.Command('test', 'tora', 'prove --source Executable tests/ --source Perl t')
+        ]))
+    env.Command('test', programs, 'prove --source Executable tests/ --source Perl t')
 
 ########
 # main programs
