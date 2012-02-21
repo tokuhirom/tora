@@ -34,5 +34,11 @@ elsif (false) { say("ELSIF") }
 else { say("ELSE"); }
 ...
 
+run_is(<<'...', "60\n45\n");
+my $x = 45;
+if (my $x = 60) { say($x); }
+say($x);
+...
+
 done_testing;
 

@@ -1,3 +1,5 @@
+/* vim: set filetype=cpp: */
+
 OP_PUSH_TRUE {
     stack.push(new BoolValue(true));
 }

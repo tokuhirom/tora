@@ -6,6 +6,22 @@
 #include "value/regexp.h"
 #include "disasm.h"
 
+using namespace tora;
+
+static int count_variable_declare(const SharedPtr<Node> &node) {
+    if (node->type == NODE_MY) {
+        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        return ln->size();
+    } else {
+        auto iter = node->list->begin();
+        int ret = 0;
+        for (; iter!=node->list->end(); iter++) {
+            ret += count_variable_declare(*iter);
+        }
+        return ret;
+    }
+}
+
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
     for (level = 0; level<this->blocks->size(); level++) {
@@ -229,6 +245,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
 
         Compiler funccomp(this->symbol_table);
+        if (funccomp.blocks) {
+            delete funccomp.blocks;
+            funccomp.blocks = NULL;
+        }
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block());
 
@@ -391,9 +411,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         */
         auto if_node = node->upcast<IfNode>();
 
-        this->push_block();
-        OP *enter = new OP(OP_ENTER);
-        ops->push_back(enter);
+        const int decvar_in_cond = count_variable_declare(if_node->cond());
+
+        OP * enter;
+        if (decvar_in_cond) {
+            this->push_block();
+
+            enter = new OP(OP_ENTER);
+            ops->push_back(enter);
+        }
 
         {
 
@@ -420,10 +446,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         }
 
-        ops->push_back(new OP(OP_LEAVE));
+        if (decvar_in_cond) {
+            ops->push_back(new OP(OP_LEAVE));
 
-        enter->operand.int_value = this->blocks->back()->vars.size();
-        this->pop_block();
+            enter->operand.int_value = this->blocks->back()->vars.size();
+            this->pop_block();
+        }
 
         break;
     }
