@@ -1,0 +1,17 @@
+print(<<EOF);
+Hello, world.
+EOF
+
+say("OOOOO");
+
+print(<<XXX, "DIVDIV\n", <<YYY);
+Hello, world.
+XXX
+HogeHoge
+FugaFuga
+YYY
+
+# TODO: support unexpected EOF in heredoc
+
+__END__
+Hello, world.

@@ -326,6 +326,9 @@ primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
 primary_expression(A) ::= DOTDOTDOT. {
     A = new VoidNode(NODE_DOTDOTDOT);
 }
+primary_expression(A) ::= HEREDOC_START(B). {
+    A = B;
+}
 
 /* qw */
 qw_creation(A) ::= QW_START qw_list(B) QW_END. {

@@ -11,6 +11,7 @@
 #include "parser.h"
 #include <iostream>
 #include <fstream>
+#include <queue>
 
 namespace tora {
 
@@ -32,6 +33,12 @@ private:
     std::stringstream *string_buffer;
     unsigned char qw_mode;
     int next_token;
+
+    struct HereDoc {
+        StrNode *val;
+        std::string marker;
+    };
+    std::queue<HereDoc*> heredoc_queue;
  
 public:
 
@@ -50,7 +57,12 @@ public:
         }
         string_buffer = new std::stringstream();
     }
+    void tora_add_string_literal(const std::string &str) {
+        assert(string_buffer);
+        (*string_buffer) << str;
+    }
     void tora_add_string_literal(char c) {
+        assert(string_buffer);
         (*string_buffer) << c;
     }
  
@@ -161,7 +173,8 @@ std:
         IDENTIFIER             = [A-Za-z_][A-Za-z0-9_]*;
         DOUBLE                 = [1-9][0-9]*[.][0-9]+;
         LF                     = "\\n";
-
+        HEREDOC_MARKER         = [A-Za-z0-9_]+;
+        HEREDOC_START          = "<<" HEREDOC_MARKER;
     */
 
 /*!re2c
@@ -189,7 +202,13 @@ std:
     }
     "\n" {
         increment_line_number();
-        goto std;
+        if (heredoc_queue.size() > 0) {
+            tora_open_string_literal();
+            ++m_token;
+            goto heredoc_literal_start;
+        } else {
+            goto std;
+        }
     }
     ";" { return SEMICOLON; }
     "sub" {return FUNCSUB; }
@@ -200,6 +219,13 @@ std:
     "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }
     "..." { return DOTDOTDOT; }
+    HEREDOC_START {
+        HereDoc * here = new HereDoc();
+        *yylval = here->val = new StrNode(NODE_IDENTIFIER, "");
+        here->marker = this->text().substr(2, this->text().length()-2);
+        heredoc_queue.push(here);
+        return HEREDOC_START;
+    }
     DOUBLE {
         double tmp = 0;
         char *head;
@@ -270,10 +296,6 @@ std:
         increment_line_number();
         increment_line_number();
         goto end;
-    }
-    "\n" {
-        increment_line_number();
-        goto std;
     }
     IDENTIFIER {
         std::string token(m_token, m_cursor-m_token);
@@ -457,6 +479,58 @@ qw_literal:
         }
         tora_add_string_literal(*(m_cursor-1));
         goto qw_literal;
+    }
+*/
+
+heredoc_literal_start:
+/*!re2c
+    [A-Z0-9a-z_]+ "\n" {
+        std::string &marker = heredoc_queue.front()->marker;
+        if (this->text().length() >= marker.length()+1) {
+            std::string target_marker = this->text().substr(this->text().length()-marker.length()-1, marker.length());
+            if (target_marker == marker) {
+                HereDoc *here = heredoc_queue.front();
+                heredoc_queue.pop();
+                here->val->str_value = string_buffer->str();
+                delete string_buffer; string_buffer = NULL;
+                delete here;
+                if (heredoc_queue.size() > 0) {
+                    tora_open_string_literal();
+                    goto heredoc_literal_start;
+                } else {
+                    goto std;
+                }
+            } else {
+                // printf("TARGET: '%s' FOO : '%s'\n", target_marker.c_str(), marker.c_str());
+                goto FAIL_TARGET;
+            }
+        } else {
+    FAIL_TARGET:
+            tora_add_string_literal(this->text());
+            goto heredoc_literal_start;
+        }
+    }
+    "\n" {
+        increment_line_number();
+        tora_add_string_literal(*(m_cursor-1));
+        goto heredoc_literal_start;
+    }
+    ANY_CHARACTER {
+        tora_add_string_literal(*(m_cursor-1));
+        goto heredoc_literal_inner;
+    }
+*/
+
+heredoc_literal_inner:
+/*!re2c
+    "\n" {
+        increment_line_number();
+        tora_add_string_literal(*(m_cursor-1));
+        goto heredoc_literal_start;
+    }
+    ANY_CHARACTER {
+        tora_add_string_literal(*(m_cursor-1));
+        goto heredoc_literal_inner;
     }
 */
 
