@@ -49,7 +49,8 @@ syntax
  * qq{}
  * say $_ for $array;
  * return if $_;
- * $array.map({ say($_); });
+ * $array.map(^{ say($_); });
+ * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
  * lambda syntax: ^{ }
  * <<'...'
@@ -67,6 +68,7 @@ feature
   * -p option
   * -i option
   * __FILE__
+  * do not create scope if thre is no var definition.
 
 Library
 -------
