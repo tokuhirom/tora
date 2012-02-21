@@ -73,7 +73,7 @@ public:
     }
  
     ~Scanner() {
-        delete ifs;
+        if (ifs != &std::cin) { delete ifs; }
         delete [] m_buffer;
         if (string_buffer) { delete string_buffer; }
     }
