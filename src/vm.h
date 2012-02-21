@@ -18,6 +18,7 @@ typedef enum {
     FRAME_TYPE_LEXICAL = 1,
     FRAME_TYPE_FUNCTION,
     FRAME_TYPE_TRY,
+    FRAME_TYPE_FOREACH,
 } frame_type_t;
 
 // TODO rename LexicalVarsFrame to Frame
@@ -42,6 +43,7 @@ public:
         delete vars;
     }
     void setVar(int id, SharedPtr<Value> v) {
+        assert(id < this->vars->capacity());
         (*this->vars)[id] = v;
     }
     SharedPtr<Value> find(int id) {
@@ -85,6 +87,14 @@ public:
     std::vector<SharedPtr<OP>> *orig_ops;
     FunctionFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
         this->type = FRAME_TYPE_FUNCTION;
+    }
+};
+
+class ForeachFrame : public LexicalVarsFrame {
+public:
+    SharedPtr<Value> iter;
+    ForeachFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
+        this->type = FRAME_TYPE_FOREACH;
     }
 };
 

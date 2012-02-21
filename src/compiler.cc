@@ -685,7 +685,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         */
 
         this->compile(node->upcast<ForEachNode>()->source());
-        ops->push_back(new OP(OP_GET_ITER));
+
+        this->push_block();
+        OP *enter_foreach = new OP(OP_ENTER_FOREACH);
+        ops->push_back(enter_foreach);
 
         size_t label1 = ops->size();
 
@@ -706,6 +709,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         size_t label2 = ops->size();
         jump_label2->operand.int_value = label2;
+
+        enter_foreach->operand.int_value = this->blocks->back()->vars.size();
+        this->pop_block();
+
+        ops->push_back(new OP(OP_LEAVE));
 
         break;
     }

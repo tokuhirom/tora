@@ -84,9 +84,8 @@ statement(A) ::= WHILE L_PAREN expression(B) R_PAREN block(C). {
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN block(E). {
     A = new ForNode(B, C, D, E);
 }
-statement(A) ::= FOR L_PAREN parameter_list(B) IN expression(C) R_PAREN block(D). {
-    B->type = NODE_TUPLE;
-    A = new ForEachNode(B->upcast<ListNode>(), C, D);
+statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
+    A = new ForEachNode(B, C, D);
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }

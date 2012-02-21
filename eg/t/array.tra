@@ -16,13 +16,13 @@ my $empty_array = [];
 __END__
 hoge
 [dump] array(9):
-[0]     [dump] str: hOgE
-[1]     [dump] str: hOgE1
-[2]     [dump] str: haga
-[3]     [dump] undef
-[4]     [dump] undef
-[5]     [dump] str: IYAN
-[6]     [dump] undef
-[7]     [dump] undef
-[8]     [dump] str: hOgE8
+    [0]     [dump] str: hOgE
+    [1]     [dump] str: hOgE1
+    [2]     [dump] str: haga
+    [3]     [dump] undef
+    [4]     [dump] undef
+    [5]     [dump] str: IYAN
+    [6]     [dump] undef
+    [7]     [dump] undef
+    [8]     [dump] str: hOgE8
 4

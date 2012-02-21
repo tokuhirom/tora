@@ -453,31 +453,39 @@ OP_POP_TOP {
     stack.pop();
 }
 
-OP_GET_ITER {
-    // Binary operations remove the top of the stack (TOS) and the second top-most stack item (TOS1) from the stack. They perform the operation, and put the result back on the stack.
+OP_ENTER_FOREACH {
     SharedPtr<Value>a = stack.pop();
+    SharedPtr<Value> iiter;
     if (a->value_type == VALUE_TYPE_ARRAY) {
         SharedPtr<ArrayValue::iterator> iter = new ArrayValue::iterator();
         iter->parent = a->upcast<ArrayValue>();
         iter->counter = 0;
-        stack.push(iter);
+        iiter = iter;
     } else if (a->value_type == VALUE_TYPE_RANGE) {
         SharedPtr<RangeValue::iterator> iter = new RangeValue::iterator(a->upcast<RangeValue>());
-        stack.push(iter);
+        iiter = iter;
     } else if (a->value_type == VALUE_TYPE_HASH) {
         SharedPtr<HashValue::iterator> iter = new HashValue::iterator(a->upcast<HashValue>());
-        stack.push(iter);
+        iiter = iter;
     } else {
         fprintf(stderr, "This object doesn't support iteration\n");
         a->dump();
         abort();
     }
+
+    int vars_cnt = op->operand.int_value;
+    SharedPtr<ForeachFrame> fframe = new ForeachFrame(vars_cnt, frame_stack->back());
+    fframe->top = stack.size();
+    fframe->iter = iiter;
+    frame_stack->push_back(fframe);
 }
 
 OP_FOR_ITER {
     // TOS is an iterator. Call its next() method. If this yields a new value, push it on the stack (leaving the iterator below it). If the iterator indicates it is exhausted TOS is popped, and the byte code counter is incremented by delta.
 
-    SharedPtr<Value> iter = stack.back();
+    auto fframe = frame_stack->back()->upcast<ForeachFrame>();
+    assert(fframe->type == FRAME_TYPE_FOREACH);
+    SharedPtr<Value> iter = fframe->iter;
     if (iter->value_type == VALUE_TYPE_ARRAY_ITERATOR) {
         SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();
         if (aiter->counter < aiter->parent->size()) {

@@ -170,10 +170,10 @@ public:
 
 class ForEachNode: public Node {
 public:
-    SharedPtr<ListNode> vars() { return this->list->at(0)->upcast<ListNode>(); }
+    SharedPtr<Node> vars() { return this->list->at(0); }
     SharedPtr<Node> source() { return this->list->at(1); }
     SharedPtr<Node> block() { return this->list->at(2); }
-    ForEachNode(SharedPtr<ListNode> i, SharedPtr<Node> s, SharedPtr<Node> b): Node() {
+    ForEachNode(SharedPtr<Node> i, SharedPtr<Node> s, SharedPtr<Node> b): Node() {
         this->type = NODE_FOREACH;
         this->list->push_back(i);
         this->list->push_back(s);

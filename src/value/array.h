@@ -35,6 +35,7 @@ public:
         print_indent(indent);
         printf("[dump] %s(%zd):\n", this->type_str(), values->size());
         for (size_t i=0; i<values->size(); i++) {
+            print_indent(indent+1);
             printf("[%zd] ", i);
             values->at(i)->dump(indent+1);
         }
