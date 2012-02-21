@@ -20,6 +20,11 @@ public:
         this->value_type = VALUE_TYPE_CODE;
     }
     ~CodeValue() {
+        auto iter = code_params->begin();
+        for (; iter!=code_params->end(); iter++) {
+            delete *iter;
+        }
+
         delete code_params;
         delete code_opcodes;
     }
