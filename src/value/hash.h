@@ -35,16 +35,16 @@ public:
     }
 
     class iterator : public Value {
-        std::map<std::string, SharedPtr<Value> >::reverse_iterator iter;
+        std::map<std::string, SharedPtr<Value> >::iterator iter;
         SharedPtr<HashValue> parent;
     public:
         iterator(const SharedPtr<HashValue> & parent_) {
             value_type = VALUE_TYPE_HASH_ITERATOR;
             parent = parent_;
-            iter = parent->data.rbegin();
+            iter = parent->data.begin();
         }
         bool finished() {
-            return iter == parent->data.rend();
+            return iter == parent->data.end();
         }
         SharedPtr<Value> get() {
             return iter->second;

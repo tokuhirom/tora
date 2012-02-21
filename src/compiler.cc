@@ -596,9 +596,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_MAKE_HASH: {
         auto args = node->upcast<ListNode>();
         int args_len = args->size();
-        while (args->size() > 0) {
-            this->compile(args->back());
-            args->pop_back();
+        for (int i=0; i<args_len; i+=2) {
+            this->compile(args->at(i+1));
+            this->compile(args->at(i));
         }
 
         SharedPtr<OP> tmp = new OP;

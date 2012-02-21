@@ -1,3 +1,4 @@
+/* vim: set filetype=cpp: */
 #ifndef TORA_SCANNER_H_
 #define TORA_SCANNER_H_
 
