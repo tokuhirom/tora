@@ -20,6 +20,11 @@ public:
         this->op_type = type;
     }
     virtual ~OP() { }
+
+    template<class Y>
+    Y* upcast() {
+        return dynamic_cast<Y*>(&(*(this)));
+    }
 };
 
 /**
