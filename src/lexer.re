@@ -305,6 +305,11 @@ std:
         // skip white space
         goto std;
     }
+    "__LINE__" {
+        *yylval = new IntNode(NODE_INT, this->lineno());
+        divable = true;
+        return INT_LITERAL;
+    }
     "\n__END__\n" {
         increment_line_number();
         increment_line_number();
