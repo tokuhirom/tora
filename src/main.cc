@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <cassert>
 #include <sstream>
+#include <memory>
 
 #include "tora.h"
 #include "vm.h"
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
     }
 
     std::ifstream *ifs;
-    Scanner *scanner;
+    SharedPtr<Scanner> scanner;
     if (code) {
         std::stringstream *s = new std::stringstream(std::string(code) + ";");
         scanner = new Scanner(s);
@@ -79,7 +80,10 @@ int main(int argc, char **argv) {
         parser.set_lineno(scanner->lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);
-    delete scanner;
+    if (scanner->in_heredoc()) {
+        fprintf(stderr, "Unexpected EOF in heredoc\n");
+        exit(1);
+    }
 
     if (parser.is_failure()) {
         return 1;

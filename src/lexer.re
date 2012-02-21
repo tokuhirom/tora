@@ -9,13 +9,14 @@
 #include "node.h"
 #include "nodes.gen.h"
 #include "parser.h"
+#include "prim.h"
 #include <iostream>
 #include <fstream>
 #include <queue>
 
 namespace tora {
 
-class Scanner {
+class Scanner: public Prim {
 private:
     // iostream sucks. very slow.
     std::istream *ifs;
@@ -141,6 +142,10 @@ public:
     int lineno() {
         return m_lineno;
     }
+
+    bool in_heredoc() {
+        return heredoc_queue.size() > 0;
+    }
  
     int scan(Node **yylval) {
 std:
@@ -178,6 +183,14 @@ std:
     */
 
 /*!re2c
+    "qw{" {
+        qw_mode = '{';
+        return QW_START;
+    }
+    "qw!" {
+        qw_mode = '!';
+        return QW_START;
+    }
     "qw(" {
         qw_mode = '(';
         return QW_START;
@@ -429,26 +442,16 @@ regexp_literal:
 
 qw_literal:
 /*!re2c
-    ")" {
-        if (qw_mode == '(') {
-            qw_mode = '\0';
-
-            if (string_buffer) {
-                this->next_token = QW_END;
-
-                *yylval = new StrNode(NODE_STRING, string_buffer->str());
-                delete string_buffer; string_buffer = NULL;
-                return QW_WORD;
-            } else {
-                return QW_END;
-            }
-        } else {
-            tora_add_string_literal(*(m_cursor-1));
-            goto regexp_literal;
+    [)!}\]] {
+        char open_char;
+        switch (*(m_cursor-1)) {
+        case ')': open_char='('; break;
+        case '!': open_char='!'; break;
+        case '}': open_char='{'; break;
+        case ']': open_char='['; break;
+        default:  abort();
         }
-    }
-    "]" {
-        if (qw_mode == '[') {
+        if (open_char == qw_mode) {
             qw_mode = '\0';
 
             if (string_buffer) {
@@ -461,6 +464,9 @@ qw_literal:
                 return QW_END;
             }
         } else {
+            if (!string_buffer) {
+                tora_open_string_literal();
+            }
             tora_add_string_literal(*(m_cursor-1));
             goto regexp_literal;
         }

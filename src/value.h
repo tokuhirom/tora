@@ -198,7 +198,7 @@ public:
     }
     void dump(int indent) {
         print_indent(indent);
-        printf("[dump] str: '%s'\n", str_value.c_str());
+        printf("[dump] str: %s\n", str_value.c_str());
     }
     const char *type_str() { return "str"; }
     SharedPtr<StrValue> to_s() {

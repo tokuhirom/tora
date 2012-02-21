@@ -45,7 +45,6 @@ syntax
 
  * open($fname).read();
  * given-when
- * qw()
  * q{}
  * qq{}
  * say $_ for $array;
@@ -53,6 +52,9 @@ syntax
  * $array.map({ say($_); });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
  * lambda syntax: ^{ }
+ * <<'...'
+ * "hogehoge $foo"
+ * "hogehoge #{ 3+2 }"
 
 feature
 -------

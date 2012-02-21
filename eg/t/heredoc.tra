@@ -11,7 +11,10 @@ HogeHoge
 FugaFuga
 YYY
 
-# TODO: support unexpected EOF in heredoc
-
 __END__
 Hello, world.
+OOOOO
+Hello, world.
+DIVDIV
+HogeHoge
+FugaFuga
