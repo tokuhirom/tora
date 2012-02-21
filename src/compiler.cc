@@ -414,7 +414,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         const int decvar_in_cond = count_variable_declare(if_node->cond());
 
-        OP * enter;
+        OP * enter = NULL;
         if (decvar_in_cond) {
             this->push_block();
 
