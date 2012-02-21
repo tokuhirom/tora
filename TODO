@@ -56,6 +56,11 @@ syntax
  * <<'...'
  * "hogehoge $foo"
  * "hogehoge #{ 3+2 }"
+ * last
+ * next
+ * continue
+ * for (my $v in [1,2,3]) { say($v); }
+ * my ($k, $v)
 
 feature
 -------
