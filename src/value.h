@@ -31,6 +31,8 @@ typedef enum {
     VALUE_TYPE_RANGE_ITERATOR,
     VALUE_TYPE_EXCEPTION,
     VALUE_TYPE_SYMBOL,
+    VALUE_TYPE_HASH,
+    VALUE_TYPE_HASH_ITERATOR,
 } value_type_t;
 
 typedef enum {
@@ -61,7 +63,7 @@ protected:
 public:
     value_type_t value_type;
 
-    void dump() { this->dump(0); }
+    virtual void dump() { this->dump(0); }
     virtual void dump(int indent) = 0;
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();

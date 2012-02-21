@@ -7,9 +7,11 @@
 namespace tora {
 
 class HashValue: public Value {
+protected:
     std::map<std::string, SharedPtr<Value> > data;
 public:
     HashValue() {
+        value_type = VALUE_TYPE_HASH;
     }
     SharedPtr<Value> get(const std::string &key) {
         return data[key];
@@ -28,6 +30,35 @@ public:
         SharedPtr<StrValue> s = index->to_s();
         return this->get(s->str_value);
     }
+    size_t size() {
+        return data.size();
+    }
+
+    class iterator : public Value {
+        std::map<std::string, SharedPtr<Value> >::reverse_iterator iter;
+        SharedPtr<HashValue> parent;
+    public:
+        iterator(const SharedPtr<HashValue> & parent_) {
+            value_type = VALUE_TYPE_HASH_ITERATOR;
+            parent = parent_;
+            iter = parent->data.rbegin();
+        }
+        bool finished() {
+            return iter == parent->data.rend();
+        }
+        SharedPtr<Value> get() {
+            return iter->second;
+        }
+        void increment() {
+            iter++;
+        }
+        void dump(int indent) {
+            print_indent(indent);
+            printf("[dump] hash_iterator:\n");
+            parent->dump(indent+1);
+        }
+        const char *type_str() { return "hash_iterator"; }
+    };
 };
 
 };
