@@ -237,6 +237,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("getenv", builtin_getenv);
     this->add_builtin_function("exit", builtin_exit);
     this->add_builtin_function("say", builtin_say);
+    this->add_builtin_function("open", builtin_open);
     this->add_builtin_function("print", builtin_print);
 }
 
