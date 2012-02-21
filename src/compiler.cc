@@ -109,7 +109,8 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
                     break;
                 }
                 default: {
-                    fprintf(stderr, "Compilation failed\n");
+                    fprintf(stderr, "\nCompilation failed. This is not a variable node:\n");
+                    ln->at(i)->dump(1);
                     this->error++;
                     break;
                 }
