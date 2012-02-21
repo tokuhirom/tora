@@ -483,6 +483,7 @@ qw_literal:
 */
 
 heredoc_literal_start:
+    char * cc_marker = m_cursor;
 /*!re2c
     [A-Z0-9a-z_]+ "\n" {
         std::string &marker = heredoc_queue.front()->marker;
@@ -506,7 +507,8 @@ heredoc_literal_start:
             }
         } else {
     FAIL_TARGET:
-            tora_add_string_literal(this->text());
+            std::string token(cc_marker, m_cursor-cc_marker);
+            tora_add_string_literal(token);
             goto heredoc_literal_start;
         }
     }
