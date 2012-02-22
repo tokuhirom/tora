@@ -10,11 +10,11 @@
 
 using namespace tora;
 
-VM::VM(std::vector<SharedPtr<OP>>* ops_, SharedPtr<SymbolTable> &symbol_table_) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
     sp = 0;
     pc = 0;
     symbol_table = symbol_table_;
-    ops = new std::vector<SharedPtr<OP>>(*ops_);
+    ops = ops_;
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
@@ -22,7 +22,6 @@ VM::VM(std::vector<SharedPtr<OP>>* ops_, SharedPtr<SymbolTable> &symbol_table_) 
 
 VM::~VM() {
     delete this->global_vars;
-    delete this->ops;
     delete this->frame_stack;
 
     {

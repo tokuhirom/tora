@@ -2,6 +2,7 @@
 #define TORA_DISASM_H_
 
 #include "op.h"
+#include "op_array.h"
 
 namespace tora {
 
@@ -9,7 +10,7 @@ class Disasm {
 public:
     static void disasm_op(OP* op);
 
-    static void disasm(std::vector<SharedPtr<OP>> *ops);
+    static void disasm(SharedPtr<OPArray>& ops);
 };
 
 };

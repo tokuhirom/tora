@@ -31,7 +31,7 @@ void Disasm::disasm_op(OP* op) {
     printf("\n");
 }
 
-void Disasm::disasm(std::vector<SharedPtr<OP>> *ops) {
+void Disasm::disasm(SharedPtr<OPArray>& ops) {
     printf("-- OP DUMP    --\n");
     for (size_t i=0; i<ops->size(); i++) {
         printf("[%03zd] %s", i, opcode2name[ops->at(i)->op_type]);

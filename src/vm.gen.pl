@@ -67,7 +67,7 @@ using namespace tora;
             $ret .= "inline void VM::PP_$k->[0]() {\n";
             # $ret .= "inline void VM::PP_$k->[0]() {\n";
             if ($k->[1] =~ /op/) {
-                $ret .= "SharedPtr<OP> op = ops->at(pc);\n";
+                $ret .= "OP* op = ops->at(pc);\n";
             }
             # $ret .= qq{#line @{[ $k->[2] + 1 ]} "vm.inc"\n};
             $ret .= "$k->[1]\n";

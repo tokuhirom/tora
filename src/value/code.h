@@ -6,6 +6,7 @@
 #include "../value.h"
 #include "../op.h"
 #include "../shared_ptr.h"
+#include "../op_array.h"
 
 namespace tora {
 
@@ -14,7 +15,7 @@ public:
     ID code_id;
     std::string code_name;
     std::vector<std::string*> *code_params;
-    std::vector<SharedPtr<OP>> *code_opcodes;
+    SharedPtr<OPArray> code_opcodes;
 
     CodeValue(): Value() {
         this->value_type = VALUE_TYPE_CODE;
@@ -26,7 +27,6 @@ public:
         }
 
         delete code_params;
-        delete code_opcodes;
     }
     void dump(int indent) {
         print_indent(indent);

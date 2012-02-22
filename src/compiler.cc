@@ -263,8 +263,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         code->code_name = funcname;
         code->code_id = this->symbol_table->get_id(funcname);
         code->code_params = params;
-        // TODO memory leaks?
-        code->code_opcodes = new std::vector<SharedPtr<OP>>(*funccomp.ops);
+        code->code_opcodes = funccomp.ops;
 
         SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
         ops->push_back(putval);

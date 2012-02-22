@@ -9,6 +9,7 @@
 #include "stack.h"
 #include "shared_ptr.h"
 #include "symbol_table.h"
+#include "op_array.h"
 
 namespace tora {
 
@@ -84,7 +85,7 @@ public:
 class FunctionFrame : public LexicalVarsFrame {
 public:
     int return_address;
-    std::vector<SharedPtr<OP>> *orig_ops;
+    SharedPtr<OPArray> orig_ops;
     FunctionFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
         this->type = FRAME_TYPE_FUNCTION;
     }
@@ -143,8 +144,8 @@ class VM {
 public:
     tora::Stack stack;
     int sp; // stack pointer
-    size_t pc; // program counter
-    std::vector<SharedPtr<OP>> *ops;
+    int pc; // program counter
+    SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Value>> *global_vars;
     std::map<ID, SharedPtr<Value>> functions;
     SharedPtr<SymbolTable> symbol_table;
@@ -163,7 +164,7 @@ public:
      */
     std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
 
-    VM(std::vector<SharedPtr<OP>>* ops_, SharedPtr<SymbolTable> &symbol_table_);
+    VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();
     void execute();
 
