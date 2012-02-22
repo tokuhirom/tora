@@ -31,7 +31,7 @@ my $x = "hoge";
 say($x/"fuga");
 ...
 
-run_is(<<'...', '', qq{Unknown function: foo\n});
+run_is(<<'...', '', qq{Unknown function: foo\n}, 1);
 foo();
 ...
 
