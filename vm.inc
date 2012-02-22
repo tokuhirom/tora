@@ -114,6 +114,17 @@ OP_FUNCALL {
             }
             SharedPtr<Value> ret = iter->second->funcv(vec);
             stack.push(ret);
+        } else if (iter->second->argc==-2) {
+            SharedPtr<Value> v = stack.pop();
+            SharedPtr<Value> ret = iter->second->func_vm1(this, v);
+            if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            printf("DIE\n");
+                this->die(ret);
+            } else {
+            printf("NO DIE\n");
+            ret->dump();
+                stack.push(ret);
+            }
         }
     } else {
         auto iter =  this->functions.find(id);

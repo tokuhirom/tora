@@ -38,6 +38,7 @@ typedef enum {
 typedef enum {
     EXCEPTION_TYPE_UNDEF,
     EXCEPTION_TYPE_STOP_ITERATION,
+    EXCEPTION_TYPE_GENERAL,
 } exception_type_t;
 
 class CodeValue;
@@ -209,14 +210,22 @@ public:
 };
 
 class ExceptionValue : public Value {
+    std::string message_;
 public:
     exception_type_t exception_type;
     ExceptionValue(exception_type_t e) : exception_type(e) {
         this->value_type = VALUE_TYPE_EXCEPTION;
     }
+    ExceptionValue(const char *msg) : exception_type(EXCEPTION_TYPE_GENERAL) {
+        this->value_type = VALUE_TYPE_EXCEPTION;
+        message_ = msg;
+    }
     void dump(int indent) {
         print_indent(indent);
         printf("[dump] exception(%d)\n", exception_type);
+    }
+    std::string message() {
+        return message_;
     }
     const char *type_str() { return "exception"; }
 };

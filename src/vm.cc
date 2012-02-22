@@ -4,6 +4,10 @@
 #include "value/code.h"
 #include "value/regexp.h"
 #include "value/file.h"
+#include "lexer.gen.h"
+#include "parser.class.h"
+#include "compiler.h"
+#include "disasm.h"
 #include <unistd.h>
 #include <algorithm>
 #include <functional>
@@ -113,10 +117,13 @@ void VM::die(SharedPtr<Value> & exception) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
                 fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+            } else if (exception->value_type == VALUE_TYPE_EXCEPTION && exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
+                fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
             } else {
                 fprintf(stderr, "died\n");
                 exception->dump();
             }
+            exit(1);
             break;
         }
 
@@ -195,6 +202,63 @@ static SharedPtr<Value> builtin_exit(SharedPtr<Value> &v) {
     exit(s->upcast<IntValue>()->int_value);
 }
 
+static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
+    assert(v->value_type == VALUE_TYPE_STR);
+
+    std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
+    SharedPtr<Scanner> scanner(new Scanner(ss));
+
+    Node *yylval = NULL;
+    int token_number;
+    tora::Parser parser;
+    do {
+        token_number = scanner->scan(&yylval);
+        parser.set_lineno(scanner->lineno());
+        parser.parse(token_number, yylval);
+    } while (token_number != 0);
+    if (scanner->in_heredoc()) {
+        return new ExceptionValue("Unexpected EOF in heredoc.");
+    }
+    if (parser.is_failure()) {
+        return new ExceptionValue("Parsing failed.");
+    }
+
+    // compile
+    // SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+    Compiler compiler(vm->symbol_table);
+    compiler.init_globals();
+    compiler.compile(parser.root_node());
+    if (compiler.error) {
+        return new ExceptionValue("Compilation failed.");
+    }
+
+    // run it
+    // tora::VM vm(compiler.ops, symbol_table);
+    // vm->init_globals(argc-optind, argv+optind);
+
+    // save orig ops.
+    SharedPtr<OPArray> orig_ops = vm->ops;
+    int orig_pc = vm->pc;
+
+    if (0) {
+        Disasm::disasm(compiler.ops);
+    }
+
+    vm->ops = compiler.ops;
+    vm->pc = 0;
+    vm->execute();
+
+    // restore
+    vm->ops= orig_ops;
+    vm->pc = orig_pc;
+
+    return UndefValue::instance();
+}
+
+/**
+ * do $file; => eval(open($file).read())
+ */
+
 static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
     SharedPtr<Value> filename(args.at(1));
     std::string mode;
@@ -255,5 +319,6 @@ void VM::register_standard_methods() {
     this->add_builtin_function("say", builtin_say);
     this->add_builtin_function("open", builtin_open);
     this->add_builtin_function("print", builtin_print);
+    this->add_builtin_function("eval", builtin_eval);
 }
 

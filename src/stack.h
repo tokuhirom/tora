@@ -20,7 +20,10 @@ public:
         container.pop_back();
     }
     SharedPtr<Value> pop() {
-        SharedPtr<Value> v = container.back();
+        assert(container.size() > 0);
+
+
+        SharedPtr<Value> v(container.back());
         container.pop_back();
         return v;
     }
