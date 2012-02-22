@@ -186,7 +186,7 @@ public:
         this->value_type = VALUE_TYPE_STR;
         this->str_value = str;
     }
-    StrValue(std::string &str): Value() {
+    StrValue(const std::string str): Value() {
         this->value_type = VALUE_TYPE_STR;
         this->str_value = str;
     }
@@ -195,7 +195,7 @@ public:
         str_value = s;
     }
     int length();
-    void set_str(std::string s) {
+    void set_str(const std::string & s) {
         str_value = s;
     }
     void dump(int indent) {

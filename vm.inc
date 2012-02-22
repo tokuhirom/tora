@@ -514,10 +514,12 @@ OP_FOR_ITER {
     } else if (iter->value_type == VALUE_TYPE_HASH_ITERATOR) {
         SharedPtr<HashValue::iterator> riter = iter->upcast<HashValue::iterator>();
         if (!riter->finished()) {
-            SharedPtr<Value> val = riter->get();
+            SharedPtr<Value> key = riter->getkey();
+            SharedPtr<Value> val = riter->getval();
             riter->increment();
             SharedPtr<TupleValue> t = new TupleValue();
             t->push(val);
+            t->push(key);
             stack.push(t);
         } else {
             stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));

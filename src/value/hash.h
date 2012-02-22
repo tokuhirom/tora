@@ -46,7 +46,10 @@ public:
         bool finished() {
             return iter == parent->data.end();
         }
-        SharedPtr<Value> get() {
+        SharedPtr<Value> getkey() {
+            return new StrValue(iter->first);
+        }
+        SharedPtr<Value> getval() {
             return iter->second;
         }
         void increment() {
