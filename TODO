@@ -86,4 +86,5 @@ Library
  * HTTP client
  * HTTP server
  * B::Deparse
+ * Test::More
 

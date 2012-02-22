@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <algorithm>
 #include <functional>
+#include <iostream>
+#include <fstream>
 
 using namespace tora;
 
@@ -202,11 +204,8 @@ static SharedPtr<Value> builtin_exit(SharedPtr<Value> &v) {
     exit(s->upcast<IntValue>()->int_value);
 }
 
-static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
-    assert(v->value_type == VALUE_TYPE_STR);
-
-    std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
-    SharedPtr<Scanner> scanner(new Scanner(ss));
+static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
+    SharedPtr<Scanner> scanner(new Scanner(is));
 
     Node *yylval = NULL;
     int token_number;
@@ -264,11 +263,25 @@ static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
     }
 }
 
+static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
+    assert(v->value_type == VALUE_TYPE_STR);
+
+    std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
+    return eval_foo(vm, ss);
+}
+
 /**
  * do $file; => eval(open($file).read())
  */
-// static SharedPtr<Value> builtin_do(SharedPtr<Value> &v) {
-// }
+static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
+    assert(v->value_type == VALUE_TYPE_STR);
+    std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value);
+    if (ifs->is_open()) {
+        return eval_foo(vm, ifs);
+    } else {
+        return new ExceptionValue(v->upcast<StrValue>()->str_value + " : " + strerror(errno));
+    }
+}
 
 static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
     SharedPtr<Value> filename(args.at(1));
@@ -331,5 +344,6 @@ void VM::register_standard_methods() {
     this->add_builtin_function("open", builtin_open);
     this->add_builtin_function("print", builtin_print);
     this->add_builtin_function("eval", builtin_eval);
+    this->add_builtin_function("do",   builtin_do);
 }
 

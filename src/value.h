@@ -216,7 +216,7 @@ public:
     ExceptionValue(exception_type_t e) : exception_type(e) {
         this->value_type = VALUE_TYPE_EXCEPTION;
     }
-    ExceptionValue(const char *msg) : exception_type(EXCEPTION_TYPE_GENERAL) {
+    ExceptionValue(const std::string &msg) : exception_type(EXCEPTION_TYPE_GENERAL) {
         this->value_type = VALUE_TYPE_EXCEPTION;
         message_ = msg;
     }
