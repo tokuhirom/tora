@@ -6,5 +6,5 @@ sub fib($n) {
     }
 }
 
-say(fib(3));
+say(fib(39));
 

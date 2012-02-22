@@ -223,18 +223,21 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_BLOCK: {
-        this->push_block();
-
-        OP *enter = new OP(OP_ENTER);
-        ops->push_back(enter);
+        const int decvar_in_cond = count_variable_declare(node->upcast<NodeNode>()->node());
+        OP *enter = NULL;
+        if (decvar_in_cond) {
+            this->push_block();
+            enter = new OP(OP_ENTER);
+            ops->push_back(enter);
+        }
 
         this->compile(node->upcast<NodeNode>()->node());
 
-        ops->push_back(new OP(OP_LEAVE));
-
-        enter->operand.int_value = this->blocks->back()->vars.size();
-
-        this->pop_block();
+        if (decvar_in_cond) {
+            ops->push_back(new OP(OP_LEAVE));
+            enter->operand.int_value = this->blocks->back()->vars.size();
+            this->pop_block();
+        }
 
         break;
     }
@@ -273,9 +276,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
         funccomp.ops->push_back(new OP(OP_RETURN));
-#if 0
-        Disasm::disasm(funccomp.ops);
-#endif
+        // Disasm::disasm(funccomp.ops);
 
         SharedPtr<CodeValue> code = new CodeValue();
         code->code_name = funcname;
