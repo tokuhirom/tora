@@ -173,6 +173,30 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
     }
 }
 
+class OptimizableEnterScope {
+    Compiler *compiler_;
+    OP *enter;
+public:
+    OptimizableEnterScope(Compiler *compiler, const SharedPtr<Node> &node) {
+        int decvar_in_cond = count_variable_declare(node);
+        compiler_ = compiler;
+        if (decvar_in_cond) {
+            enter = new OP(OP_ENTER);
+            compiler->ops->push_back(enter);
+            compiler->push_block();
+        } else {
+            enter = NULL;
+        }
+    }
+    ~OptimizableEnterScope() {
+        if (enter) {
+            compiler_->ops->push_back(new OP(OP_LEAVE));
+            enter->operand.int_value = compiler_->blocks->back()->vars.size();
+            compiler_->pop_block();
+        }
+    }
+};
+
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
@@ -186,7 +210,6 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(new OP(OP_END));
 
         enter->operand.int_value = this->blocks->back()->vars.size();
-
         this->pop_block();
 
         break;
@@ -223,20 +246,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_BLOCK: {
-        const int decvar_in_cond = count_variable_declare(node->upcast<NodeNode>()->node());
-        OP *enter = NULL;
-        if (decvar_in_cond) {
-            this->push_block();
-            enter = new OP(OP_ENTER);
-            ops->push_back(enter);
-        }
-
-        this->compile(node->upcast<NodeNode>()->node());
-
-        if (decvar_in_cond) {
-            ops->push_back(new OP(OP_LEAVE));
-            enter->operand.int_value = this->blocks->back()->vars.size();
-            this->pop_block();
+        {
+            OptimizableEnterScope es(this, node->upcast<NodeNode>()->node());
+            this->compile(node->upcast<NodeNode>()->node());
         }
 
         break;
@@ -430,15 +442,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         */
         auto if_node = node->upcast<IfNode>();
 
-        const int decvar_in_cond = count_variable_declare(if_node->cond());
-
-        OP * enter = NULL;
-        if (decvar_in_cond) {
-            this->push_block();
-
-            enter = new OP(OP_ENTER);
-            ops->push_back(enter);
-        }
+        OptimizableEnterScope oes(this, if_node->cond());
 
         {
 
@@ -463,13 +467,6 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             int end_label = ops->size();
             jump_end->operand.int_value = end_label;
 
-        }
-
-        if (decvar_in_cond) {
-            ops->push_back(new OP(OP_LEAVE));
-
-            enter->operand.int_value = this->blocks->back()->vars.size();
-            this->pop_block();
         }
 
         break;
