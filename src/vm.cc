@@ -239,6 +239,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
     // save orig ops.
     SharedPtr<OPArray> orig_ops = vm->ops;
     int orig_pc = vm->pc;
+    size_t orig_stack_size = vm->stack.size();
 
     if (0) {
         Disasm::disasm(compiler.ops);
@@ -252,12 +253,22 @@ static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
     vm->ops= orig_ops;
     vm->pc = orig_pc;
 
-    return UndefValue::instance();
+    if (orig_stack_size < vm->stack.size()) {
+        SharedPtr<Value> ret = vm->stack.pop();
+        while (orig_stack_size < vm->stack.size()) {
+            vm->stack.pop();
+        }
+        return ret;
+    } else {
+        return UndefValue::instance();
+    }
 }
 
 /**
  * do $file; => eval(open($file).read())
  */
+// static SharedPtr<Value> builtin_do(SharedPtr<Value> &v) {
+// }
 
 static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
     SharedPtr<Value> filename(args.at(1));
