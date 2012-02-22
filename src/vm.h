@@ -53,7 +53,7 @@ public:
     void dump(int i) {
         printf("type: %s [%d]\n", this->type == FRAME_TYPE_FUNCTION ? "function" : "lexical", i);
         for (size_t n=0; n<this->vars->size(); n++) {
-            printf("  %d\n", n);
+            printf("  %zd\n", n);
             this->vars->at(n)->dump();
         }
         if (this->up) {
@@ -190,6 +190,13 @@ public:
     void die(SharedPtr<Value> & exception);
 
     void register_standard_methods();
+
+    int get_int_operand() {
+        return ops->at(pc)->operand.int_value;
+    }
+    int get_double_operand() {
+        return ops->at(pc)->operand.double_value;
+    }
 
 #include "vm.ops.inc.h"
 };

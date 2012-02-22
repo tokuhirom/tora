@@ -13,19 +13,21 @@ OP_PUSH_UNDEF {
 }
 
 OP_PUSH_INT {
-    stack.push(new IntValue(op->operand.int_value));
+    stack.push(new IntValue(get_int_operand()));
 }
 
 OP_PUSH_DOUBLE {
-    stack.push(new DoubleValue(op->operand.double_value));
+    stack.push(new DoubleValue(get_double_operand()));
 }
 
 OP_PUSH_STRING {
+    OP * op = ops->at(pc);
     SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
     stack.push(sv);
 }
 
 OP_PUSH_VALUE {
+    OP * op = ops->at(pc);
     SharedPtr<Value> v = ((ValueOP*)&(*(op)))->value;
     stack.push(v);
 }
@@ -82,7 +84,7 @@ OP_ADD {
 
 OP_FUNCALL {
     SharedPtr<Value> funname(stack.pop());
-    int argcnt = op->operand.int_value;
+    int argcnt = get_int_operand();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
         argcnt = t->size();
@@ -150,8 +152,8 @@ OP_FUNCALL {
 OP_METHOD_CALL {
     SharedPtr<Value> object(stack.pop());
     SharedPtr<Value> funid(stack.pop());
-    if (!(stack.size() >= (size_t) op->operand.int_value)) {
-        // printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, op->operand.int_value, stack.size());
+    if (!(stack.size() >= (size_t) get_int_operand())) {
+        // printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), stack.size());
         dump_stack();
         abort();
     }
@@ -167,7 +169,7 @@ OP_METHOD_CALL {
             break;
         } else {
             if (iter->second->argc==0) {
-                if (op->operand.int_value == 0) {
+                if (get_int_operand() == 0) {
                     SharedPtr<Value> v = iter->second->func0(object);
                     stack.push(v);
                 } else {
@@ -175,7 +177,7 @@ OP_METHOD_CALL {
                     break;
                 }
             } else if (iter->second->argc==1) {
-                if (op->operand.int_value == 1) {
+                if (get_int_operand() == 1) {
                     SharedPtr<Value> arg1 = stack.pop();
                     SharedPtr<Value> v = iter->second->func1(object, arg1);
                     stack.push(v);
@@ -250,7 +252,7 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(op->operand.int_value, frame_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
@@ -265,6 +267,7 @@ OP_LEAVE {
 
 OP_PUSH_IDENTIFIER {
     // deprecate?
+    OP * op = ops->at(pc);
     SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
     stack.push(sv);
 }
@@ -278,12 +281,12 @@ OP_JUMP_IF_FALSE {
 
     SharedPtr<Value> b(v->to_b());
     if (!b->upcast<BoolValue>()->bool_value) {
-        pc = op->operand.int_value-1;
+        pc = get_int_operand()-1;
     }
 }
 
 OP_JUMP {
-    pc = op->operand.int_value-1;
+    pc = get_int_operand()-1;
 }
 
 OP_EQ {
@@ -319,7 +322,7 @@ OP_LE {
 OP_SETLOCAL {
     SharedPtr<Value> rvalue = stack.pop();
     frame_stack->back()->setVar(
-        op->operand.int_value,
+        get_int_operand(),
         rvalue
     );
     stack.push(rvalue);
@@ -328,8 +331,8 @@ OP_SETLOCAL {
 OP_SETDYNAMIC {
     // frame_stack->back()->dump_vars();
     SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-    int level = (op->operand.int_value >> 16) & 0x0000FFFF;
-    int no    = op->operand.int_value & 0x0000ffff;
+    int level = (get_int_operand() >> 16) & 0x0000FFFF;
+    int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
     for (int i=0; i<level; i++) {
         frame = frame->up;
@@ -345,8 +348,8 @@ OP_SETDYNAMIC {
 OP_GETDYNAMIC {
     // lexical vars
     SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-    int level = (op->operand.int_value >> 16) & 0x0000FFFF;
-    int no    = op->operand.int_value & 0x0000ffff;
+    int level = (get_int_operand() >> 16) & 0x0000FFFF;
+    int no    = get_int_operand() & 0x0000ffff;
     for (int i=0; i<level; i++) {
         frame = frame->up;
     }
@@ -357,20 +360,20 @@ OP_GETDYNAMIC {
     } else { // TODO: remove this and use 'my' keyword?
         DBG2("There is no variable...\n");
         v = UndefValue::instance();
-        frame_stack->back()->setVar(op->operand.int_value, v);
+        frame_stack->back()->setVar(get_int_operand(), v);
         stack.push(v);
     }
 }
 
 OP_GETLOCAL {
     // lexical vars
-    SharedPtr<Value>v = frame_stack->back()->find(op->operand.int_value);
+    SharedPtr<Value>v = frame_stack->back()->find(get_int_operand());
     if (v) {
         // printf("found lexical var\n");
         stack.push(v);
     } else { // TODO: remove this and use 'my' keyword?
         v = UndefValue::instance();
-        frame_stack->back()->setVar(op->operand.int_value, v);
+        frame_stack->back()->setVar(get_int_operand(), v);
         stack.push(v);
     }
 }
@@ -400,7 +403,7 @@ OP_UNARY_NEGATIVE {
 
 OP_MAKE_HASH {
     SharedPtr<HashValue> h = new HashValue();
-    int size = op->operand.int_value;
+    int size = get_int_operand();
     for (int i=0; i<size; i+=2) {
         SharedPtr<StrValue> k = stack.pop()->to_s();
         SharedPtr<Value> v = stack.pop();
@@ -411,7 +414,7 @@ OP_MAKE_HASH {
 
 OP_MAKE_ARRAY {
     SharedPtr<ArrayValue> a = new ArrayValue();
-    int array_size = op->operand.int_value;
+    int array_size = get_int_operand();
     for (int i=0; i<array_size; i++) {
         SharedPtr<Value> v = stack.pop();
         a->push(v);
@@ -421,7 +424,7 @@ OP_MAKE_ARRAY {
 
 OP_MAKE_TUPLE {
     SharedPtr<TupleValue> t = new TupleValue();
-    int tuple_size = op->operand.int_value;
+    int tuple_size = get_int_operand();
     for (int i=0; i<tuple_size; i++) {
         SharedPtr<Value> v = stack.pop();
         t->push(v);
@@ -445,7 +448,7 @@ OP_UNARY_INCREMENT {
 }
 
 OP_GETGLOBAL {
-    int globalvarno = op->operand.int_value;
+    int globalvarno = get_int_operand();
     stack.push(this->global_vars->at(globalvarno));
 }
 
@@ -473,7 +476,7 @@ OP_ENTER_FOREACH {
         abort();
     }
 
-    int vars_cnt = op->operand.int_value;
+    int vars_cnt = get_int_operand();
     SharedPtr<ForeachFrame> fframe = new ForeachFrame(vars_cnt, frame_stack->back());
     fframe->top = stack.size();
     fframe->iter = iiter;
@@ -529,7 +532,7 @@ OP_FOR_ITER {
 OP_JUMP_IF_STOP_EXCEPTION {
     SharedPtr<Value> top = stack.back();
     if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
-        pc = op->operand.int_value-1;
+        pc = get_int_operand()-1;
     }
 }
 
@@ -540,7 +543,7 @@ OP_DOTDOTDOT {
 
 OP_TRY {
     SharedPtr<TryFrame> fframe = new TryFrame(frame_stack->back());
-    fframe->return_address = op->operand.int_value-1;
+    fframe->return_address = get_int_operand()-1;
     fframe->top = stack.size();
     frame_stack->push_back(fframe);
 }
