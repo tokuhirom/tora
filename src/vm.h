@@ -10,6 +10,7 @@
 #include "shared_ptr.h"
 #include "symbol_table.h"
 #include "op_array.h"
+#include <stdarg.h>
 
 namespace tora {
 
