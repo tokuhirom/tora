@@ -13,6 +13,8 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace tora;
 
@@ -58,6 +60,17 @@ void VM::init_globals(int argc, char**argv) {
         avalue->push(new StrValue(argv[i]));
     }
     this->global_vars->push_back(avalue);
+
+    // $ENV
+    this->global_vars->push_back(UndefValue::instance());
+
+    // $LIBPATH : Array
+    SharedPtr<ArrayValue> libpath = new ArrayValue();
+    libpath->push(new StrValue("lib"));
+    this->global_vars->push_back(libpath);
+
+    // $REQUIRED : Hash
+    this->global_vars->push_back(new HashValue());
 }
 
 template <class operationI, class operationD>
@@ -283,6 +296,58 @@ static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
     }
 }
 
+/**
+ */
+static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
+    SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
+    SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
+    std::string s = v->to_s()->str_value;
+    {
+        auto iter = s.find("::");
+        while (iter != std::string::npos) {
+            s.replace(iter, 2, "/");
+            iter = s.find("::");
+        }
+        s += ".tra";
+    }
+
+    // inc check
+    if (required->has_key(s)) {
+        if (required->get(s)->value_type == VALUE_TYPE_UNDEF) {
+            return new StrValue("Compilation failed in require");
+        } else {
+            return new IntValue(1);
+        }
+    }
+
+    // load
+    for (int i=0; i<libpath->size(); i++) {
+        std::string realfilename;
+        realfilename = libpath->at(i)->to_s()->str_value;
+        realfilename += "/";
+        realfilename += s;
+        struct stat stt;
+        if (stat(realfilename.c_str(), &stt)==0) {
+            SharedPtr<Value> realfilename_value(new StrValue(realfilename));
+            required->set_item(new StrValue(s), realfilename_value);
+            SharedPtr<Value> ret = builtin_do(vm, realfilename_value);
+            if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+                required->set_item(new StrValue(s), UndefValue::instance());
+                return ret;
+            } else {
+                return ret;
+            }
+        }
+    }
+
+    // not found...
+    std::string message = std::string("Cannot find ") + s + " in $LIBPATH\n";
+    for (int i=0; i<libpath->size(); i++) {
+        message += "  " + libpath->at(i)->to_s()->str_value;
+    }
+    return new ExceptionValue(message);
+}
+
 static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
     SharedPtr<Value> filename(args.at(1));
     std::string mode;
@@ -345,5 +410,6 @@ void VM::register_standard_methods() {
     this->add_builtin_function("print", builtin_print);
     this->add_builtin_function("eval", builtin_eval);
     this->add_builtin_function("do",   builtin_do);
+    this->add_builtin_function("require",   builtin_require);
 }
 

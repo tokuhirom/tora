@@ -28,6 +28,7 @@ public:
     SharedPtr<SymbolTable> symbol_table;
     int error;
     bool in_try_block;
+    bool dump_ops;
 
     Compiler(SharedPtr<SymbolTable> &symbol_table_) {
         error = 0;
@@ -36,6 +37,7 @@ public:
         ops = new OPArray();
         in_try_block = false;
         symbol_table = symbol_table_;
+        dump_ops = false;
     }
     ~Compiler() {
         delete global_vars;

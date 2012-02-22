@@ -49,6 +49,7 @@ public:
         (*this->vars)[id] = v;
     }
     SharedPtr<Value> find(int id) {
+        assert(id < this->vars->capacity());
         return (*this->vars)[id];
     }
     void dump(int i) {

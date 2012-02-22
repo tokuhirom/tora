@@ -1,0 +1,10 @@
+my $counter = 0;
+
+sub done_testing($n) {
+    say('' + $n + ".." + $counter);
+}
+
+done_testing(1);
+
+__END__
+1..0

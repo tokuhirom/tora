@@ -33,6 +33,13 @@ public:
     size_t size() {
         return data.size();
     }
+    bool has_key(SharedPtr<Value> key) {
+        SharedPtr<StrValue> k = key->to_s();
+        return this->has_key(k->str_value);
+    }
+    bool has_key(const std::string & key) {
+        return this->data.find(key) != this->data.end();
+    }
 
     class iterator : public Value {
         std::map<std::string, SharedPtr<Value> >::iterator iter;

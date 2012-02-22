@@ -111,6 +111,7 @@ int main(int argc, char **argv) {
     // compile
     SharedPtr<SymbolTable> symbol_table = new SymbolTable();
     tora::Compiler compiler(symbol_table);
+    compiler.dump_ops = dump_ops;
     compiler.init_globals();
     compiler.compile(parser.root_node());
     if (compiler.error) {

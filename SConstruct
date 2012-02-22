@@ -25,7 +25,6 @@ env.Append(CXXFLAGS=['-I./vendor/re2/'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CXXFLAGS=['-g'])
 env.Append(LDFLAGS=['-g'])
-env.Append(CCFLAGS=['-O2'])
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg'])
@@ -33,6 +32,9 @@ if ARGUMENTS.get('profile', 0):
 
 if ARGUMENTS.get('ndebug', 1) != '0':
     env.Append(CCFLAGS=['-DNDEBUG'])
+    env.Append(CCFLAGS=['-O2'])
+else:
+    env.Append(CCFLAGS=['-O0'])
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):

@@ -61,6 +61,8 @@ int tora::Compiler::find_localvar(std::string name, int &level) {
 void tora::Compiler::init_globals() {
     this->define_global_var("$ARGV");
     this->define_global_var("$ENV");
+    this->define_global_var("$LIBPATH");
+    this->define_global_var("$REQUIRED");
 }
 
 void tora::Compiler::set_variable(std::string &varname) {
@@ -272,6 +274,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         // function name
         std::string &funcname = funcdef_node->name()->upcast<StrNode>()->str_value;
 
+        this->push_block();
         auto params = new std::vector<std::string *>();
         for (size_t i=0; i<funcdef_node->params()->size(); i++) {
             params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
@@ -285,10 +288,13 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block());
+        this->pop_block();
 
         funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
         funccomp.ops->push_back(new OP(OP_RETURN));
-        // Disasm::disasm(funccomp.ops);
+        if (this->dump_ops) {
+            Disasm::disasm(funccomp.ops);
+        }
 
         SharedPtr<CodeValue> code = new CodeValue();
         code->code_name = funcname;
@@ -516,6 +522,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             // find local variable
             int level;
             int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
+            // dump_localvars();
             if (no<0) {
                 fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
                 this->error++;
