@@ -97,11 +97,26 @@ void VM::cmpop(operationI operation_i, operationD operation_d) {
     }
 }
 
+void VM::die(const char *format, ...) {
+    va_list ap;
+    char p[4096+1];
+    va_start(ap, format);
+    vsnprintf(p, 4096, format, ap);
+    va_end(ap);
+    std::string s = p;
+    SharedPtr<Value> v(new StrValue(s));
+    this->die(v);
+}
+
 void VM::die(SharedPtr<Value> & exception) {
     while (1) {
         if (frame_stack->size() == 1) {
-            fprintf(stderr, "died\n");
-            exception->dump();
+            if (exception->value_type == VALUE_TYPE_STR) {
+                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+            } else {
+                fprintf(stderr, "died\n");
+                exception->dump();
+            }
             break;
         }
 

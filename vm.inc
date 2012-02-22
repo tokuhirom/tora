@@ -143,8 +143,7 @@ OP_FUNCALL {
             }
             frame_stack->push_back(fframe);
         } else {
-            fprintf(stderr, "Unknown function: %s\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
-            abort();
+            this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
         }
     }
 }

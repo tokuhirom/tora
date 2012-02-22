@@ -22,6 +22,29 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
     }
 }
 
+void Compiler::define_my(SharedPtr<Node> node) {
+    SharedPtr<ListNode>ln = node->upcast<ListNode>();
+    for (size_t i=0; i < ln->size(); i++) {
+        auto target = ln->at(i);
+        switch (target->type) {
+        case NODE_GETVARIABLE: {
+            std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
+            this->define_localvar(name);
+            ops->push_back(new OP(OP_PUSH_UNDEF));
+            break;
+        }
+        case NODE_TUPLE: {
+            this->define_my(target);
+            break;
+        }
+        default:
+            fail("This is not a variable node: %s\n", target->type_name_str());
+            target->dump();
+            return;
+        }
+    }
+}
+
 int tora::Compiler::find_localvar(std::string name, int &level) {
     DBG("FIND LOCAL VAR %d\n", 0);
     for (level = 0; level<this->blocks->size(); level++) {
@@ -79,7 +102,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_SET_ITEM;
-        ops->push_back(tmp);
+       ops->push_back(tmp);
         break;
     }
     case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
@@ -169,12 +192,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_MY: {
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
-        for (size_t i=0; i < ln->size(); i++) {
-            std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
-            this->define_localvar(name);
-        }
-        // this->compile(node->upcast<NodeNode>()->node());
+        this->define_my(node);
         break;
     }
     case NODE_RETURN: {
@@ -756,6 +774,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         for (size_t i=0; i < ln->size(); i++) {
             this->compile(ln->at(i));
         }
+        OP *op = new OP(OP_MAKE_TUPLE);
+        op->operand.int_value = ln->size();
+        ops->push_back(op);
         break;
     }
     case NODE_DOTDOTDOT: {

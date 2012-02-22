@@ -40,6 +40,7 @@ public:
         delete global_vars;
         delete blocks;
     }
+    void define_my(SharedPtr<Node> node);
     void define_global_var(const char *name) {
         auto iter = global_vars->begin();
         for (; iter!=global_vars->end(); iter++) {
@@ -97,6 +98,15 @@ public:
             }
         }
         printf("--------------------\n");
+    }
+    void fail(const char *format, ...) {
+        fprintf(stderr, "Compilation failed:\n");
+        va_list ap;
+        va_start(ap, format);
+        vfprintf(stderr, format, ap);
+        va_end(ap);
+
+        error++;
     }
 
     /**

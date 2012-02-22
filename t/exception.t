@@ -26,7 +26,7 @@ say($e);
 say($x);
 ...
 
-run_is(<<'...', '', qq{'hoge' is not numeric.\n});
+run_is(<<'...', '', qq{'hoge' is not numeric.\n}, 1);
 my $x = "hoge";
 say($x/"fuga");
 ...

@@ -188,6 +188,7 @@ public:
         this->add_function(this->symbol_table->get_id(name), code);
     }
     void die(SharedPtr<Value> & exception);
+    void die(const char *format, ...);
 
     void register_standard_methods();
 
