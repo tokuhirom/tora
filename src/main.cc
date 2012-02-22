@@ -53,14 +53,18 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::ifstream *ifs;
+    std::ifstream *ifs = NULL;
     SharedPtr<Scanner> scanner;
     if (code) {
         std::stringstream *s = new std::stringstream(std::string(code) + ";");
         scanner = new Scanner(s);
     } else if (optind < argc) { // source code
         ifs = new std::ifstream(argv[optind], std::ios::in);
-        if (!ifs) { perror(argv[optind]); exit(EXIT_FAILURE); }
+        assert(ifs);
+        if (!ifs->is_open()) {
+            perror(argv[optind]);
+            exit(EXIT_FAILURE);
+        }
         scanner = new Scanner(ifs);
     } else {
         scanner = new Scanner(&std::cin);
@@ -76,7 +80,7 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    Node *yylval;
+    Node *yylval = NULL;
     int token_number;
     tora::Parser parser;
     do {

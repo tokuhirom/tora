@@ -82,6 +82,7 @@ public:
         , next_token(0)
     {
         m_buffer = new char[m_buffer_size];
+        assert(m_buffer);
         m_cursor = m_limit = m_token = m_marker = m_buffer;
         ifs = ifs_;
     }
