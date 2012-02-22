@@ -1,0 +1,22 @@
+sub fib($n) {
+    if ($n<2) {
+        return $n;
+    } else {
+        return fib($n-2) + fib($n-1);
+    }
+}
+
+say(fib(0));
+say(fib(1));
+say(fib(2));
+say(fib(3));
+say(fib(4));
+say(fib(5));
+
+__END__
+0
+1
+1
+2
+3
+5
