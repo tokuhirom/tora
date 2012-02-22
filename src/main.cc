@@ -66,10 +66,15 @@ int main(int argc, char **argv) {
         scanner = new Scanner(&std::cin);
     }
 
+#ifndef NDEBUG
     if (parse_trace) {
         tora::Parser::ParseTrace(stderr, (char*)"[Parser] >> ");
     }
-
+#else
+    if (parse_trace) {
+        fprintf(stderr, "Parsing trace is not supported on -DNDEBUG\n");
+    }
+#endif
 
     Node *yylval;
     int token_number;

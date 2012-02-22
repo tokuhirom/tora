@@ -31,6 +31,9 @@ if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg'])
     env.Append(LINKFLAGS=['-pg'])
 
+if ARGUMENTS.get('ndebug', 0):
+    env.Append(CCFLAGS=['-DNDEBUG'])
+
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
     env.Append(CCFLAGS=['-DDEBUG'])
