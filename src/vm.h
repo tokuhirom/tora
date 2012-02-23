@@ -10,6 +10,7 @@
 #include "shared_ptr.h"
 #include "symbol_table.h"
 #include "op_array.h"
+#include "value/hash.h"
 #include <stdarg.h>
 
 namespace tora {
@@ -21,6 +22,7 @@ typedef enum {
     FRAME_TYPE_FUNCTION,
     FRAME_TYPE_TRY,
     FRAME_TYPE_FOREACH,
+    FRAME_TYPE_PACKAGE,
 } frame_type_t;
 
 // TODO rename LexicalVarsFrame to Frame
@@ -125,11 +127,13 @@ struct CallbackFunction {
     typedef SharedPtr<Value> (*func0_t)();
     typedef SharedPtr<Value> (*func1_t)(SharedPtr<Value>&);
     typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
+    typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
     typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, SharedPtr<Value>&);
     union {
         func0_t    func0;
         func1_t    func1;
         funcv_t    funcv;
+        func_vm0_t func_vm0;
         func_vm1_t func_vm1;
     };
     int argc;
@@ -142,8 +146,60 @@ struct CallbackFunction {
     CallbackFunction(funcv_t func_) : argc(-1) {
         funcv = func_;
     }
-    CallbackFunction(func_vm1_t func_) : argc(-2) {
-        func_vm1 = func_;
+    CallbackFunction(func_vm0_t func_) : argc(-2) { func_vm0 = func_; }
+    CallbackFunction(func_vm1_t func_) : argc(-3) { func_vm1 = func_; }
+};
+
+class Package : public Value {
+    ID name_id;
+    std::map<ID, SharedPtr<Value>> data;
+public:
+    typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
+
+    Package(ID id) : name_id(id) { }
+    void add_function(ID function_name_id, SharedPtr<Value> code);
+    iterator find(ID id) {
+        return data.find(id);
+    }
+    void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
+        print_indent(indent);
+        printf("[dump] Package(%s):\n", symbol_table->id2name(name_id).c_str());
+        auto iter = data.begin();
+        for (; iter!=data.end(); iter++) {
+            print_indent(indent+1);
+            printf("%s:\n", symbol_table->id2name(iter->first).c_str());
+            iter->second->dump(indent+2);
+        }
+    }
+    void dump(int indent) {
+        print_indent(indent);
+        printf("[dump] Package\n");
+    }
+    const char *type_str() { return "package"; }
+    ID id() { return name_id; }
+    iterator begin() { return data.begin(); }
+    iterator end()   { return data.end(); }
+};
+
+class PackageMap : public Value {
+    std::map<ID, SharedPtr<Package>> data;
+public:
+    PackageMap() : Value() {
+        value_type = VALUE_TYPE_PACKAGE_MAP;
+    }
+    std::map<ID, SharedPtr<Package>>::iterator find(ID id) {
+        return data.find(id);
+    }
+    void dump(int indent) {
+        print_indent(indent);
+        printf("[dump] PackageMap(%zd)\n", data.size());
+    }
+    void set(SharedPtr<Package> &pkg) {
+        this->data[pkg->id()] = pkg;
+    }
+    const char *type_str() { return "package_map"; }
+    std::map<ID, SharedPtr<Package>>::iterator end() {
+        return data.end();
     }
 };
 
@@ -154,8 +210,15 @@ public:
     int pc; // program counter
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Value>> *global_vars;
-    std::map<ID, SharedPtr<Value>> functions;
     SharedPtr<SymbolTable> symbol_table;
+    std::string package;
+    SharedPtr<PackageMap> package_map;
+    SharedPtr<Package> find_package(ID id);
+
+    // TODO: cache
+    ID package_id() {
+        return this->symbol_table->get_id(package);
+    }
 
     std::map<ID, CallbackFunction*> builtin_functions;
     template <class T>
@@ -188,9 +251,8 @@ public:
         }
         printf("----------------\n");
     }
-    void add_function(ID id, SharedPtr<Value> code) {
-        functions[id] = code;
-    }
+    SharedPtr<Value> require(SharedPtr<Value> &v);
+    void add_function(ID id, SharedPtr<Value> code);
     void add_function(std::string &name, SharedPtr<Value> code) {
         this->add_function(this->symbol_table->get_id(name), code);
     }
@@ -205,6 +267,8 @@ public:
     int get_double_operand() {
         return ops->at(pc)->operand.double_value;
     }
+
+    SharedPtr<Value> copy_all_public_symbols(const std::string &src, const std::string &dst);
 
 #include "vm.ops.inc.h"
 };
@@ -222,6 +286,23 @@ public:
     void add_method(const std::string &name, T func) {
         ID id = vm_->symbol_table->get_id(name);
         this->methods->insert(std::make_pair(id, new Callback(func)));
+    }
+};
+
+class VM;
+
+class PackageFrame : public LexicalVarsFrame {
+    std::string orig_package;
+    VM * vm_;
+public:
+    PackageFrame(std::string pkg, VM *parent, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(0, up_) {
+        this->type = FRAME_TYPE_PACKAGE;
+        orig_package = pkg;
+        vm_ = parent;
+    }
+    ~PackageFrame() {
+        // printf("LEAVE PACKAGE FROM %s. back to %s\n", vm_->package.c_str(), orig_package.c_str());
+        vm_->package = orig_package;
     }
 };
 

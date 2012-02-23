@@ -33,6 +33,7 @@ typedef enum {
     VALUE_TYPE_SYMBOL,
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
+    VALUE_TYPE_PACKAGE_MAP,
 } value_type_t;
 
 typedef enum {
@@ -97,6 +98,10 @@ public:
     virtual SharedPtr<Value> get_item(SharedPtr<Value> index) {
         printf("This is not a container type: %s\n", this->type_str());
         abort();
+    }
+
+    bool is_exception() {
+        return value_type == VALUE_TYPE_EXCEPTION;
     }
 };
 

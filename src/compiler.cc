@@ -199,11 +199,34 @@ public:
     }
 };
 
+bool tora::Compiler::is_builtin(const std::string &s) {
+    const char *bs[] = {
+        "say",
+        "__PACKAGE__",
+        "p",
+        "require",
+        "getenv",
+        "eval",
+        "do",
+        "print",
+        NULL
+    };
+    for (int i=0; bs[i]; i++) {
+        if (s == bs[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block();
+        ValueOP * pkg = new ValueOP(OP_PACKAGE_ENTER, new StrValue(this->package()));
+        ops->push_back(pkg);
 
+        this->push_block();
         OP *enter = new OP(OP_ENTER);
         ops->push_back(enter);
 
@@ -212,6 +235,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(new OP(OP_END));
 
         enter->operand.int_value = this->blocks->back()->vars.size();
+        this->pop_block();
+
+        ops->push_back(new OP(OP_PACKAGE_LEAVE));
         this->pop_block();
 
         break;
@@ -286,6 +312,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;
         }
+        funccomp.package(this->package());
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block());
         this->pop_block();
@@ -297,8 +324,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         }
 
         SharedPtr<CodeValue> code = new CodeValue();
-        code->code_name = funcname;
-        code->code_id = this->symbol_table->get_id(funcname);
+        code->package_id = this->symbol_table->get_id(this->package());
+        code->func_name_id = this->symbol_table->get_id(funcname);
+        code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
 
@@ -379,14 +407,31 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             args->pop_back();
         }
 
-        ID id = this->symbol_table->get_id(node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value);
-        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
-        ops->push_back(o);
+        std::string funcname = node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value;
 
-        SharedPtr<OP> tmp = new OP;
-        tmp->op_type = OP_FUNCALL;
-        tmp->operand.int_value = args_len; // the number of args
-        ops->push_back(tmp);
+        if (this->is_builtin(funcname)) {
+            ID id = this->symbol_table->get_id(node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value);
+            SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+            ops->push_back(o);
+            SharedPtr<OP> tmp = new OP;
+            tmp->op_type = OP_BUILTIN_FUNCALL;
+            tmp->operand.int_value = args_len; // the number of args
+            ops->push_back(tmp);
+        } else {
+            /*
+            std::string funcname2 = funcname.find("::")==std::string::npos
+                ? this->package() + "::" + funcname
+                : funcname;
+            */
+            std::string funcname2 = funcname;
+            ID id = this->symbol_table->get_id(funcname2);
+            SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+            ops->push_back(o);
+            SharedPtr<OP> tmp = new OP;
+            tmp->op_type = OP_FUNCALL;
+            tmp->operand.int_value = args_len; // the number of args
+            ops->push_back(tmp);
+        }
         break;
     }
 #define C_OP_BINARY(type) \
@@ -819,6 +864,15 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     case NODE_DIE: {
         this->compile(node->upcast<NodeNode>()->node());
         ops->push_back(new OP(OP_DIE));
+        break;
+    }
+    case NODE_USE: {
+        // use Test::More;           # => 0
+        // use Test::More *;         # => 1
+        // use Test::More qw(ok is); # => 1
+        this->compile(node->upcast<BinaryNode>()->right());
+        this->compile(node->upcast<BinaryNode>()->left());
+        ops->push_back(new OP(OP_USE));
         break;
     }
 

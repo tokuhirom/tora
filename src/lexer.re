@@ -182,6 +182,7 @@ std:
         LF                     = "\\n";
         HEREDOC_MARKER         = [A-Za-z0-9_]+;
         HEREDOC_START          = "<<" HEREDOC_MARKER;
+        CLASS_NAME             = IDENTIFIER ( "::" IDENTIFIER )*;
     */
 
 /*!re2c
@@ -305,9 +306,13 @@ std:
     "return" { return RETURN; }
     "else" { return ELSE; }
     "elsif" { return ELSIF; }
+    "use" { return USE; }
     [ \t\r] {
         // skip white space
         goto std;
+    }
+    "__PACKAGE__" {
+        return PACKAGE_LITERAL;
     }
     "__LINE__" {
         *yylval = new IntNode(NODE_INT, this->lineno());
@@ -320,6 +325,12 @@ std:
         goto end;
     }
     IDENTIFIER {
+        std::string token(m_token, m_cursor-m_token);
+        *yylval = new StrNode(NODE_IDENTIFIER, token);
+        divable = true;
+        return IDENTIFIER;
+    }
+    CLASS_NAME {
         std::string token(m_token, m_cursor-m_token);
         *yylval = new StrNode(NODE_IDENTIFIER, token);
         divable = true;

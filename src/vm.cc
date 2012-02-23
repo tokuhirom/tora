@@ -26,6 +26,8 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
+    this->package = "main";
+    this->package_map = new PackageMap();
 }
 
 VM::~VM() {
@@ -217,7 +219,7 @@ static SharedPtr<Value> builtin_exit(SharedPtr<Value> &v) {
     exit(s->upcast<IntValue>()->int_value);
 }
 
-static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
+static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
     SharedPtr<Scanner> scanner(new Scanner(is));
 
     Node *yylval = NULL;
@@ -239,6 +241,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
     // SharedPtr<SymbolTable> symbol_table = new SymbolTable();
     Compiler compiler(vm->symbol_table);
     compiler.init_globals();
+    compiler.package(package);
     compiler.compile(parser.root_node());
     if (compiler.error) {
         return new ExceptionValue("Compilation failed.");
@@ -252,6 +255,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
     SharedPtr<OPArray> orig_ops = vm->ops;
     int orig_pc = vm->pc;
     size_t orig_stack_size = vm->stack.size();
+    size_t orig_frame_size = vm->frame_stack->size();
 
     if (0) {
         Disasm::disasm(compiler.ops);
@@ -265,6 +269,11 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
     vm->ops= orig_ops;
     vm->pc = orig_pc;
 
+    // remove frames
+    while (orig_frame_size < vm->frame_stack->size()) {
+        vm->frame_stack->pop_back();
+    }
+
     if (orig_stack_size < vm->stack.size()) {
         SharedPtr<Value> ret = vm->stack.pop();
         while (orig_stack_size < vm->stack.size()) {
@@ -273,6 +282,19 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
         return ret;
     } else {
         return UndefValue::instance();
+    }
+}
+static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
+    // TODO use current vm's package
+    return eval_foo(vm, is, "main");
+}
+
+static SharedPtr<Value> do_foo(VM *vm, const std::string &fname, std::string & package) {
+    std::ifstream *ifs = new std::ifstream(fname);
+    if (ifs->is_open()) {
+        return eval_foo(vm, ifs, package);
+    } else {
+        return new ExceptionValue(fname + " : " + strerror(errno));
     }
 }
 
@@ -296,12 +318,12 @@ static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
     }
 }
 
-/**
- */
-static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
+SharedPtr<Value> VM::require(SharedPtr<Value> &v) {
+    VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
     std::string s = v->to_s()->str_value;
+    std::string package = v->to_s()->str_value;
     {
         auto iter = s.find("::");
         while (iter != std::string::npos) {
@@ -330,7 +352,7 @@ static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
             required->set_item(new StrValue(s), realfilename_value);
-            SharedPtr<Value> ret = builtin_do(vm, realfilename_value);
+            SharedPtr<Value> ret = do_foo(vm, realfilename, package);
             if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                 required->set_item(new StrValue(s), UndefValue::instance());
                 return ret;
@@ -346,6 +368,12 @@ static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
         message += "  " + libpath->at(i)->to_s()->str_value;
     }
     return new ExceptionValue(message);
+}
+
+/**
+ */
+static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
+    return vm->require(v);
 }
 
 static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
@@ -391,6 +419,10 @@ static SharedPtr<Value> builtin_say(const std::vector<SharedPtr<Value>> & args) 
     return UndefValue::instance();
 }
 
+static SharedPtr<Value> builtin_package(VM *vm) {
+    return new StrValue(vm->package);
+}
+
 void VM::register_standard_methods() {
     {
         MetaClass meta(this, VALUE_TYPE_ARRAY);
@@ -411,5 +443,46 @@ void VM::register_standard_methods() {
     this->add_builtin_function("eval", builtin_eval);
     this->add_builtin_function("do",   builtin_do);
     this->add_builtin_function("require",   builtin_require);
+    this->add_builtin_function("__PACKAGE__",   builtin_package);
+}
+
+SharedPtr<Value> VM::copy_all_public_symbols(const std::string &src, const std::string &dst) {
+    ID srcid = this->symbol_table->get_id(src);
+    ID dstid = this->symbol_table->get_id(dst);
+    SharedPtr<Package> srcpkg = this->find_package(srcid);
+    SharedPtr<Package> dstpkg = this->find_package(dstid);
+
+    // printf("Copying %s to %s\n", src.c_str(), dst.c_str());
+    auto iter = srcpkg->begin();
+    for (; iter!=srcpkg->end(); iter++) {
+        SharedPtr<Value> v = iter->second;
+        if (v->value_type == VALUE_TYPE_CODE) {
+            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
+        } else {
+            // copy non-code value to other package?
+            abort();
+        }
+    }
+    // dstpkg->dump(this->symbol_table, 1);
+    return UndefValue::instance();
+}
+
+void VM::add_function(ID id, SharedPtr<Value> code) {
+    this->find_package(this->package_id())->add_function(id, code);
+}
+
+void Package::add_function(ID function_name_id, SharedPtr<Value> code) {
+    this->data[function_name_id] = code;
+}
+
+SharedPtr<Package> VM::find_package(ID id) {
+    auto iter = this->package_map->find(id);
+    if (iter != this->package_map->end()) {
+        return iter->second;
+    } else {
+        SharedPtr<Package> pkg =  new Package(id);
+        this->package_map->set(pkg);
+        return pkg;
+    }
 }
 

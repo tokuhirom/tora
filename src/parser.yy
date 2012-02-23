@@ -198,6 +198,14 @@ expression(A) ::= DIE expression(B). {
     A = new NodeNode(NODE_DIE, B);
 }
 
+expression(A) ::= use_expression(B).   { A = B; }
+use_expression(A) ::= USE identifier(B) MUL. {
+    A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));
+}
+use_expression(A) ::= USE identifier(B). {
+    A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 0));
+}
+
 assignment_expression(A) ::= conditional_expression(B). {
     A = B;
 }
@@ -330,6 +338,9 @@ primary_expression(A) ::= DOTDOTDOT. {
 }
 primary_expression(A) ::= HEREDOC_START(B). {
     A = B;
+}
+primary_expression(A) ::= PACKAGE_LITERAL. {
+    A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new ListNode());
 }
 
 /* qw */

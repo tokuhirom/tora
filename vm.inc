@@ -82,7 +82,7 @@ OP_ADD {
     }
 }
 
-OP_FUNCALL {
+OP_BUILTIN_FUNCALL {
     SharedPtr<Value> funname(stack.pop());
     int argcnt = get_int_operand();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
@@ -98,61 +98,86 @@ OP_FUNCALL {
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions.find(id);
-    if (iter != this->builtin_functions.end()) {
-        if (iter->second->argc==0) {
-            SharedPtr<Value> ret = iter->second->func0();
-            stack.push(ret);
-        } else if (iter->second->argc==1) {
-            SharedPtr<Value> v = stack.pop();
-            SharedPtr<Value> ret = iter->second->func1(v);
-            stack.push(ret);
-        } else if (iter->second->argc==-1) {
-            std::vector<SharedPtr<Value>> vec;
-            for (int i=0; i<argcnt; i++) {
-                SharedPtr<Value> arg = stack.pop();
-                vec.push_back(arg);
-            }
-            SharedPtr<Value> ret = iter->second->funcv(vec);
-            stack.push(ret);
-        } else if (iter->second->argc==-2) {
-            SharedPtr<Value> v = stack.pop();
-            SharedPtr<Value> ret = iter->second->func_vm1(this, v);
-            if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-                this->die(ret);
-            } else {
-                stack.push(ret);
-            }
+    assert(iter != this->builtin_functions.end());
+    if (iter->second->argc==0) {
+        SharedPtr<Value> ret = iter->second->func0();
+        stack.push(ret);
+    } else if (iter->second->argc==1) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> ret = iter->second->func1(v);
+        stack.push(ret);
+    } else if (iter->second->argc==-1) {
+        std::vector<SharedPtr<Value>> vec;
+        for (int i=0; i<argcnt; i++) {
+            SharedPtr<Value> arg = stack.pop();
+            vec.push_back(arg);
         }
-    } else {
-        auto iter =  this->functions.find(id);
-        if (iter != this->functions.end()) {
-            SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
-            // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
-
-            SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
-            fframe->return_address = pc;
-            fframe->orig_ops = ops;
-            fframe->top = stack.size() - argcnt;
-
-            pc = -1;
-            this->ops = code->code_opcodes;
-
-            // TODO: vargs support
-            // TODO: kwargs support
-            assert(argcnt == (int)code->code_params->size());
-            for (int i=0; i<argcnt; i++) {
-                SharedPtr<Value> arg = stack.pop();
-                /*
-                std::string *argname = code->code_params->at(i);
-                // printf("set lexical var: %d for %s\n", i, argname->c_str());
-                frame->setVar(argname, arg);
-                */
-                fframe->setVar(i, arg);
-            }
-            frame_stack->push_back(fframe);
+        SharedPtr<Value> ret = iter->second->funcv(vec);
+        stack.push(ret);
+    } else if (iter->second->argc==-2) {
+        SharedPtr<Value> ret = iter->second->func_vm0(this);
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
         } else {
-            this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
+            stack.push(ret);
         }
+    } else if (iter->second->argc==-3) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> ret = iter->second->func_vm1(this, v);
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
+    }
+}
+
+OP_FUNCALL {
+    SharedPtr<Value> funname(stack.pop());
+    int argcnt = get_int_operand();
+    if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
+        SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
+        argcnt = t->size();
+        stack.extract_tuple(t);
+    }
+    if (!(stack.size() >= (size_t) argcnt)) {
+        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
+        dump_stack();
+        abort();
+    }
+    ID id = funname->upcast<SymbolValue>()->id;
+    assert(funname->value_type == VALUE_TYPE_SYMBOL);
+    this->find_package(this->package_id())->dump(this->symbol_table, 1);
+
+    SharedPtr<Package> pkg = this->find_package(this->package_id());
+    auto iter = pkg->find(id);
+    if (iter != pkg->end()) {
+        SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
+        // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
+
+        SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+        fframe->return_address = pc;
+        fframe->orig_ops = ops;
+        fframe->top = stack.size() - argcnt;
+
+        pc = -1;
+        this->ops = code->code_opcodes;
+
+        // TODO: vargs support
+        // TODO: kwargs support
+        assert(argcnt == (int)code->code_params->size());
+        for (int i=0; i<argcnt; i++) {
+            SharedPtr<Value> arg = stack.pop();
+            /*
+            std::string *argname = code->code_params->at(i);
+            // printf("set lexical var: %d for %s\n", i, argname->c_str());
+            frame->setVar(argname, arg);
+            */
+            fframe->setVar(i, arg);
+        }
+        frame_stack->push_back(fframe);
+    } else {
+        this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
     }
 }
 
@@ -560,5 +585,37 @@ OP_TRY {
 OP_DIE {
     SharedPtr<Value> exception = stack.pop();
     this->die(exception);
+}
+
+OP_USE {
+    SharedPtr<Value> mod_name = stack.pop();
+    SharedPtr<Value> include  = stack.pop();
+    SharedPtr<Value> ret = this->require(mod_name);
+    if (ret->is_exception()) {
+        this->die(ret);
+    } else {
+        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value == 1) {
+            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<StrValue>()->str_value, this->package);
+            if (v->is_exception()) {
+                this->die(ret);
+            }
+        }
+        stack.push(ret);
+    }
+}
+
+OP_PACKAGE_ENTER {
+    OP * op = ops->at(pc);
+    SharedPtr<Value> package = ((ValueOP*)&(*(op)))->value;
+    assert(package->value_type = VALUE_TYPE_STR);
+
+    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package, this, frame_stack->back());
+    this->frame_stack->push_back(pframe);
+    this->package = package->upcast<StrValue>()->str_value;
+}
+
+OP_PACKAGE_LEAVE {
+    assert(this->frame_stack->back()->type == FRAME_TYPE_PACKAGE);
+    this->frame_stack->pop_back();
 }
 

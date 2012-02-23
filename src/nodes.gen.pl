@@ -54,6 +54,8 @@ my @nodes = qw(
 
     NODE_TRY
     NODE_DIE
+
+    NODE_USE
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';

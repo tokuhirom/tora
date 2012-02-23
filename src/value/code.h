@@ -12,6 +12,8 @@ namespace tora {
 
 class CodeValue: public Value {
 public:
+    ID package_id;
+    ID func_name_id;
     ID code_id;
     std::string code_name;
     std::vector<std::string*> *code_params;

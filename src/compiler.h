@@ -21,6 +21,7 @@ public:
 };
 
 class Compiler {
+    std::string package_;
 public:
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Block>> *blocks;
@@ -30,6 +31,9 @@ public:
     bool in_try_block;
     bool dump_ops;
 
+    void package(const std::string & p) { package_ = p; }
+    std::string & package() { return package_; }
+
     Compiler(SharedPtr<SymbolTable> &symbol_table_) {
         error = 0;
         blocks = new std::vector<SharedPtr<Block>>();
@@ -38,6 +42,7 @@ public:
         in_try_block = false;
         symbol_table = symbol_table_;
         dump_ops = false;
+        package_ = "main";
     }
     ~Compiler() {
         delete global_vars;
@@ -111,6 +116,8 @@ public:
 
         error++;
     }
+
+    bool is_builtin(const std::string &s);
 
     /**
      * This is RAII guard object.

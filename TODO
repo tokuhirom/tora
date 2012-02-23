@@ -64,6 +64,7 @@ syntax
  * $i++
  * __FILE__
  * $PROGRAM_NAME($0)
+ * $x ** 2
 
 feature
 -------
