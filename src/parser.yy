@@ -209,6 +209,9 @@ assignment_expression(A) ::= conditional_expression(B) DIV_ASSIGN conditional_ex
 }
 
 conditional_expression(A) ::= logical_or_expression(B). { A = B; }
+conditional_expression(A) ::= logical_or_expression(B) QUESTION expression(C) COLON conditional_expression(D). {
+    A = new IfNode(NODE_IF, B, C, D);
+}
 conditional_expression(A) ::= MY conditional_expression(B).   {
     ListNode*nl = new ListNode(NODE_MY);
     nl->push_back(B);

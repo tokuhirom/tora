@@ -225,6 +225,8 @@ std:
             goto std;
         }
     }
+    "?" { return QUESTION; }
+    ":" { return COLON; }
     ";" { return SEMICOLON; }
     "sub" {return FUNCSUB; }
     "try" {return TRY; }
