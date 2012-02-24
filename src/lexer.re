@@ -279,6 +279,7 @@ std:
     }
     "if" { return IF; }
     "in" { return IN; }
+    "class" { return CLASS; }
     "<" { return GT; }
     ">" { return LT; }
     "<=" { return GE; }

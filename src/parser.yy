@@ -89,6 +89,11 @@ statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
+statement(A) ::= class_statement(B). { A = B; }
+
+class_statement(A) ::= CLASS identifier(B) block(C). {
+    A = new ClassNode(B, NULL, NULL, C);
+}
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;

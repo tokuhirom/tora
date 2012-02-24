@@ -221,6 +221,24 @@ public:
     ~MethodCallNode() { }
 };
 
+class ClassNode : public Node {
+public:
+    SharedPtr<Node>     klass()  { return this->list->at(0); }
+    SharedPtr<Node>     parent() { return this->list->at(1); }
+    SharedPtr<ListNode> roles()  { return this->list->at(2)->upcast<ListNode>(); }
+    SharedPtr<Node>     block()  { return this->list->at(3); }
+
+    ClassNode(SharedPtr<Node> k, SharedPtr<Node>p, SharedPtr<ListNode>r, SharedPtr<Node> b) : Node() {
+        type = NODE_CLASS;
+        this->list->push_back(k);
+        this->list->push_back(p);
+        this->list->push_back(r);
+        this->list->push_back(b);
+    }
+    ~ClassNode() { }
+};
+
+
 class BinaryNode: public Node {
 public:
     SharedPtr<Node>left () { return this->list->at(0); }
