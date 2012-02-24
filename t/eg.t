@@ -9,7 +9,7 @@ for my $fname (glob('eg/t/*.tra')) {
     if (my ($expected) = ($src =~ /\n__END__\n(.+)/s)) {
         is($result, $expected, $fname);
     } else {
-        die "Bad test case: $src";
+        die "Bad test case: $fname: $src";
     }
 }
 

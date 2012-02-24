@@ -17,10 +17,10 @@ if os.uname()[0]=='Darwin':
 else:
     env = Environment(CXX='g++')
     env.Append(CXXFLAGS=['-std=c++0x'])
-    env.Append(CXXFLAGS=['-pthread', '-Wno-sign-compare'])
     env.Append(LDFLAGS=['-pthread'])
     env.Append(LINKFLAGS=['-lpthread'])
     env.Append(CCFLAGS=['-Wall'])
+    env.Append(CCFLAGS=['-pthread', '-Wno-sign-compare'])
 env.Append(CXXFLAGS=['-I./vendor/re2/'])
 env.Append(CCFLAGS=['-g'])
 env.Append(CXXFLAGS=['-g'])

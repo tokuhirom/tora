@@ -8,6 +8,9 @@
 
 using namespace tora;
 
+/**
+ * Count up the number of variables declared at this scope.
+ */
 static int count_variable_declare(const SharedPtr<Node> &node) {
     if (node->type == NODE_MY) {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
@@ -45,12 +48,20 @@ void Compiler::define_my(SharedPtr<Node> node) {
     }
 }
 
-int tora::Compiler::find_localvar(std::string name, int &level) {
+int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closure) {
     DBG("FIND LOCAL VAR %d\n", 0);
+    need_closure = false;
+    int seen_funcdef = -1;
     for (level = 0; level<this->blocks->size(); level++) {
         SharedPtr<Block> block = this->blocks->at(this->blocks->size()-1-level);
+        if (block->type == BLOCK_TYPE_FUNCDEF && seen_funcdef == -1) {
+            seen_funcdef = level;
+        }
         for (size_t i=0; i<block->vars.size(); i++) {
             if (*(block->vars.at(i)) == name) {
+                if (seen_funcdef != -1 && seen_funcdef < level) {
+                    need_closure = true;
+                }
                 return i;
             }
         }
@@ -67,7 +78,8 @@ void tora::Compiler::init_globals() {
 
 void tora::Compiler::set_variable(std::string &varname) {
     int level;
-    int no = this->find_localvar(varname, level);
+    bool need_closure;
+    int no = this->find_localvar(varname, level, need_closure);
     if (no<0) {
         fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname.c_str());
         this->error++;
@@ -75,14 +87,31 @@ void tora::Compiler::set_variable(std::string &varname) {
     }
 
     SharedPtr<OP> tmp = new OP;
-    if (level == 0) {
+    if (need_closure) {
         DBG2("LOCAL\n");
-        tmp->op_type = OP_SETLOCAL;
-        tmp->operand.int_value = no;
+        tmp->op_type = OP_SETCLOSURE;
+        tmp->operand.int_value = -1;
+        auto iter = closure_vars->begin();
+        for (; iter!=closure_vars->end(); iter++) {
+            if (*iter == varname) {
+                tmp->operand.int_value = no;
+                break;
+            }
+        }
+        if (tmp->operand.int_value == -1) {
+            closure_vars->push_back(varname);
+            tmp->operand.int_value = closure_vars->size()-1;
+        }
     } else {
-        DBG2("DYNAMIC\n");
-        tmp->op_type = OP_SETDYNAMIC;
-        tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+        if (level == 0) {
+            DBG2("LOCAL\n");
+            tmp->op_type = OP_SETLOCAL;
+            tmp->operand.int_value = no;
+        } else {
+            DBG2("DYNAMIC\n");
+            tmp->op_type = OP_SETDYNAMIC;
+            tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+        }
     }
     ops->push_back(tmp);
 }
@@ -185,7 +214,7 @@ public:
         if (decvar_in_cond) {
             enter = new OP(OP_ENTER);
             compiler->ops->push_back(enter);
-            compiler->push_block();
+            compiler->push_block(BLOCK_TYPE_BLOCK);
         } else {
             enter = NULL;
         }
@@ -222,11 +251,11 @@ bool tora::Compiler::is_builtin(const std::string &s) {
 void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
-        this->push_block();
+        this->push_block(BLOCK_TYPE_FILE);
         ValueOP * pkg = new ValueOP(OP_PACKAGE_ENTER, new StrValue(this->package()));
         ops->push_back(pkg);
 
-        this->push_block();
+        this->push_block(BLOCK_TYPE_BLOCK);
         OP *enter = new OP(OP_ENTER);
         ops->push_back(enter);
 
@@ -300,7 +329,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         // function name
         std::string &funcname = funcdef_node->name()->upcast<StrNode>()->str_value;
 
-        this->push_block();
+        this->push_block(BLOCK_TYPE_FUNCDEF);
         auto params = new std::vector<std::string *>();
         for (size_t i=0; i<funcdef_node->params()->size(); i++) {
             params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
@@ -323,19 +352,40 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             Disasm::disasm(funccomp.ops);
         }
 
+        // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
+
         SharedPtr<CodeValue> code = new CodeValue();
         code->package_id = this->symbol_table->get_id(this->package());
         code->func_name_id = this->symbol_table->get_id(funcname);
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
-
-        SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
-        ops->push_back(putval);
+        code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
 
         SharedPtr<StrValue> funcname_value = new StrValue(funcname);
-        SharedPtr<ValueOP> define_method = new ValueOP(OP_DEFINE_METHOD, funcname_value);
-        ops->push_back(define_method);
+        if (funccomp.closure_vars->size() > 0) {
+            // create closure
+            // push variables  to stack.
+            auto iter = funccomp.closure_vars->begin();
+            for (; iter!=funccomp.closure_vars->end(); iter++) {
+                this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+            }
+
+            SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
+            ops->push_back(putval);
+
+            // define method.
+            SharedPtr<OP> op = new OP(OP_CLOSUREDEF);
+            op->operand.int_value = funccomp.closure_vars->size();
+            ops->push_back(op);
+        } else {
+            SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
+            ops->push_back(putval);
+
+            // create normal function
+            SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
+            ops->push_back(define_method);
+        }
 
         break;
     }
@@ -557,7 +607,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         // nop
         break;
     case NODE_GETVARIABLE: {
-        int global = this->find_global_var(node->upcast<StrNode>()->str_value);
+        std::string & varname = node->upcast<StrNode>()->str_value;
+        int global = this->find_global_var(varname);
         if (global >= 0) {
             SharedPtr<OP> tmp = new OP();
             tmp->op_type = OP_GETGLOBAL;
@@ -566,7 +617,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         } else {
             // find local variable
             int level;
-            int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level);
+            bool need_closure;
+            int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level, need_closure);
             // dump_localvars();
             if (no<0) {
                 fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
@@ -574,18 +626,36 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
                 return;
             }
 
-            if (level == 0) {
-                DBG2("LOCAL\n");
+            if (need_closure) {
                 SharedPtr<OP> tmp = new OP;
-                tmp->op_type = OP_GETLOCAL;
-                tmp->operand.int_value = no;
+                tmp->op_type = OP_GETCLOSURE;
+                tmp->operand.int_value = -1;
+                auto iter = closure_vars->begin();
+                for (; iter!=closure_vars->end(); iter++) {
+                    if (*iter == varname) {
+                        tmp->operand.int_value = no;
+                        break;
+                    }
+                }
+                if (tmp->operand.int_value == -1) {
+                    closure_vars->push_back(varname);
+                    tmp->operand.int_value = closure_vars->size()-1;
+                }
                 ops->push_back(tmp);
             } else {
-                SharedPtr<OP> tmp = new OP;
-                DBG2("DYNAMIC\n");
-                tmp->op_type = OP_GETDYNAMIC;
-                tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
-                ops->push_back(tmp);
+                if (level == 0) {
+                    DBG2("LOCAL\n");
+                    SharedPtr<OP> tmp = new OP;
+                    tmp->op_type = OP_GETLOCAL;
+                    tmp->operand.int_value = no;
+                    ops->push_back(tmp);
+                } else {
+                    SharedPtr<OP> tmp = new OP;
+                    DBG2("DYNAMIC\n");
+                    tmp->op_type = OP_GETDYNAMIC;
+                    tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
+                    ops->push_back(tmp);
+                }
             }
         }
         break;
@@ -753,7 +823,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         this->compile(node->upcast<ForEachNode>()->source());
 
-        this->push_block();
+        this->push_block(BLOCK_TYPE_BLOCK);
         OP *enter_foreach = new OP(OP_ENTER_FOREACH);
         ops->push_back(enter_foreach);
 
@@ -839,7 +909,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         OP *try_op = new OP(OP_TRY);
         ops->push_back(try_op);
 
-        this->push_block();
+        this->push_block(BLOCK_TYPE_TRY);
         OP *enter_op = new OP(OP_ENTER);
         ops->push_back(enter_op);
 

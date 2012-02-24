@@ -10,9 +10,19 @@
 
 namespace tora {
 
+enum block_type_t {
+    BLOCK_TYPE_BLOCK,
+    BLOCK_TYPE_SUB,
+    BLOCK_TYPE_FILE,
+    BLOCK_TYPE_TRY,
+    BLOCK_TYPE_FUNCDEF,
+};
+
 class Block : public Prim {
 public:
+    block_type_t type;
     std::vector<std::string*> vars;
+    Block(block_type_t t) : type(t) { }
     ~Block() {
         for (size_t i=0; i<vars.size(); i++) {
             delete vars.at(i);
@@ -26,6 +36,7 @@ public:
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Block>> *blocks;
     std::vector<std::string> *global_vars;
+    std::vector<std::string> *closure_vars;
     SharedPtr<SymbolTable> symbol_table;
     int error;
     bool in_try_block;
@@ -43,10 +54,12 @@ public:
         symbol_table = symbol_table_;
         dump_ops = false;
         package_ = "main";
+        closure_vars = new std::vector<std::string>();
     }
     ~Compiler() {
         delete global_vars;
         delete blocks;
+        delete closure_vars;
     }
     void define_my(SharedPtr<Node> node);
     void define_global_var(const char *name) {
@@ -70,9 +83,9 @@ public:
     }
     void init_globals();
     void compile(SharedPtr<Node> node);
-    void push_block() {
+    void push_block(block_type_t t) {
         DBG("PUSH BLOCK: %d\n", this->blocks->size());
-        this->blocks->push_back(new Block());
+        this->blocks->push_back(new Block(t));
     }
     void pop_block() {
         DBG("POP BLOCK: %d\n", this->blocks->size());
@@ -80,7 +93,7 @@ public:
     }
     void set_lvalue(SharedPtr<Node> node);
     void set_variable(std::string &varname);
-    int find_localvar(std::string name, int &level);
+    int find_localvar(std::string name, int &level, bool &need_closure);
     void define_localvar(const char* name) {
         this->define_localvar(std::string(name));
     }

@@ -77,6 +77,10 @@ public:
         return this->value_type == VALUE_TYPE_INT;
     }
 
+    virtual void assign(SharedPtr<Value> &v) {
+        abort();
+    }
+
     template<class Y>
     Y* upcast() {
         return dynamic_cast<Y*>(&(*(this)));
@@ -122,6 +126,10 @@ public:
     SharedPtr<Value> tora__neg__();
     void tora__incr__() {
         this->int_value++;
+    }
+    virtual void assign(SharedPtr<Value> &v) {
+        assert(v->value_type == this->value_type);
+        this->int_value = v->upcast<IntValue>()->int_value;
     }
 };
 

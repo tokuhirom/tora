@@ -38,10 +38,51 @@ OP_NEW_RANGE {
     stack.push(new RangeValue(l->upcast<IntValue>(), r->upcast<IntValue>()));
 }
 
-OP_DEFINE_METHOD {
+OP_FUNCDEF {
     SharedPtr<Value> code = stack.pop(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
-    this->add_function(code->upcast<CodeValue>()->code_id, code);
+    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+}
+
+OP_CLOSUREDEF {
+    SharedPtr<Value> code = stack.pop(); // code object
+    // take variables from stack. and push it to code->closure_cells.
+    assert(code->value_type == VALUE_TYPE_CODE);
+    for (int i=0; i<get_int_operand(); i++) {
+        SharedPtr<Value> v = stack.pop();
+        code->upcast<CodeValue>()->closure_vars->push_back(v);
+    }
+    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+}
+
+OP_GETCLOSURE {
+    // take variable from code->closure_cells[n]
+    SharedPtr<LexicalVarsFrame> frame;
+    for (auto iter=frame_stack->begin(); iter!=frame_stack->end(); iter++) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            frame = *iter;
+            break;
+        }
+    }
+    assert(frame);
+    int i = get_int_operand();
+    SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars->at(i);
+    stack.push(v);
+}
+
+OP_SETCLOSURE {
+    // save variable to code->closure_cells[n]
+    SharedPtr<LexicalVarsFrame> frame;
+    for (auto iter=frame_stack->begin(); iter!=frame_stack->end(); iter++) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            frame = *iter;
+            break;
+        }
+    }
+    assert(frame);
+    int i = get_int_operand();
+    SharedPtr<Value> v = stack.back();
+    (*(frame->code->upcast<CodeValue>()->closure_vars))[i]->assign(v);
 }
 
 OP_SUB {
@@ -147,7 +188,7 @@ OP_FUNCALL {
     }
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
-    this->find_package(this->package_id())->dump(this->symbol_table, 1);
+    // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
     SharedPtr<Package> pkg = this->find_package(this->package_id());
     auto iter = pkg->find(id);
@@ -159,6 +200,7 @@ OP_FUNCALL {
         fframe->return_address = pc;
         fframe->orig_ops = ops;
         fframe->top = stack.size() - argcnt;
+        fframe->code = code;
 
         pc = -1;
         this->ops = code->code_opcodes;

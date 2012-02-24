@@ -11,6 +11,7 @@
 #include "symbol_table.h"
 #include "op_array.h"
 #include "value/hash.h"
+#include "value/code.h"
 #include <stdarg.h>
 
 namespace tora {
@@ -33,6 +34,7 @@ public:
     frame_type_t type;
     int top;
     SharedPtr<LexicalVarsFrame> up;
+    SharedPtr<CodeValue> code;
     LexicalVarsFrame(int vars_cnt) : Prim() {
         up = NULL;
         type = FRAME_TYPE_LEXICAL;

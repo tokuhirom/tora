@@ -1,0 +1,22 @@
+{
+    my $count = 0;
+    sub cnt() { ++$count; return $count; }
+    {
+        sub reset() { $count = 0; }
+    }
+    say(cnt());
+    say(cnt());
+}
+say(cnt());
+say(cnt());
+say(cnt());
+reset();
+say(cnt());
+
+__END__
+1
+2
+3
+4
+5
+1
