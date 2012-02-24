@@ -48,6 +48,7 @@ class DoubleValue;
 class StrValue;
 class BoolValue;
 class ArrayValue;
+class SymbolTable;
 
 /**
  * The value class
@@ -67,6 +68,9 @@ public:
 
     virtual void dump() { this->dump(0); }
     virtual void dump(int indent) = 0;
+    virtual void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
+        this->dump(indent);
+    }
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
     // TODO: rename to as_int

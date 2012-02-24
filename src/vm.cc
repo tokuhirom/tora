@@ -15,6 +15,9 @@
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/errno.h>
 
 using namespace tora;
 
@@ -290,7 +293,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
 }
 
 static SharedPtr<Value> do_foo(VM *vm, const std::string &fname, std::string & package) {
-    std::ifstream *ifs = new std::ifstream(fname);
+    std::ifstream *ifs = new std::ifstream(fname.c_str());
     if (ifs->is_open()) {
         return eval_foo(vm, ifs, package);
     } else {
@@ -310,7 +313,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
  */
 static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
     assert(v->value_type == VALUE_TYPE_STR);
-    std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value);
+    std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value.c_str(), std::ios::in);
     if (ifs->is_open()) {
         return eval_foo(vm, ifs);
     } else {

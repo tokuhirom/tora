@@ -163,7 +163,7 @@ public:
     iterator find(ID id) {
         return data.find(id);
     }
-    void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
+    virtual void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
         print_indent(indent);
         printf("[dump] Package(%s):\n", symbol_table->id2name(name_id).c_str());
         auto iter = data.begin();
@@ -173,7 +173,7 @@ public:
             iter->second->dump(indent+2);
         }
     }
-    void dump(int indent) {
+    virtual void dump(int indent) {
         print_indent(indent);
         printf("[dump] Package\n");
     }

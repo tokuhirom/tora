@@ -63,7 +63,13 @@ if 'test' in COMMAND_LINE_TARGETS:
             re2files,
             src,
         ]))
-    env.Command('test', programs, 'prove --source Executable tests/ --source Perl t')
+    prove_path = 'prove'
+    try:
+        os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
+        prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
+    finally:
+        pass
+    env.Command('test', programs, prove_path + ' --source Executable tests/ --source Perl t')
 
 ########
 # main programs
