@@ -22,8 +22,7 @@ public:
     std::vector<SharedPtr<Value>> *closure_vars;
     SharedPtr<OPArray> code_opcodes;
 
-    CodeValue(): Value() {
-        this->value_type = VALUE_TYPE_CODE;
+    CodeValue(): Value(VALUE_TYPE_CODE) {
         this->closure_vars = new std::vector<SharedPtr<Value>>();
     }
     ~CodeValue() {

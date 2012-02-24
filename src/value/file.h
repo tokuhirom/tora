@@ -10,9 +10,7 @@ class FileValue : public Value {
 private:
     FILE *fp;
 public:
-    FileValue() : fp(NULL) {
-        value_type = VALUE_TYPE_FILE;
-    }
+    FileValue() : Value(VALUE_TYPE_FILE), fp(NULL) { }
     ~FileValue() {
         if (fp) { this->close(); }
     }

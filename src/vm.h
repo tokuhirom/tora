@@ -92,8 +92,12 @@ class FunctionFrame : public LexicalVarsFrame {
 public:
     int return_address;
     SharedPtr<OPArray> orig_ops;
+    SharedPtr<Value> self;
     FunctionFrame(int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
         this->type = FRAME_TYPE_FUNCTION;
+    }
+    FunctionFrame(SharedPtr<Value>& self_, int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
+        self = self_;
     }
 };
 
@@ -158,7 +162,7 @@ class Package : public Value {
 public:
     typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
 
-    Package(ID id) : name_id(id) { }
+    Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
     void add_function(ID function_name_id, SharedPtr<Value> code);
     iterator find(ID id) {
         return data.find(id);
@@ -186,8 +190,7 @@ public:
 class PackageMap : public Value {
     std::map<ID, SharedPtr<Package>> data;
 public:
-    PackageMap() : Value() {
-        value_type = VALUE_TYPE_PACKAGE_MAP;
+    PackageMap() : Value(VALUE_TYPE_PACKAGE_MAP) {
     }
     std::map<ID, SharedPtr<Package>>::iterator find(ID id) {
         return data.find(id);

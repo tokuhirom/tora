@@ -9,8 +9,7 @@ namespace tora {
 class SymbolValue: public Value {
 public:
     ID id;
-    SymbolValue(ID i): Value(), id(i) {
-        this->value_type = VALUE_TYPE_SYMBOL;
+    SymbolValue(ID i): Value(VALUE_TYPE_SYMBOL), id(i) {
     }
     ~SymbolValue() { }
     void dump(int indent) {

@@ -8,9 +8,7 @@ namespace tora {
 
 class AbstractRegexpValue : public Value {
 public:
-    AbstractRegexpValue() {
-        this->value_type = VALUE_TYPE_REGEXP;
-    }
+    AbstractRegexpValue() : Value(VALUE_TYPE_REGEXP) { }
     virtual ~AbstractRegexpValue() { }
     virtual bool ok() = 0;
     virtual const std::string& error() = 0;

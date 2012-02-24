@@ -11,10 +11,9 @@ public:
     SharedPtr<IntValue> left;
     SharedPtr<IntValue> right;
 
-    RangeValue(SharedPtr<IntValue> l, SharedPtr<IntValue> r) {
+    RangeValue(SharedPtr<IntValue> l, SharedPtr<IntValue> r) : Value(VALUE_TYPE_RANGE) {
         left = l;
         right = r;
-        value_type = VALUE_TYPE_RANGE;
     }
     void dump(int indent) {
         print_indent(indent);
@@ -27,10 +26,9 @@ public:
     public:
         int counter;
         SharedPtr<RangeValue> parent;
-        iterator(SharedPtr<RangeValue> parent_) {
+        iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
             parent = parent_;
             counter = parent->left->int_value;
-            value_type = VALUE_TYPE_RANGE_ITERATOR;
         }
         void dump(int indent) {
             print_indent(indent);

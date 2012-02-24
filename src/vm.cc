@@ -426,6 +426,20 @@ static SharedPtr<Value> builtin_package(VM *vm) {
     return new StrValue(vm->package);
 }
 
+static SharedPtr<Value> builtin_self(VM *vm) {
+    auto iter = vm->frame_stack->begin();
+    for (; iter!=vm->frame_stack->end(); ++iter) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            if ((*iter)->upcast<FunctionFrame>()->self) {
+                return (*iter)->upcast<FunctionFrame>()->self;
+            } else {
+                return UndefValue::instance();
+            }
+        }
+    }
+    return new ExceptionValue("Cannot call 'self' method out of method.");
+}
+
 void VM::register_standard_methods() {
     {
         MetaClass meta(this, VALUE_TYPE_ARRAY);
@@ -446,6 +460,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("eval", builtin_eval);
     this->add_builtin_function("do",   builtin_do);
     this->add_builtin_function("require",   builtin_require);
+    this->add_builtin_function("self",   builtin_self);
     this->add_builtin_function("__PACKAGE__",   builtin_package);
 }
 

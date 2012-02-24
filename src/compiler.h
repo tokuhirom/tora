@@ -16,6 +16,7 @@ enum block_type_t {
     BLOCK_TYPE_FILE,
     BLOCK_TYPE_TRY,
     BLOCK_TYPE_FUNCDEF,
+    BLOCK_TYPE_CLASS,
 };
 
 class Block : public Prim {
@@ -41,11 +42,12 @@ public:
     int error;
     bool in_try_block;
     bool dump_ops;
+    bool in_class_context;
 
     void package(const std::string & p) { package_ = p; }
     std::string & package() { return package_; }
 
-    Compiler(SharedPtr<SymbolTable> &symbol_table_) {
+    Compiler(SharedPtr<SymbolTable> &symbol_table_) : in_class_context(false) {
         error = 0;
         blocks = new std::vector<SharedPtr<Block>>();
         global_vars = new std::vector<std::string>();

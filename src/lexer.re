@@ -239,7 +239,7 @@ std:
     "..." { return DOTDOTDOT; }
     HEREDOC_START {
         HereDoc * here = new HereDoc();
-        *yylval = here->val = new StrNode(NODE_IDENTIFIER, "");
+        *yylval = here->val = new StrNode(NODE_STRING, "");
         here->marker = this->text().substr(2, this->text().length()-2);
         heredoc_queue.push(here);
         return HEREDOC_START;

@@ -54,6 +54,7 @@ sub vm_gen_cc {
 #include "value/range.h"
 #include "value/symbol.h"
 #include "value/regexp.h"
+#include "value/object.h"
 #include <unistd.h>
 #include <algorithm>
 #include <functional>

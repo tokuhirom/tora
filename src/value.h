@@ -33,7 +33,9 @@ typedef enum {
     VALUE_TYPE_SYMBOL,
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
+    VALUE_TYPE_PACKAGE,
     VALUE_TYPE_PACKAGE_MAP,
+    VALUE_TYPE_OBJECT,
 } value_type_t;
 
 typedef enum {
@@ -55,7 +57,6 @@ class SymbolTable;
  */
 class Value : public Prim {
 protected:
-    Value() : Prim(), value_type(VALUE_TYPE_UNDEF) { }
     Value(value_type_t t) : Prim(), value_type(t) { }
     virtual ~Value() { }
     void print_indent(int indent) {
@@ -116,8 +117,7 @@ public:
 class IntValue: public Value {
 public:
     int  int_value;
-    IntValue(int i): Value() {
-        this->value_type = VALUE_TYPE_INT;
+    IntValue(int i): Value(VALUE_TYPE_INT) {
         this->int_value = i;
     }
     ~IntValue() { }
@@ -140,8 +140,7 @@ public:
 class DoubleValue: public Value {
 public:
     double  double_value;
-    DoubleValue(double d): Value() {
-        this->value_type = VALUE_TYPE_DOUBLE;
+    DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
         this->double_value = d;
     }
     void dump(int indent) {
@@ -154,9 +153,7 @@ public:
 
 class UndefValue: public Value {
 private:
-    UndefValue(): Value() {
-        this->value_type = VALUE_TYPE_UNDEF;
-    }
+    UndefValue(): Value(VALUE_TYPE_UNDEF) { }
 public:
     static UndefValue *instance() {
         return new UndefValue();
@@ -172,8 +169,7 @@ public:
 // This is singleton
 class BoolValue: public Value {
 public:
-    BoolValue(bool b): Value() {
-        this->value_type = VALUE_TYPE_BOOL;
+    BoolValue(bool b): Value(VALUE_TYPE_BOOL) {
         this->bool_value = b;
     }
     bool bool_value;
@@ -197,15 +193,12 @@ public:
 class StrValue: public Value {
 public:
     std::string str_value;
-    StrValue(): Value() {
-        this->value_type = VALUE_TYPE_STR;
+    StrValue(): Value(VALUE_TYPE_STR) {
     }
-    StrValue(const char *str): Value() {
-        this->value_type = VALUE_TYPE_STR;
+    StrValue(const char *str): Value(VALUE_TYPE_STR) {
         this->str_value = str;
     }
-    StrValue(const std::string str): Value() {
-        this->value_type = VALUE_TYPE_STR;
+    StrValue(const std::string str): Value(VALUE_TYPE_STR) {
         this->str_value = str;
     }
     ~StrValue();
@@ -230,11 +223,9 @@ class ExceptionValue : public Value {
     std::string message_;
 public:
     exception_type_t exception_type;
-    ExceptionValue(exception_type_t e) : exception_type(e) {
-        this->value_type = VALUE_TYPE_EXCEPTION;
+    ExceptionValue(exception_type_t e) : Value(VALUE_TYPE_EXCEPTION), exception_type(e) {
     }
-    ExceptionValue(const std::string &msg) : exception_type(EXCEPTION_TYPE_GENERAL) {
-        this->value_type = VALUE_TYPE_EXCEPTION;
+    ExceptionValue(const std::string &msg) : Value(VALUE_TYPE_EXCEPTION), exception_type(EXCEPTION_TYPE_GENERAL) {
         message_ = msg;
     }
     void dump(int indent) {

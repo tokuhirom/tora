@@ -238,8 +238,7 @@ OP_METHOD_CALL {
     case VALUE_TYPE_ARRAY: {
         auto iter = this->standard[object->value_type]->find(funid->upcast<SymbolValue>()->id);
         if (iter == this->standard[object->value_type]->end()) {
-            // TODO throw exception
-            fprintf(stderr, "Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), object->type_str());
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), object->type_str());
             break;
         } else {
             if (iter->second->argc==0) {
@@ -247,7 +246,7 @@ OP_METHOD_CALL {
                     SharedPtr<Value> v = iter->second->func0(object);
                     stack.push(v);
                 } else {
-                    fprintf(stderr, "Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
+                    this->die("Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
                     break;
                 }
             } else if (iter->second->argc==1) {
@@ -256,9 +255,48 @@ OP_METHOD_CALL {
                     SharedPtr<Value> v = iter->second->func1(object, arg1);
                     stack.push(v);
                 } else {
-                    fprintf(stderr, "Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
+                    this->die("Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
                     break;
                 }
+            }
+        }
+        break;
+    }
+    case VALUE_TYPE_SYMBOL: {
+        // Foo.new();
+        SharedPtr<Package> pkg = this->find_package(object->upcast<SymbolValue>()->id);
+        auto iter = pkg->find(funid->upcast<SymbolValue>()->id);
+        if (iter != pkg->end()) {
+            SharedPtr<Value>code_v = iter->second;
+            assert(code_v->value_type == VALUE_TYPE_CODE);
+            SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+            int argcnt = get_int_operand();
+
+            {
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                fframe->return_address = pc;
+                fframe->orig_ops = ops;
+                fframe->top = stack.size() - argcnt;
+                fframe->code = code;
+
+                pc = -1;
+                this->ops = code->code_opcodes;
+
+                // TODO: vargs support
+                // TODO: kwargs support
+                assert(argcnt == (int)code->code_params->size());
+                for (int i=0; i<argcnt; i++) {
+                    SharedPtr<Value> arg = stack.pop();
+                    fframe->setVar(i, arg);
+                }
+                frame_stack->push_back(fframe);
+            }
+        } else {
+            if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("new")) {
+                // process parameters
+                stack.push(new ObjectValue(object->upcast<SymbolValue>()->id));
+            } else {
+                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
             }
         }
         break;
@@ -274,9 +312,42 @@ OP_METHOD_CALL {
         break;
     }
     */
+    case VALUE_TYPE_OBJECT:{
+        SharedPtr<Package> pkg = this->find_package(object->upcast<ObjectValue>()->package_id());
+        auto iter = pkg->find(funid->upcast<SymbolValue>()->id);
+        if (iter != pkg->end()) {
+            SharedPtr<Value>code_v = iter->second;
+            assert(code_v->value_type == VALUE_TYPE_CODE);
+            SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+            int argcnt = get_int_operand();
+
+            {
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                fframe->return_address = pc;
+                fframe->orig_ops = ops;
+                fframe->top = stack.size() - argcnt;
+                fframe->code = code;
+                fframe->self = object;
+
+                pc = -1;
+                this->ops = code->code_opcodes;
+
+                // TODO: vargs support
+                // TODO: kwargs support
+                assert(argcnt == (int)code->code_params->size());
+                for (int i=0; i<argcnt; i++) {
+                    SharedPtr<Value> arg = stack.pop();
+                    fframe->setVar(i, arg);
+                }
+                frame_stack->push_back(fframe);
+            }
+        } else {
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
+        }
+        break;
+    }
     default:
-        fprintf(stderr, "Unknown method %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
-        // TODO throw exception
+        this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), object->type_str());
         break;
     }
 }
@@ -340,10 +411,7 @@ OP_LEAVE {
 }
 
 OP_PUSH_IDENTIFIER {
-    // deprecate?
-    OP * op = ops->at(pc);
-    SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
-    stack.push(sv);
+    stack.push(new SymbolValue(get_int_operand()));
 }
 
 OP_DUMP {
@@ -647,13 +715,10 @@ OP_USE {
 }
 
 OP_PACKAGE_ENTER {
-    OP * op = ops->at(pc);
-    SharedPtr<Value> package = ((ValueOP*)&(*(op)))->value;
-    assert(package->value_type = VALUE_TYPE_STR);
-
+    ID package_id = get_int_operand();
     SharedPtr<PackageFrame> pframe = new PackageFrame(this->package, this, frame_stack->back());
     this->frame_stack->push_back(pframe);
-    this->package = package->upcast<StrValue>()->str_value;
+    this->package = this->symbol_table->id2name(package_id);
 }
 
 OP_PACKAGE_LEAVE {

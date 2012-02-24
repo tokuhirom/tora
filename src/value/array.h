@@ -8,8 +8,7 @@ namespace tora {
 class ArrayValue: public Value {
 public:
     std::vector<SharedPtr<Value>> *values;
-    ArrayValue() : Value() {
-        this->value_type = VALUE_TYPE_ARRAY;
+    ArrayValue() : Value(VALUE_TYPE_ARRAY) {
         this->values = new std::vector<SharedPtr<Value>>;
     }
     ~ArrayValue() {
@@ -48,9 +47,7 @@ public:
     public:
         int counter;
         SharedPtr<ArrayValue> parent;
-        iterator() {
-            counter = 0;
-            value_type = VALUE_TYPE_ARRAY_ITERATOR;
+        iterator() : Value(VALUE_TYPE_ARRAY_ITERATOR), counter(0) {
         }
         void dump(int indent) {
             print_indent(indent);

@@ -10,9 +10,7 @@ class HashValue: public Value {
 protected:
     std::map<std::string, SharedPtr<Value> > data;
 public:
-    HashValue() {
-        value_type = VALUE_TYPE_HASH;
-    }
+    HashValue() : Value(VALUE_TYPE_HASH) { }
     SharedPtr<Value> get(const std::string &key) {
         return data[key];
     }
@@ -45,8 +43,7 @@ public:
         std::map<std::string, SharedPtr<Value> >::iterator iter;
         SharedPtr<HashValue> parent;
     public:
-        iterator(const SharedPtr<HashValue> & parent_) {
-            value_type = VALUE_TYPE_HASH_ITERATOR;
+        iterator(const SharedPtr<HashValue> & parent_) : Value(VALUE_TYPE_HASH_ITERATOR) {
             parent = parent_;
             iter = parent->data.begin();
         }

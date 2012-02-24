@@ -33,6 +33,7 @@
 #include "value/regexp.h"
 #include "parser.h"
 #include "lexer.h"
+#include "token.gen.h"
 
 using namespace tora;
 
@@ -46,7 +47,7 @@ using namespace tora;
 }
 %syntax_error {
     state->errors++;
-    fprintf(stderr, "Syntax error at line %d.\n", state->lineno);
+    fprintf(stderr, "Syntax error at line %d(%s).\n", state->lineno, token_id2name[yymajor]);
 }
 
 %extra_argument { ParserState *state }
@@ -300,6 +301,12 @@ postfix_expression(A) ::= identifier(B) L_PAREN R_PAREN. {
 postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
     A = new FuncallNode(B, C->upcast<ListNode>());
+}
+postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
+    A = new MethodCallNode(B, C, D->upcast<ListNode>());
+}
+postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
+    A = new MethodCallNode(B, C, new ListNode());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     A = new MethodCallNode(B, C, D->upcast<ListNode>());

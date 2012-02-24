@@ -238,6 +238,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "eval",
         "do",
         "print",
+        "self",
         NULL
     };
     for (int i=0; bs[i]; i++) {
@@ -252,7 +253,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block(BLOCK_TYPE_FILE);
-        ValueOP * pkg = new ValueOP(OP_PACKAGE_ENTER, new StrValue(this->package()));
+        ID package_id = this->symbol_table->get_id(this->package());
+        OP *pkg = new OP(OP_PACKAGE_ENTER);
+        pkg->operand.int_value = package_id;
         ops->push_back(pkg);
 
         this->push_block(BLOCK_TYPE_BLOCK);
@@ -442,9 +445,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_IDENTIFIER: {
-        SharedPtr<StrValue>sv = new StrValue(node->upcast<StrNode>()->str_value);
-        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_IDENTIFIER, sv);
-        ops->push_back(tmp);
+        ID id = this->symbol_table->get_id(node->upcast<StrNode>()->str_value);
+        SharedPtr<OP> o = new OP(OP_PUSH_IDENTIFIER);
+        o->operand.int_value = id;
+        ops->push_back(o);
         break;
     }
 
@@ -943,6 +947,37 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         this->compile(node->upcast<BinaryNode>()->right());
         this->compile(node->upcast<BinaryNode>()->left());
         ops->push_back(new OP(OP_USE));
+        break;
+    }
+
+    case NODE_CLASS: {
+        SharedPtr<ClassNode> n = node->upcast<ClassNode>();
+
+        if (this->in_class_context) {
+            // allow nested class?
+            this->fail("You cannot nest classes.");
+            abort();
+        }
+        this->in_class_context = true;
+
+        this->push_block(BLOCK_TYPE_CLASS);
+        std::string klass_name = n->klass()->upcast<StrNode>()->str_value;
+        ID package_id = this->symbol_table->get_id(
+              this->package() == "main"
+            ? klass_name
+            : this->package() + "::" + klass_name
+        );
+        OP *pkg = new OP(OP_PACKAGE_ENTER);
+        pkg->operand.int_value = package_id;
+        ops->push_back(pkg);
+
+        this->compile(n->block());
+
+        ops->push_back(new OP(OP_PACKAGE_LEAVE));
+        this->pop_block();
+
+        this->in_class_context = false;
+
         break;
     }
 
