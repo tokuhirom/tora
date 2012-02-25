@@ -58,6 +58,7 @@ sub vm_gen_cc {
 #include <unistd.h>
 #include <algorithm>
 #include <functional>
+#include <sys/stat.h>
 
 using namespace tora;
 

@@ -208,6 +208,9 @@ public:
         this->str_value = str;
     }
     ~StrValue();
+    const char * c_str() {
+        return this->str_value.c_str();
+    }
     void set_str(const char*s) {
         str_value = s;
     }

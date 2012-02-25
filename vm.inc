@@ -627,6 +627,13 @@ OP_POST_DECREMENT {
     }
 }
 
+OP_FILE_TEST_F {
+    // -f $file
+    SharedPtr<StrValue> fname = stack.pop()->to_s();
+    struct stat buf;
+    stack.push(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFREG));
+}
+
 OP_GETGLOBAL {
     int globalvarno = get_int_operand();
     stack.push(this->global_vars->at(globalvarno));

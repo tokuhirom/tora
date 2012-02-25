@@ -1,0 +1,8 @@
+say(-f "SConstruct");
+say(-f "PConstruct");
+say(-f "t");
+
+__END__
+true
+false
+false

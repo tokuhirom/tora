@@ -288,6 +288,7 @@ std:
     "++" { return PLUSPLUS; }
     "--" { return MINUSMINUS; }
     "/=" { return DIV_ASSIGN; }
+    "-f" { return FILE_TEST_F; }
     "(" { 
         divable = false;
         return L_PAREN;
