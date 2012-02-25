@@ -1,4 +1,3 @@
-#!./tora
 use Test::More *;
 
 ok(-f "SConstruct");
