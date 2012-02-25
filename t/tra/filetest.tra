@@ -1,7 +1,16 @@
 use Test::More *;
 
 ok(-f "SConstruct");
-ok(!-f "PConstruct");
+ok(!-f "fjdaslkfjadslfjalf");
 ok(!-f "t");
 
+ok(!-d "SConstruct");
+ok(-d "t");
+ok(!-d "fjdaslkfjadslfjalf");
+
+ok(-e "SConstruct");
+ok(-e "t");
+ok(!-e "fjdaslkfjadslfjalf");
+
 done_testing();
+

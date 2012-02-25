@@ -64,9 +64,7 @@ syntax
  * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
- * -d
  * -s
- * -e
 
 feature
 -------

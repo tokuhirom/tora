@@ -627,11 +627,24 @@ OP_POST_DECREMENT {
     }
 }
 
-OP_FILE_TEST_F {
+OP_FILE_TEST {
     // -f $file
     SharedPtr<StrValue> fname = stack.pop()->to_s();
     struct stat buf;
-    stack.push(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFREG));
+    switch (get_int_operand()) {
+    case 'f':
+        stack.push(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFREG));
+        break;
+    case 'd':
+        stack.push(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
+        break;
+    case 'e':
+        stack.push(new BoolValue(stat(fname->c_str(), &buf)==0));
+        break;
+    default:
+        printf("[BUG] Unknown operand: %c\n", get_int_operand());
+        abort();
+    }
 }
 
 OP_GETGLOBAL {

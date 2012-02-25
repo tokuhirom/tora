@@ -54,7 +54,7 @@ my @nodes = qw(
 
     NODE_NOT
 
-    NODE_FILE_TEST_F
+    NODE_FILE_TEST
 
     NODE_DIV_ASSIGN
     NODE_RANGE

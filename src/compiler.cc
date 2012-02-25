@@ -893,10 +893,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(new OP(OP_NOT));
         break;
     }
-    case NODE_FILE_TEST_F: {
+    case NODE_FILE_TEST: {
         // -f $file
-        this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_FILE_TEST_F));
+        OP *op = new OP(OP_FILE_TEST);
+        op->operand.int_value = node->upcast<BinaryNode>()->left()->upcast<IntNode>()->int_value;
+        this->compile(node->upcast<BinaryNode>()->right());
+        ops->push_back(op);
         break;
     }
     case NODE_POST_DECREMENT: {

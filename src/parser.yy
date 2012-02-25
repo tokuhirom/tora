@@ -1,4 +1,4 @@
-%right FILE_TEST_F.
+%right FILE_TEST.
 %right ASSIGN.
 %right MY.
 %left DIV_ASSIGN.
@@ -291,8 +291,8 @@ unary_expression(A) ::= /* $i-- */ unary_expression(B) MINUSMINUS. {
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
     A = new NodeNode(NODE_PRE_INCREMENT, B);
 }
-unary_expression(A) ::= /* -f $file */ FILE_TEST_F unary_expression(B). {
-    A = new NodeNode(NODE_FILE_TEST_F, B);
+unary_expression(A) ::= /* -f $file */ FILE_TEST(B) unary_expression(C). {
+    A = new BinaryNode(NODE_FILE_TEST, B, C);
 }
 unary_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
     A = new NodeNode(NODE_POST_INCREMENT, B);

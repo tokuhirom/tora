@@ -288,7 +288,9 @@ std:
     "++" { return PLUSPLUS; }
     "--" { return MINUSMINUS; }
     "/=" { return DIV_ASSIGN; }
-    "-f" { return FILE_TEST_F; }
+    "-f" { *yylval = new IntNode(NODE_INT, 'f'); return FILE_TEST; }
+    "-d" { *yylval = new IntNode(NODE_INT, 'd'); return FILE_TEST; }
+    "-e" { *yylval = new IntNode(NODE_INT, 'e'); return FILE_TEST; }
     "!" { return NOT; }
     "(" { 
         divable = false;
