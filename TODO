@@ -61,7 +61,6 @@ syntax
  * continue
  * for (my $v in [1,2,3]) { say($v); }
  * my ($k, $v)
- * $i++
  * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2

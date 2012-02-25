@@ -128,6 +128,9 @@ public:
     const char *type_str() { return "int"; }
     SharedPtr<StrValue> to_s();
     SharedPtr<Value> tora__neg__();
+    void tora__decr__() {
+        this->int_value--;
+    }
     void tora__incr__() {
         this->int_value++;
     }

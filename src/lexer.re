@@ -286,6 +286,7 @@ std:
     ">=" { return LE; }
     "==" { return EQ; }
     "++" { return PLUSPLUS; }
+    "--" { return MINUSMINUS; }
     "/=" { return DIV_ASSIGN; }
     "(" { 
         divable = false;

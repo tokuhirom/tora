@@ -1,6 +1,7 @@
 %right ASSIGN.
 %right MY.
 %left DIV_ASSIGN.
+%left MINUSMINUS.
 %left PLUSPLUS.
 %left DOT.
 %left DOTDOT.
@@ -280,6 +281,12 @@ multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expressi
 }
 
 unary_expression(A) ::= postfix_expression(B). { A = B; }
+unary_expression(A) ::= /* --$i */ MINUSMINUS unary_expression(B). {
+    A = new NodeNode(NODE_PRE_DECREMENT, B);
+}
+unary_expression(A) ::= /* $i-- */ unary_expression(B) MINUSMINUS. {
+    A = new NodeNode(NODE_POST_DECREMENT, B);
+}
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
     A = new NodeNode(NODE_PRE_INCREMENT, B);
 }

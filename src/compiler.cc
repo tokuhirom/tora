@@ -887,6 +887,18 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(op);
         break;
     }
+    case NODE_POST_DECREMENT: {
+        // $i--
+        this->compile(node->upcast<NodeNode>()->node());
+        ops->push_back(new OP(OP_POST_DECREMENT));
+        break;
+    }
+    case NODE_PRE_DECREMENT: {
+        // --$i
+        this->compile(node->upcast<NodeNode>()->node());
+        ops->push_back(new OP(OP_PRE_DECREMENT));
+        break;
+    }
     case NODE_POST_INCREMENT: {
         // $i++
         this->compile(node->upcast<NodeNode>()->node());

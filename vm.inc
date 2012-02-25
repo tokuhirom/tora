@@ -603,6 +603,30 @@ OP_POST_INCREMENT {
     }
 }
 
+OP_PRE_DECREMENT {
+    // --$i
+    SharedPtr<Value> i = stack.pop();
+    if (i->value_type == VALUE_TYPE_INT) {
+        i->upcast<IntValue>()->tora__decr__();
+        stack.push(i);
+    } else {
+        this->die("%s does not supports decrement operator.\n", i->type_str());
+    }
+}
+
+OP_POST_DECREMENT {
+    // $i--
+    SharedPtr<Value> i = stack.pop();
+    if (i->value_type == VALUE_TYPE_INT) {
+        SharedPtr<IntValue>ii = i->upcast<IntValue>();
+        SharedPtr<IntValue>tmp = ii->clone();
+        ii->tora__decr__();
+        stack.push(tmp);
+    } else {
+        this->die("%s does not supports post decrement operator.\n", i->type_str());
+    }
+}
+
 OP_GETGLOBAL {
     int globalvarno = get_int_operand();
     stack.push(this->global_vars->at(globalvarno));
