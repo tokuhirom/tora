@@ -131,6 +131,9 @@ public:
     void tora__incr__() {
         this->int_value++;
     }
+    SharedPtr<IntValue> clone() {
+        return new IntValue(this->int_value);
+    }
     virtual void assign(SharedPtr<Value> &v) {
         assert(v->value_type == this->value_type);
         this->int_value = v->upcast<IntValue>()->int_value;

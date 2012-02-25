@@ -887,10 +887,16 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(op);
         break;
     }
-    case NODE_UNARY_INCREMENT: {
+    case NODE_POST_INCREMENT: {
+        // $i++
+        this->compile(node->upcast<NodeNode>()->node());
+        ops->push_back(new OP(OP_POST_INCREMENT));
+        break;
+    }
+    case NODE_PRE_INCREMENT: {
         // ++$i
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_UNARY_INCREMENT));
+        ops->push_back(new OP(OP_PRE_INCREMENT));
         break;
     }
     case NODE_TUPLE: {

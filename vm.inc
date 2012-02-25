@@ -579,13 +579,27 @@ OP_EXTRACT_TUPLE {
     stack.extract_tuple(t);
 }
 
-OP_UNARY_INCREMENT {
-    SharedPtr<IntValue> i = stack.pop()->upcast<IntValue>();
+OP_PRE_INCREMENT {
+    // ++$i
+    SharedPtr<Value> i = stack.pop();
     if (i->value_type == VALUE_TYPE_INT) {
-        i->tora__incr__();
+        i->upcast<IntValue>()->tora__incr__();
         stack.push(i);
     } else {
-        abort(); // TODO: throw exception
+        this->die("%s does not supports increment operator.\n", i->type_str());
+    }
+}
+
+OP_POST_INCREMENT {
+    // $i++
+    SharedPtr<Value> i = stack.pop();
+    if (i->value_type == VALUE_TYPE_INT) {
+        SharedPtr<IntValue>ii = i->upcast<IntValue>();
+        SharedPtr<IntValue>tmp = ii->clone();
+        ii->tora__incr__();
+        stack.push(tmp);
+    } else {
+        this->die("%s does not supports post increment operator.\n", i->type_str());
     }
 }
 

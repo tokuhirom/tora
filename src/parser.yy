@@ -281,7 +281,10 @@ multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expressi
 
 unary_expression(A) ::= postfix_expression(B). { A = B; }
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
-    A = new NodeNode(NODE_UNARY_INCREMENT, B);
+    A = new NodeNode(NODE_PRE_INCREMENT, B);
+}
+unary_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
+    A = new NodeNode(NODE_POST_INCREMENT, B);
 }
 unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
