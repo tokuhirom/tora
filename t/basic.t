@@ -128,13 +128,10 @@ $a = 1;
 say($a);
 ...
 
-TODO: {
-    local $TODO = 'oops';
-    run_is(<<'...', "OK\nHERE\n");
+run_is(<<'...', "OK\nHERE\n");
 if (true) { say("OK"); }
 say("HERE");
 ...
-}
 
 done_testing;
 
