@@ -52,6 +52,8 @@ my @nodes = qw(
     NODE_PRE_DECREMENT
     NODE_POST_DECREMENT
 
+    NODE_NOT
+
     NODE_FILE_TEST_F
 
     NODE_DIV_ASSIGN

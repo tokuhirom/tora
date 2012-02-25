@@ -1,0 +1,8 @@
+#!./tora
+use Test::More *;
+
+ok(-f "SConstruct");
+ok(!-f "PConstruct");
+ok(!-f "t");
+
+done_testing();

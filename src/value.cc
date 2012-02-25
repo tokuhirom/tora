@@ -3,13 +3,13 @@
 
 using namespace tora;
 
-SharedPtr<Value> Value::to_b() {
+SharedPtr<BoolValue> Value::to_b() {
     switch (value_type) {
     case VALUE_TYPE_UNDEF: {
         return new BoolValue(false);
     }
     case VALUE_TYPE_BOOL:
-        return this;
+        return this->upcast<BoolValue>();
     default: {
         return new BoolValue(true);
     }

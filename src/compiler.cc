@@ -887,6 +887,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         ops->push_back(op);
         break;
     }
+    case NODE_NOT: {
+        // ! $val
+        this->compile(node->upcast<NodeNode>()->node());
+        ops->push_back(new OP(OP_NOT));
+        break;
+    }
     case NODE_FILE_TEST_F: {
         // -f $file
         this->compile(node->upcast<NodeNode>()->node());

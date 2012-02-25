@@ -4,6 +4,7 @@
 #include "value/code.h"
 #include "value/regexp.h"
 #include "value/file.h"
+#include "value/symbol.h"
 #include "lexer.gen.h"
 #include "parser.class.h"
 #include "compiler.h"
@@ -325,8 +326,8 @@ SharedPtr<Value> VM::require(SharedPtr<Value> &v) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
-    std::string s = v->to_s()->str_value;
-    std::string package = v->to_s()->str_value;
+    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id);
+    std::string package = s;
     {
         auto iter = s.find("::");
         while (iter != std::string::npos) {
@@ -464,8 +465,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("__PACKAGE__",   builtin_package);
 }
 
-SharedPtr<Value> VM::copy_all_public_symbols(const std::string &src, const std::string &dst) {
-    ID srcid = this->symbol_table->get_id(src);
+SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, const std::string &dst) {
     ID dstid = this->symbol_table->get_id(dst);
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);

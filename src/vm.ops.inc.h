@@ -54,5 +54,6 @@ void PP_OP_DOTDOTDOT();
 void PP_OP_TRY();
 void PP_OP_DIE();
 void PP_OP_USE();
+void PP_OP_NOT();
 void PP_OP_PACKAGE_ENTER();
 void PP_OP_PACKAGE_LEAVE();

@@ -77,7 +77,7 @@ public:
     // TODO: rename to as_int
     IntValue *to_i();
     // TODO: rename to as_bool
-    SharedPtr<Value> to_b();
+    SharedPtr<BoolValue> to_b();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
     }
@@ -194,6 +194,9 @@ public:
     }
     const char *type_str() { return "bool"; }
     SharedPtr<StrValue>to_s();
+    BoolValue* tora__not__() {
+        return new BoolValue(!this->bool_value);
+    }
 };
 
 class StrValue: public Value {

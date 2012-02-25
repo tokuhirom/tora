@@ -289,6 +289,7 @@ std:
     "--" { return MINUSMINUS; }
     "/=" { return DIV_ASSIGN; }
     "-f" { return FILE_TEST_F; }
+    "!" { return NOT; }
     "(" { 
         divable = false;
         return L_PAREN;

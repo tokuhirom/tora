@@ -273,7 +273,7 @@ public:
         return ops->at(pc)->operand.double_value;
     }
 
-    SharedPtr<Value> copy_all_public_symbols(const std::string &src, const std::string &dst);
+    SharedPtr<Value> copy_all_public_symbols(ID srcid, const std::string &dst);
 
 #include "vm.ops.inc.h"
 };

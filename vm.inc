@@ -750,13 +750,18 @@ OP_USE {
         this->die(ret);
     } else {
         if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value == 1) {
-            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<StrValue>()->str_value, this->package);
+            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id, this->package);
             if (v->is_exception()) {
                 this->die(ret);
             }
         }
         stack.push(ret);
     }
+}
+
+OP_NOT {
+    SharedPtr<BoolValue> v = stack.pop()->to_b();
+    stack.push(v->tora__not__());
 }
 
 OP_PACKAGE_ENTER {

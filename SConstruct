@@ -69,7 +69,7 @@ if 'test' in COMMAND_LINE_TARGETS:
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
     finally:
         pass
-    env.Command('test', programs, prove_path + ' --source Executable tests/ --source Perl t')
+    env.Command('test', programs, prove_path + ' --source Executable -r tests/ t/tra/*.tra --source Perl t')
 
 ########
 # main programs

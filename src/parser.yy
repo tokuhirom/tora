@@ -12,7 +12,7 @@
 %left LT GT LE GE.
 %left ADD SUB.
 %left MUL DIV.
-/* %right '!'. */
+%right NOT.
 
 %token_type { Node* }
 
@@ -296,6 +296,9 @@ unary_expression(A) ::= /* -f $file */ FILE_TEST_F unary_expression(B). {
 }
 unary_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
     A = new NodeNode(NODE_POST_INCREMENT, B);
+}
+unary_expression(A) ::= NOT unary_expression(B). {
+    A = new NodeNode(NODE_NOT, B);
 }
 unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
