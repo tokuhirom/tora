@@ -126,6 +126,10 @@ void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
         stack.push(result);
         break;
     }
+    case VALUE_TYPE_UNDEF: {
+        stack.push(new BoolValue(v2->value_type == VALUE_TYPE_UNDEF));
+        break;
+    }
     default:
         printf("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
         v1->dump();

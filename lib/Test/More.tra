@@ -15,6 +15,8 @@ sub is($a, $b) {
         say("ok " + $counter);
     } else {
         say("not ok " + $counter);
+        say(" # got:      " + $a);
+        say(" # expected: " + $b);
     }
 }
 

@@ -4,13 +4,12 @@ TODO
 builtin functions
 -----------------
 
-
+stat()
 
 builtin objects
 ---------------
 
 Array.new()
-Array#sort()
 Array#sort!()
 Array#reverse()
 Array#map()
@@ -59,12 +58,11 @@ syntax
  * last
  * next
  * continue
- * for (my $v in [1,2,3]) { say($v); }
- * my ($k, $v)
  * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
  * -s
+ * for (my $e in opendir('t')) { } is needed?
 
 feature
 -------
@@ -77,12 +75,10 @@ feature
   * -p option
   * -i option
   * __FILE__
-  * do not create scope if thre is no var definition.
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
-  * Dir.close
-  * say(($a==$b ? "ok " : "not ok ") + $counter);
-  * "abc" == "def"
+  * undef == undef
+  * === operator?
 
 Library
 -------
@@ -95,4 +91,11 @@ Library
  * HTTP server
  * B::Deparse
  * Test::More
+
+Finished
+--------
+  * say(($a==$b ? "ok " : "not ok ") + $counter);
+  * "abc" == "def"
+  * Dir.close
+  * do not create scope if thre is no var definition.
 

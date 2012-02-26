@@ -366,6 +366,9 @@ primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
         A = B->at(0);
     }
 }
+primary_expression(A) ::= UNDEF. {
+    A = new VoidNode(NODE_UNDEF);
+}
 primary_expression(A) ::= DOTDOTDOT. {
     A = new VoidNode(NODE_DOTDOTDOT);
 }

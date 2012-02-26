@@ -649,6 +649,13 @@ OP_FILE_TEST {
     case 'e':
         stack.push(new BoolValue(stat(fname->c_str(), &buf)==0));
         break;
+    case 's':
+        if (stat(fname->c_str(), &buf) == 0) {
+            stack.push(new IntValue(buf.st_size));
+        } else {
+            stack.push(UndefValue::instance());
+        }
+        break;
     default:
         printf("[BUG] Unknown operand: %c\n", get_int_operand());
         abort();

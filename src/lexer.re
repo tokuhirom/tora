@@ -278,6 +278,7 @@ std:
         return INT_LITERAL;
     }
     "if" { return IF; }
+    "undef" { return UNDEF; }
     "in" { return IN; }
     "class" { return CLASS; }
     "<" { return GT; }
@@ -291,6 +292,7 @@ std:
     "-f" { *yylval = new IntNode(NODE_INT, 'f'); return FILE_TEST; }
     "-d" { *yylval = new IntNode(NODE_INT, 'd'); return FILE_TEST; }
     "-e" { *yylval = new IntNode(NODE_INT, 'e'); return FILE_TEST; }
+    "-s" { *yylval = new IntNode(NODE_INT, 's'); return FILE_TEST; }
     "!" { return NOT; }
     "(" { 
         divable = false;

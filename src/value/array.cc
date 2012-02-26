@@ -30,7 +30,6 @@ void ArrayValue::sort() {
 SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     SharedPtr<IntValue> iv = index->to_i();
     int i = iv->int_value;
-    iv->release();
     if (i > (int)this->values->size()) {
         fprintf(stderr, "IndexError: %d, %zd\n", i, this->values->size());
         abort();
