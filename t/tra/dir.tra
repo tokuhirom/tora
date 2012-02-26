@@ -12,3 +12,4 @@ is($a[2], 'x');
 is($a[3], 'y');
 is($a[4], 'z');
 
+done_testing();

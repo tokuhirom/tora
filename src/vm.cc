@@ -9,6 +9,8 @@
 #include "value/object.h"
 #include "object/array.h"
 #include "object/str.h"
+#include "object/dir.h"
+#include "object/stat.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -455,34 +457,6 @@ static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
     }
 }
 
-static SharedPtr<Value> dir_read(VM * vm, Value* self) {
-    assert(self->value_type == VALUE_TYPE_OBJECT);
-    SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__d"));
-    assert(v->value_type = VALUE_TYPE_POINTER);
-    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
-    assert(dp);
-    // TODO: support readdir_r
-    struct dirent * ent = readdir(dp);
-    if (ent) {
-        return new StrValue(ent->d_name);
-    } else {
-        return UndefValue::instance();
-    }
-}
-
-static SharedPtr<Value> dir_DESTROY(VM * vm, Value* self) {
-    assert(self->value_type == VALUE_TYPE_OBJECT);
-    SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__d"));
-    assert(v->value_type = VALUE_TYPE_POINTER);
-    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
-    assert(dp);
-    closedir(dp);
-#ifndef NDEBUG
-    self->upcast<ObjectValue>()->set_value(vm->symbol_table->get_id("__d"), UndefValue::instance());
-#endif
-    return UndefValue::instance();
-}
-
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==0) {
         SharedPtr<Value> ret = callback->func0();
@@ -520,6 +494,8 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
 void VM::register_standard_methods() {
     Init_Array(this);
     Init_Str(this);
+    Init_Dir(this);
+    Init_Stat(this);
 
     // this->add_builtin_function("print");
     this->add_builtin_function("p", builtin_p);
@@ -534,12 +510,6 @@ void VM::register_standard_methods() {
     this->add_builtin_function("self",   builtin_self);
     this->add_builtin_function("__PACKAGE__",   builtin_package);
     this->add_builtin_function("opendir",   builtin_opendir);
-
-    {
-        SharedPtr<Package> pkg = this->find_package("Dir");
-        pkg->add_method(this->symbol_table->get_id("read"), new CallbackFunction(dir_read));
-        pkg->add_method(this->symbol_table->get_id("DESTROY"), new CallbackFunction(dir_DESTROY));
-    }
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, const std::string &dst) {
