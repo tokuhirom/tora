@@ -4,5 +4,7 @@ ok((1==2 ? 3 : 4) == 4);
 my $a = 3;
 my $b = 3;
 my $counter = 4;
-say(($a==$b ? "ok " : "not ok ") + $counter);
+ok(($a==$b ? "ok " : "not ok ") + $counter);
+
+done_testing();
 

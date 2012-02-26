@@ -5,6 +5,8 @@
 
 namespace tora {
 
+class VM;
+
 class ObjectValue : public Value {
     std::map<ID, SharedPtr<Value>> data;
     ID package_id_;
@@ -12,7 +14,7 @@ class ObjectValue : public Value {
 public:
     ObjectValue(ID p, VM *v) : Value(VALUE_TYPE_OBJECT), package_id_(p), vm_(v) {
     }
-    ~ObjectValue() { }
+    ~ObjectValue();
 
     ID package_id() { return package_id_; }
 
