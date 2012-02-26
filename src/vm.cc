@@ -11,6 +11,7 @@
 #include "object/str.h"
 #include "object/dir.h"
 #include "object/stat.h"
+#include "object/env.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -76,7 +77,8 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(avalue);
 
     // $ENV
-    this->global_vars->push_back(UndefValue::instance());
+    SharedPtr<ObjectValue> env = new ObjectValue(this->symbol_table->get_id("Env"), this);
+    this->global_vars->push_back(env);
 
     // $LIBPATH : Array
     SharedPtr<ArrayValue> libpath = new ArrayValue();
@@ -206,18 +208,6 @@ void VM::die(SharedPtr<Value> & exception) {
 static SharedPtr<Value> builtin_p(Value* arg1) {
     arg1->dump();
     return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_getenv(Value * v) {
-    SharedPtr<Value> s(v->to_s());
-    char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
-    if (env) {
-        SharedPtr<StrValue> ret = new StrValue();
-        ret->set_str(env);
-        return ret;
-    } else {
-        return UndefValue::instance();
-    }
 }
 
 static SharedPtr<Value> builtin_exit(Value* v) {
@@ -488,6 +478,17 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         } else {
             stack.push(ret);
         }
+    } else if (callback->argc==-4) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> v2 = stack.pop();
+        SharedPtr<Value> ret = callback->func_vm2(this, v.get(), v2.get());
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
+    } else {
+        abort();
     }
 }
 
@@ -496,10 +497,10 @@ void VM::register_standard_methods() {
     Init_Str(this);
     Init_Dir(this);
     Init_Stat(this);
+    Init_Env(this);
 
     // this->add_builtin_function("print");
     this->add_builtin_function("p", builtin_p);
-    this->add_builtin_function("getenv", builtin_getenv);
     this->add_builtin_function("exit", builtin_exit);
     this->add_builtin_function("say", builtin_say);
     this->add_builtin_function("open", builtin_open);

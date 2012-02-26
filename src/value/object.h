@@ -26,6 +26,8 @@ public:
         printf("[dump] Object: %d\n", package_id_);
     }
     const char *type_str() { return "object"; }
+
+    SharedPtr<Value> get_item(SharedPtr<Value> index);
 };
 
 };

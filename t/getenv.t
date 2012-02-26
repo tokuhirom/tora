@@ -1,8 +1,10 @@
 use t::Util;
 
 local $ENV{FOO} = 'hogehoge';
-run_is(<<'...', $ENV{FOO});
-print(getenv("FOO"));
+local $ENV{HOGE};
+run_is(<<'...', "$ENV{FOO}\nundef\n");
+say($ENV["FOO"]);
+say($ENV["HOGE"]);
 ...
 
 done_testing;

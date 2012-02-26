@@ -234,7 +234,6 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "__PACKAGE__",
         "p",
         "require",
-        "getenv",
         "eval",
         "do",
         "print",

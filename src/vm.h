@@ -135,12 +135,14 @@ struct CallbackFunction {
     typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
     typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
     typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, Value*);
+    typedef SharedPtr<Value> (*func_vm2_t)(VM * vm_, Value*, Value*);
     union {
         func0_t    func0;
         func1_t    func1;
         funcv_t    funcv;
         func_vm0_t func_vm0;
         func_vm1_t func_vm1;
+        func_vm2_t func_vm2;
     };
     int argc;
     CallbackFunction(func0_t func_) : argc(0) {
@@ -154,6 +156,7 @@ struct CallbackFunction {
     }
     CallbackFunction(func_vm0_t func_) : argc(-2) { func_vm0 = func_; }
     CallbackFunction(func_vm1_t func_) : argc(-3) { func_vm1 = func_; }
+    CallbackFunction(func_vm2_t func_) : argc(-4) { func_vm2 = func_; }
 };
 
 class Package : public Value {

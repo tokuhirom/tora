@@ -79,6 +79,7 @@ feature
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
   * === operator?
+  * $ENV['Foo'] = 'Bar';
 
 Library
 -------
