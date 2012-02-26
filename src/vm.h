@@ -281,6 +281,7 @@ public:
     SharedPtr<Value> copy_all_public_symbols(ID srcid, const std::string &dst);
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
+    void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
 
 #include "vm.ops.inc.h"
 };

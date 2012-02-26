@@ -1,5 +1,6 @@
 #include "value.h"
 #include "value/code.h"
+#include "value/tuple.h"
 
 using namespace tora;
 
@@ -45,17 +46,20 @@ SharedPtr<StrValue> Value::to_s() {
 }
 
 IntValue *Value::to_i() {
-    switch (value_type) {
-    case VALUE_TYPE_INT: {
+    if (value_type == VALUE_TYPE_INT) {
         IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
         // TODO: this->clone()?
         return v;
+    } else if (value_type == VALUE_TYPE_TUPLE) {
+        if (this->upcast<TupleValue>()->size() == 1) {
+            return this->upcast<TupleValue>()->at(0)->to_i();
+        }
     }
-    default:
-        printf("to_i is not supported yet in not VALUE_TYPE_INT(%d)\n", value_type);
-        this->dump();
-        abort();
-    }
+
+
+    printf("to_i is not supported yet in not VALUE_TYPE_INT(%d)\n", value_type);
+    this->dump();
+    abort();
 }
 
 SharedPtr<Value> IntValue::tora__neg__() {

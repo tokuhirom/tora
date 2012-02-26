@@ -106,21 +106,7 @@ OP_MUL {
 OP_ADD {
     SharedPtr<Value> v1(stack.pop());
     SharedPtr<Value> v2(stack.pop());
-    if (v2->is_numeric()) {
-        SharedPtr<Value> i(v2->to_i());
-        SharedPtr<IntValue>v = new IntValue(v2->upcast<IntValue>()->int_value + v1->upcast<IntValue>()->int_value);
-        stack.push(v);
-    } else if (v2->value_type == VALUE_TYPE_STR) {
-        // TODO: support null terminated string
-        SharedPtr<StrValue>v = new StrValue();
-        SharedPtr<Value> s(v1->to_s());
-        v->set_str(v2->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
-        stack.push(v);
-    } else {
-        SharedPtr<Value> s(v1->to_s());
-        fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
-        exit(1); // TODO : die
-    }
+    this->add(v2, v1);
 }
 
 OP_BUILTIN_FUNCALL {
