@@ -18,7 +18,10 @@ public:
     void sort();
 
     // retain before push
-    void push(SharedPtr<Value> v) {
+    void push(Value *v) {
+        this->values->push_back(v);
+    }
+    void push(SharedPtr<Value> &v) {
         this->values->push_back(v);
     }
     size_t size() {

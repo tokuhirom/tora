@@ -131,10 +131,10 @@ struct Callback {
 
 struct CallbackFunction {
     typedef SharedPtr<Value> (*func0_t)();
-    typedef SharedPtr<Value> (*func1_t)(SharedPtr<Value>&);
+    typedef SharedPtr<Value> (*func1_t)(Value *);
     typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
     typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
-    typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, SharedPtr<Value>&);
+    typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, Value*);
     union {
         func0_t    func0;
         func1_t    func1;
@@ -163,6 +163,7 @@ public:
     typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
 
     Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
+    ~Package () { }
     void add_function(ID function_name_id, SharedPtr<Value> code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
@@ -195,6 +196,7 @@ class PackageMap : public Value {
 public:
     PackageMap() : Value(VALUE_TYPE_PACKAGE_MAP) {
     }
+    ~PackageMap() { }
     std::map<ID, SharedPtr<Package>>::iterator find(ID id) {
         return data.find(id);
     }
@@ -213,7 +215,6 @@ public:
 
 class VM {
 public:
-    tora::Stack stack;
     int sp; // stack pointer
     int pc; // program counter
     SharedPtr<OPArray> ops;
@@ -223,6 +224,7 @@ public:
     SharedPtr<PackageMap> package_map;
     SharedPtr<Package> find_package(ID id);
     SharedPtr<Package> find_package(const char *name);
+    tora::Stack stack;
 
     // TODO: cache
     ID package_id() {
@@ -249,7 +251,7 @@ public:
     void execute();
 
     template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
-    template <class operationI, class operationD> void cmpop(operationI operation_i, operationD operation_d);
+    template <class operationI, class operationD, class operationS> void cmpop(operationI operation_i, operationD operation_d, operationS operation_s);
 
     void init_globals(int argc, char**argv);
 
@@ -261,7 +263,7 @@ public:
         }
         printf("----------------\n");
     }
-    SharedPtr<Value> require(SharedPtr<Value> &v);
+    SharedPtr<Value> require(Value *v);
     void add_function(ID id, SharedPtr<Value> code);
     void add_function(std::string &name, SharedPtr<Value> code) {
         this->add_function(this->symbol_table->get_id(name), code);

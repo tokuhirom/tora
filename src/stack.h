@@ -37,6 +37,14 @@ public:
         return container.size();
     }
     void extract_tuple(SharedPtr<TupleValue> &t);
+    void dump() {
+        printf("-- stack dump --\n");
+        for (size_t i=0; i< container.size(); i++) {
+            printf("[%d]\n", i);
+            container.at(i)->dump(1);
+        }
+        printf("----------------\n");
+    }
 };
 
 };

@@ -28,7 +28,7 @@ void ArrayValue::sort() {
 // TODO: Array#stable_sort()
 
 SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
-    IntValue *iv = index->to_i();
+    SharedPtr<IntValue> iv = index->to_i();
     int i = iv->int_value;
     iv->release();
     if (i > (int)this->values->size()) {

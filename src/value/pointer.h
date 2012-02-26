@@ -12,7 +12,10 @@ public:
     }
     ~PointerValue() { }
 
-    void *ptr() { return ptr_; }
+    void *ptr() {
+        assert(ptr_);
+        return ptr_;
+    }
 
     void dump(int indent) {
         print_indent(indent);

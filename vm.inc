@@ -132,7 +132,7 @@ OP_BUILTIN_FUNCALL {
         stack.push(ret);
     } else if (iter->second->argc==1) {
         SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = iter->second->func1(v);
+        SharedPtr<Value> ret = iter->second->func1(v.get());
         stack.push(ret);
     } else if (iter->second->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
@@ -151,7 +151,7 @@ OP_BUILTIN_FUNCALL {
         }
     } else if (iter->second->argc==-3) {
         SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = iter->second->func_vm1(this, v);
+        SharedPtr<Value> ret = iter->second->func_vm1(this, v.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
@@ -437,31 +437,36 @@ OP_JUMP {
 OP_EQ {
     std::equal_to<int> i;
     std::equal_to<double> d;
-    this->cmpop(i, d);
+    std::equal_to<std::string> s;
+    this->cmpop(i, d, s);
 }
 
 OP_GT {
     std::greater<int> i;
     std::greater<double> d;
-    this->cmpop(i, d);
+    std::greater<std::string> s;
+    this->cmpop(i, d, s);
 }
 
 OP_LT {
     std::less<int> i;
     std::less<double> d;
-    this->cmpop(i, d);
+    std::less<std::string> s;
+    this->cmpop(i, d, s);
 }
 
 OP_GE {
     std::greater_equal<int> i;
     std::greater_equal<double> d;
-    this->cmpop(i, d);
+    std::greater_equal<std::string> s;
+    this->cmpop(i, d, s);
 }
 
 OP_LE {
     std::less_equal<int> i;
     std::less_equal<double> d;
-    this->cmpop(i, d);
+    std::less_equal<std::string> s;
+    this->cmpop(i, d, s);
 }
 
 OP_SETLOCAL {
@@ -709,7 +714,7 @@ OP_FOR_ITER {
             SharedPtr<IntValue> val = new IntValue(riter->counter);
             riter->counter++;
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push(val);
+            t->push(val.get());
             stack.push(t);
         } else {
             stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
@@ -761,7 +766,7 @@ OP_DIE {
 OP_USE {
     SharedPtr<Value> mod_name = stack.pop();
     SharedPtr<Value> include  = stack.pop();
-    SharedPtr<Value> ret = this->require(mod_name);
+    SharedPtr<Value> ret = this->require(mod_name.get());
     if (ret->is_exception()) {
         this->die(ret);
     } else {

@@ -10,12 +10,14 @@ protected:
 public:
     virtual ~Prim() { }
     void release() {
+        // assert(refcnt > 0);
         --refcnt;
         if (refcnt == 0) {
             delete this;
         }
     }
     void retain() {
+        assert(refcnt >= 0);
         ++refcnt;
     }
 };

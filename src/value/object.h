@@ -10,7 +10,7 @@ class VM;
 class ObjectValue : public Value {
     std::map<ID, SharedPtr<Value>> data;
     ID package_id_;
-    const VM * vm_;
+    VM * vm_;
 public:
     ObjectValue(ID p, VM *v) : Value(VALUE_TYPE_OBJECT), package_id_(p), vm_(v) {
     }

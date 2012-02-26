@@ -108,8 +108,8 @@ void VM::binop(operationI operation_i, operationD operation_d) {
     }
 }
 
-template <class operationI, class operationD>
-void VM::cmpop(operationI operation_i, operationD operation_d) {
+template <class operationI, class operationD, class OperationS>
+void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
     SharedPtr<Value> v1(stack.pop());
     SharedPtr<Value> v2(stack.pop());
  
@@ -117,6 +117,12 @@ void VM::cmpop(operationI operation_i, operationD operation_d) {
     case VALUE_TYPE_INT: {
         SharedPtr<Value> i2(v2->to_i());
         SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, i2->upcast<IntValue>()->int_value));
+        stack.push(result);
+        break;
+    }
+    case VALUE_TYPE_STR: {
+        SharedPtr<Value> s2(v2->to_s());
+        SharedPtr<BoolValue> result = BoolValue::instance(operation_s(v1->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
         stack.push(result);
         break;
     }
@@ -191,12 +197,12 @@ void VM::die(SharedPtr<Value> & exception) {
     }
 }
 
-static SharedPtr<Value> builtin_p(SharedPtr<Value>&arg1) {
+static SharedPtr<Value> builtin_p(Value* arg1) {
     arg1->dump();
     return UndefValue::instance();
 }
 
-static SharedPtr<Value> builtin_getenv(SharedPtr<Value> &v) {
+static SharedPtr<Value> builtin_getenv(Value * v) {
     SharedPtr<Value> s(v->to_s());
     char *env = getenv(s->upcast<StrValue>()->str_value.c_str());
     if (env) {
@@ -208,7 +214,7 @@ static SharedPtr<Value> builtin_getenv(SharedPtr<Value> &v) {
     }
 }
 
-static SharedPtr<Value> builtin_exit(SharedPtr<Value> &v) {
+static SharedPtr<Value> builtin_exit(Value* v) {
     assert(v->value_type == VALUE_TYPE_INT);
     SharedPtr<Value> s(v->to_i());
     exit(s->upcast<IntValue>()->int_value);
@@ -293,7 +299,7 @@ static SharedPtr<Value> do_foo(VM *vm, const std::string &fname, std::string & p
     }
 }
 
-static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
+static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
     std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
@@ -303,7 +309,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, SharedPtr<Value> &v) {
 /**
  * do $file; => eval(open($file).read())
  */
-static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
+static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
     std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value.c_str(), std::ios::in);
     if (ifs->is_open()) {
@@ -313,7 +319,7 @@ static SharedPtr<Value> builtin_do(VM * vm, SharedPtr<Value> &v) {
     }
 }
 
-SharedPtr<Value> VM::require(SharedPtr<Value> &v) {
+SharedPtr<Value> VM::require(Value * v) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
@@ -367,7 +373,7 @@ SharedPtr<Value> VM::require(SharedPtr<Value> &v) {
 
 /**
  */
-static SharedPtr<Value> builtin_require(VM *vm, SharedPtr<Value> &v) {
+static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
     return vm->require(v);
 }
 
@@ -433,7 +439,7 @@ static SharedPtr<Value> builtin_self(VM *vm) {
 }
 
 // TODO: close directory at destructor
-static SharedPtr<Value> builtin_opendir(VM * vm, SharedPtr<Value>& s) {
+static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
     SharedPtr<StrValue> dirname = s->to_s();
     DIR * dp = opendir(dirname->c_str());
     if (dp) {
@@ -445,7 +451,7 @@ static SharedPtr<Value> builtin_opendir(VM * vm, SharedPtr<Value>& s) {
     }
 }
 
-static SharedPtr<Value> dir_read(VM * vm, SharedPtr<Value>& self) {
+static SharedPtr<Value> dir_read(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__d"));
     assert(v->value_type = VALUE_TYPE_POINTER);
@@ -460,13 +466,26 @@ static SharedPtr<Value> dir_read(VM * vm, SharedPtr<Value>& self) {
     }
 }
 
+static SharedPtr<Value> dir_DESTROY(VM * vm, Value* self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__d"));
+    assert(v->value_type = VALUE_TYPE_POINTER);
+    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
+    assert(dp);
+    closedir(dp);
+#ifndef NDEBUG
+    self->upcast<ObjectValue>()->set_value(vm->symbol_table->get_id("__d"), UndefValue::instance());
+#endif
+    return UndefValue::instance();
+}
+
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==0) {
         SharedPtr<Value> ret = callback->func0();
         stack.push(ret);
     } else if (callback->argc==1) {
         SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = callback->func1(v);
+        SharedPtr<Value> ret = callback->func1(v.get());
         stack.push(ret);
     } else if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
@@ -485,7 +504,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         }
     } else if (callback->argc==-3) {
         SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = callback->func_vm1(this, v);
+        SharedPtr<Value> ret = callback->func_vm1(this, v.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
@@ -515,6 +534,7 @@ void VM::register_standard_methods() {
     {
         SharedPtr<Package> pkg = this->find_package("Dir");
         pkg->add_method(this->symbol_table->get_id("read"), new CallbackFunction(dir_read));
+        pkg->add_method(this->symbol_table->get_id("DESTROY"), new CallbackFunction(dir_DESTROY));
     }
 }
 

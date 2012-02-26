@@ -35,18 +35,8 @@ public:
     CodeValue(const CallbackFunction * cb): Value(VALUE_TYPE_CODE), callback_(cb), is_native_(true), code_params(NULL), closure_var_names(NULL) {
         this->closure_vars = new std::vector<SharedPtr<Value>>();
     }
-    ~CodeValue() {
-        if (code_params) {
-            auto iter = code_params->begin();
-            for (; iter!=code_params->end(); iter++) {
-                delete *iter;
-            }
-            delete code_params;
-        }
+    ~CodeValue();
 
-        delete closure_var_names;
-        delete closure_vars;
-    }
     void dump(int indent) {
         print_indent(indent);
         printf("[dump] code: name: %s\n", this->code_name.c_str());

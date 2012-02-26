@@ -1,0 +1,14 @@
+use Test::More *;
+
+my $d = opendir('t/dat/dir');
+my $a = [];
+while (my $e = $d.read()) {
+    $a.push($e);
+}
+$a = $a.sort();
+is($a[0], '.');
+is($a[1], '..');
+is($a[2], 'x');
+is($a[3], 'y');
+is($a[4], 'z');
+
