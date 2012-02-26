@@ -11,7 +11,11 @@
 
 namespace tora {
 
+struct CallbackFunction;
+
 class CodeValue: public Value {
+    const CallbackFunction * callback_;
+    bool is_native_;
 public:
     ID package_id;
     ID func_name_id;
@@ -22,19 +26,26 @@ public:
     std::vector<SharedPtr<Value>> *closure_vars;
     SharedPtr<OPArray> code_opcodes;
 
-    CodeValue(): Value(VALUE_TYPE_CODE) {
+    bool is_native() { return is_native_; }
+    const CallbackFunction* callback() { return callback_; }
+
+    CodeValue(): Value(VALUE_TYPE_CODE), callback_(NULL), is_native_(false) {
+        this->closure_vars = new std::vector<SharedPtr<Value>>();
+    }
+    CodeValue(const CallbackFunction * cb): Value(VALUE_TYPE_CODE), callback_(cb), is_native_(true), code_params(NULL), closure_var_names(NULL) {
         this->closure_vars = new std::vector<SharedPtr<Value>>();
     }
     ~CodeValue() {
-        auto iter = code_params->begin();
-        for (; iter!=code_params->end(); iter++) {
-            delete *iter;
+        if (code_params) {
+            auto iter = code_params->begin();
+            for (; iter!=code_params->end(); iter++) {
+                delete *iter;
+            }
+            delete code_params;
         }
 
         delete closure_var_names;
         delete closure_vars;
-
-        delete code_params;
     }
     void dump(int indent) {
         print_indent(indent);

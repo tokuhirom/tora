@@ -5,6 +5,10 @@
 #include "value/regexp.h"
 #include "value/file.h"
 #include "value/symbol.h"
+#include "value/pointer.h"
+#include "value/object.h"
+#include <sys/types.h>
+#include <dirent.h>
 #include "lexer.gen.h"
 #include "parser.class.h"
 #include "compiler.h"
@@ -441,6 +445,68 @@ static SharedPtr<Value> builtin_self(VM *vm) {
     return new ExceptionValue("Cannot call 'self' method out of method.");
 }
 
+// TODO: close directory at destructor
+static SharedPtr<Value> builtin_opendir(VM * vm, SharedPtr<Value>& s) {
+    SharedPtr<StrValue> dirname = s->to_s();
+    DIR * dp = opendir(dirname->c_str());
+    if (dp) {
+        SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Dir"), vm);
+        o->set_value(vm->symbol_table->get_id("__d"), new PointerValue(dp));
+        return o;
+    } else {
+        return UndefValue::instance();
+    }
+}
+
+static SharedPtr<Value> dir_read(VM * vm, SharedPtr<Value>& self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__d"));
+    assert(v->value_type = VALUE_TYPE_POINTER);
+    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
+    assert(dp);
+    // TODO: support readdir_r
+    struct dirent * ent = readdir(dp);
+    if (ent) {
+        return new StrValue(ent->d_name);
+    } else {
+        return UndefValue::instance();
+    }
+}
+
+void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
+    if (callback->argc==0) {
+        SharedPtr<Value> ret = callback->func0();
+        stack.push(ret);
+    } else if (callback->argc==1) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> ret = callback->func1(v);
+        stack.push(ret);
+    } else if (callback->argc==-1) {
+        std::vector<SharedPtr<Value>> vec;
+        for (int i=0; i<argcnt; i++) {
+            SharedPtr<Value> arg = stack.pop();
+            vec.push_back(arg);
+        }
+        SharedPtr<Value> ret = callback->funcv(vec);
+        stack.push(ret);
+    } else if (callback->argc==-2) {
+        SharedPtr<Value> ret = callback->func_vm0(this);
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
+    } else if (callback->argc==-3) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> ret = callback->func_vm1(this, v);
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
+    }
+}
+
 void VM::register_standard_methods() {
     {
         MetaClass meta(this, VALUE_TYPE_ARRAY);
@@ -463,6 +529,12 @@ void VM::register_standard_methods() {
     this->add_builtin_function("require",   builtin_require);
     this->add_builtin_function("self",   builtin_self);
     this->add_builtin_function("__PACKAGE__",   builtin_package);
+    this->add_builtin_function("opendir",   builtin_opendir);
+
+    {
+        SharedPtr<Package> pkg = this->find_package("Dir");
+        pkg->add_method(this->symbol_table->get_id("read"), new CallbackFunction(dir_read));
+    }
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, const std::string &dst) {
@@ -491,6 +563,17 @@ void VM::add_function(ID id, SharedPtr<Value> code) {
 
 void Package::add_function(ID function_name_id, SharedPtr<Value> code) {
     this->data[function_name_id] = code;
+}
+
+// move package to package.h/package.cc
+void Package::add_method(ID function_name_id, const CallbackFunction* code) {
+    SharedPtr<CodeValue> cv = new CodeValue(code);
+    cv->package_id = this->name_id;
+    this->data[function_name_id] = cv;
+}
+
+SharedPtr<Package> VM::find_package(const char * name) {
+    return this->find_package(this->symbol_table->get_id(name));
 }
 
 SharedPtr<Package> VM::find_package(ID id) {

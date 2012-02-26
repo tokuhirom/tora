@@ -140,6 +140,7 @@ OP_BUILTIN_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
+    // TODO: call_native_func
     if (iter->second->argc==0) {
         SharedPtr<Value> ret = iter->second->func0();
         stack.push(ret);
@@ -271,30 +272,38 @@ OP_METHOD_CALL {
             assert(code_v->value_type == VALUE_TYPE_CODE);
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
-
-            {
+            if (code->is_native()) {
                 SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
                 fframe->return_address = pc;
-                fframe->orig_ops = ops;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
 
-                pc = -1;
-                this->ops = code->code_opcodes;
+                this->call_native_func(code->callback(), argcnt);
+            } else {
+                {
+                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                    fframe->return_address = pc;
+                    fframe->orig_ops = ops;
+                    fframe->top = stack.size() - argcnt;
+                    fframe->code = code;
 
-                // TODO: vargs support
-                // TODO: kwargs support
-                assert(argcnt == (int)code->code_params->size());
-                for (int i=0; i<argcnt; i++) {
-                    SharedPtr<Value> arg = stack.pop();
-                    fframe->setVar(i, arg);
+                    pc = -1;
+                    this->ops = code->code_opcodes;
+
+                    // TODO: vargs support
+                    // TODO: kwargs support
+                    assert(argcnt == (int)code->code_params->size());
+                    for (int i=0; i<argcnt; i++) {
+                        SharedPtr<Value> arg = stack.pop();
+                        fframe->setVar(i, arg);
+                    }
+                    frame_stack->push_back(fframe);
                 }
-                frame_stack->push_back(fframe);
             }
         } else {
             if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("new")) {
                 // process parameters
-                stack.push(new ObjectValue(object->upcast<SymbolValue>()->id));
+                stack.push(new ObjectValue(object->upcast<SymbolValue>()->id, this));
             } else {
                 this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
             }
@@ -321,7 +330,15 @@ OP_METHOD_CALL {
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
 
-            {
+            if (code->is_native()) {
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                fframe->return_address = pc;
+                fframe->top = stack.size() - argcnt;
+                fframe->code = code;
+
+                stack.push(object);
+                this->call_native_func(code->callback(), argcnt+1);
+            } else {
                 SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
                 fframe->return_address = pc;
                 fframe->orig_ops = ops;

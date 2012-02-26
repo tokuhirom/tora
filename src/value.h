@@ -36,6 +36,7 @@ typedef enum {
     VALUE_TYPE_PACKAGE,
     VALUE_TYPE_PACKAGE_MAP,
     VALUE_TYPE_OBJECT,
+    VALUE_TYPE_POINTER,
 } value_type_t;
 
 typedef enum {

@@ -8,12 +8,16 @@ namespace tora {
 class ObjectValue : public Value {
     std::map<ID, SharedPtr<Value>> data;
     ID package_id_;
+    const VM * vm_;
 public:
-    ObjectValue(ID p) : Value(VALUE_TYPE_OBJECT), package_id_(p) {
+    ObjectValue(ID p, VM *v) : Value(VALUE_TYPE_OBJECT), package_id_(p), vm_(v) {
     }
     ~ObjectValue() { }
 
     ID package_id() { return package_id_; }
+
+    void set_value(ID id, const SharedPtr<Value> & v) { data[id] = v; }
+    SharedPtr<Value> get_value(ID id) { return data[id]; }
 
     void dump(int indent) {
         print_indent(indent);

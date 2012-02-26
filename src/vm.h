@@ -164,6 +164,9 @@ public:
 
     Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
     void add_function(ID function_name_id, SharedPtr<Value> code);
+
+    void add_method(ID function_name_id, const CallbackFunction* code);
+
     iterator find(ID id) {
         return data.find(id);
     }
@@ -219,6 +222,7 @@ public:
     std::string package;
     SharedPtr<PackageMap> package_map;
     SharedPtr<Package> find_package(ID id);
+    SharedPtr<Package> find_package(const char *name);
 
     // TODO: cache
     ID package_id() {
@@ -226,6 +230,7 @@ public:
     }
 
     std::map<ID, CallbackFunction*> builtin_functions;
+
     template <class T>
     void add_builtin_function(const char *name, T func) {
         ID id = this->symbol_table->get_id(std::string(name));
@@ -274,6 +279,8 @@ public:
     }
 
     SharedPtr<Value> copy_all_public_symbols(ID srcid, const std::string &dst);
+
+    void call_native_func(const CallbackFunction* callback, int argcnt);
 
 #include "vm.ops.inc.h"
 };
