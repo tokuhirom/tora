@@ -359,8 +359,12 @@ primary_expression(A) ::= qw_creation(B). { A = B; }
 primary_expression(A) ::= hash_creation(B). { A = B; }
 /* tuple */
 primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
-    B->type = NODE_TUPLE;
-    A = B;
+    if (B->size() > 1) {
+        B->type = NODE_TUPLE;
+        A = B;
+    } else {
+        A = B->at(0);
+    }
 }
 primary_expression(A) ::= DOTDOTDOT. {
     A = new VoidNode(NODE_DOTDOTDOT);

@@ -49,6 +49,14 @@ public:
     virtual void dump(int indent);
     void dump();
 
+    Node* at(int i) {
+        return &(*(list->at(i)));
+    }
+
+    size_t size() {
+        return list->size();
+    }
+
     template<class Y>
     Y* upcast() {
         return dynamic_cast<Y*>(&(*(this)));

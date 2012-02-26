@@ -569,14 +569,6 @@ SharedPtr<Package> VM::find_package(ID id) {
 }
 
 void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
-    if (lhs->value_type == VALUE_TYPE_TUPLE) {
-        if (lhs->upcast<TupleValue>()->size() >= 1) {
-            lhs = lhs->upcast<TupleValue>()->at(0);
-        } else {
-            lhs = UndefValue::instance();
-        }
-    }
-
     if (lhs->is_numeric()) {
         SharedPtr<Value> i(lhs->to_i());
         SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + rhs->upcast<IntValue>()->int_value);
