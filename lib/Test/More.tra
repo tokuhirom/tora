@@ -9,6 +9,15 @@ sub ok($b) {
     }
 }
 
+sub is($a, $b) {
+    ++$counter;
+    if ($a==$b) {
+        say("ok " + $counter);
+    } else {
+        say("not ok " + $counter);
+    }
+}
+
 sub done_testing() {
     say("1.." + $counter);
 }

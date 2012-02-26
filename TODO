@@ -79,8 +79,10 @@ feature
   * __FILE__
   * do not create scope if thre is no var definition.
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
-  * Array#sort
+  * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * Dir.close
+  * say(($a==$b ? "ok " : "not ok ") + $counter);
+  * "abc" == "def"
 
 Library
 -------

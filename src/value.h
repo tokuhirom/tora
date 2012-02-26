@@ -65,6 +65,8 @@ protected:
             printf("    ");
         }
     }
+    Value(const Value&) = delete;
+    Value& operator=(const Value&) = delete;
 public:
     value_type_t value_type;
 

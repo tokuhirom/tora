@@ -5,6 +5,8 @@ class Prim {
 protected:
     Prim(): refcnt(0) { }
     int refcnt;
+    Prim(const Prim&) = delete;
+    Prim& operator=(const Prim&) = delete;
 public:
     virtual ~Prim() { }
     void release() {

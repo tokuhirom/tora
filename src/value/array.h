@@ -11,9 +11,12 @@ public:
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
         this->values = new std::vector<SharedPtr<Value>>;
     }
+    ArrayValue(const ArrayValue & a);
     ~ArrayValue() {
         delete values;
     }
+    void sort();
+
     // retain before push
     void push(SharedPtr<Value> v) {
         this->values->push_back(v);

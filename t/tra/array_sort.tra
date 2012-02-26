@@ -1,0 +1,12 @@
+use Test::More *;
+
+my $a = [4,1,5, 13];
+is($a.size(), 4);
+
+my $b = $a.sort();
+is($b.size(), 4);
+is($b[0], 1);
+is($b[1], 13);
+is($b[2], 4);
+is($b[3], 5);
+
