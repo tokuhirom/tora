@@ -7,4 +7,5 @@ KNOWN BUGS LIST
 * for (my $i in [1]) { ... } should works
 * 3/0.5 segv
 * zero divided error
+* close directory at destructor
 

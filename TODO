@@ -79,6 +79,8 @@ feature
   * __FILE__
   * do not create scope if thre is no var definition.
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
+  * Array#sort
+  * Dir.close
 
 Library
 -------

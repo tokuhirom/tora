@@ -7,6 +7,8 @@
 #include "value/symbol.h"
 #include "value/pointer.h"
 #include "value/object.h"
+#include "object/array.h"
+#include "object/str.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -187,21 +189,6 @@ void VM::die(SharedPtr<Value> & exception) {
             frame_stack->pop_back();
         }
     }
-}
-
-static SharedPtr<Value> av_size(SharedPtr<Value>& self) {
-    SharedPtr<IntValue> size = new IntValue(self->upcast<ArrayValue>()->size());
-    return size;
-}
-
-static SharedPtr<Value> str_length(SharedPtr<Value>& self) {
-    return new IntValue(self->upcast<StrValue>()->length());
-}
-
-static SharedPtr<Value> str_match(SharedPtr<Value>&self, SharedPtr<Value>&arg1) {
-    SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
-    SharedPtr<BoolValue> b = new BoolValue(regex->match(self->upcast<StrValue>()->str_value));
-    return b;
 }
 
 static SharedPtr<Value> builtin_p(SharedPtr<Value>&arg1) {
@@ -508,15 +495,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
 }
 
 void VM::register_standard_methods() {
-    {
-        MetaClass meta(this, VALUE_TYPE_ARRAY);
-        meta.add_method("size", av_size);
-    }
-    {
-        MetaClass meta(this, VALUE_TYPE_STR);
-        meta.add_method("length", str_length);
-        meta.add_method("match", str_match);
-    }
+    Init_Array(this);
+    Init_Str(this);
+
     // this->add_builtin_function("print");
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("getenv", builtin_getenv);
