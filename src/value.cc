@@ -93,7 +93,7 @@ Value& tora::Value::operator=(const Value&v) {
     assert(this->value_type == v->value_type);
     switch (v.value_type) {
     case VALUE_TYPE_INT: {
-        const IntValue *vp = (const IntValue*)&v;
+        const IntValue *vp = static_cast<const IntValue*>(&v);
         this->upcast<IntValue>()->int_value = vp->int_value;
         return *this;
     }

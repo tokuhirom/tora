@@ -87,7 +87,7 @@ public:
 
     template<class Y>
     Y* upcast() {
-        return (Y*)(this);
+        return static_cast<Y*>(this);
     }
 
     // GET type name in const char*
