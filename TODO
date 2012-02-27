@@ -63,6 +63,7 @@ syntax
  * $x ** 2
  * -s
  * for (my $e in opendir('t')) { } is needed?
+ * caller()
 
 feature
 -------
@@ -79,7 +80,6 @@ feature
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
   * === operator?
-  * $ENV['Foo'] = 'Bar';
 
 Library
 -------
@@ -99,4 +99,5 @@ Finished
   * "abc" == "def"
   * Dir.close
   * do not create scope if thre is no var definition.
+  * $ENV['Foo'] = 'Bar';
 

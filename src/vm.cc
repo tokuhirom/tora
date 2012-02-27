@@ -48,18 +48,6 @@ VM::~VM() {
     delete this->frame_stack;
 
     {
-        auto iter = standard.begin();
-        for (; iter!=standard.end(); iter++) {
-            auto mp = iter->second;
-            auto iter2 = mp->begin();
-            for (; iter2!=mp->end(); iter2++) {
-                delete iter2->second;
-            }
-            delete mp;
-        }
-    }
-
-    {
         // std::map<ID, CallbackFunction*> builtin_functions;
         auto iter = builtin_functions.begin();
         for (;iter != builtin_functions.end(); iter++) {
@@ -448,10 +436,7 @@ static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
 }
 
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
-    if (callback->argc==0) {
-        SharedPtr<Value> ret = callback->func0();
-        stack.push(ret);
-    } else if (callback->argc==1) {
+    if (callback->argc==1) {
         SharedPtr<Value> v = stack.pop();
         SharedPtr<Value> ret = callback->func1(v.get());
         stack.push(ret);

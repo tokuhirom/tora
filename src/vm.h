@@ -113,24 +113,7 @@ typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
 class VM;
 
-struct Callback {
-    typedef SharedPtr<Value> (*func0_t)(SharedPtr<Value>&);
-    typedef SharedPtr<Value> (*func1_t)(SharedPtr<Value>&, SharedPtr<Value>&);
-    union {
-        func0_t func0;
-        func1_t func1;
-    };
-    int argc;
-    Callback(func0_t func_) : argc(0) {
-        func0 = func_;
-    }
-    Callback(func1_t func_) : argc(1) {
-        func1 = func_;
-    }
-};
-
 struct CallbackFunction {
-    typedef SharedPtr<Value> (*func0_t)();
     typedef SharedPtr<Value> (*func1_t)(Value *);
     typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
     typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
@@ -138,7 +121,6 @@ struct CallbackFunction {
     typedef SharedPtr<Value> (*func_vm2_t)(VM * vm_, Value*, Value*);
     typedef SharedPtr<Value> (*func_vm3_t)(VM * vm_, Value*, Value*, Value*);
     union {
-        func0_t    func0;
         func1_t    func1;
         funcv_t    funcv;
         func_vm0_t func_vm0;
@@ -147,9 +129,6 @@ struct CallbackFunction {
         func_vm3_t func_vm3;
     };
     int argc;
-    CallbackFunction(func0_t func_) : argc(0) {
-        func0 = func_;
-    }
     CallbackFunction(func1_t func_) : argc(1) {
         func1 = func_;
     }
@@ -245,8 +224,6 @@ public:
         this->builtin_functions.insert(std::make_pair(id, new CallbackFunction(func)));
     }
 
-    std::map<value_type_t, std::map<ID, Callback*>*> standard;
-
     /*
      * stack for lexical variables.
      */
@@ -292,22 +269,6 @@ public:
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
 
 #include "vm.ops.inc.h"
-};
-
-class MetaClass {
-    VM *vm_;
-    value_type_t type;
-    std::map<ID, Callback*> *methods;
-public:
-    MetaClass(VM *v, value_type_t t) : vm_(v), type(t) {
-        this->methods = new std::map<ID, Callback*>();
-        vm_->standard[t] = this->methods;
-    }
-    template <class T>
-    void add_method(const std::string &name, T func) {
-        ID id = vm_->symbol_table->get_id(name);
-        this->methods->insert(std::make_pair(id, new Callback(func)));
-    }
 };
 
 class VM;

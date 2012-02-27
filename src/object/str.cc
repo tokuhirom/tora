@@ -6,18 +6,18 @@
 
 using namespace tora;
 
-static SharedPtr<Value> str_length(SharedPtr<Value>& self) {
+static SharedPtr<Value> str_length(VM *vm, Value* self) {
     return new IntValue(self->upcast<StrValue>()->length());
 }
 
-static SharedPtr<Value> str_match(SharedPtr<Value>&self, SharedPtr<Value>&arg1) {
+static SharedPtr<Value> str_match(VM *vm, Value* self, Value* arg1) {
     SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
     SharedPtr<BoolValue> b = new BoolValue(regex->match(self->upcast<StrValue>()->str_value));
     return b;
 }
 
 void tora::Init_Str(VM *vm) {
-    MetaClass meta(vm, VALUE_TYPE_STR);
-    meta.add_method("length", str_length);
-    meta.add_method("match", str_match);
+    SharedPtr<Package> pkg = vm->find_package("String");
+    pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
+    pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
 }

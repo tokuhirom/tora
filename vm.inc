@@ -126,38 +126,7 @@ OP_BUILTIN_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
-    // TODO: call_native_func
-    if (iter->second->argc==0) {
-        SharedPtr<Value> ret = iter->second->func0();
-        stack.push(ret);
-    } else if (iter->second->argc==1) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = iter->second->func1(v.get());
-        stack.push(ret);
-    } else if (iter->second->argc==-1) {
-        std::vector<SharedPtr<Value>> vec;
-        for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> arg = stack.pop();
-            vec.push_back(arg);
-        }
-        SharedPtr<Value> ret = iter->second->funcv(vec);
-        stack.push(ret);
-    } else if (iter->second->argc==-2) {
-        SharedPtr<Value> ret = iter->second->func_vm0(this);
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push(ret);
-        }
-    } else if (iter->second->argc==-3) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = iter->second->func_vm1(this, v.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push(ret);
-        }
-    }
+    this->call_native_func(iter->second, argcnt);
 }
 
 OP_FUNCALL {
@@ -221,34 +190,6 @@ OP_METHOD_CALL {
     assert(funid->value_type == VALUE_TYPE_SYMBOL);
 
     switch (object->value_type) {
-    case VALUE_TYPE_STR:
-    case VALUE_TYPE_ARRAY: {
-        auto iter = this->standard[object->value_type]->find(funid->upcast<SymbolValue>()->id);
-        if (iter == this->standard[object->value_type]->end()) {
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), object->type_str());
-            break;
-        } else {
-            if (iter->second->argc==0) {
-                if (get_int_operand() == 0) {
-                    SharedPtr<Value> v = iter->second->func0(object);
-                    stack.push(v);
-                } else {
-                    this->die("Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
-                    break;
-                }
-            } else if (iter->second->argc==1) {
-                if (get_int_operand() == 1) {
-                    SharedPtr<Value> arg1 = stack.pop();
-                    SharedPtr<Value> v = iter->second->func1(object, arg1);
-                    stack.push(v);
-                } else {
-                    this->die("Argument error %s for %s\n", funid->upcast<StrValue>()->str_value.c_str(), object->type_str());
-                    break;
-                }
-            }
-        }
-        break;
-    }
     case VALUE_TYPE_SYMBOL: {
         // Foo.new();
         SharedPtr<Package> pkg = this->find_package(object->upcast<SymbolValue>()->id);
@@ -296,19 +237,22 @@ OP_METHOD_CALL {
         }
         break;
     }
-    /*
-    case VALUE_TYPE_FILE: {
-        SharedPtr<FileValue>file = object->upcast<FileValue>();
-        if (strcmp(funname->upcast<StrValue>()->str_value.c_str(), "read") == 0) {
-            SharedPtr<StrValue> str = file->read();
-            str->dump(0);
-            stack.push(str);
-        }
-        break;
-    }
-    */
+    case VALUE_TYPE_STR:
+    case VALUE_TYPE_ARRAY:
     case VALUE_TYPE_OBJECT:{
-        SharedPtr<Package> pkg = this->find_package(object->upcast<ObjectValue>()->package_id());
+        ID pkgid;
+        if (object->value_type == VALUE_TYPE_STR) {
+            pkgid = this->symbol_table->get_id("String");
+        } else if (object->value_type == VALUE_TYPE_ARRAY) {
+            pkgid = this->symbol_table->get_id("Array");
+        } else if (object->value_type == VALUE_TYPE_FILE) {
+            pkgid = this->symbol_table->get_id("File");
+        } else if (object->value_type == VALUE_TYPE_OBJECT) {
+            pkgid = object->upcast<ObjectValue>()->package_id();
+        } else {
+            abort();
+        }
+        SharedPtr<Package> pkg = this->find_package(pkgid);
         auto iter = pkg->find(funid->upcast<SymbolValue>()->id);
         if (iter != pkg->end()) {
             SharedPtr<Value>code_v = iter->second;
