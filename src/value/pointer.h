@@ -19,7 +19,7 @@ public:
 
     void dump(int indent) {
         print_indent(indent);
-        printf("[dump] Pointer: %X\n", (unsigned int)ptr_);
+        printf("[dump] Pointer: %p\n", ptr_);
     }
     const char *type_str() { return "pointer"; }
 
