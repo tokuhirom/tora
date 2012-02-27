@@ -6,6 +6,21 @@ use 5.010000;
 use autodie;
 
 open my $fh, '<', 'src/parser.h';
+
+open my $hhh, '>', 'src/token.gen.h';
+print $hhh <<'...';
+#ifndef TORA_TOKENGEN_H_
+#define TORA_TOKENGEN_H_
+
+namespace tora {
+
+extern const char *token_id2name[];
+
+};
+
+#endif
+...
+
 open my $ofh, '>', 'src/token.gen.cc';
 print $ofh qq!#include "token.gen.h"\n!;
 print $ofh qq!const char *tora::token_id2name[] = {"EOF",\n!;
