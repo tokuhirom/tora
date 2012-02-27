@@ -7,24 +7,26 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
 
+env = Environment(
+    LIBS=['re2', 'pthread'],
+    LIBPATH=['./'],
+    CXXFLAGS=['-std=c++0x'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-g', '-I./vendor/re2/', '-static'],
+)
+re2_env = Environment(
+    CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
+    LIBS=['pthread'],
+)
+
 if os.uname()[0]=='Darwin':
-    env = Environment(CXX='clang++', CC='clang')
-    env.Append(CXXFLAGS=['-std=c++0x'])
-    env.Append(CCFLAGS=['-Wall'])
+    re2_env.Replace(CXX='clang++', CC='clang')
+    env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
     env.Append(CCFLAGS=['-Wno-unused-function'])
     env.Append(CXXFLAGS=['-Wno-unneeded-internal-declaration'])
 else:
-    env = Environment(CXX='g++')
-    env.Append(CXXFLAGS=['-std=c++0x'])
-    env.Append(LDFLAGS=['-pthread'])
-    env.Append(LINKFLAGS=['-lpthread'])
-    env.Append(CCFLAGS=['-Wall'])
-    env.Append(CCFLAGS=['-pthread', '-Wno-sign-compare'])
-env.Append(CXXFLAGS=['-I./vendor/re2/'])
-env.Append(CCFLAGS=['-g'])
-env.Append(CXXFLAGS=['-g'])
-env.Append(LDFLAGS=['-g'])
+    re2_env.Replace(CXX='g++')
+    env.Replace(CXX='g++')
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg', '-Dprofile'])
@@ -57,6 +59,7 @@ libfiles = [
     ''')
 ]
 
+
 ########
 # tests.
 if 'test' in COMMAND_LINE_TARGETS:
@@ -64,7 +67,6 @@ if 'test' in COMMAND_LINE_TARGETS:
     for src in glob("tests/test_*.cc"):
         programs.append(env.Program(src.rstrip(".cc") + '.t', [
             libfiles,
-            re2files,
             src,
         ]))
     prefix = 'PERL5LIB=util/:$PERL5LIB '
@@ -81,15 +83,23 @@ env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl s
 env.Command(['src/token.gen.h'], ['src/token.gen.pl', 'src/parser.h'], 'perl src/token.gen.pl');
 env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.h');
 env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl src/vm.gen.pl > src/vm.gen.cc');
-t = env.Command(['src/parser.h', 'src/parser.cc'], ['src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
-Clean(t, 'parser.out')
+t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
+Clean(t, 'src/parser.out')
+
+lib = re2_env.Library('re2', re2files)
 env.Program('tora', [
     ['src/main.cc'],
     libfiles,
-    re2files
+    lib
 ])
 
-env.Program('lemon', ['tools/lemon/lemon.c']);
+
+# lemon
+lemon_env = Environment()
+lemon_env.Append(CCFLAGS=['-O2'])
+lemon_env.Program('lemon', ['tools/lemon/lemon.c']);
+
+# instalation
 env.Install('/usr/local/bin/', 'tora');
 env.Alias('install', '/usr/local/bin/')
 

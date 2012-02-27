@@ -17,3 +17,5 @@ parser.out
 lemon
 !tools/lemon
 tests/*.t
+libre2.a
+*.os
