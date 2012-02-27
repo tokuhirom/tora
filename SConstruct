@@ -53,7 +53,7 @@ re2files = [
 ]
 libfiles = [
     "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc stack.cc
-        token.gen.cc
+        token.gen.cc value.gen.cc
         symbol_table.cc
         value/object.cc
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc
@@ -83,6 +83,7 @@ if 'test' in COMMAND_LINE_TARGETS:
 ########
 # main programs
 env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl src/nodes.gen.pl > src/nodes.gen.h');
+env.Command(['src/value.gen.cc'], 'src/value.gen.pl', 'perl src/value.gen.pl');
 env.Command(['src/token.gen.cc', 'src/token.gen.h'], ['src/token.gen.pl', 'src/parser.h'], 'perl src/token.gen.pl');
 env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.h');
 env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl src/vm.gen.pl > src/vm.gen.cc');

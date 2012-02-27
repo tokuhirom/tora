@@ -89,5 +89,3 @@ ExceptionValue::ExceptionValue(const char *format, ...)
     message_ = p;
 }
 
-
-

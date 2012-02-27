@@ -71,9 +71,9 @@ protected:
 public:
     value_type_t value_type;
 
-    virtual void dump() { this->dump(0); }
-    virtual void dump(int indent) = 0;
-    virtual void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
+    void dump() { this->dump(0); }
+    void dump(int indent);
+    virtual void dump(const SharedPtr<SymbolTable> & symbol_table, int indent) {
         this->dump(indent);
     }
     // TODO: rename to as_str
@@ -95,7 +95,7 @@ public:
     }
 
     // GET type name in const char*
-    virtual const char *type_str() = 0;
+    const char *type_str();
 
     virtual SharedPtr<Value> tora__neg__() {
         printf("%s is not a numeric. You cannot apply unary negative operator.\n", this->type_str());
