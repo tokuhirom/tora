@@ -2,6 +2,7 @@
 #define TORA_PRIM_H_
 
 #include <cassert>
+#include <stdio.h>
 
 class Prim {
 protected:

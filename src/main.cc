@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
             perror(argv[optind]);
             exit(EXIT_FAILURE);
         }
+        optind++;
         scanner = new Scanner(ifs);
     } else {
         scanner = new Scanner(&std::cin);

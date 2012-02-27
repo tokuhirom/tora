@@ -22,12 +22,14 @@ public:
     SharedPtr<Value> pop() {
         assert(container.size() > 0);
 
-
         SharedPtr<Value> v(container.back());
         container.pop_back();
         return v;
     }
-    void push(SharedPtr<Value> v) {
+    void push(Value* v) {
+        container.push_back(v);
+    }
+    void push(const SharedPtr<Value> & v) {
         container.push_back(v);
     }
     SharedPtr<Value> at(int i) {

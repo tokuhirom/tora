@@ -6,5 +6,9 @@ sub fib($n) {
     }
 }
 
-say(fib(39));
+if ($ARGV.size() == 1) {
+    say(fib(0+$ARGV[0]));
+} else {
+    say(fib(39));
+}
 

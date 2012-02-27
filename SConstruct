@@ -27,7 +27,7 @@ env.Append(CXXFLAGS=['-g'])
 env.Append(LDFLAGS=['-g'])
 
 if ARGUMENTS.get('profile', 0):
-    env.Append(CXXFLAGS=['-pg'])
+    env.Append(CXXFLAGS=['-pg', '-Dprofile'])
     env.Append(LINKFLAGS=['-pg'])
 
 if ARGUMENTS.get('ndebug', 1) != '0':
