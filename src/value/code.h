@@ -37,6 +37,7 @@ public:
     }
     ~CodeValue();
 
+    void dump(SharedPtr<SymbolTable> & symbol_table, int indent);
     void dump(int indent) {
         print_indent(indent);
         printf("[dump] code: name: %s\n", this->code_name.c_str());

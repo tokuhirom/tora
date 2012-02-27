@@ -14,6 +14,8 @@
 #define DBG2(...)
 #endif
 
+#define TODO() printf("This function is not implemented yet. %s at %d.\n", __FILE__, __LINE__); abort();
+
 typedef unsigned int ID;
 
 #endif // TORA_H_

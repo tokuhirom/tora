@@ -239,6 +239,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "print",
         "self",
         "opendir",
+        "ref",
         NULL
     };
     for (int i=0; bs[i]; i++) {

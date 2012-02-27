@@ -12,6 +12,7 @@
 #include "object/dir.h"
 #include "object/stat.h"
 #include "object/env.h"
+#include "object/json.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -408,6 +409,10 @@ static SharedPtr<Value> builtin_package(VM *vm) {
     return new StrValue(vm->package);
 }
 
+static SharedPtr<Value> builtin_ref(VM *vm, Value *v) {
+    return new StrValue(v->type_str());
+}
+
 static SharedPtr<Value> builtin_self(VM *vm) {
     auto iter = vm->frame_stack->begin();
     for (; iter!=vm->frame_stack->end(); ++iter) {
@@ -479,6 +484,7 @@ void VM::register_standard_methods() {
     Init_Dir(this);
     Init_Stat(this);
     Init_Env(this);
+    Init_JSON(this);
 
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);
@@ -491,6 +497,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("self",   builtin_self);
     this->add_builtin_function("__PACKAGE__",   builtin_package);
     this->add_builtin_function("opendir",   builtin_opendir);
+    this->add_builtin_function("ref",   builtin_ref);
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, const std::string &dst) {

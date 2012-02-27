@@ -57,7 +57,6 @@ syntax
  * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
- * -s
  * for (my $e in opendir('t')) { } is needed?
  * caller()
 
@@ -76,6 +75,8 @@ feature
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
   * === operator?
+  * sub f() { { say('hoge') } } f()
+  * sub f() { { 1 => 2 } } f()
 
 Library
 -------
@@ -96,4 +97,5 @@ Finished
   * Dir.close
   * do not create scope if thre is no var definition.
   * $ENV['Foo'] = 'Bar';
+ * -s
 

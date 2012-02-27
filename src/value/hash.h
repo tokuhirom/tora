@@ -10,6 +10,7 @@ class HashValue: public Value {
 protected:
     std::map<std::string, SharedPtr<Value> > data;
 public:
+    typedef std::map<std::string, SharedPtr<Value> >::iterator iter;
     HashValue() : Value(VALUE_TYPE_HASH) { }
     SharedPtr<Value> get(const std::string &key) {
         return data[key];
@@ -19,6 +20,9 @@ public:
     }
     void dump(int indent);
     const char *type_str() { return "hash"; }
+
+    iter begin() { return data.begin(); }
+    iter end()   { return data.end(); }
 
     Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();

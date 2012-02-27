@@ -133,5 +133,10 @@ if (true) { say("OK"); }
 say("HERE");
 ...
 
+run_is(<<'...', "str\nhash\n");
+say(ref("hoge"));
+say(ref({}));
+...
+
 done_testing;
 

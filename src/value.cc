@@ -1,6 +1,7 @@
 #include "value.h"
 #include "value/code.h"
 #include "value/tuple.h"
+#include <stdarg.h>
 
 using namespace tora;
 
@@ -65,5 +66,17 @@ IntValue *Value::to_i() {
 SharedPtr<Value> IntValue::tora__neg__() {
     return new IntValue(-this->int_value);
 }
+
+ExceptionValue::ExceptionValue(const char *format, ...)
+    : Value(VALUE_TYPE_EXCEPTION), exception_type(EXCEPTION_TYPE_GENERAL) {
+
+    va_list ap;
+    char p[4096+1];
+    va_start(ap, format);
+    vsnprintf(p, 4096, format, ap);
+    va_end(ap);
+    message_ = p;
+}
+
 
 

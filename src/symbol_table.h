@@ -20,19 +20,7 @@ public:
     ID get_id(const char *str) {
         return this->get_id(std::string(str));
     }
-    ID get_id(const std::string &str) {
-        // find symbol from table
-        auto i = this->tbl.find(str);
-        if (i!=this->tbl.end()) {
-            return i->second;
-        }
-
-        // create new symbol
-        int ret = counter++;
-        tbl[str] = ret;
-        rev_tbl[ret] = str;
-        return ret;
-    }
+    ID get_id(const std::string &str);
     /**
      * Convert ID to :symbol.
      */

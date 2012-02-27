@@ -1,6 +1,8 @@
 #ifndef TORA_PRIM_H_
 #define TORA_PRIM_H_
 
+#include <cassert>
+
 class Prim {
 protected:
     Prim(): refcnt(0) { }

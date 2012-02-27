@@ -240,6 +240,7 @@ public:
     exception_type_t exception_type;
     ExceptionValue(exception_type_t e) : Value(VALUE_TYPE_EXCEPTION), exception_type(e) {
     }
+    ExceptionValue(const char *format, ...);
     ExceptionValue(const std::string &msg) : Value(VALUE_TYPE_EXCEPTION), exception_type(EXCEPTION_TYPE_GENERAL) {
         message_ = msg;
     }

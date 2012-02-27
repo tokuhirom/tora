@@ -1,0 +1,19 @@
+{
+    my $counter = 0;
+
+    sub ok() {
+        say("ok " + ++$counter);
+    }
+
+    sub done_testing() {
+        say("1.." + $counter);
+    }
+}
+
+sub TEST() {
+    ok();
+}
+
+TEST();
+
+done_testing();

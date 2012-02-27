@@ -7,6 +7,7 @@
 %left DOT.
 %left DOTDOT.
 %left QW_START QW_END.
+%left L_BRACE R_BRACE.
 %left L_BRACKET R_BRACKET.
 %left EQ.
 %left LT GT LE GE.
@@ -87,8 +88,14 @@ statement(A) ::= WHILE L_PAREN expression(B) R_PAREN block(C). {
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN block(E). {
     A = new ForNode(B, C, D, E);
 }
+statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN L_BRACE R_BRACE. {
+    A = new ForNode(B, C, D, new VoidNode(NODE_VOID));
+}
 statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
     A = new ForEachNode(B, C, D);
+}
+statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN L_BRACE R_BRACE. {
+    A = new ForEachNode(B, C, new VoidNode(NODE_VOID));
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
@@ -128,8 +135,14 @@ else_clause(A) ::= ELSE block(B). {
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {
     A = new FuncdefNode(B, C->upcast<ListNode>(), D);
 }
+sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN L_BRACE R_BRACE. {
+    A = new FuncdefNode(B, C->upcast<ListNode>(), new VoidNode(NODE_VOID));
+}
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN block(C). {
     A = new FuncdefNode(B, new ListNode(), C);
+}
+sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN L_BRACE R_BRACE. {
+    A = new FuncdefNode(B, new ListNode(), new VoidNode(NODE_VOID));
 }
 
 parameter_list(A) ::= expression(B). {
@@ -154,6 +167,9 @@ array_creation(A) ::= L_BRACKET R_BRACKET. {
 hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
     B->type = NODE_MAKE_HASH;
     A = B;
+}
+hash_creation(A) ::= L_BRACE R_BRACE. {
+    A = new ListNode(NODE_MAKE_HASH);
 }
 
 argument_list(A) ::= expression(B). {
@@ -184,9 +200,6 @@ block(A) ::= L_BRACE expression(B) R_BRACE. {
     ListNode* ln = new ListNode(NODE_STMTS_LIST);
     ln->push_back(B);
     A = new NodeNode(NODE_BLOCK, ln);
-}
-block(A) ::= L_BRACE R_BRACE. {
-    A = new VoidNode(NODE_VOID);
 }
 
 statement_list(A) ::= statement(B). {
@@ -285,17 +298,11 @@ unary_expression(A) ::= postfix_expression(B). { A = B; }
 unary_expression(A) ::= /* --$i */ MINUSMINUS unary_expression(B). {
     A = new NodeNode(NODE_PRE_DECREMENT, B);
 }
-unary_expression(A) ::= /* $i-- */ unary_expression(B) MINUSMINUS. {
-    A = new NodeNode(NODE_POST_DECREMENT, B);
-}
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
     A = new NodeNode(NODE_PRE_INCREMENT, B);
 }
 unary_expression(A) ::= /* -f $file */ FILE_TEST(B) unary_expression(C). {
     A = new BinaryNode(NODE_FILE_TEST, B, C);
-}
-unary_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
-    A = new NodeNode(NODE_POST_INCREMENT, B);
 }
 unary_expression(A) ::= NOT unary_expression(B). {
     A = new NodeNode(NODE_NOT, B);
@@ -330,6 +337,12 @@ postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argume
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
     A = new MethodCallNode(B, C, new ListNode());
+}
+postfix_expression(A) ::= /* $i-- */ unary_expression(B) MINUSMINUS. {
+    A = new NodeNode(NODE_POST_DECREMENT, B);
+}
+postfix_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
+    A = new NodeNode(NODE_POST_INCREMENT, B);
 }
 
 primary_expression(A) ::= int(B). { A = B; }

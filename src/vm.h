@@ -99,6 +99,7 @@ public:
     FunctionFrame(SharedPtr<Value>& self_, int vars_cnt, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(vars_cnt, up_) {
         self = self_;
     }
+    ~FunctionFrame() { }
 };
 
 class ForeachFrame : public LexicalVarsFrame {

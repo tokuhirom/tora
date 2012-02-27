@@ -57,8 +57,9 @@ OP_CLOSUREDEF {
 
 OP_GETCLOSURE {
     // take variable from code->closure_cells[n]
+
     SharedPtr<LexicalVarsFrame> frame;
-    for (auto iter=frame_stack->begin(); iter!=frame_stack->end(); iter++) {
+    for (auto iter=frame_stack->rbegin(); iter!=frame_stack->rend(); iter++) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             frame = *iter;
             break;
@@ -66,6 +67,9 @@ OP_GETCLOSURE {
     }
     assert(frame);
     int i = get_int_operand();
+    assert(frame->code);
+    assert(frame->code->func_name_id);
+    assert(i < frame->code->upcast<CodeValue>()->closure_vars->size());
     SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars->at(i);
     stack.push(v);
 }
