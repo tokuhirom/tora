@@ -29,10 +29,6 @@ File#seek()
 File#rewind()
 File#tell()
 
-opendir()
-Dir#__next__
-Dir#__iter__
-
 String#substr(n)
 String#substr(n, m)
 String#replace(regexp|str, code)
