@@ -28,7 +28,9 @@ void ArrayValue::sort() {
 // TODO: Array#stable_sort()
 
 SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
-    SharedPtr<IntValue> iv = index->to_i();
+    SharedPtr<Value> v = index->to_int();
+    if (v->is_exception()) { return v; }
+    SharedPtr<IntValue> iv = v->upcast<IntValue>();
     int i = iv->int_value;
     if (i > (int)this->values->size()) {
         fprintf(stderr, "IndexError: %d, %zd\n", i, this->values->size());
@@ -39,7 +41,10 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
 }
 
 Value* ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
-    SharedPtr<IntValue> iv(index->to_i());
+    Value* idx_i = index->to_int();
+    if (idx_i->is_exception()) { return idx_i; }
+
+    SharedPtr<IntValue> iv = idx_i->upcast<IntValue>();
     int i = iv->int_value;
     if ((int)this->values->size()-1 < i) {
         for (int j=this->values->size()-1; j<i-1; j++) {

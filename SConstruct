@@ -63,13 +63,15 @@ libfiles = [
 
 ########
 # tests.
+
+programs = ['tora']
+for src in glob("tests/test_*.cc"):
+    programs.append(env.Program(src.rstrip(".cc") + '.t', [
+        libfiles,
+        src,
+    ]))
+
 if 'test' in COMMAND_LINE_TARGETS:
-    programs = ['tora']
-    for src in glob("tests/test_*.cc"):
-        programs.append(env.Program(src.rstrip(".cc") + '.t', [
-            libfiles,
-            src,
-        ]))
     prefix = 'PERL5LIB=util/:$PERL5LIB '
     prove_path = 'prove'
     try:

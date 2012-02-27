@@ -53,6 +53,7 @@ class BoolValue;
 class ArrayValue;
 class SymbolTable;
 
+// TODO: remove virtual from this class for performance.
 /**
  * The value class
  */
@@ -77,8 +78,7 @@ public:
     }
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
-    // TODO: rename to as_int
-    IntValue *to_i();
+    Value *to_int();
     // TODO: rename to as_bool
     SharedPtr<BoolValue> to_b();
     bool is_numeric() {

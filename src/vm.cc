@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "value.h"
+#include "tora.h"
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/regexp.h"
@@ -108,8 +109,9 @@ void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
  
     switch (v1->value_type) {
     case VALUE_TYPE_INT: {
-        SharedPtr<Value> i2(v2->to_i());
-        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, i2->upcast<IntValue>()->int_value));
+        Value * ie2 = v2->to_int();
+        if (ie2->is_exception()) { TODO(); }
+        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, ie2->upcast<IntValue>()->int_value));
         stack.push(result);
         break;
     }
@@ -201,7 +203,8 @@ static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
 
 static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_INT);
-    SharedPtr<Value> s(v->to_i());
+    SharedPtr<Value> s(v->to_int());
+    if (s->is_exception()) { return s; }
     exit(s->upcast<IntValue>()->int_value);
 }
 
@@ -550,9 +553,11 @@ SharedPtr<Package> VM::find_package(ID id) {
 }
 
 void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
-    if (lhs->is_numeric()) {
-        SharedPtr<Value> i(lhs->to_i());
-        SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + rhs->upcast<IntValue>()->int_value);
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        Value * ie = rhs->to_int();
+        if (ie->is_exception()) { TODO(); }
+        SharedPtr<IntValue> iv = ie->upcast<IntValue>();
+        SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
         stack.push(v);
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         // TODO: support null terminated string
@@ -560,6 +565,8 @@ void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
         SharedPtr<Value> s(rhs->to_s());
         v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
         stack.push(v);
+    } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        TODO();
     } else {
         SharedPtr<Value> s(lhs->to_s());
         fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());

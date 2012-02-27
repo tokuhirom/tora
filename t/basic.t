@@ -138,5 +138,9 @@ say(ref("hoge"));
 say(ref({}));
 ...
 
+run_is(<<'...', "4\n");
+say(1+"3");
+...
+
 done_testing;
 

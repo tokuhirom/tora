@@ -46,21 +46,32 @@ SharedPtr<StrValue> Value::to_s() {
     abort();
 }
 
-IntValue *Value::to_i() {
+Value *Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
-        IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
-        // TODO: this->clone()?
-        return v;
+        // IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
+        return this;
     } else if (value_type == VALUE_TYPE_TUPLE) {
         if (this->upcast<TupleValue>()->size() == 1) {
-            return this->upcast<TupleValue>()->at(0)->to_i();
+            return this->upcast<TupleValue>()->at(0)->to_int();
+        }
+    } else if (value_type == VALUE_TYPE_STR) {
+        StrValue *s = this->upcast<StrValue>();
+        errno = 0;
+        char *endptr = (char*)(s->str_value.c_str()+s->str_value.size());
+        long ret = strtol(s->str_value.c_str(), &endptr, 10);
+        if (errno == 0) {
+            return new IntValue(ret);
+        } else if (errno = EINVAL) {
+            return new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
+        } else if (errno == ERANGE) {
+            // try to the bigint?
+            TODO();
+        } else {
+            return new ExceptionValue("Unknown error in strtol: %s(%d)", s->str_value.c_str(), errno);
         }
     }
 
-
-    printf("to_i is not supported yet in not VALUE_TYPE_INT(%d)\n", value_type);
-    this->dump();
-    abort();
+    return new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
 }
 
 SharedPtr<Value> IntValue::tora__neg__() {

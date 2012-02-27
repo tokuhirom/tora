@@ -5,6 +5,8 @@ builtin functions
 -----------------
 
 stat()
+hex()
+caller()
 
 builtin objects
 ---------------
