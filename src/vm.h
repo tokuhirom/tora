@@ -114,14 +114,19 @@ typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 class VM;
 
 struct CallbackFunction {
-    typedef SharedPtr<Value> (*func1_t)(Value *);
+    typedef enum {
+        typev    = -1,
+        type_vm0 = -2,
+        type_vm1 = -3,
+        type_vm2 = -4,
+        type_vm3 = -5,
+    } callback_type_t;
     typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
     typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
     typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, Value*);
     typedef SharedPtr<Value> (*func_vm2_t)(VM * vm_, Value*, Value*);
     typedef SharedPtr<Value> (*func_vm3_t)(VM * vm_, Value*, Value*, Value*);
     union {
-        func1_t    func1;
         funcv_t    funcv;
         func_vm0_t func_vm0;
         func_vm1_t func_vm1;
@@ -129,16 +134,11 @@ struct CallbackFunction {
         func_vm3_t func_vm3;
     };
     int argc;
-    CallbackFunction(func1_t func_) : argc(1) {
-        func1 = func_;
-    }
-    CallbackFunction(funcv_t func_) : argc(-1) {
-        funcv = func_;
-    }
-    CallbackFunction(func_vm0_t func_) : argc(-2) { func_vm0 = func_; }
-    CallbackFunction(func_vm1_t func_) : argc(-3) { func_vm1 = func_; }
-    CallbackFunction(func_vm2_t func_) : argc(-4) { func_vm2 = func_; }
-    CallbackFunction(func_vm3_t func_) : argc(-5) { func_vm3 = func_; }
+    CallbackFunction(funcv_t func_)    : argc(typev)    { funcv = func_; }
+    CallbackFunction(func_vm0_t func_) : argc(type_vm0) { func_vm0 = func_; }
+    CallbackFunction(func_vm1_t func_) : argc(type_vm1) { func_vm1 = func_; }
+    CallbackFunction(func_vm2_t func_) : argc(type_vm2) { func_vm2 = func_; }
+    CallbackFunction(func_vm3_t func_) : argc(type_vm3) { func_vm3 = func_; }
 };
 
 class Package : public Value {

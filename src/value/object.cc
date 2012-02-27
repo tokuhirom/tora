@@ -127,10 +127,7 @@ ObjectValue::~ObjectValue() {
             // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, this->vm_->frame_stack->back());
             // this->vm_->frame_stack->push_back(fframe);
 
-            if (code->callback()->argc == 1) {
-                code->callback()->func1(this);
-                abort(); // not tested yet.
-            } else if (code->callback()->argc == -3) {
+            if (code->callback()->argc == -3) {
                 SharedPtr<Value> ret = code->callback()->func_vm1(vm_, this);
                 if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                     // TODO: warn

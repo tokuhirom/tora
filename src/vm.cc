@@ -193,12 +193,12 @@ void VM::die(SharedPtr<Value> & exception) {
     }
 }
 
-static SharedPtr<Value> builtin_p(Value* arg1) {
+static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
     arg1->dump();
     return UndefValue::instance();
 }
 
-static SharedPtr<Value> builtin_exit(Value* v) {
+static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_INT);
     SharedPtr<Value> s(v->to_i());
     exit(s->upcast<IntValue>()->int_value);
@@ -436,11 +436,7 @@ static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
 }
 
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
-    if (callback->argc==1) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> ret = callback->func1(v.get());
-        stack.push(ret);
-    } else if (callback->argc==-1) {
+    if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
         for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> arg = stack.pop();
@@ -484,7 +480,6 @@ void VM::register_standard_methods() {
     Init_Stat(this);
     Init_Env(this);
 
-    // this->add_builtin_function("print");
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);
     this->add_builtin_function("say", builtin_say);
