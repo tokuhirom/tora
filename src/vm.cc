@@ -81,8 +81,10 @@ void VM::init_globals(int argc, char**argv) {
 
 template <class operationI, class operationD>
 void VM::binop(operationI operation_i, operationD operation_d) {
-    SharedPtr<Value> v1(stack.pop()); /* rvalue */
-    SharedPtr<Value> v2(stack.pop()); /* lvalue */
+    SharedPtr<Value> v1(stack.back()); /* rvalue */
+    stack.pop_back();
+    SharedPtr<Value> v2(stack.back()); /* lvalue */
+    stack.pop_back();
 
     if (v2->value_type == VALUE_TYPE_DOUBLE) {
         if (v1->value_type == VALUE_TYPE_DOUBLE) {
@@ -104,8 +106,10 @@ void VM::binop(operationI operation_i, operationD operation_d) {
 
 template <class operationI, class operationD, class OperationS>
 void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
-    SharedPtr<Value> v1(stack.pop());
-    SharedPtr<Value> v2(stack.pop());
+    SharedPtr<Value> v1(stack.back());
+    stack.pop_back();
+    SharedPtr<Value> v2(stack.back());
+    stack.pop_back();
  
     switch (v1->value_type) {
     case VALUE_TYPE_INT: {

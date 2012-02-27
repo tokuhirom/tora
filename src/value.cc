@@ -61,7 +61,7 @@ Value *Value::to_int() {
         long ret = strtol(s->str_value.c_str(), &endptr, 10);
         if (errno == 0) {
             return new IntValue(ret);
-        } else if (errno = EINVAL) {
+        } else if (errno == EINVAL) {
             return new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
         } else if (errno == ERANGE) {
             // try to the bigint?

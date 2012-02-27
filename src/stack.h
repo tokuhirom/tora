@@ -13,12 +13,13 @@ class Value;
 class Stack {
     std::vector< SharedPtr<Value>> container;
 public:
-    SharedPtr<Value> back() {
+    const SharedPtr<Value>& back() {
         return container.back();
     }
     void pop_back() {
         container.pop_back();
     }
+    // bit slow... i want to deprecate this method.
     SharedPtr<Value> pop() {
         assert(container.size() > 0);
 
@@ -33,6 +34,9 @@ public:
         container.push_back(v);
     }
     SharedPtr<Value> at(int i) {
+        return container.at(i);
+    }
+    const SharedPtr<Value>& at(int i) const {
         return container.at(i);
     }
     size_t size() {
