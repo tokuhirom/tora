@@ -86,7 +86,8 @@ OP_SETCLOSURE {
     assert(frame);
     int i = get_int_operand();
     SharedPtr<Value> v = stack.back();
-    (*(frame->code->upcast<CodeValue>()->closure_vars))[i]->assign(v);
+    SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars))[i];
+    *dst = *v;
 }
 
 OP_SUB {

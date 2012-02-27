@@ -67,9 +67,9 @@ protected:
         }
     }
     Value(const Value&) = delete;
-    Value& operator=(const Value&) = delete;
 public:
     value_type_t value_type;
+    Value& operator=(const Value&v);
 
     void dump() { this->dump(0); }
     void dump(int indent);
@@ -85,13 +85,9 @@ public:
         return this->value_type == VALUE_TYPE_INT;
     }
 
-    virtual void assign(SharedPtr<Value> &v) {
-        abort();
-    }
-
     template<class Y>
     Y* upcast() {
-        return dynamic_cast<Y*>(&(*(this)));
+        return (Y*)(this);
     }
 
     // GET type name in const char*
@@ -139,10 +135,6 @@ public:
     }
     SharedPtr<IntValue> clone() {
         return new IntValue(this->int_value);
-    }
-    virtual void assign(SharedPtr<Value> &v) {
-        assert(v->value_type == this->value_type);
-        this->int_value = v->upcast<IntValue>()->int_value;
     }
 };
 
