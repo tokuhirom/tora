@@ -38,7 +38,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     }
 }
 
-void ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
+Value* ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
     SharedPtr<IntValue> iv(index->to_i());
     int i = iv->int_value;
     if ((int)this->values->size()-1 < i) {
@@ -49,5 +49,6 @@ void ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
         this->values->erase(this->values->begin()+i);
     }
     this->values->insert(this->values->begin()+i, v);
+    return UndefValue::instance();
 }
 

@@ -46,7 +46,7 @@ public:
         }
     }
     SharedPtr<Value>get_item(SharedPtr<Value>index);
-    void set_item(SharedPtr<Value>index, SharedPtr<Value>v);
+    Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v);
     const char *type_str() { return "array"; }
 
     class iterator : public Value {

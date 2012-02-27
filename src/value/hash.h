@@ -20,9 +20,10 @@ public:
     void dump(int indent);
     const char *type_str() { return "hash"; }
 
-    void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();
         this->set(s->str_value, v);
+        return UndefValue::instance();
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
         SharedPtr<StrValue> s = index->to_s();

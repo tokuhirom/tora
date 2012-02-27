@@ -16,7 +16,7 @@ public:
         this->value_type = VALUE_TYPE_TUPLE;
     }
     ~TupleValue() { }
-    void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         printf("tuple is a read only value.\n");
         abort(); // TODO throw exception
     }

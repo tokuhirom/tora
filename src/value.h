@@ -102,7 +102,7 @@ public:
         abort();
     }
 
-    virtual void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    virtual Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
         this->dump();
         abort();
