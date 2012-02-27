@@ -200,21 +200,32 @@ public:
 };
 
 class VM {
+    ID package_id_;
 public:
     int sp; // stack pointer
     int pc; // program counter
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Value>> *global_vars;
     SharedPtr<SymbolTable> symbol_table;
-    std::string package;
     SharedPtr<PackageMap> package_map;
     SharedPtr<Package> find_package(ID id);
     SharedPtr<Package> find_package(const char *name);
     tora::Stack stack;
 
+    std::string &package() {
+        return symbol_table->id2name(package_id_);
+    }
+    void package(const std::string& s) {
+        // will be deprecate
+        package_id_ = symbol_table->get_id(s);
+    }
+
     // TODO: cache
     ID package_id() {
-        return this->symbol_table->get_id(package);
+        return package_id_;
+    }
+    void package_id(ID id) {
+        package_id_ = id;
     }
 
     std::map<ID, CallbackFunction*> builtin_functions;
@@ -264,7 +275,7 @@ public:
         return ops->at(pc)->operand.double_value;
     }
 
-    SharedPtr<Value> copy_all_public_symbols(ID srcid, const std::string &dst);
+    SharedPtr<Value> copy_all_public_symbols(ID srcid, ID dstid);
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
@@ -275,17 +286,17 @@ public:
 class VM;
 
 class PackageFrame : public LexicalVarsFrame {
-    std::string orig_package;
+    ID orig_package_id_;
     VM * vm_;
 public:
-    PackageFrame(std::string pkg, VM *parent, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(0, up_) {
+    PackageFrame(ID pkgid, VM *parent, SharedPtr<LexicalVarsFrame> up_) : LexicalVarsFrame(0, up_) {
         this->type = FRAME_TYPE_PACKAGE;
-        orig_package = pkg;
+        orig_package_id_ = pkgid;
         vm_ = parent;
     }
     ~PackageFrame() {
         // printf("LEAVE PACKAGE FROM %s. back to %s\n", vm_->package.c_str(), orig_package.c_str());
-        vm_->package = orig_package;
+        vm_->package_id(orig_package_id_);
     }
 };
 

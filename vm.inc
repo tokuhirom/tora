@@ -728,7 +728,7 @@ OP_USE {
         this->die(ret);
     } else {
         if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value == 1) {
-            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id, this->package);
+            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id, this->package_id());
             if (v->is_exception()) {
                 this->die(ret);
             }
@@ -744,9 +744,9 @@ OP_NOT {
 
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
-    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package, this, frame_stack->back());
+    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package_id(), this, frame_stack->back());
     this->frame_stack->push_back(pframe);
-    this->package = this->symbol_table->id2name(package_id);
+    this->package_id_ = package_id;
 }
 
 OP_PACKAGE_LEAVE {

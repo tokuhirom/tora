@@ -40,7 +40,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->package = "main";
+    this->package_id_ = symbol_table_->get_id("main");
     this->package_map = new PackageMap();
 }
 
@@ -406,7 +406,7 @@ static SharedPtr<Value> builtin_say(const std::vector<SharedPtr<Value>> & args) 
 }
 
 static SharedPtr<Value> builtin_package(VM *vm) {
-    return new StrValue(vm->package);
+    return new StrValue(vm->package());
 }
 
 static SharedPtr<Value> builtin_ref(VM *vm, Value *v) {
@@ -500,8 +500,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("ref",   builtin_ref);
 }
 
-SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, const std::string &dst) {
-    ID dstid = this->symbol_table->get_id(dst);
+SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);
 
