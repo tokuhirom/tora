@@ -12,4 +12,10 @@ is($a[2], 'x');
 is($a[3], 'y');
 is($a[4], 'z');
 
+my $p = [];
+for (my $e in opendir('t/dat/dir')) {
+    $p.push($e);
+}
+is(JSON.encode($p.sort()), '[".","..","x","y","z"]');
+
 done_testing();

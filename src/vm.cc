@@ -466,7 +466,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     } else if (callback->argc==-3) {
         SharedPtr<Value> v = stack.pop();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+        if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type != EXCEPTION_TYPE_STOP_ITERATION) {
             this->die(ret);
         } else {
             stack.push(ret);

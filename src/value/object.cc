@@ -3,6 +3,11 @@
 
 using namespace tora;
 
+void ObjectValue::dump(int indent) {
+    print_indent(indent);
+    printf("[dump] Object: %s\n", vm_->symbol_table->id2name(package_id_).c_str());
+}
+
 Value* ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
     SharedPtr<Package> pkg = this->vm_->find_package(package_id_);
     auto iter = pkg->find(this->vm_->symbol_table->get_id("__setitem__"));

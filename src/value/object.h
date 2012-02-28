@@ -21,10 +21,7 @@ public:
     void set_value(ID id, const SharedPtr<Value> & v) { data[id] = v; }
     SharedPtr<Value> get_value(ID id) { return data[id]; }
 
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Object: %d\n", package_id_);
-    }
+    void dump(int indent);
     const char *type_str() { return "object"; }
 
     SharedPtr<Value> get_item(SharedPtr<Value> index);

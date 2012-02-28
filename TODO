@@ -59,7 +59,6 @@ syntax
  * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
- * for (my $e in opendir('t')) { } is needed?
  * caller()
 
 feature

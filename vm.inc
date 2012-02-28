@@ -621,11 +621,12 @@ OP_GETGLOBAL {
 }
 
 OP_POP_TOP {
-    stack.pop();
+    stack.pop_back();
 }
 
 OP_ENTER_FOREACH {
-    SharedPtr<Value>a = stack.pop();
+    SharedPtr<Value>a = stack.back();
+    stack.pop_back();
     SharedPtr<Value> iiter;
     if (a->value_type == VALUE_TYPE_ARRAY) {
         SharedPtr<ArrayValue::iterator> iter = new ArrayValue::iterator();
@@ -638,9 +639,30 @@ OP_ENTER_FOREACH {
     } else if (a->value_type == VALUE_TYPE_HASH) {
         SharedPtr<HashValue::iterator> iter = new HashValue::iterator(a->upcast<HashValue>());
         iiter = iter;
+    } else if (a->value_type == VALUE_TYPE_OBJECT) {
+        ObjectValue * o = a->upcast<ObjectValue>();
+        Package *pkg = this->find_package(o->package_id());
+        auto iter = pkg->find(this->symbol_table->get_id("__iter__"));
+        if (iter != pkg->end()) {
+            CodeValue * code = iter->second->upcast<CodeValue>();
+            if (code->is_native()) {
+                stack.push(a);
+               this->call_native_func(code->callback(), 0);
+               iiter = stack.back();
+               stack.pop_back();
+               if (iiter->value_type == VALUE_TYPE_EXCEPTION) {
+                    this->die(iiter);
+                    TODO();
+               }
+            } else {
+                TODO();
+            }
+        } else {
+            this->die("This object doesn't support iteration\n");
+            abort();
+        }
     } else {
-        fprintf(stderr, "This object doesn't support iteration\n");
-        a->dump();
+        this->die("This object doesn't support iteration\n");
         abort();
     }
 
@@ -692,10 +714,34 @@ OP_FOR_ITER {
         } else {
             stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
         }
+    } else if (iter->value_type == VALUE_TYPE_OBJECT) {
+        ObjectValue * o = iter->upcast<ObjectValue>();
+        Package *pkg = this->find_package(o->package_id());
+        auto iter = pkg->find(this->symbol_table->get_id("__next__"));
+        if (iter != pkg->end()) {
+            CodeValue * code = iter->second->upcast<CodeValue>();
+            if (code->is_native()) {
+                stack.push(o);
+               this->call_native_func(code->callback(), 0);
+               SharedPtr<Value> val = stack.back();
+               stack.pop_back();
+               if (val->value_type == VALUE_TYPE_EXCEPTION) {
+                    if (val->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
+                        stack.push(val);
+                    } else {
+                        this->die(val);
+                    }
+               } else {
+                    stack.push(val);
+               }
+            } else {
+                TODO();
+            }
+        } else {
+            this->die("'%s' does not have a '__next__' method.", symbol_table->id2name(o->package_id()).c_str());
+        }
     } else {
-        fprintf(stderr, "[BUG] TOS is not a iterator object.\n");
-        iter->dump();
-        abort();
+        this->die("[BUG] TOS is not a iterator object: %s.", iter->type_str());
     }
 }
 
