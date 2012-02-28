@@ -46,7 +46,7 @@ public:
     void dump() {
         printf("-- stack dump --\n");
         for (size_t i=0; i< container.size(); i++) {
-            printf("[%d]\n", i);
+            printf("[%zd]\n", i);
             container.at(i)->dump(1);
         }
         printf("----------------\n");
