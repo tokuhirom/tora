@@ -48,9 +48,9 @@ public:
     ~LexicalVarsFrame() {
         delete vars;
     }
-    void setVar(int id, SharedPtr<Value> v) {
+    void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars->capacity());
-        (*this->vars)[id] = v;
+        (*this->vars)[id] = v.get();
     }
     SharedPtr<Value> find(int id) {
         assert(id < this->vars->capacity());
@@ -190,6 +190,9 @@ public:
         print_indent(indent);
         printf("[dump] PackageMap(%zd)\n", data.size());
     }
+    void set(Package* &pkg) {
+        this->data[pkg->id()] = pkg;
+    }
     void set(SharedPtr<Package> &pkg) {
         this->data[pkg->id()] = pkg;
     }
@@ -208,8 +211,8 @@ public:
     std::vector<SharedPtr<Value>> *global_vars;
     SharedPtr<SymbolTable> symbol_table;
     SharedPtr<PackageMap> package_map;
-    SharedPtr<Package> find_package(ID id);
-    SharedPtr<Package> find_package(const char *name);
+    Package* find_package(ID id);
+    Package* find_package(const char *name);
     tora::Stack stack;
 
     std::string &package() {

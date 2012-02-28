@@ -541,16 +541,16 @@ void Package::add_method(ID function_name_id, const CallbackFunction* code) {
     this->data[function_name_id] = cv;
 }
 
-SharedPtr<Package> VM::find_package(const char * name) {
+Package* VM::find_package(const char * name) {
     return this->find_package(this->symbol_table->get_id(name));
 }
 
-SharedPtr<Package> VM::find_package(ID id) {
+Package* VM::find_package(ID id) {
     auto iter = this->package_map->find(id);
     if (iter != this->package_map->end()) {
-        return iter->second;
+        return iter->second.get();
     } else {
-        SharedPtr<Package> pkg =  new Package(id);
+        Package* pkg =  new Package(id);
         this->package_map->set(pkg);
         return pkg;
     }

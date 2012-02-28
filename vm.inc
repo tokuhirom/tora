@@ -115,7 +115,9 @@ OP_ADD {
 }
 
 OP_BUILTIN_FUNCALL {
-    SharedPtr<Value> funname(stack.pop());
+    SharedPtr<Value> funname(stack.back());
+    stack.pop_back();
+
     int argcnt = get_int_operand();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
@@ -135,29 +137,33 @@ OP_BUILTIN_FUNCALL {
 }
 
 OP_FUNCALL {
-    SharedPtr<Value> funname(stack.pop());
+    SharedPtr<Value> funname(stack.back());
+    stack.pop_back();
+
     int argcnt = get_int_operand();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.pop()->upcast<TupleValue>();
         argcnt = t->size();
         stack.extract_tuple(t);
     }
+#ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
         printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
         dump_stack();
         abort();
     }
+#endif
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-    SharedPtr<Package> pkg = this->find_package(this->package_id());
+    Package* pkg = this->find_package(this->package_id());
     auto iter = pkg->find(id);
     if (iter != pkg->end()) {
-        SharedPtr<CodeValue> code = iter->second->upcast<CodeValue>();
+        CodeValue* code = iter->second->upcast<CodeValue>();
         // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-        SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+        FunctionFrame* fframe = new FunctionFrame(argcnt, frame_stack->back());
         fframe->return_address = pc;
         fframe->orig_ops = ops;
         fframe->top = stack.size() - argcnt;
@@ -170,13 +176,9 @@ OP_FUNCALL {
         // TODO: kwargs support
         assert(argcnt == (int)code->code_params->size());
         for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> arg = stack.pop();
-            /*
-            std::string *argname = code->code_params->at(i);
-            // printf("set lexical var: %d for %s\n", i, argname->c_str());
-            frame->setVar(argname, arg);
-            */
-            fframe->setVar(i, arg);
+            const SharedPtr<Value> &arg = stack.back();
+            fframe->setVar(i, arg.get());
+            stack.pop_back();
         }
         frame_stack->push_back(fframe);
     } else {
