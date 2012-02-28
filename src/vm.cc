@@ -580,3 +580,14 @@ void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
     }
 }
 
+SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
+    switch (v->value_type) {
+    case VALUE_TYPE_INT:
+        return new IntValue(-(v->upcast<IntValue>()->int_value));
+    case VALUE_TYPE_DOUBLE:
+        return new DoubleValue(-(v->upcast<DoubleValue>()->double_value));
+    default:
+        return new ExceptionValue("%s is not a numeric. You cannot apply unary negative operator.\n", v->type_str());
+    }
+}
+

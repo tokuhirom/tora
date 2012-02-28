@@ -274,7 +274,7 @@ public:
     int get_int_operand() {
         return ops->at(pc)->operand.int_value;
     }
-    int get_double_operand() {
+    double get_double_operand() {
         return ops->at(pc)->operand.double_value;
     }
 
@@ -282,6 +282,9 @@ public:
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
+
+    const SharedPtr<Value>& TOP() { return stack.top(); }
+    SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
 
 #include "vm.ops.inc.h"
 };

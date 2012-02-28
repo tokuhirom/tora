@@ -813,6 +813,12 @@ int main(void)
   TEST( (true),  "true");
   TEST( (false), "false");
   TEST( (42.0),   "42");
+  TEST( (3.14),   "3.14");
+  {
+    ;
+    printf("xxx %s\n", picojson::value (3.14).serializ().c_str());
+    return 1;
+  }
   TEST( (string("hello")), "\"hello\"");
   TEST( ("hello"), "\"hello\"");
   TEST( ("hello", 4), "\"hell\"");

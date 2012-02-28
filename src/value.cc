@@ -74,10 +74,6 @@ Value *Value::to_int() {
     return new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
 }
 
-SharedPtr<Value> IntValue::tora__neg__() {
-    return new IntValue(-this->int_value);
-}
-
 ExceptionValue::ExceptionValue(const char *format, ...)
     : Value(VALUE_TYPE_EXCEPTION), exception_type(EXCEPTION_TYPE_GENERAL) {
 

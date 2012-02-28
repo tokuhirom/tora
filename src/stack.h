@@ -16,6 +16,9 @@ public:
     const SharedPtr<Value>& back() {
         return container.back();
     }
+    const SharedPtr<Value>& top() {
+        return container.back();
+    }
     void pop_back() {
         container.pop_back();
     }

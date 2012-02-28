@@ -1,0 +1,11 @@
+use Test::More *;
+
+my $x=9;
+my $y=3.14;
+is(JSON.encode(-5), "-5");
+is(JSON.encode(-$x), "-9");
+is(JSON.encode($y), "3.140000");
+is(JSON.encode(-$y), "-3.140000");
+is(JSON.encode(-(-$y)), "3.140000");
+
+done_testing();

@@ -499,9 +499,11 @@ OP_SET_ITEM {
 }
 
 OP_UNARY_NEGATIVE {
-    SharedPtr<Value> v(stack.pop());
-    SharedPtr<Value> result = v->tora__neg__();
-    stack.push(result);
+    const SharedPtr<Value>& v = TOP();
+    SharedPtr<Value> r = this->unary_negative(v);
+    if (r->is_exception()) { this->die(r); }
+    stack.pop_back();
+    stack.push(r);
 }
 
 OP_MAKE_HASH {

@@ -93,11 +93,6 @@ public:
     // GET type name in const char*
     const char *type_str();
 
-    virtual SharedPtr<Value> tora__neg__() {
-        printf("%s is not a numeric. You cannot apply unary negative operator.\n", this->type_str());
-        abort();
-    }
-
     virtual Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
         this->dump();
@@ -126,7 +121,6 @@ public:
     }
     const char *type_str() { return "int"; }
     SharedPtr<StrValue> to_s();
-    SharedPtr<Value> tora__neg__();
     void tora__decr__() {
         this->int_value--;
     }
