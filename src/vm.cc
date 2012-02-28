@@ -591,3 +591,16 @@ SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
     }
 }
 
+SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const {
+    switch (container->value_type) {
+    case VALUE_TYPE_OBJECT:
+        return container->upcast<ObjectValue>()->set_item(index, rvalue);
+    case VALUE_TYPE_HASH:
+        return container->upcast<HashValue>()->set_item(index, rvalue);
+    case VALUE_TYPE_ARRAY:
+        return container->upcast<ArrayValue>()->set_item(index, rvalue);
+    default:
+        return new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
+    }
+}
+

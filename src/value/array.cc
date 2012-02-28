@@ -40,7 +40,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     }
 }
 
-Value* ArrayValue::set_item(SharedPtr<Value> index, SharedPtr<Value> v) {
+Value* ArrayValue::set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
     Value* idx_i = index->to_int();
     if (idx_i->is_exception()) { return idx_i; }
 

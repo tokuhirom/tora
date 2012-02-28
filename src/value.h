@@ -93,11 +93,6 @@ public:
     // GET type name in const char*
     const char *type_str();
 
-    virtual Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
-        printf("%s is not a container. You cannot set item for this type.\n", this->type_str());
-        this->dump();
-        abort();
-    }
     virtual SharedPtr<Value> get_item(SharedPtr<Value> index) {
         printf("This is not a container type: %s\n", this->type_str());
         abort();
@@ -155,7 +150,7 @@ public:
     }
     void dump(int indent) {
         print_indent(indent);
-        printf("[dump] undef\n");
+        printf("[dump] undef(refcnt: %d)\n", refcnt);
     }
     const char *type_str() { return "undef"; }
     SharedPtr<StrValue> to_s();
@@ -212,7 +207,7 @@ public:
     }
     void dump(int indent) {
         print_indent(indent);
-        printf("[dump] str: %s\n", str_value.c_str());
+        printf("[dump] str: %s(refcnt: %d)\n", str_value.c_str(), refcnt);
     }
     const char *type_str() { return "str"; }
     SharedPtr<StrValue> to_s() {

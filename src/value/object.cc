@@ -5,10 +5,10 @@ using namespace tora;
 
 void ObjectValue::dump(int indent) {
     print_indent(indent);
-    printf("[dump] Object: %s\n", vm_->symbol_table->id2name(package_id_).c_str());
+    printf("[dump] Object: %s(refcnt: %d)\n", vm_->symbol_table->id2name(package_id_).c_str(), this->refcnt);
 }
 
-Value* ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
     SharedPtr<Package> pkg = this->vm_->find_package(package_id_);
     auto iter = pkg->find(this->vm_->symbol_table->get_id("__setitem__"));
     if (iter != pkg->end()) {
@@ -25,7 +25,7 @@ Value* ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
                 abort(); // not tested yet.
             } else if (code->callback()->argc == -5) {
                 SharedPtr<Value> ret = code->callback()->func_vm3(vm_, this, index.get(), v.get());
-                return ret.get();
+                return ret;
             } else {
                 // this is just a warnings?
                 fprintf(stderr, "%s::__setitem__ method requires 2 arguments. This is not allowed.\n", this->vm_->symbol_table->id2name(package_id_).c_str());

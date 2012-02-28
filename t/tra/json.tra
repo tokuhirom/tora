@@ -12,6 +12,7 @@ is(JSON.encode({"a" => 3}), '{"a":3}');
 
 TEST(true, "true");
 TEST(false, "false");
+TEST(undef, "null");
 TEST(42.0, "42");
 TEST(3.14, "3.140000");
 TEST(42, "42");

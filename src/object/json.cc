@@ -40,6 +40,10 @@ static Value* json_encode2(std::string & buf, Value *v) {
         buf += v->upcast<BoolValue>()->bool_value ? "true" : "false";
         break;
     }
+    case VALUE_TYPE_UNDEF: {
+        buf += "null";
+        break;
+    }
     case VALUE_TYPE_ARRAY: {
         buf += "[";
         SharedPtr<ArrayValue> av = v->upcast<ArrayValue>();

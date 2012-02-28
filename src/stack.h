@@ -13,10 +13,10 @@ class Value;
 class Stack {
     std::vector< SharedPtr<Value>> container;
 public:
-    const SharedPtr<Value>& back() {
+    const SharedPtr<Value>& back() const {
         return container.back();
     }
-    const SharedPtr<Value>& top() {
+    const SharedPtr<Value>& top() const {
         return container.back();
     }
     void pop_back() {
@@ -42,11 +42,11 @@ public:
     const SharedPtr<Value>& at(int i) const {
         return container.at(i);
     }
-    size_t size() {
+    size_t size() const {
         return container.size();
     }
     void extract_tuple(SharedPtr<TupleValue> &t);
-    void dump() {
+    void dump() const {
         printf("-- stack dump --\n");
         for (size_t i=0; i< container.size(); i++) {
             printf("[%zd]\n", i);

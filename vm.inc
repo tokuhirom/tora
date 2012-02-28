@@ -494,8 +494,12 @@ OP_SET_ITEM {
     SharedPtr<Value> container(stack.pop());
     SharedPtr<Value> rvalue(stack.pop());
 
-    container->set_item(index, rvalue);
-    stack.push(rvalue);
+    SharedPtr<Value> ret = this->set_item(container, index, rvalue);
+    if (ret->is_exception()) {
+        this->die(ret);
+    } else {
+        stack.push(rvalue);
+    }
 }
 
 OP_UNARY_NEGATIVE {

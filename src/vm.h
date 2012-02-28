@@ -285,6 +285,7 @@ public:
 
     const SharedPtr<Value>& TOP() { return stack.top(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
+    SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
 
 #include "vm.ops.inc.h"
 };
