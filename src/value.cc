@@ -2,6 +2,7 @@
 #include "value/code.h"
 #include "value/tuple.h"
 #include <stdarg.h>
+#include <errno.h>
 
 using namespace tora;
 
