@@ -178,7 +178,7 @@ std:
         ANY_CHARACTER          = [^];
         VARNAME                = [$][A-Za-z_][A-Za-z0-9_]*;
         IDENTIFIER             = [A-Za-z_][A-Za-z0-9_]*;
-        DOUBLE                 = ([1-9][0-9]*[.][0-9]+) | ([0][.][0-9]*);
+        DOUBLE                 = ([1-9][0-9]*[.][0-9]+) | ([0][.][0-9]+);
         LF                     = "\\n";
         HEREDOC_MARKER         = [A-Za-z0-9_]+;
         HEREDOC_START          = "<<" HEREDOC_MARKER;

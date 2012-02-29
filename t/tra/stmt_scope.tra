@@ -1,0 +1,9 @@
+use Test::More *;
+
+for (my $i in 1..1) {
+    (1,2);
+    my $n = rand();
+    is(typeof($n), 'double');
+}
+
+done_testing();

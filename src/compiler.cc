@@ -521,6 +521,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         SharedPtr<ListNode> ln = node->upcast<ListNode>();
         for (int i=0; i<ln->size(); i++) {
             this->compile(ln->at(i));
+            ops->push_back(new OP(OP_NEXTSTATE));
         }
         break;
     }

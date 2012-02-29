@@ -15,6 +15,7 @@ void PP_OP_DIV();
 void PP_OP_MUL();
 void PP_OP_ADD();
 void PP_OP_BUILTIN_FUNCALL();
+void PP_OP_NEXTSTATE();
 void PP_OP_FUNCALL();
 void PP_OP_METHOD_CALL();
 void PP_OP_RETURN();

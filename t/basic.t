@@ -134,8 +134,8 @@ say("HERE");
 ...
 
 run_is(<<'...', "str\nhash\n");
-say(ref("hoge"));
-say(ref({}));
+say(typeof("hoge"));
+say(typeof({}));
 ...
 
 run_is(<<'...', "4\n");

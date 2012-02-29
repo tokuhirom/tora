@@ -136,6 +136,11 @@ OP_BUILTIN_FUNCALL {
     this->call_native_func(iter->second, argcnt);
 }
 
+OP_NEXTSTATE {
+     // rewind stack
+    stack.resize(frame_stack->back()->top);
+}
+
 OP_FUNCALL {
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();

@@ -499,7 +499,7 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
             boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value);
-            return new DoubleValue(dist(*(vm->myrand)));
+            return new IntValue(dist(*(vm->myrand)));
         } else {
             // support to_int?
             return new ExceptionValue("Invalid arguments for rand() : %s", v->type_str());
