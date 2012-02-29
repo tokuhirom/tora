@@ -321,9 +321,7 @@ OP_RETURN {
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
 
-            while (stack.size() > (size_t)frame->top) {
-                stack.pop();
-            }
+            stack.resize(frame->top);
 
             frame_stack->pop_back();
 
@@ -334,9 +332,7 @@ OP_RETURN {
             pc = tframe->return_address;
             // printf("RETURN :orig: %d, current: %d\n", tframe->top, stack.size());
 
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
+            stack.resize(frame->top);
 
             frame_stack->pop_back();
 
@@ -360,9 +356,7 @@ OP_ENTER {
 
 OP_LEAVE {
     SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-    while (stack.size() > (size_t)frame->top) {
-        stack.pop();
-    }
+    stack.resize(frame->top);
     frame_stack->pop_back();
 }
 
@@ -375,7 +369,8 @@ OP_DUMP {
 }
 
 OP_JUMP_IF_FALSE {
-    SharedPtr<Value> v(stack.pop());
+    SharedPtr<Value> v(stack.top());
+    stack.pop_back();
 
     SharedPtr<Value> b(v->to_b());
     if (!b->upcast<BoolValue>()->bool_value) {
@@ -548,7 +543,9 @@ OP_EXTRACT_TUPLE {
 
 OP_PRE_INCREMENT {
     // ++$i
-    SharedPtr<Value> i = stack.pop();
+    SharedPtr<Value> i = stack.back();
+    stack.pop_back();
+    // printf("stack %zd\n", stack.size());
     if (i->value_type == VALUE_TYPE_INT) {
         i->upcast<IntValue>()->tora__incr__();
         stack.push(i);
@@ -684,6 +681,7 @@ OP_FOR_ITER {
 
     auto fframe = frame_stack->back()->upcast<ForeachFrame>();
     assert(fframe->type == FRAME_TYPE_FOREACH);
+    stack.resize(fframe->top);
     SharedPtr<Value> iter = fframe->iter;
     if (iter->value_type == VALUE_TYPE_ARRAY_ITERATOR) {
         SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();

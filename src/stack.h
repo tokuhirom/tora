@@ -36,6 +36,9 @@ public:
     void push(const SharedPtr<Value> & v) {
         container.push_back(v);
     }
+    void resize(size_t count) {
+        container.resize(count);
+    }
     SharedPtr<Value> at(int i) {
         return container.at(i);
     }
