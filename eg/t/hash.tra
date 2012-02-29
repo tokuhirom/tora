@@ -1,5 +1,5 @@
 my $a = {"A" => 4, "B" => 55, 46 => "OK"};
-p($a);
+say(JSON.encode($a));
 say("---");
 say($a["A"]);
 say($a["B"]);
@@ -7,20 +7,13 @@ $a["X"] = "OK";
 $a["46"] = "WAO";
 say($a["X"]);
 say("---");
-p($a);
+say(JSON.encode($a));
 
 __END__
-[dump] hash(3)
-46:     [dump] str: OK
-A:     [dump] IV: 4
-B:     [dump] IV: 55
+{"46":"OK""A":4"B":55}
 ---
 4
 55
 OK
 ---
-[dump] hash(4)
-46:     [dump] str: WAO
-A:     [dump] IV: 4
-B:     [dump] IV: 55
-X:     [dump] str: OK
+{"46":"WAO""A":4"B":55"X":"OK"}
