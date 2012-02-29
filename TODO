@@ -81,6 +81,7 @@ feature
   * bignum support using ttmath?
   * for (1..10) { say($_) }
   * statement scope
+  * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
 
 Library
 -------
