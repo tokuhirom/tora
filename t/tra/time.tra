@@ -1,0 +1,6 @@
+use Test::More *;
+
+is(Time.new(1330493590).strftime("%Y-%m-%d(%a) %T %zZ"), '2012-02-29(Wed) 14:33:10 +0900Z');
+
+done_testing();
+

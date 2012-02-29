@@ -212,6 +212,7 @@ OP_METHOD_CALL {
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
 
+                stack.push(object);
                 this->call_native_func(code->callback(), argcnt);
             } else {
                 {

@@ -78,6 +78,7 @@ feature
   * === operator?
   * sub f() { { say('hoge') } } f()
   * sub f() { { 1 => 2 } } f()
+  * bignum support using ttmath?
 
 Library
 -------

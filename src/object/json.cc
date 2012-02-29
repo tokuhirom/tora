@@ -68,7 +68,7 @@ static Value* json_encode2(std::string & buf, Value *v) {
  *
  * This method encode $value to JSON format. and return a string.
  */
-static SharedPtr<Value> json_encode(VM *vm, Value* v) {
+static SharedPtr<Value> json_encode(VM *vm, Value *klass, Value* v) {
     std::string buf;
     Value * exception = json_encode2(buf, v);
     if (exception) {
@@ -83,7 +83,7 @@ static SharedPtr<Value> json_encode(VM *vm, Value* v) {
  *
  * Decode $json to Hash|Array.
  */
-static SharedPtr<Value> json_decode(VM *vm, Value* v) {
+static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* v) {
     TODO();
 }
 

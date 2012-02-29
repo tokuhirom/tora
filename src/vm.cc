@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "value.h"
 #include "tora.h"
+
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/regexp.h"
@@ -8,12 +9,15 @@
 #include "value/symbol.h"
 #include "value/pointer.h"
 #include "value/object.h"
+
 #include "object/array.h"
 #include "object/str.h"
 #include "object/dir.h"
 #include "object/stat.h"
 #include "object/env.h"
 #include "object/json.h"
+#include "object/time.h"
+
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -492,6 +496,7 @@ void VM::register_standard_methods() {
     Init_Stat(this);
     Init_Env(this);
     Init_JSON(this);
+    Init_Time(this);
 
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);
