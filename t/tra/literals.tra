@@ -1,0 +1,6 @@
+use Test::More *;
+
+is(typeof(0.0), 'double');
+
+done_testing();
+

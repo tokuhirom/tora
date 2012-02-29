@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/errno.h>
+#include <random>
+
+#include <boost/random.hpp>
 
 using namespace tora;
 
@@ -47,6 +50,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
     this->global_vars = new std::vector<SharedPtr<Value>>();
     this->package_id_ = symbol_table_->get_id("main");
     this->package_map = new PackageMap();
+    this->myrand = new boost::mt19937(time(NULL));
 }
 
 VM::~VM() {
@@ -129,11 +133,31 @@ void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
         stack.push(result);
         break;
     }
+    case VALUE_TYPE_DOUBLE: {
+        switch (v2->value_type) {
+        case VALUE_TYPE_INT: {
+            SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, (double)v2->upcast<IntValue>()->int_value));
+            stack.push(result);
+            return;
+        }
+        case VALUE_TYPE_DOUBLE: {
+            SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, v2->upcast<DoubleValue>()->double_value));
+            stack.push(result);
+            return;
+        }
+        default: {
+            TODO(); // throw exception
+            return;
+        }
+        }
+        break;
+    }
     case VALUE_TYPE_UNDEF: {
         stack.push(new BoolValue(v2->value_type == VALUE_TYPE_UNDEF));
         break;
     }
     default:
+        // TODO: support object comparation
         printf("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
         v1->dump();
         v2->dump();
@@ -373,7 +397,7 @@ static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
     return vm->require(v);
 }
 
-static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args) {
+static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     SharedPtr<Value> filename(args.at(1));
     std::string mode;
     if (args.size() >= 2) {
@@ -394,7 +418,7 @@ static SharedPtr<Value> builtin_open(const std::vector<SharedPtr<Value>> & args)
 }
 
 
-static SharedPtr<Value> builtin_print(const std::vector<SharedPtr<Value>> & args) {
+static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     auto iter = args.begin();
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
@@ -404,7 +428,7 @@ static SharedPtr<Value> builtin_print(const std::vector<SharedPtr<Value>> & args
     return UndefValue::instance();
 }
 
-static SharedPtr<Value> builtin_say(const std::vector<SharedPtr<Value>> & args) {
+static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     auto iter = args.begin();
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
@@ -420,7 +444,7 @@ static SharedPtr<Value> builtin_package(VM *vm) {
     return new StrValue(vm->package());
 }
 
-static SharedPtr<Value> builtin_ref(VM *vm, Value *v) {
+static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
     return new StrValue(v->type_str());
 }
 
@@ -451,6 +475,40 @@ static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
     }
 }
 
+/**
+ * rand() : Double;
+ * rand($n Double) : Double;
+ * rand($n Int)     : Int;
+ *
+ * Get a random number.
+ *
+ * rand() returns [0, 1) in Double value.
+ * rand($n :Double) returns [0, $n) in Double value.
+ * rand($n :Int) returns [0, $n) in Int value.
+ */
+static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>& args) {
+    // TODO: use std::mt19937 in c++11.
+    // in 2012, I use g++ 4.4.3. It does not support uniform_real_distribution
+    if (args.size() == 0) {
+        boost::uniform_real<double> dist(0.0, 1.0);
+        return new DoubleValue(dist(*(vm->myrand)));
+    } else if (args.size() == 1) {
+        SharedPtr<Value> v = args.at(0);
+        if (v->value_type == VALUE_TYPE_DOUBLE) {
+            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value);
+            return new DoubleValue(dist(*(vm->myrand)));
+        } else if (v->value_type == VALUE_TYPE_INT) {
+            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value);
+            return new DoubleValue(dist(*(vm->myrand)));
+        } else {
+            // support to_int?
+            return new ExceptionValue("Invalid arguments for rand() : %s", v->type_str());
+        }
+    } else {
+        return new ExceptionValue("Too many arguments for rand()");
+    }
+}
+
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
@@ -458,7 +516,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             SharedPtr<Value> arg = stack.pop();
             vec.push_back(arg);
         }
-        SharedPtr<Value> ret = callback->funcv(vec);
+        SharedPtr<Value> ret = callback->func_vmv(this, vec);
         stack.push(ret);
     } else if (callback->argc==-2) {
         SharedPtr<Value> ret = callback->func_vm0(this);
@@ -509,7 +567,8 @@ void VM::register_standard_methods() {
     this->add_builtin_function("self",   builtin_self);
     this->add_builtin_function("__PACKAGE__",   builtin_package);
     this->add_builtin_function("opendir",   builtin_opendir);
-    this->add_builtin_function("ref",   builtin_ref);
+    this->add_builtin_function("typeof",   builtin_typeof);
+    this->add_builtin_function("rand",   builtin_rand);
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {

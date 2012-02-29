@@ -1,0 +1,10 @@
+This is yet another programming language for general scripting.
+
+Build Dependencies
+------------------
+
+ * boost 1.15.0+(header only)
+   * for supporting C++11 features
+ * gcc 4.4.3 or later
+ * SConstruct
+

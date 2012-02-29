@@ -700,9 +700,7 @@ OP_FOR_ITER {
         if (riter->counter <= riter->parent->right->int_value) {
             SharedPtr<IntValue> val = new IntValue(riter->counter);
             riter->counter++;
-            SharedPtr<TupleValue> t = new TupleValue();
-            t->push(val.get());
-            stack.push(t);
+            stack.push(val);
         } else {
             stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
         }

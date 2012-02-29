@@ -14,6 +14,8 @@
 #include "value/code.h"
 #include <stdarg.h>
 
+#include <boost/random.hpp>
+
 namespace tora {
 
 class Stack;
@@ -116,26 +118,26 @@ class VM;
 
 struct CallbackFunction {
     typedef enum {
-        typev    = -1,
+        type_vmv = -1,
         type_vm0 = -2,
         type_vm1 = -3,
         type_vm2 = -4,
         type_vm3 = -5,
     } callback_type_t;
-    typedef SharedPtr<Value> (*funcv_t)(const std::vector<SharedPtr<Value>>&);
-    typedef SharedPtr<Value> (*func_vm0_t)(VM * vm_);
-    typedef SharedPtr<Value> (*func_vm1_t)(VM * vm_, Value*);
-    typedef SharedPtr<Value> (*func_vm2_t)(VM * vm_, Value*, Value*);
-    typedef SharedPtr<Value> (*func_vm3_t)(VM * vm_, Value*, Value*, Value*);
+    typedef SharedPtr<Value> (*func_vmv_t)(VM *, const std::vector<SharedPtr<Value>>&);
+    typedef SharedPtr<Value> (*func_vm0_t)(VM *);
+    typedef SharedPtr<Value> (*func_vm1_t)(VM *, Value*);
+    typedef SharedPtr<Value> (*func_vm2_t)(VM *, Value*, Value*);
+    typedef SharedPtr<Value> (*func_vm3_t)(VM *, Value*, Value*, Value*);
     union {
-        funcv_t    funcv;
+        func_vmv_t func_vmv;
         func_vm0_t func_vm0;
         func_vm1_t func_vm1;
         func_vm2_t func_vm2;
         func_vm3_t func_vm3;
     };
     int argc;
-    CallbackFunction(funcv_t func_)    : argc(typev)    { funcv = func_; }
+    CallbackFunction(func_vmv_t func_) : argc(type_vmv) { func_vmv = func_; }
     CallbackFunction(func_vm0_t func_) : argc(type_vm0) { func_vm0 = func_; }
     CallbackFunction(func_vm1_t func_) : argc(type_vm1) { func_vm1 = func_; }
     CallbackFunction(func_vm2_t func_) : argc(type_vm2) { func_vm2 = func_; }
@@ -286,6 +288,8 @@ public:
     const SharedPtr<Value>& TOP() { return stack.top(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
+
+    boost::mt19937 *myrand;
 
 #include "vm.ops.inc.h"
 };
