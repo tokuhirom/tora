@@ -241,6 +241,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "opendir",
         "typeof",
         "rand",
+        "open",
         NULL
     };
     for (int i=0; bs[i]; i++) {

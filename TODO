@@ -60,6 +60,7 @@ syntax
  * $PROGRAM_NAME($0)
  * $x ** 2
  * caller()
+ * && operator
 
 feature
 -------

@@ -20,6 +20,17 @@ sub is($a, $b) {
     }
 }
 
+sub like($a, $b) {
+    ++$counter;
+    if ($a.match($b)) {
+        say("ok " + $counter);
+    } else {
+        say("not ok " + $counter);
+        say(" # got:      " + $a);
+        say(" # expected: " + $b);
+    }
+}
+
 sub done_testing() {
     say("1.." + $counter);
 }

@@ -134,6 +134,11 @@ OP_BUILTIN_FUNCALL {
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
     this->call_native_func(iter->second, argcnt);
+    if (stack.top()->value_type == VALUE_TYPE_EXCEPTION) {
+        SharedPtr<Value> v = stack.top();
+        stack.pop_back();
+        this->die(v);
+    }
 }
 
 OP_NEXTSTATE {
@@ -252,6 +257,7 @@ OP_METHOD_CALL {
     }
     case VALUE_TYPE_STR:
     case VALUE_TYPE_ARRAY:
+    case VALUE_TYPE_FILE:
     case VALUE_TYPE_OBJECT:{
         ID pkgid;
         if (object->value_type == VALUE_TYPE_STR) {

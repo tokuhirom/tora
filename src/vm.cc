@@ -17,6 +17,7 @@
 #include "object/env.h"
 #include "object/json.h"
 #include "object/time.h"
+#include "object/file.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -397,14 +398,23 @@ static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
     return vm->require(v);
 }
 
+/**
+ * open(Str $fname) : FileHandle
+ * open(Str $fname, Str $mode) : FileHandle
+ */
 static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    SharedPtr<Value> filename(args.at(1));
+    if (args.size() != 1 && args.size() != 2) {
+        return new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
+    }
+
+    SharedPtr<Value> filename(args.at(0));
     std::string mode;
-    if (args.size() >= 2) {
+    if (args.size() == 2) {
         mode = args.at(1)->upcast<StrValue>()->str_value.c_str();
     } else {
         mode = "rb";
     }
+
     // TODO: check \0
     SharedPtr<FileValue> file = new FileValue();
     if (file->open(
@@ -413,7 +423,7 @@ static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>>
     )) {
         return file;
     } else {
-        abort(); // todo: throw exception
+        return new ExceptionValue("Cannot open file: %s: %s", filename->upcast<StrValue>()->str_value.c_str(), strerror(errno));
     }
 }
 
@@ -555,6 +565,7 @@ void VM::register_standard_methods() {
     Init_Env(this);
     Init_JSON(this);
     Init_Time(this);
+    Init_File(this);
 
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);
