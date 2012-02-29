@@ -81,17 +81,6 @@ feature
   * bignum support using ttmath?
   * for (1..10) { say($_) }
   * statement scope
-  * for (my $i in 1..1) {
-        my $n = rand();
-        p($n);
-    }
-  * for (my $i in 1..100) {
-        (1,2);
-        my $n = rand();
-        is(typeof($n), 'double');
-        ok(0.0 <= $n);
-        ok($n <= 1.0);
-    }
 
 Library
 -------

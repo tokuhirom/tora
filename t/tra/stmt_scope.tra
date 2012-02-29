@@ -6,4 +6,9 @@ for (my $i in 1..1) {
     is(typeof($n), 'double');
 }
 
+for (my ($k, $v) in {"A" => "B"}) {
+    my $n = rand();
+    is(typeof($n), 'double');
+}
+
 done_testing();
