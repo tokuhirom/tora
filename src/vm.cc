@@ -473,7 +473,6 @@ static SharedPtr<Value> builtin_self(VM *vm) {
     return new ExceptionValue("Cannot call 'self' method out of method.");
 }
 
-// TODO: close directory at destructor
 static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
     SharedPtr<StrValue> dirname = s->to_s();
     DIR * dp = opendir(dirname->c_str());

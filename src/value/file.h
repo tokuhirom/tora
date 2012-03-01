@@ -8,14 +8,14 @@ namespace tora {
 
 class FileValue : public Value {
 private:
-    FILE *fp;
 public:
+    FILE *fp;
     FileValue() : Value(VALUE_TYPE_FILE), fp(NULL) { }
     ~FileValue() {
         if (fp) { this->close(); }
     }
     void close() {
-        if (fp) { fclose(this->fp); }
+        if (fp) { fclose(this->fp); fp = NULL; }
     }
     bool open(std::string &fname, std::string &mode) {
         this->fp = fopen(fname.c_str(), mode.c_str());
