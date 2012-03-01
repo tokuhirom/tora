@@ -1,0 +1,8 @@
+use Test::More *;
+
+class Foo { }
+
+my $f = Foo.new();
+is(typeof($f), "Foo");
+
+done_testing();

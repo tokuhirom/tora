@@ -22,7 +22,7 @@ public:
     SharedPtr<Value> get_value(ID id) { return data[id]; }
 
     void dump(int indent);
-    const char *type_str() { return "object"; }
+    const char *type_str();
 
     SharedPtr<Value> get_item(SharedPtr<Value> index);
     SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v);

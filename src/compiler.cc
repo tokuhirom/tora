@@ -1007,7 +1007,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         pkg->operand.int_value = package_id;
         ops->push_back(pkg);
 
-        this->compile(n->block());
+        if (n->block() != NULL) {
+            this->compile(n->block());
+        }
 
         ops->push_back(new OP(OP_PACKAGE_LEAVE));
         this->pop_block();

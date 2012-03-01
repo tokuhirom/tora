@@ -3,6 +3,10 @@
 
 using namespace tora;
 
+const char *ObjectValue::type_str() {
+    return vm_->symbol_table->id2name(package_id_).c_str();
+}
+
 void ObjectValue::dump(int indent) {
     print_indent(indent);
     printf("[dump] Object: %s(refcnt: %d)\n", vm_->symbol_table->id2name(package_id_).c_str(), this->refcnt);

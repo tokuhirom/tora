@@ -53,7 +53,6 @@ syntax
  * say $_ for $array;
  * unless () { }
  * x unless foo;
- * x if foo;
  * $array.map(^{ say($_); });
  * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
@@ -68,9 +67,13 @@ syntax
  * $PROGRAM_NAME($0)
  * $x ** 2
  * caller()
- * && operator
+ * $x && $y
+ * $x || $y
+ * $x or $y
+ * $x and $y
  * dir()
  * file()
+ * $x % $y
 
 feature
 -------
@@ -115,6 +118,7 @@ Finished
   * Dir.close
   * do not create scope if thre is no var definition.
   * $ENV['Foo'] = 'Bar';
- * -s
- * return if $_;
+  * -s
+  * return if $_;
+  * x if foo;
 

@@ -107,6 +107,9 @@ statement(A) ::= class_statement(B). { A = B; }
 class_statement(A) ::= CLASS identifier(B) block(C). {
     A = new ClassNode(B, NULL, NULL, C);
 }
+class_statement(A) ::= CLASS identifier(B) L_BRACE R_BRACE. {
+    A = new ClassNode(B, NULL, NULL, NULL);
+}
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;
