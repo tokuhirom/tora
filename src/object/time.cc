@@ -53,7 +53,7 @@ static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
 
     SharedPtr<Value> t = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("t"));
     assert(t->value_type == VALUE_TYPE_POINTER);
-    delete t->upcast<PointerValue>()->ptr();
+    delete static_cast<struct tm*>(t->upcast<PointerValue>()->ptr());
     return UndefValue::instance();
 }
 

@@ -24,7 +24,7 @@ public:
     iter begin() { return data.begin(); }
     iter end()   { return data.end(); }
 
-    Value* set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();
         this->set(s->str_value, v);
         return UndefValue::instance();

@@ -23,7 +23,14 @@ Array#pop()
 Array#shift()
 Array#unshift()
 
+for (my $e in dir('t')) { ... }
+dir('t').is_dir()
+dir('t').file($fname)
+dir('t').file($fname)
+
 open()
+open($fname, $mode, $encoding)
+file($fname).open($mode="rb", $encoding="utf-8")
 File#write()
 File#read(n)
 File#sync()
@@ -40,12 +47,14 @@ String#match(regexp|str, code)
 syntax
 -------
 
- * open($fname).read();
  * given-when
  * q{}
  * qq{}
  * say $_ for $array;
  * return if $_;
+ * unless () { }
+ * x unless foo;
+ * x if foo;
  * $array.map(^{ say($_); });
  * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();

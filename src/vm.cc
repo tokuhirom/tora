@@ -57,6 +57,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
 VM::~VM() {
     delete this->global_vars;
     delete this->frame_stack;
+    delete this->myrand;
 
     {
         // std::map<ID, CallbackFunction*> builtin_functions;
