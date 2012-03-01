@@ -1,0 +1,18 @@
+use Test::More *;
+
+use Socket *;
+
+my $sock = Socket.socket(AF_INET(), SOCK_STREAM(), 0);
+is(typeof($sock), 'Socket::Socket');
+
+/*
+my ($err) = try {
+    my $sock2 = Socket.socket(99, 499, 552);
+};
+3+2;
+is(typeof($err), "exceptiPn");
+p($err);
+p(typeof($err));
+*/
+
+done_testing();

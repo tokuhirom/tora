@@ -1,0 +1,3 @@
+sub AF_INET     () { return 2; }
+sub SOCK_STREAM () { return 1; }
+

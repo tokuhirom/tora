@@ -18,6 +18,7 @@
 #include "object/json.h"
 #include "object/time.h"
 #include "object/file.h"
+#include "object/socket.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -183,8 +184,14 @@ void VM::die(SharedPtr<Value> & exception) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
                 fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
-            } else if (exception->value_type == VALUE_TYPE_EXCEPTION && exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
-                fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+            } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
+                if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
+                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
+                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
+                } else {
+                    TODO();
+                }
             } else {
                 fprintf(stderr, "died\n");
                 exception->dump();
@@ -552,6 +559,17 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         } else {
             stack.push(ret);
         }
+    } else if (callback->argc == CallbackFunction::type_vm4) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> v2 = stack.pop();
+        SharedPtr<Value> v3 = stack.pop();
+        SharedPtr<Value> v4 = stack.pop();
+        SharedPtr<Value> ret = callback->func_vm4(this, v.get(), v2.get(), v3.get(), v4.get());
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
     } else {
         abort();
     }
@@ -566,6 +584,7 @@ void VM::register_standard_methods() {
     Init_JSON(this);
     Init_Time(this);
     Init_File(this);
+    Init_Socket(this);
 
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);

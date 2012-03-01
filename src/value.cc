@@ -43,8 +43,13 @@ SharedPtr<StrValue> UndefValue::to_s() {
     return new StrValue("undef"); // TODO
 }
 SharedPtr<StrValue> Value::to_s() {
-    fprintf(stderr, "%s don't support stringification.\n", this->type_str());
-    abort();
+    if (this->value_type == VALUE_TYPE_EXCEPTION) {
+        ExceptionValue * e = this->upcast<ExceptionValue>();
+        return new StrValue(e->message());
+    } else {
+        fprintf(stderr, "%s don't support stringification.\n", this->type_str());
+        abort();
+    }
 }
 
 Value *Value::to_int() {
@@ -76,7 +81,7 @@ Value *Value::to_int() {
 }
 
 ExceptionValue::ExceptionValue(const char *format, ...)
-    : Value(VALUE_TYPE_EXCEPTION), exception_type(EXCEPTION_TYPE_GENERAL) {
+    : Value(VALUE_TYPE_EXCEPTION), errno_(0), exception_type(EXCEPTION_TYPE_GENERAL) {
 
     va_list ap;
     char p[4096+1];

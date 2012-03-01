@@ -56,7 +56,7 @@ libfiles = [
         token.gen.cc value.gen.cc
         symbol_table.cc
         value/object.cc
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc
     ''')
 ]
 

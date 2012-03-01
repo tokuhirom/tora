@@ -242,6 +242,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "typeof",
         "rand",
         "open",
+        "exit",
         NULL
     };
     for (int i=0; bs[i]; i++) {

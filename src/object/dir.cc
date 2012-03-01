@@ -48,7 +48,7 @@ static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
     SharedPtr<Value> dir = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("__dir"));
     if (dir->value_type != VALUE_TYPE_OBJECT) { return new ExceptionValue("[BUG] This is not a Directory value.: %s", dir->type_str()); }
     SharedPtr<Value> ret = dir_read(vm, dir.get());
-    if (ret->value_type == VALUE_TYPE_UNDEF) { return new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION); }
+    if (ret->value_type == VALUE_TYPE_UNDEF) { return new StopIterationExceptionValue(); }
     return ret;
 }
 
@@ -61,3 +61,4 @@ void tora::Init_Dir(VM *vm) {
     SharedPtr<Package> iter = vm->find_package("Dir::Iterator");
     iter->add_method(vm->symbol_table->get_id("__next__"), new CallbackFunction(dir_Iterator___next__));
 }
+

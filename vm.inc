@@ -223,7 +223,7 @@ OP_METHOD_CALL {
                 fframe->code = code;
 
                 stack.push(object);
-                this->call_native_func(code->callback(), argcnt);
+                this->call_native_func(code->callback(), argcnt+1);
             } else {
                 {
                     SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
@@ -704,7 +704,7 @@ OP_FOR_ITER {
             t->push(val);
             stack.push(t);
         } else {
-            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+            stack.push(new StopIterationExceptionValue());
         }
     } else if (iter->value_type == VALUE_TYPE_RANGE_ITERATOR) {
         SharedPtr<RangeValue::iterator> riter = iter->upcast<RangeValue::iterator>();
@@ -713,7 +713,7 @@ OP_FOR_ITER {
             riter->counter++;
             stack.push(val);
         } else {
-            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+            stack.push(new StopIterationExceptionValue());
         }
     } else if (iter->value_type == VALUE_TYPE_HASH_ITERATOR) {
         SharedPtr<HashValue::iterator> riter = iter->upcast<HashValue::iterator>();
@@ -726,7 +726,7 @@ OP_FOR_ITER {
             t->push(key);
             stack.push(t);
         } else {
-            stack.push(new ExceptionValue(EXCEPTION_TYPE_STOP_ITERATION));
+            stack.push(new StopIterationExceptionValue());
         }
     } else if (iter->value_type == VALUE_TYPE_OBJECT) {
         ObjectValue * o = iter->upcast<ObjectValue>();
