@@ -1,0 +1,9 @@
+use Test::More *;
+
+my $i = 0;
+$i++ if true;
+is($i, 1);
+$i++ if false;
+is($i, 1);
+
+done_testing();

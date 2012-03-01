@@ -77,6 +77,9 @@ translation_unit(A) ::= translation_unit(B) statement(C). {
 statement(A) ::= expression(B) SEMICOLON . {
     A = B;
 }
+statement(A) ::= expression(B) IF expression(C) SEMICOLON. {
+    A = new IfNode(NODE_IF, C, B, NULL);
+}
 statement(A) ::= SEMICOLON. {
     A = new VoidNode(NODE_VOID);
 }
@@ -218,7 +221,6 @@ expression(A) ::= assignment_expression(B). {
 expression(A) ::= DIE expression(B). {
     A = new NodeNode(NODE_DIE, B);
 }
-
 expression(A) ::= use_expression(B).   { A = B; }
 use_expression(A) ::= USE identifier(B) MUL. {
     A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));
@@ -338,10 +340,10 @@ postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argume
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
     A = new MethodCallNode(B, C, new ListNode());
 }
-postfix_expression(A) ::= /* $i-- */ unary_expression(B) MINUSMINUS. {
+postfix_expression(A) ::= /* $i-- */ postfix_expression(B) MINUSMINUS. {
     A = new NodeNode(NODE_POST_DECREMENT, B);
 }
-postfix_expression(A) ::= /* $i++ */ unary_expression(B) PLUSPLUS. {
+postfix_expression(A) ::= /* $i++ */ postfix_expression(B) PLUSPLUS. {
     A = new NodeNode(NODE_POST_INCREMENT, B);
 }
 

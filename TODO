@@ -51,7 +51,6 @@ syntax
  * q{}
  * qq{}
  * say $_ for $array;
- * return if $_;
  * unless () { }
  * x unless foo;
  * x if foo;
@@ -70,6 +69,8 @@ syntax
  * $x ** 2
  * caller()
  * && operator
+ * dir()
+ * file()
 
 feature
 -------
@@ -92,6 +93,8 @@ feature
   * for (1..10) { say($_) }
   * statement scope
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
+  * use ICU for converting encoding.
+  * Bytes class.
 
 Library
 -------
@@ -113,4 +116,5 @@ Finished
   * do not create scope if thre is no var definition.
   * $ENV['Foo'] = 'Bar';
  * -s
+ * return if $_;
 
