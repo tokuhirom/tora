@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use autodie;
+use Text::MicroTemplate qw(render_mt build_mt);
 
 my $dat = parse();
 write_file('src/vm.gen.cc', vm_gen_cc($dat));
@@ -43,7 +44,7 @@ sub parse {
 sub vm_gen_cc {
     my $dat = shift;
 
-    my $ret .= <<'...';
+    return build_mt(template => <<'...', escape_func => sub { $_[0] })->($dat);
 #include "vm.h"
 #include "frame.h"
 #include "value.h"
@@ -61,50 +62,40 @@ sub vm_gen_cc {
 #include <sys/stat.h>
 
 using namespace tora;
+? for my $k (@{$_[0]}) {
+inline void VM::PP_<?= $k->[0] ?>() {
+<?= $k->[1] ?>
+}
+? }
 
-...
-
-    {
-        for my $k (@$dat) {
-            $ret .= "inline void VM::PP_$k->[0]() {\n";
-            # $ret .= "inline void VM::PP_$k->[0]() {\n";
-            # $ret .= qq{#line @{[ $k->[2] + 1 ]} "vm.inc"\n};
-            $ret .= "$k->[1]\n";
-            # $ret .= qq{#line @{[ $k->[2] + 1 + split(/\n/, $k->[1]) ]} "<stdout>"\n};
-            $ret .= "}\n";
-        }
-    }
-
-    $ret .= <<'...';
-
+? for (['execute', 0], ['execute_trace', 1]) {
+?  my ($method, $with_trace) = @{$_};
 // run program
-void VM::execute() {
+void VM::<?= $method ?>() {
     DBG2("************** VM::execute\n");
 
 #ifdef __GNUC__
     static const void *JUMPTABLE [] = {
-...
-
-    for my $k (@$dat) {
-        $ret .= sprintf("&&CODE_%s,", $k->[0]);
-    }
-
-    $ret .= <<'...';
-    &&CODE_OP_END};
+? for my $k (@{$_[0]}) {
+        <?= sprintf("&&CODE_%s,", $k->[0]); ?>
+?   }
+        &&CODE_OP_END
+    };
 
     {
         goto *JUMPTABLE[ops->at(pc)->op_type];
-...
 
-    for my $k (@$dat) {
-        $ret .= "CODE_$k->[0]: {\n";
-        if (0) {
-            $ret .= "    printf(\"calling PP_$k->[0](%d).\\n\", ops->at(pc)->op_type);\n";
+? for my $k (@{$_[0]}) {
+        CODE_<?= $k->[0] ?>: {
+?       if ($with_trace) {
+            printf("[%03d] calling PP_<?= $k->[0] ?>(%d).\n", pc, ops->at(pc)->op_type);
+?       }
+            PP_<?= $k->[0] ?>();
+            pc++;
+            goto *JUMPTABLE[ops->at(pc)->op_type];
         }
-        $ret .= "PP_$k->[0]();\n pc++; goto *JUMPTABLE[ops->at(pc)->op_type]; }\n";
-    }
+? }
 
-    $ret .= <<'...';
 CODE_OP_END:
         goto END;
     }
@@ -116,19 +107,17 @@ CODE_OP_END:
         DBG2("[DEBUG] ");
         disasm_one(ops->at(pc));
 #endif
+?       if ($with_trace) {
+            printf("calling %d.\n", ops->at(pc)->op_type);
+?       }
 
         OP* op = ops->at(pc);
         switch (op->op_type) {
-...
-
-    for my $k (@$dat) {
-        $ret .= "    case $k->[0]: { PP_$k->[0](); break; }\n";
-    }
-
-    $ret .= <<'...';
+? for my $k (@{$_[0]}) {
+        case <?= $k->[0] ?>: { PP_<?= $k->[0] ?>(); break; }
+? }
         case OP_END: { goto END; }
         }
-        // dump_stack();
         pc++;
     }
 #endif // __GNUC__
@@ -136,6 +125,7 @@ CODE_OP_END:
 END:
     return;
 }
+? } # end for
 ...
 }
 

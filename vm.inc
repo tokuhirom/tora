@@ -173,7 +173,7 @@ OP_FUNCALL {
         CodeValue* code = iter->second->upcast<CodeValue>();
         // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-        FunctionFrame* fframe = new FunctionFrame(argcnt, frame_stack->back());
+        FunctionFrame* fframe = new FunctionFrame(argcnt);
         fframe->return_address = pc;
         fframe->orig_ops = ops;
         fframe->top = stack.size() - argcnt;
@@ -217,7 +217,7 @@ OP_METHOD_CALL {
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
             if (code->is_native()) {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
@@ -226,7 +226,7 @@ OP_METHOD_CALL {
                 this->call_native_func(code->callback(), argcnt+1);
             } else {
                 {
-                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                     fframe->return_address = pc;
                     fframe->orig_ops = ops;
                     fframe->top = stack.size() - argcnt;
@@ -280,7 +280,7 @@ OP_METHOD_CALL {
             int argcnt = get_int_operand();
 
             if (code->is_native()) {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
@@ -288,7 +288,7 @@ OP_METHOD_CALL {
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
             } else {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
+                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->orig_ops = ops;
                 fframe->top = stack.size() - argcnt;
@@ -375,20 +375,20 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_WHILE {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
     frame->type = FRAME_TYPE_WHILE;
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_FOR {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
     frame->type = FRAME_TYPE_FOR;
     frame->top = stack.size();
     frame_stack->push_back(frame);
@@ -426,42 +426,48 @@ OP_EQ {
     std::equal_to<int> i;
     std::equal_to<double> d;
     std::equal_to<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_NE {
     std::not_equal_to<int> i;
     std::not_equal_to<double> d;
     std::not_equal_to<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_GT {
     std::greater<int> i;
     std::greater<double> d;
     std::greater<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_LT {
     std::less<int> i;
     std::less<double> d;
     std::less<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_GE {
     std::greater_equal<int> i;
     std::greater_equal<double> d;
     std::greater_equal<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_LE {
     std::less_equal<int> i;
     std::less_equal<double> d;
     std::less_equal<std::string> s;
-    this->cmpop(i, d, s);
+    SharedPtr<Value> v = this->cmpop(i, d, s);
+    if (v->is_exception()) { this->die(v); } else { stack.push(v); }
 }
 
 OP_SETLOCAL {
@@ -481,13 +487,10 @@ OP_SETLOCAL {
 
 OP_SETDYNAMIC {
     // frame_stack->back()->dump_vars();
-    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
-    for (int i=0; i<level; i++) {
-        frame = frame->up;
-    }
+    SharedPtr<LexicalVarsFrame> frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value> rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         frame->setVar(
@@ -504,12 +507,9 @@ OP_SETDYNAMIC {
 
 OP_GETDYNAMIC {
     // lexical vars
-    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
-    for (int i=0; i<level; i++) {
-        frame = frame->up;
-    }
+    SharedPtr<LexicalVarsFrame> frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value>v = frame->find(no);
     if (v) {
         DBG2("found lexical var\n");
@@ -540,7 +540,8 @@ OP_GET_ITEM {
     SharedPtr<Value> container(stack.pop());
 
     SharedPtr<Value> ret = container->get_item(&(*index));
-    stack.push(ret);
+    if (ret->is_exception()) { this->die(ret); }
+    else { stack.push(ret); }
 }
 
 OP_SET_ITEM {
@@ -729,7 +730,7 @@ OP_ENTER_FOREACH {
     }
 
     int vars_cnt = get_int_operand();
-    SharedPtr<ForeachFrame> fframe = new ForeachFrame(vars_cnt, frame_stack->back());
+    SharedPtr<ForeachFrame> fframe = new ForeachFrame(vars_cnt);
     fframe->top = stack.size();
     fframe->iter = iiter;
     frame_stack->push_back(fframe);
@@ -819,7 +820,7 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    SharedPtr<TryFrame> fframe = new TryFrame(frame_stack->back());
+    SharedPtr<TryFrame> fframe = new TryFrame();
     fframe->return_address = get_int_operand()-1;
     fframe->top = stack.size();
     frame_stack->push_back(fframe);
@@ -854,7 +855,7 @@ OP_NOT {
 
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
-    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package_id(), this, frame_stack->back());
+    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package_id(), this);
     this->frame_stack->push_back(pframe);
     this->package_id_ = package_id;
 }

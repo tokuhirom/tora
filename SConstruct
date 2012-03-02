@@ -91,11 +91,12 @@ env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl s
 env.Command(['src/value.gen.cc'], 'src/value.gen.pl', 'perl src/value.gen.pl');
 env.Command(['src/token.gen.cc', 'src/token.gen.h'], ['src/token.gen.pl', 'src/parser.h'], 'perl src/token.gen.pl');
 env.Command(['src/lexer.gen.h'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.h');
-env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl src/vm.gen.pl > src/vm.gen.cc');
+env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ src/vm.gen.pl > src/vm.gen.cc');
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
 Clean(t, 'src/parser.out')
 
 lib = re2_env.Library('re2', re2files)
+# env.get('CCFLAGS').join(' ')
 tora = env.Program('tora', [
     ['src/main.cc'],
     libfiles,

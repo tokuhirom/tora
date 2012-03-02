@@ -21,6 +21,7 @@
 #include "object/file.h"
 #include "object/socket.h"
 
+#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <dirent.h>
 #include "lexer.gen.h"
@@ -122,7 +123,7 @@ template void tora::VM::binop(std::divides<int> operation_i, std::divides<double
 
 // TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
-void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
+SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
     SharedPtr<Value> v1(stack.back());
     stack.pop_back();
     SharedPtr<Value> v2(stack.back());
@@ -131,55 +132,49 @@ void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
     switch (v1->value_type) {
     case VALUE_TYPE_INT: {
         Value * ie2 = v2->to_int();
-        if (ie2->is_exception()) { TODO(); }
+        if (ie2->is_exception()) { return ie2; }
         SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, ie2->upcast<IntValue>()->int_value));
-        stack.push(result);
-        break;
+        return result;
     }
     case VALUE_TYPE_STR: {
         SharedPtr<Value> s2(v2->to_s());
+        if (s2->is_exception()) { return s2; }
         SharedPtr<BoolValue> result = BoolValue::instance(operation_s(v1->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
-        stack.push(result);
-        break;
+        return result;
     }
     case VALUE_TYPE_DOUBLE: {
         switch (v2->value_type) {
         case VALUE_TYPE_INT: {
             SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, (double)v2->upcast<IntValue>()->int_value));
-            stack.push(result);
-            return;
+            return result;
         }
         case VALUE_TYPE_DOUBLE: {
             SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, v2->upcast<DoubleValue>()->double_value));
-            stack.push(result);
-            return;
+            return result;
         }
         default: {
             TODO(); // throw exception
-            return;
+            abort();
         }
         }
         break;
     }
     case VALUE_TYPE_UNDEF: {
-        stack.push(new BoolValue(v2->value_type == VALUE_TYPE_UNDEF));
-        break;
+        return new BoolValue(v2->value_type == VALUE_TYPE_UNDEF);
     }
     default:
         // TODO: support object comparation
-        printf("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
-        v1->dump();
-        v2->dump();
-        abort();
+        return new ExceptionValue("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
     }
+    abort();
 }
 
-template void VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>);
-template void VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>);
-template void VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>);
-template void VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>);
-template void VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>);
-template void VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>);
+template SharedPtr<Value> VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>);
+template SharedPtr<Value> VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>);
+template SharedPtr<Value> VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>);
+template SharedPtr<Value> VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>);
+template SharedPtr<Value> VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>);
+template SharedPtr<Value> VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>);
 
 void VM::die(const char *format, ...) {
     va_list ap;
@@ -632,7 +627,9 @@ void VM::register_standard_methods() {
     this->add_builtin_function("opendir",   builtin_opendir);
     this->add_builtin_function("typeof",   builtin_typeof);
     this->add_builtin_function("rand",   builtin_rand);
+#ifndef NDEBUG
     this->add_builtin_function("dump_stack",   builtin_dump_stack);
+#endif
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
@@ -730,5 +727,27 @@ SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr
     default:
         return new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
     }
+}
+
+void VM::dump_frame() {
+    printf("-- dump frame             --\n");
+    int i = 0;
+    for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
+        printf("type: %s [%d]\n", (*f)->type_str(), i++);
+        for (size_t n=0; n<(*f)->vars->size(); n++) {
+            printf("  %zd\n", n);
+            (*f)->vars->at(n)->dump();
+        }
+    }
+    printf("---------------\n");
+}
+
+void VM::dump_stack() {
+    printf("-- STACK DUMP --\nSP: %d\n", sp);
+    for (size_t i=0; i<stack.size(); i++) {
+        printf("[%zd] ", i);
+        stack.at(i)->dump();
+    }
+    printf("----------------\n");
 }
 

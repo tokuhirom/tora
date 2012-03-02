@@ -138,7 +138,6 @@ public:
         package_id_ = symbol_table->get_id(s);
     }
 
-    // TODO: cache
     ID package_id() {
         return package_id_;
     }
@@ -162,20 +161,15 @@ public:
     VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();
     void execute();
+    void execute_trace();
 
     template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
-    template <class operationI, class operationD, class operationS> void cmpop(operationI operation_i, operationD operation_d, operationS operation_s);
+    template <class operationI, class operationD, class operationS> SharedPtr<Value> cmpop(operationI operation_i, operationD operation_d, operationS operation_s);
 
     void init_globals(int argc, char**argv);
 
-    void dump_stack() {
-        printf("-- STACK DUMP --\nSP: %d\n", sp);
-        for (size_t i=0; i<stack.size(); i++) {
-            printf("[%zd] ", i);
-            stack.at(i)->dump();
-        }
-        printf("----------------\n");
-    }
+    void dump_frame();
+    void dump_stack();
     SharedPtr<Value> require(Value *v);
     void add_function(ID id, SharedPtr<Value> code);
     void add_function(std::string &name, SharedPtr<Value> code) {

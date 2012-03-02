@@ -26,8 +26,9 @@ int main(int argc, char **argv) {
     bool dump_ast = false;
     bool compile_only = false;
     bool parse_trace = false;
+    bool exec_trace = false;
     char *code = NULL;
-    while ((opt = getopt(argc, argv, "yvdtce:")) != -1) {
+    while ((opt = getopt(argc, argv, "yvdtcqe:")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
@@ -46,6 +47,9 @@ int main(int argc, char **argv) {
             break;
         case 'y':
             parse_trace = true;
+            break;
+        case 'q':
+            exec_trace = true;
             break;
         default:
             fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
@@ -127,6 +131,10 @@ int main(int argc, char **argv) {
     if (dump_ops) {
         Disasm::disasm(compiler.ops);
     }
-    vm.execute();
+    if (exec_trace) {
+        vm.execute_trace();
+    } else {
+        vm.execute();
+    }
 }
 

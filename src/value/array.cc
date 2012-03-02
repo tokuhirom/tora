@@ -33,8 +33,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
     SharedPtr<IntValue> iv = v->upcast<IntValue>();
     int i = iv->int_value;
     if (i > (int)this->values->size()) {
-        fprintf(stderr, "IndexError: %d, %zd\n", i, this->values->size());
-        abort();
+        return UndefValue::instance();
     } else {
         return this->at(i);
     }

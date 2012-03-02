@@ -58,7 +58,8 @@ syntax
  * <<'...'
  * "hogehoge $foo"
  * "hogehoge #{ 3+2 }"
- * last
+ * last with label
+ * next with label
  * next
  * continue
  * __FILE__
@@ -126,4 +127,5 @@ Finished
   * x if foo;
  * q{}
  * qq{}
+ * last
 
