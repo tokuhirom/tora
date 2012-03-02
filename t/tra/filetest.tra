@@ -15,5 +15,5 @@ ok(!-e "fjdaslkfjadslfjalf");
 is(-s "jiojklj", undef);
 is(-s "t/dat/filetest/foo", 8);
 
-done_testing();
+done_testing;
 

@@ -225,6 +225,9 @@ expression(A) ::= DIE expression(B). {
     A = new NodeNode(NODE_DIE, B);
 }
 expression(A) ::= use_expression(B).   { A = B; }
+expression(A) ::= identifier(B). {
+    A = new FuncallNode(B, new ListNode());
+}
 use_expression(A) ::= USE identifier(B) MUL. {
     A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));
 }

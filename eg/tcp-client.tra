@@ -1,6 +1,6 @@
 use Socket *;
 
-my $sock = Socket.socket(AF_INET(), SOCK_STREAM(), 0);
+my $sock = Socket.socket(AF_INET, SOCK_STREAM, 0);
 $sock.connect(Socket.sockaddr_in(80, Socket.inet_aton('localhost')));
 $sock.write("GET / HTTP/1.0\r\n\r\n");
 say($sock.read());
