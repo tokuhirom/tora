@@ -32,6 +32,8 @@ class Node : public Prim {
 public:
     node_type_t type;
     std::vector<SharedPtr<Node>> *list;
+    typedef std::vector<SharedPtr<Node>>::iterator iterator;
+    typedef std::vector<SharedPtr<Node>>::reverse_iterator reverse_iterator;
     Node() {
         type = NODE_UNKNOWN;
         list = new std::vector<SharedPtr<Node>>();
@@ -61,6 +63,11 @@ public:
     Y* upcast() {
         return dynamic_cast<Y*>(&(*(this)));
     }
+
+    iterator begin() { return list->begin(); }
+    iterator end() { return list->end(); }
+    reverse_iterator rbegin() { return list->rbegin(); }
+    reverse_iterator rend() { return list->rend(); }
 };
 
 class StrNode : public Node {

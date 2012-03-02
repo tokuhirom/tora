@@ -21,7 +21,7 @@ public:
         // operator[] is faster.
         return this->ops[i];
 #else
-        return this->ops->at(i);
+        return this->ops.at(i);
 #endif
     }
     size_t size() const {

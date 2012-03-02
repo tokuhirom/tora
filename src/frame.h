@@ -77,6 +77,7 @@ public:
     int return_address;
     SharedPtr<OPArray> orig_ops;
     SharedPtr<Value> self;
+    int argcnt;
     FunctionFrame(int vars_cnt) : LexicalVarsFrame(vars_cnt) {
         this->type = FRAME_TYPE_FUNCTION;
     }

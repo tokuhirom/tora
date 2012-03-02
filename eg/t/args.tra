@@ -1,0 +1,14 @@
+sub m($x, $y, $z) {
+    my $n="world. ";
+    print($x);
+    print($n);
+    $x="John!";
+    say($x);
+    say($y);
+    say($z);
+}
+m("Hello, ", "Oops!", 3);
+__END__
+Hello, world. John!
+Oops!
+3

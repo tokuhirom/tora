@@ -26,6 +26,20 @@ OP_PUSH_STRING {
     stack.push(sv);
 }
 
+OP_GETARG {
+    int no = get_int_operand();
+    stack.push(stack.at(mark_stack.back() - no));
+}
+
+OP_SETARG {
+    int no = get_int_operand();
+    SharedPtr<Value> rvalue = stack.back();
+    if (rvalue->value_type == VALUE_TYPE_TUPLE) {
+        rvalue = rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1);
+    }
+    stack.set(mark_stack.back() - no, rvalue);
+}
+
 OP_PUSH_VALUE {
     const OP * op = ops->at(pc);
     SharedPtr<Value> v = ((ValueOP*)&(*(op)))->value;
@@ -176,7 +190,8 @@ OP_FUNCALL {
         FunctionFrame* fframe = new FunctionFrame(argcnt);
         fframe->return_address = pc;
         fframe->orig_ops = ops;
-        fframe->top = stack.size() - argcnt;
+        fframe->top = stack.size();
+        fframe->argcnt = argcnt;
         fframe->code = code;
 
         pc = -1;
@@ -185,11 +200,13 @@ OP_FUNCALL {
         // TODO: vargs support
         // TODO: kwargs support
         assert(argcnt == (int)code->code_params->size());
-        for (int i=0; i<argcnt; i++) {
-            const SharedPtr<Value> &arg = stack.back();
-            fframe->setVar(i, arg.get());
-            stack.pop_back();
-        }
+        /**
+         *   +------+
+         * 0 | arg2 |
+         *   | arg1 | <- mark, frame->top
+         *   +------+
+         */
+        mark_stack.push_back(stack.size()-1);
         frame_stack->push_back(fframe);
     } else {
         this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
@@ -229,8 +246,9 @@ OP_METHOD_CALL {
                     SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                     fframe->return_address = pc;
                     fframe->orig_ops = ops;
-                    fframe->top = stack.size() - argcnt;
+                    fframe->top = stack.size();
                     fframe->code = code;
+                    fframe->argcnt = argcnt;
 
                     pc = -1;
                     this->ops = code->code_opcodes;
@@ -238,10 +256,7 @@ OP_METHOD_CALL {
                     // TODO: vargs support
                     // TODO: kwargs support
                     assert(argcnt == (int)code->code_params->size());
-                    for (int i=0; i<argcnt; i++) {
-                        SharedPtr<Value> arg = stack.pop();
-                        fframe->setVar(i, arg);
-                    }
+                    mark_stack.push_back(stack.size()-1);
                     frame_stack->push_back(fframe);
                 }
             }
@@ -291,7 +306,8 @@ OP_METHOD_CALL {
                 SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->orig_ops = ops;
-                fframe->top = stack.size() - argcnt;
+                fframe->top = stack.size();
+                fframe->argcnt = argcnt;
                 fframe->code = code;
                 fframe->self = object;
 
@@ -301,10 +317,7 @@ OP_METHOD_CALL {
                 // TODO: vargs support
                 // TODO: kwargs support
                 assert(argcnt == (int)code->code_params->size());
-                for (int i=0; i<argcnt; i++) {
-                    SharedPtr<Value> arg = stack.pop();
-                    fframe->setVar(i, arg);
-                }
+                mark_stack.push_back(stack.size()-1);
                 frame_stack->push_back(fframe);
             }
         } else {
@@ -339,6 +352,8 @@ OP_RETURN {
     SharedPtr<Value> retval = stack.back();
     stack.pop_back();
 
+    mark_stack.pop_back();
+
     // frame_stack->back()->dump();
     while (1) {
         assert(frame_stack->size() > 0);
@@ -349,7 +364,7 @@ OP_RETURN {
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
 
-            stack.resize(frame->top);
+            stack.resize(frame->top - fframe->argcnt);
 
             frame_stack->pop_back();
 

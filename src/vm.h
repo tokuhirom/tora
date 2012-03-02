@@ -157,6 +157,11 @@ public:
      * stack for lexical variables.
      */
     std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
+    /**
+     * mark for first argument in function call.
+     */
+    std::vector<int> mark_stack;
+    std::vector<int> stack_base;
 
     VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();

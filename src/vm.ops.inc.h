@@ -4,6 +4,8 @@ void PP_OP_PUSH_UNDEF();
 void PP_OP_PUSH_INT();
 void PP_OP_PUSH_DOUBLE();
 void PP_OP_PUSH_STRING();
+void PP_OP_GETARG();
+void PP_OP_SETARG();
 void PP_OP_PUSH_VALUE();
 void PP_OP_NEW_RANGE();
 void PP_OP_FUNCDEF();

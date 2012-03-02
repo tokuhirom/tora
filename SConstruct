@@ -12,7 +12,7 @@ env = Environment(
     LIBS=['re2', 'pthread'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-g', '-I./vendor/re2/', '-static'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-g', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],

@@ -66,7 +66,7 @@ void Compiler::define_my(SharedPtr<Node> node) {
     }
 }
 
-int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closure) {
+int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closure, bool &is_arg) {
     DBG("FIND LOCAL VAR %d\n", 0);
     need_closure = false;
     int seen_funcdef = -1;
@@ -79,6 +79,11 @@ int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closu
             if (*(block->vars.at(i)) == name) {
                 if (seen_funcdef != -1 && seen_funcdef < level) {
                     need_closure = true;
+                }
+                if (block->type == BLOCK_TYPE_FUNCDEF) {
+                    is_arg = true;
+                } else {
+                    is_arg = false;
                 }
                 return i;
             }
@@ -97,7 +102,8 @@ void tora::Compiler::init_globals() {
 void tora::Compiler::set_variable(std::string &varname) {
     int level;
     bool need_closure;
-    int no = this->find_localvar(varname, level, need_closure);
+    bool is_arg;
+    int no = this->find_localvar(varname, level, need_closure, is_arg);
     if (no<0) {
         fprintf(stderr, "There is no variable named %s(SETVARIABLE)\n", varname.c_str());
         this->error++;
@@ -121,7 +127,12 @@ void tora::Compiler::set_variable(std::string &varname) {
             tmp->operand.int_value = closure_vars->size()-1;
         }
     } else {
-        if (level == 0) {
+        if (is_arg) {
+            SharedPtr<OP> tmp = new OP;
+            tmp->op_type = OP_SETARG;
+            tmp->operand.int_value = no;
+            ops->push_back(tmp);
+        } else if (level == 0) {
             DBG2("LOCAL\n");
             tmp->op_type = OP_SETLOCAL;
             tmp->operand.int_value = no;
@@ -480,10 +491,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         auto args = node->upcast<FuncallNode>()->args();
         int args_len = args->size();
-        while (args->size() > 0) {
-            assert(args->back());
-            this->compile(args->back());
-            args->pop_back();
+        for (auto iter=args->rbegin(); iter!=args->rend(); iter++) {
+            this->compile(*iter);
         }
 
         std::string funcname = node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value;
@@ -669,7 +678,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             // find local variable
             int level;
             bool need_closure;
-            int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level, need_closure);
+            bool is_arg;
+            int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level, need_closure, is_arg);
             // dump_localvars();
             if (no<0) {
                 fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
@@ -694,7 +704,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
                 }
                 ops->push_back(tmp);
             } else {
-                if (level == 0) {
+                if (is_arg) {
+                    SharedPtr<OP> tmp = new OP;
+                    tmp->op_type = OP_GETARG;
+                    tmp->operand.int_value = no;
+                    ops->push_back(tmp);
+                } else if (level == 0) {
                     DBG2("LOCAL\n");
                     SharedPtr<OP> tmp = new OP;
                     tmp->op_type = OP_GETLOCAL;

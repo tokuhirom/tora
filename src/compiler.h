@@ -99,7 +99,7 @@ public:
     }
     void set_lvalue(SharedPtr<Node> node);
     void set_variable(std::string &varname);
-    int find_localvar(std::string name, int &level, bool &need_closure);
+    int find_localvar(std::string name, int &level, bool &need_closure, bool &is_arg);
     void define_localvar(const char* name) {
         this->define_localvar(std::string(name));
     }

@@ -40,10 +40,13 @@ public:
         container.resize(count);
     }
     SharedPtr<Value> at(int i) {
-        return container.at(i);
+        return container[i];
     }
     const SharedPtr<Value>& at(int i) const {
-        return container.at(i);
+        return container[i];
+    }
+    void set(int i, SharedPtr<Value>& rvalue) {
+        container[i] = rvalue;
     }
     size_t size() const {
         return container.size();
