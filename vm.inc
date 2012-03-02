@@ -320,8 +320,24 @@ OP_METHOD_CALL {
     }
 }
 
+OP_LAST {
+    while (1) {
+        assert(frame_stack->size() > 0);
+        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        assert(frame->type != FRAME_TYPE_FUNCTION);
+        assert(frame->type != FRAME_TYPE_TRY);
+        stack.resize(stack.size());
+        frame_stack->pop_back();
+        if (frame->type == FRAME_TYPE_WHILE || frame->type == FRAME_TYPE_FOREACH || frame->type == FRAME_TYPE_FOR) {
+            pc = get_int_operand();
+            break;
+        }
+    }
+}
+
 OP_RETURN {
-    SharedPtr<Value> retval = stack.pop();
+    SharedPtr<Value> retval = stack.back();
+    stack.pop_back();
 
     // frame_stack->back()->dump();
     while (1) {
@@ -352,9 +368,7 @@ OP_RETURN {
             break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
+            stack.resize(stack.size());
             frame_stack->pop_back();
         }
     }
@@ -362,6 +376,20 @@ OP_RETURN {
 
 OP_ENTER {
     SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    frame->top = stack.size();
+    frame_stack->push_back(frame);
+}
+
+OP_ENTER_WHILE {
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    frame->type = FRAME_TYPE_WHILE;
+    frame->top = stack.size();
+    frame_stack->push_back(frame);
+}
+
+OP_ENTER_FOR {
+    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand(), frame_stack->back());
+    frame->type = FRAME_TYPE_FOR;
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }

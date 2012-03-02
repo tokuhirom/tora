@@ -30,6 +30,7 @@ use Test::More *;
     is($n, 5);
 }
 
+# hmm
 {
     my $n = 0;
     for (my $i=0; $i<10; $i++) {

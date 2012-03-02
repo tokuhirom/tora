@@ -586,7 +586,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             jump_else->op_type = OP_JUMP_IF_FALSE;
             ops->push_back(jump_else);
 
-            this->compile(if_node->if_body());
+            if (if_node->if_body()) {
+                this->compile(if_node->if_body());
+            }
 
             SharedPtr<OP> jump_end = new OP;
             jump_end->op_type = OP_JUMP;
@@ -615,16 +617,24 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         LABEL2:
         */
 
-        LoopContext lc(this, true);
-
         int label1 = ops->size();
         this->compile(node->upcast<BinaryNode>()->left()); // cond
+
+        LoopContext lc(this, true);
 
         SharedPtr<OP> jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_if_false);
 
-        this->compile(node->upcast<BinaryNode>()->right()); //body
+        OP *enter = new OP(OP_ENTER_WHILE);
+        ops->push_back(enter);
+        this->push_block(BLOCK_TYPE_BLOCK);
+
+            this->compile(node->upcast<BinaryNode>()->right()); //body
+
+        ops->push_back(new OP(OP_LEAVE));
+        enter->operand.int_value = this->blocks->back()->vars.size();
+        this->pop_block();
 
         SharedPtr<OP> goto_ = new OP;
         goto_->op_type = OP_JUMP;
@@ -812,6 +822,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             Node *block;
         } for_stmt;
 
+            ENTER_FOR
             (initialize)
         LABEL1:
             (cond)
@@ -820,9 +831,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             (postfix)
             goto LABEL1
         LABEL2:
+            LEAVE
         */
 
-        LoopContext lc(this, true);
+        OP *enter = new OP(OP_ENTER_FOR);
+        ops->push_back(enter);
+        this->push_block(BLOCK_TYPE_BLOCK);
 
         this->compile(node->upcast<ForNode>()->initialize());
         int label1 = ops->size();
@@ -832,7 +846,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         jump_label2->op_type = OP_JUMP_IF_FALSE;
         ops->push_back(jump_label2);
 
-        this->compile(node->upcast<ForNode>()->block());
+        {
+            LoopContext lc(this, true);
+            this->compile(node->upcast<ForNode>()->block());
+        }
+
         this->compile(node->upcast<ForNode>()->postfix());
 
         SharedPtr<OP> jump_label1 = new OP;
@@ -842,6 +860,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         int label2 = ops->size();
         jump_label2->operand.int_value = label2;
+
+        ops->push_back(new OP(OP_LEAVE));
+        enter->operand.int_value = this->blocks->back()->vars.size();
+        this->pop_block();
 
         BOOST_FOREACH(auto n, last_labels) {
             *n = label2;
@@ -994,6 +1016,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         break;
     }
     case NODE_TRY: {
+        LoopContext lc(this, false);
+
         Compiler::TryGuard guard(this, true);
 
         OP *try_op = new OP(OP_TRY);
@@ -1073,7 +1097,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         if (!in_loop_context) {
             fail("You can't put \"last\" statement out of loop block.\n");
         } else {
-            OP * op = new OP(OP_JUMP);
+            OP * op = new OP(OP_LAST);
             this->last_labels.push_back(&(op->operand.int_value));
             ops->push_back(op);
         }

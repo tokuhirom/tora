@@ -16,10 +16,12 @@ public:
         bool bool_value;
     } operand;
     OP() { }
-    OP(op_type_t type)  {
-        this->op_type = type;
+    OP(op_type_t type) :op_type(type)  { }
+    OP(op_type_t type, int i) :op_type(type)  {
+        operand.int_value = i;
     }
-    virtual ~OP() { }
+    // This is not a virtual destructor. Do not define destructor in child class.
+    ~OP() { }
 
     template<class Y>
     Y* upcast() {

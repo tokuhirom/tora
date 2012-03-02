@@ -60,6 +60,7 @@ public:
         dump_ops = false;
         package_ = "main";
         closure_vars = new std::vector<std::string>();
+        in_loop_context = false;
     }
     ~Compiler() {
         delete global_vars;

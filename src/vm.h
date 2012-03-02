@@ -26,6 +26,8 @@ typedef enum {
     FRAME_TYPE_TRY,
     FRAME_TYPE_FOREACH,
     FRAME_TYPE_PACKAGE,
+    FRAME_TYPE_WHILE,
+    FRAME_TYPE_FOR,
 } frame_type_t;
 
 // TODO rename LexicalVarsFrame to Frame
@@ -58,8 +60,27 @@ public:
         assert(id < this->vars->capacity());
         return (*this->vars)[id];
     }
+    const char *type_str() {
+        switch (type) {
+        case FRAME_TYPE_FUNCTION:
+            return "function";
+        case FRAME_TYPE_LEXICAL:
+            return "lexical";
+        case FRAME_TYPE_PACKAGE:
+            return "package";
+        case FRAME_TYPE_TRY:
+            return "try";
+        case FRAME_TYPE_FOREACH:
+            return "foreach";
+        case FRAME_TYPE_WHILE:
+            return "while";
+        case FRAME_TYPE_FOR:
+            return "for";
+        }
+        abort();
+    }
     void dump(int i) {
-        printf("type: %s [%d]\n", this->type == FRAME_TYPE_FUNCTION ? "function" : "lexical", i);
+        printf("type: %s [%d]\n", this->type_str(), i);
         for (size_t n=0; n<this->vars->size(); n++) {
             printf("  %zd\n", n);
             this->vars->at(n)->dump();

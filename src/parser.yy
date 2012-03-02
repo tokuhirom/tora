@@ -132,6 +132,9 @@ jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
     A = new IfNode(NODE_IF, B, C, NULL);
 }
+if_statement(A) ::= IF L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
+    A = new IfNode(NODE_IF, B, NULL, NULL);
+}
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
 }
