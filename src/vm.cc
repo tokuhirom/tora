@@ -568,6 +568,16 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         } else {
             stack.push(ret);
         }
+    } else if (callback->argc == CallbackFunction::type_vm3) {
+        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> v2 = stack.pop();
+        SharedPtr<Value> v3 = stack.pop();
+        SharedPtr<Value> ret = callback->func_vm3(this, v.get(), v2.get(), v3.get());
+        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
+            this->die(ret);
+        } else {
+            stack.push(ret);
+        }
     } else if (callback->argc == CallbackFunction::type_vm4) {
         SharedPtr<Value> v = stack.pop();
         SharedPtr<Value> v2 = stack.pop();

@@ -426,6 +426,10 @@ string_literal:
         delete string_buffer; string_buffer = NULL;
         return STRING_LITERAL;
     }
+    "\\r" {
+        tora_add_string_literal('\r');
+        goto string_literal;
+    }
     LF {
         tora_add_string_literal('\n');
         goto string_literal;
