@@ -95,11 +95,12 @@ t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 's
 Clean(t, 'src/parser.out')
 
 lib = re2_env.Library('re2', re2files)
-env.Program('tora', [
+tora = env.Program('tora', [
     ['src/main.cc'],
     libfiles,
     lib
 ])
+Default(tora)
 
 
 # lemon

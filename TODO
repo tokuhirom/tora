@@ -48,8 +48,6 @@ syntax
 -------
 
  * given-when
- * q{}
- * qq{}
  * say $_ for $array;
  * unless () { }
  * x unless foo;
@@ -121,4 +119,6 @@ Finished
   * -s
   * return if $_;
   * x if foo;
+ * q{}
+ * qq{}
 

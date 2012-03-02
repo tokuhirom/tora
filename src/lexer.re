@@ -159,9 +159,12 @@ std:
             return n;
         }
 
+        char string_close_char = '\0';
+
         if (qw_mode) {
             goto qw_literal;
         }
+
 
     /*!re2c
         re2c:define:YYCTYPE = "char";
@@ -186,6 +189,46 @@ std:
     */
 
 /*!re2c
+    "qq{" {
+        tora_open_string_literal();
+        string_close_char = '}';
+        goto single_string_literal;
+    }
+    "qq[" {
+        tora_open_string_literal();
+        string_close_char = ']';
+        goto single_string_literal;
+    }
+    "qq(" {
+        tora_open_string_literal();
+        string_close_char = ')';
+        goto single_string_literal;
+    }
+    "qq!" {
+        tora_open_string_literal();
+        string_close_char = '!';
+        goto single_string_literal;
+    }
+    "q{" {
+        tora_open_string_literal();
+        string_close_char = '}';
+        goto single_string_literal;
+    }
+    "q(" {
+        tora_open_string_literal();
+        string_close_char = ')';
+        goto single_string_literal;
+    }
+    "q[" {
+        tora_open_string_literal();
+        string_close_char = ']';
+        goto single_string_literal;
+    }
+    "q!" {
+        tora_open_string_literal();
+        string_close_char = '!';
+        goto single_string_literal;
+    }
     "qw{" {
         qw_mode = '{';
         return QW_START;
@@ -352,10 +395,12 @@ std:
     }
     "\"" {
         tora_open_string_literal();
+        string_close_char = '"';
         goto string_literal;
     }
     "'" {
         tora_open_string_literal();
+        string_close_char = '\'';
         goto single_string_literal;
     }
     "/*" {
@@ -400,10 +445,15 @@ end:
 
 single_string_literal:
 /*!re2c
-    "'" {
-        *yylval = new StrNode(NODE_STRING, string_buffer->str());
-        delete string_buffer; string_buffer = NULL;
-        return STRING_LITERAL;
+    [')!}\]] {
+        if (string_close_char == *(m_cursor-1)) {
+            *yylval = new StrNode(NODE_STRING, string_buffer->str());
+            delete string_buffer; string_buffer = NULL;
+            return STRING_LITERAL;
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto single_string_literal;
+        }
     }
     "\\\\" {
         tora_add_string_literal('\\');
@@ -421,10 +471,15 @@ single_string_literal:
 
 string_literal:
 /*!re2c
-    "\"" {
-        *yylval = new StrNode(NODE_STRING, string_buffer->str());
-        delete string_buffer; string_buffer = NULL;
-        return STRING_LITERAL;
+    [")!}\]] {
+        if (string_close_char == *(m_cursor-1)) {
+            *yylval = new StrNode(NODE_STRING, string_buffer->str());
+            delete string_buffer; string_buffer = NULL;
+            return STRING_LITERAL;
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto string_literal;
+        }
     }
     "\\r" {
         tora_add_string_literal('\r');
@@ -461,7 +516,7 @@ regexp_literal:
 /*!re2c
     "/" {
         // # <REGEXP>"\\/" tora_add_string_literal('/');
-        /* TODO: options like /xsmi */
+        // TODO: options like /xsmi
         *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str());
         delete string_buffer; string_buffer = NULL;
         return REGEXP_LITERAL;
