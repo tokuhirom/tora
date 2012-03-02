@@ -1,0 +1,45 @@
+use Test::More *;
+
+# last
+{
+    my $n = 10;
+    while ($n-- > 0) {
+        last;
+    }
+    is($n, 9);
+}
+
+{
+    my $n = 10;
+    while ($n-- > 0) {
+        if ($n==5) {
+            last;
+        }
+    }
+    is($n, 5);
+}
+
+{
+    my $n = 0;
+    for (my $i in 1..10) {
+        $n = $i;
+        if ($i==5) {
+            last;
+        }
+    }
+    is($n, 5);
+}
+
+{
+    my $n = 0;
+    for (my $i=0; $i<10; $i++) {
+        $n = $i;
+        my $x;
+        if ($i==5) {
+            last;
+        }
+    }
+    is($n, 5);
+}
+
+done_testing;

@@ -5,8 +5,24 @@
 #include "value/symbol.h"
 #include "value/regexp.h"
 #include "disasm.h"
+#include <boost/scope_exit.hpp>
+#include <boost/foreach.hpp>
 
 using namespace tora;
+
+class LoopContext {
+    Compiler *compiler_;
+    bool orig;
+public:
+    LoopContext(Compiler *c, bool b) {
+        compiler_ = c;
+        orig = compiler_->in_loop_context;
+        compiler_->in_loop_context = b;
+    }
+    ~LoopContext() {
+        compiler_->in_loop_context = orig;
+    }
+};
 
 /**
  * Count up the number of variables declared at this scope.
@@ -19,7 +35,9 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
         auto iter = node->list->begin();
         int ret = 0;
         for (; iter!=node->list->end(); iter++) {
-            ret += count_variable_declare(*iter);
+            if ((*iter).get()) {
+                ret += count_variable_declare(*iter);
+            }
         }
         return ret;
     }
@@ -458,6 +476,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
     }
 
     case NODE_FUNCALL: {
+        LoopContext lc(this, false);
+
         auto args = node->upcast<FuncallNode>()->args();
         int args_len = args->size();
         while (args->size() > 0) {
@@ -594,6 +614,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
           goto LABEL1
         LABEL2:
         */
+
+        LoopContext lc(this, true);
+
         int label1 = ops->size();
         this->compile(node->upcast<BinaryNode>()->left()); // cond
 
@@ -610,6 +633,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         int label2 = ops->size();
         jump_if_false->operand.int_value = label2;
+
+        BOOST_FOREACH(auto n, last_labels) {
+            *n = label2;
+        }
+        last_labels.clear();
 
         break;
     }
@@ -794,6 +822,8 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         LABEL2:
         */
 
+        LoopContext lc(this, true);
+
         this->compile(node->upcast<ForNode>()->initialize());
         int label1 = ops->size();
         this->compile(node->upcast<ForNode>()->cond());
@@ -812,6 +842,12 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         int label2 = ops->size();
         jump_label2->operand.int_value = label2;
+
+        BOOST_FOREACH(auto n, last_labels) {
+            *n = label2;
+        }
+        last_labels.clear();
+
         break;
     }
     case NODE_FOREACH: {
@@ -834,6 +870,7 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         LABEL2:
         */
 
+        LoopContext lc(this, true);
         this->compile(node->upcast<ForEachNode>()->source());
 
         this->push_block(BLOCK_TYPE_BLOCK);
@@ -865,6 +902,11 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         ops->push_back(new OP(OP_LEAVE));
 
+        BOOST_FOREACH(auto n, last_labels) {
+            *n = label2;
+        }
+        last_labels.clear();
+
         break;
     }
     case NODE_METHOD_CALL: {
@@ -873,6 +915,9 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
         node->method_call.method = $3;
         node->method_call.args   = $5;
         */
+
+        LoopContext lc(this, false);
+
         auto mcn = node->upcast<MethodCallNode>();
         auto args = mcn->args();
         int args_len = args->size();
@@ -1021,6 +1066,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         this->in_class_context = false;
 
+        break;
+    }
+    case NODE_LAST: {
+        // break from for/foreach/while
+        if (!in_loop_context) {
+            fail("You can't put \"last\" statement out of loop block.\n");
+        } else {
+            OP * op = new OP(OP_JUMP);
+            this->last_labels.push_back(&(op->operand.int_value));
+            ops->push_back(op);
+        }
         break;
     }
 

@@ -12,9 +12,15 @@ static void print_indent(int indent) {
 
 void tora::Node::dump(int indent) {
     print_indent(indent);
-    printf("[%s] %s(%zd)\n", this->type_name_str(), node_type2name[this->type], this->list->size());
+    printf("[%s] %s(size: %zd)\n", this->type_name_str(), node_type2name[this->type], this->list->size());
     for (size_t i=0; i<this->list->size(); i++) {
-        this->list->at(i)->dump(indent+1);
+        auto n = this->list->at(i);
+        if (n.get()) {
+            n->dump(indent+1);
+        } else {
+            print_indent(indent+1);
+            printf("NULL\n");
+        }
     }
 }
 

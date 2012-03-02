@@ -96,6 +96,11 @@ feature
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
   * Bytes class.
+  * local $n
+  * scope_guard { ... }
+    * BOOST_SCOPE_EXIT
+    * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
+    * https://metacpan.org/module/Guard
 
 Library
 -------

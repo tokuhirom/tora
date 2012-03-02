@@ -74,6 +74,16 @@ translation_unit(A) ::= translation_unit(B) statement(C). {
     A = new BinaryNode(NODE_STMTS, B, C);
 }
 
+expression(A) ::= LAST. {
+    A = new Node(NODE_LAST);
+}
+expression(A) ::= NEXT. {
+    A = new VoidNode(NODE_NEXT);
+}
+expression(A) ::= REDO. {
+    A = new VoidNode(NODE_REDO);
+}
+
 statement(A) ::= expression(B) SEMICOLON . {
     A = B;
 }

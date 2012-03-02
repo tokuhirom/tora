@@ -44,6 +44,9 @@ public:
     bool dump_ops;
     bool in_class_context;
 
+    bool in_loop_context;
+    std::vector<int*> last_labels;
+
     void package(const std::string & p) { package_ = p; }
     std::string & package() { return package_; }
 
@@ -103,7 +106,7 @@ public:
         SharedPtr<Block> block = this->blocks->back();
         for (size_t i=0; i<block->vars.size(); i++) {
             if (*(block->vars.at(i)) == name) {
-                fprintf(stderr, "Duplicated variable: %s", name.c_str());
+                fprintf(stderr, "Duplicated variable: %s\n", name.c_str());
                 return;
             }
         }

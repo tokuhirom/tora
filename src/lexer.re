@@ -277,6 +277,9 @@ std:
     "try" {return TRY; }
     "die" {return DIE; }
     "for" { return FOR; }
+    "next" { return NEXT; }
+    "last" { return LAST; }
+    "redo" { return REDO; }
     "," { return COMMA; }
     "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }

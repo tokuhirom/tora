@@ -68,6 +68,10 @@ my @nodes = qw(
     NODE_USE
 
     NODE_CLASS
+
+    NODE_REDO
+    NODE_LAST
+    NODE_NEXT
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';

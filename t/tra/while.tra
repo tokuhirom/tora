@@ -12,4 +12,13 @@ is($n, 3);
 # syntax check.
 while (false) { }
 
+# last
+{
+    my $n = 10;
+    while ($n-- > 0) {
+        last if $n == 5;
+    }
+    is($n, 5);
+}
+
 done_testing;
