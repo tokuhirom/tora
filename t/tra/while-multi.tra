@@ -1,0 +1,22 @@
+use Test::More *;
+
+sub foo() {
+    return (1,2);
+}
+
+my $c = 2;
+sub bar() {
+    return $c--;
+}
+
+my ($x, $y) = foo();
+is($x, 1);
+is($y, 2);
+
+while (bar() != 0) {
+}
+
+ok(1);
+
+done_testing;
+

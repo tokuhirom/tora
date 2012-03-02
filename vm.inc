@@ -401,6 +401,13 @@ OP_EQ {
     this->cmpop(i, d, s);
 }
 
+OP_NE {
+    std::not_equal_to<int> i;
+    std::not_equal_to<double> d;
+    std::not_equal_to<std::string> s;
+    this->cmpop(i, d, s);
+}
+
 OP_GT {
     std::greater<int> i;
     std::greater<double> d;

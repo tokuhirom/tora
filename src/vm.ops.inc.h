@@ -26,6 +26,7 @@ void PP_OP_DUMP();
 void PP_OP_JUMP_IF_FALSE();
 void PP_OP_JUMP();
 void PP_OP_EQ();
+void PP_OP_NE();
 void PP_OP_GT();
 void PP_OP_LT();
 void PP_OP_GE();

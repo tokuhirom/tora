@@ -88,6 +88,9 @@ statement(A) ::= if_statement(B).   { A = B; }
 statement(A) ::= WHILE L_PAREN expression(B) R_PAREN block(C). {
     A = new BinaryNode(NODE_WHILE, B, C);
 }
+statement(A) ::= WHILE L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
+    A = new BinaryNode(NODE_WHILE, B, new ListNode(NODE_STMTS_LIST));
+}
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN block(E). {
     A = new ForNode(B, C, D, E);
 }
@@ -268,6 +271,9 @@ and_expression(A) ::= equality_expression(B). { A = B; }
 equality_expression(A) ::= relational_expression(B). { A = B; }
 equality_expression(A) ::= equality_expression(B) EQ relational_expression(C). {
     A = new BinaryNode(NODE_EQ, B, C);
+}
+equality_expression(A) ::= equality_expression(B) NE relational_expression(C). {
+    A = new BinaryNode(NODE_NE, B, C);
 }
 
 relational_expression(A) ::= shift_expression(B). { A = B; }

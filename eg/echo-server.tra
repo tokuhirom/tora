@@ -1,0 +1,18 @@
+use Socket *;
+
+my $server = Socket.socket(AF_INET, SOCK_STREAM, 0);
+$server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1);
+$server.bind(Socket.sockaddr_in(5509, Socket.inet_aton('0.0.0.0')));
+$server.listen(100);
+while (true) {
+    my ($csock, $sockaddr) = $server.accept();
+    while (true) {
+        say("READY TO READ");
+        my $s = $csock.read(1024);
+        p($s);
+        $csock.write($s);
+    }
+    $csock.close();
+}
+$server.close();
+

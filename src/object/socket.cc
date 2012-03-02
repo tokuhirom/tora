@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <boost/scoped_array.hpp>
 
 using namespace tora;
 
@@ -158,14 +159,15 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
  */
 static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&args) {
     SharedPtr<Value> self = args.at(0);
+    int fd = GETFD(vm, self.get());
     if (args.size() == 1) {
-        int fd = GETFD(vm, self.get());
         int readed = 0;
         std::string bbuf;
         while (1) {
             char buf[4096];
             int ret = read(fd, buf, sizeof(buf));
             if (ret > 0) {
+                printf("CONT!\n");
                 readed += ret;
                 bbuf += std::string(buf, ret);
                 continue;
@@ -175,8 +177,107 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
                 return new ExceptionValue(errno);
             }
         }
+    } else if (args.size() == 2) {
+        SharedPtr<Value> size_v = args.at(1)->to_int();
+        if (size_v->is_exception()) { return size_v; }
+
+        int size = size_v->upcast<IntValue>()->int_value;
+        boost::scoped_array<char> buf(new char[size]);
+#ifndef NDEBUG
+        memset(buf.get(), 0, size);
+#endif
+        int ret = read(fd, buf.get(), size);
+        if (ret >= 0) {
+            SharedPtr<Value> s = new StrValue(std::string(buf.get(), ret));
+            return s;
+        } else {
+            return new ExceptionValue(errno);
+        }
     } else {
-        TODO();
+        return new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
+    }
+}
+
+static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
+    SharedPtr<Value> addr = addr_v->to_s();
+    if (addr->is_exception()) { return addr; }
+
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value;
+    int ret = bind(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
+    if (ret==0) {
+        return UndefValue::instance();
+    } else {
+        return new ExceptionValue(errno);
+    }
+}
+
+static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
+    SharedPtr<Value> queue_i = queue_v->to_int();
+    if (queue_i->is_exception()) { return queue_i; }
+
+    int ret = listen(GETFD(vm, self), queue_i->upcast<IntValue>()->int_value);
+    if (ret == 0) {
+        return UndefValue::instance();
+    } else {
+        return new ExceptionValue(errno);
+    }
+}
+
+static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_v, Value* optname_v, Value *optval_v) {
+    SharedPtr<Value> level_i = level_v->to_int();
+    if (level_i->is_exception()) { return level_i; }
+
+    SharedPtr<Value> optname_i = optname_v->to_int();
+    if (optname_i->is_exception()) { return optname_i; }
+
+    const void *optval;
+    socklen_t optlen;
+    int n;
+    if (optval_v->value_type == VALUE_TYPE_INT) {
+        n = optval_v->upcast<IntValue>()->int_value;
+        optval = &n;
+        optlen = sizeof(n);
+    } else {
+        SharedPtr<Value> optval_s = optval_v->to_s();
+        if (optval_s->is_exception()) { return optval_s; }
+        optval = optval_s->upcast<StrValue>()->str_value.c_str();
+        optlen = optval_s->upcast<StrValue>()->str_value.size();
+    }
+
+    int ret = setsockopt(GETFD(vm, self), level_i->upcast<IntValue>()->int_value, optname_i->upcast<IntValue>()->int_value, optval, optlen);
+    if (ret == 0) {
+        return UndefValue::instance();
+    } else {
+        return new ExceptionValue(errno);
+    }
+}
+
+static SharedPtr<Value> sock_sock_close(VM * vm, Value* self) {
+    int ret = close(GETFD(vm, self));
+    if (ret == 0) {
+        return UndefValue::instance();
+    } else {
+        return new ExceptionValue(errno);
+    }
+}
+
+/**
+ * $socket.accept()
+ */
+static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
+    char namebuf[MAXPATHLEN];
+    socklen_t len = sizeof namebuf;
+
+    int fd = accept(GETFD(vm, self), (struct sockaddr *)namebuf, &len);
+    if (fd >= 0) {
+        ObjectValue *new_sock = new ObjectValue(vm->symbol_table->get_id("Socket::Socket"), vm);
+        new_sock->set_value(vm->symbol_table->get_id("_fd"), new IntValue(fd));
+        SharedPtr<TupleValue> t = new TupleValue();
+        t->push(new StrValue(std::string(namebuf, len)));
+        t->push(new_sock);
+        return t;
+    } else {
+        return new ExceptionValue(errno);
     }
 }
 
@@ -198,6 +299,11 @@ void tora::Init_Socket(VM* vm) {
         pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(sock_write));
         pkg->add_method(vm->symbol_table->get_id("read"), new CallbackFunction(sock_read));
         pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(sock_sock_DESTROY));
+        pkg->add_method(vm->symbol_table->get_id("bind"), new CallbackFunction(sock_sock_bind));
+        pkg->add_method(vm->symbol_table->get_id("listen"), new CallbackFunction(sock_sock_listen));
+        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(sock_sock_close));
+        pkg->add_method(vm->symbol_table->get_id("accept"), new CallbackFunction(sock_sock_accept));
+        pkg->add_method(vm->symbol_table->get_id("setsockopt"), new CallbackFunction(sock_sock_setsockopt));
     }
 }
 

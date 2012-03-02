@@ -246,6 +246,7 @@ std:
         return QW_START;
     }
     "+" { return ADD; }
+    "!=" { return NE; }
     "-" { return SUB; }
     "*" { return MUL; }
     "/" {

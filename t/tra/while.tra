@@ -1,0 +1,15 @@
+use Test::More *;
+
+my $i = 3;
+my $n = 0;
+
+while ($i-- > 0) {
+    $n++;
+}
+
+is($n, 3);
+
+# syntax check.
+while (false) { }
+
+done_testing;
