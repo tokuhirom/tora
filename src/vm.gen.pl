@@ -45,7 +45,6 @@ sub vm_gen_cc {
 
     my $ret .= <<'...';
 #include "vm.h"
-#include "vm.cc"
 #include "value.h"
 #include "value/hash.h"
 #include "value/code.h"

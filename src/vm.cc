@@ -91,7 +91,7 @@ void VM::init_globals(int argc, char**argv) {
 }
 
 template <class operationI, class operationD>
-void VM::binop(operationI operation_i, operationD operation_d) {
+void tora::VM::binop(operationI operation_i, operationD operation_d) {
     SharedPtr<Value> v1(stack.back()); /* rvalue */
     stack.pop_back();
     SharedPtr<Value> v2(stack.back()); /* lvalue */
@@ -115,6 +115,11 @@ void VM::binop(operationI operation_i, operationD operation_d) {
     }
 }
 
+template void tora::VM::binop(std::multiplies<int> operation_i, std::multiplies<double> operation_d);
+template void tora::VM::binop(std::minus<int> operation_i, std::minus<double> operation_d);
+template void tora::VM::binop(std::divides<int> operation_i, std::divides<double> operation_d);
+
+// TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
 void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
     SharedPtr<Value> v1(stack.back());
@@ -167,6 +172,13 @@ void VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
         abort();
     }
 }
+
+template void VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>);
+template void VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>);
+template void VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>);
+template void VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>);
+template void VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>);
+template void VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>);
 
 void VM::die(const char *format, ...) {
     va_list ap;
