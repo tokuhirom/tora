@@ -243,6 +243,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "rand",
         "open",
         "exit",
+        "dump_stack",
         NULL
     };
     for (int i=0; bs[i]; i++) {
@@ -515,15 +516,17 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
     // TODO: deprecate?
     case NODE_STMTS: {
+        ops->push_back(new OP(OP_NEXTSTATE));
         this->compile(node->upcast<BinaryNode>()->left());
+        ops->push_back(new OP(OP_NEXTSTATE));
         this->compile(node->upcast<BinaryNode>()->right());
         break;
     }
     case NODE_STMTS_LIST: {
         SharedPtr<ListNode> ln = node->upcast<ListNode>();
         for (int i=0; i<ln->size(); i++) {
-            this->compile(ln->at(i));
             ops->push_back(new OP(OP_NEXTSTATE));
+            this->compile(ln->at(i));
         }
         break;
     }

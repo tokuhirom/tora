@@ -430,12 +430,18 @@ OP_LE {
 }
 
 OP_SETLOCAL {
-    SharedPtr<Value> rvalue = stack.pop();
-    frame_stack->back()->setVar(
-        get_int_operand(),
-        rvalue
-    );
-    stack.push(rvalue);
+    SharedPtr<Value> rvalue = stack.back();
+    if (rvalue->value_type == VALUE_TYPE_TUPLE) {
+        frame_stack->back()->setVar(
+            get_int_operand(),
+            rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
+        );
+    } else {
+        frame_stack->back()->setVar(
+            get_int_operand(),
+            rvalue
+        );
+    }
 }
 
 OP_SETDYNAMIC {
@@ -447,12 +453,18 @@ OP_SETDYNAMIC {
     for (int i=0; i<level; i++) {
         frame = frame->up;
     }
-    SharedPtr<Value> rvalue = stack.pop();
-    frame->setVar(
-        no,
-        rvalue
-    );
-    stack.push(rvalue);
+    SharedPtr<Value> rvalue = stack.back();
+    if (rvalue->value_type == VALUE_TYPE_TUPLE) {
+        frame->setVar(
+            no,
+            rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
+        );
+    } else {
+        frame->setVar(
+            no,
+            rvalue
+        );
+    }
 }
 
 OP_GETDYNAMIC {

@@ -526,6 +526,15 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
     }
 }
 
+#ifndef NDEBUG
+
+static SharedPtr<Value> builtin_dump_stack(VM *vm) {
+    vm->dump_stack();
+    return UndefValue::instance();
+}
+
+#endif
+
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
@@ -575,6 +584,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     }
 }
 
+
 void VM::register_standard_methods() {
     Init_Array(this);
     Init_Str(this);
@@ -599,6 +609,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("opendir",   builtin_opendir);
     this->add_builtin_function("typeof",   builtin_typeof);
     this->add_builtin_function("rand",   builtin_rand);
+    this->add_builtin_function("dump_stack",   builtin_dump_stack);
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
