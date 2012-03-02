@@ -21,13 +21,13 @@ OP_PUSH_DOUBLE {
 }
 
 OP_PUSH_STRING {
-    OP * op = ops->at(pc);
+    const OP * op = ops->at(pc);
     SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
     stack.push(sv);
 }
 
 OP_PUSH_VALUE {
-    OP * op = ops->at(pc);
+    const OP * op = ops->at(pc);
     SharedPtr<Value> v = ((ValueOP*)&(*(op)))->value;
     stack.push(v);
 }

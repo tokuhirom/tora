@@ -1,6 +1,6 @@
 #ifndef TORA_H_
 #define TORA_H_
-#define TORA_VERSION_STR "0.0.1"
+#define TORA_VERSION_STR "0.0.2"
 
 #include <vector>
 #include "value.h"

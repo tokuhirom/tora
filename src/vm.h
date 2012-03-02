@@ -180,10 +180,10 @@ public:
 
     void register_standard_methods();
 
-    int get_int_operand() {
+    int get_int_operand() const {
         return ops->at(pc)->operand.int_value;
     }
-    double get_double_operand() {
+    double get_double_operand() const {
         return ops->at(pc)->operand.double_value;
     }
 

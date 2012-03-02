@@ -19,3 +19,4 @@ lemon
 tests/*.t
 libre2.a
 *.os
+src/config.h

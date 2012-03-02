@@ -1,3 +1,4 @@
+# vim: set filetype=python:
 import os
 import subprocess
 import platform
@@ -96,7 +97,9 @@ t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 's
 Clean(t, 'src/parser.out')
 
 lib = re2_env.Library('re2', re2files)
-# env.get('CCFLAGS').join(' ')
+with open('src/config.h', 'w') as f:
+    f.write("#pragma once\n")
+    f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
 tora = env.Program('tora', [
     ['src/main.cc'],
     libfiles,

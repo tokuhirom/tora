@@ -17,8 +17,14 @@
 #include "parser.class.h"
 #include "token.gen.h"
 #include "disasm.h"
+#include "config.h"
 
 using namespace tora;
+
+void show_configuration() {
+    printf("Tora %s\n", TORA_VERSION_STR);
+    printf("Build configuration: %s\n", TORA_CCFLAGS);
+}
 
 int main(int argc, char **argv) {
     char opt;
@@ -28,7 +34,7 @@ int main(int argc, char **argv) {
     bool parse_trace = false;
     bool exec_trace = false;
     char *code = NULL;
-    while ((opt = getopt(argc, argv, "yvdtcqe:")) != -1) {
+    while ((opt = getopt(argc, argv, "Vyvdtcqe:")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
@@ -47,6 +53,10 @@ int main(int argc, char **argv) {
             break;
         case 'y':
             parse_trace = true;
+            break;
+        case 'V':
+            show_configuration();
+            exit(EXIT_SUCCESS);
             break;
         case 'q':
             exec_trace = true;

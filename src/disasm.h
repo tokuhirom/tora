@@ -10,7 +10,7 @@ class Disasm {
 public:
     static void disasm_op(OP* op);
 
-    static void disasm(SharedPtr<OPArray>& ops);
+    static void disasm(const SharedPtr<OPArray>& ops);
 };
 
 };

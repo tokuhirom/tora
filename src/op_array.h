@@ -7,35 +7,37 @@ namespace tora {
 
 class OPArray : public Prim {
 private:
-    std::vector<OP*> *ops;
+    std::vector<OP*> ops;
 public:
-    OPArray() {
-        ops = new std::vector<OP*>();
-    }
+    OPArray() { }
     ~OPArray() {
-        auto iter = ops->begin();
-        for (; iter!=ops->end(); iter++) {
+        auto iter = ops.begin();
+        for (; iter!=ops.end(); iter++) {
             delete *iter;
         }
-        delete ops;
     }
-    OP* at(size_t i) {
+    const OP* at(size_t i) const {
+#ifdef NDEBUG
+        // operator[] is faster.
+        return this->ops[i];
+#else
         return this->ops->at(i);
+#endif
     }
-    size_t size() {
-        return this->ops->size();
+    size_t size() const {
+        return this->ops.size();
     }
     void push_back(OP* o) {
         o->retain();
-        this->ops->push_back(o);
+        this->ops.push_back(o);
     }
     void push_back(SharedPtr<ValueOP>& o) {
         o->retain();
-        this->ops->push_back(&(*(o)));
+        this->ops.push_back(&(*(o)));
     }
     void push_back(SharedPtr<OP>& o) {
         o->retain();
-        this->ops->push_back(&(*(o)));
+        this->ops.push_back(&(*(o)));
     }
 };
 
