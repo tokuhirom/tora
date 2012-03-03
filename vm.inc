@@ -427,8 +427,7 @@ OP_JUMP_IF_FALSE {
     SharedPtr<Value> v(stack.top());
     stack.pop_back();
 
-    SharedPtr<Value> b(v->to_b());
-    if (!b->upcast<BoolValue>()->bool_value) {
+    if (!v->to_bool()) {
         pc = get_int_operand()-1;
     }
 }
@@ -864,8 +863,9 @@ OP_USE {
 }
 
 OP_NOT {
-    SharedPtr<BoolValue> v = stack.pop()->to_b();
-    stack.push(v->tora__not__());
+    SharedPtr<Value> v = stack.back();
+    stack.pop_back();
+    stack.push(new BoolValue(!v->to_bool()));
 }
 
 OP_PACKAGE_ENTER {

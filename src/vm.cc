@@ -55,6 +55,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
     this->package_id_ = symbol_table_->get_id("main");
     this->package_map = new PackageMap();
     this->myrand = new boost::mt19937(time(NULL));
+    this->mark_stack.reserve(1024);
 }
 
 VM::~VM() {

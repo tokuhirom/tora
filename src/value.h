@@ -80,8 +80,7 @@ public:
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
     Value *to_int();
-    // TODO: rename to as_bool
-    SharedPtr<BoolValue> to_b();
+    bool to_bool();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
     }

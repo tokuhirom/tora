@@ -6,16 +6,14 @@
 
 using namespace tora;
 
-SharedPtr<BoolValue> Value::to_b() {
+bool Value::to_bool() {
     switch (value_type) {
-    case VALUE_TYPE_UNDEF: {
-        return new BoolValue(false);
-    }
+    case VALUE_TYPE_UNDEF:
+        return false;
     case VALUE_TYPE_BOOL:
-        return this->upcast<BoolValue>();
-    default: {
-        return new BoolValue(true);
-    }
+        return this->upcast<BoolValue>()->bool_value;
+    default:
+        return true;
     }
 }
 
