@@ -20,7 +20,8 @@ static SharedPtr<Value> time_new(VM* vm, Value* klass, Value* t) {
     SharedPtr<Value> iv = t->to_int();
 
     struct tm * buf = new tm;
-    struct tm * retlocal = localtime_r((const time_t *)&(iv->upcast<IntValue>()->int_value), buf);
+    time_t tt = iv->upcast<IntValue>()->int_value;
+    struct tm * retlocal = localtime_r(&tt, buf);
     if (!retlocal) {
         delete buf;
         return new ExceptionValue("Error in localtime_r: %s", strerror(errno));
