@@ -12,7 +12,7 @@ env = Environment(
     LIBS=['re2', 'pthread'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native', '-g'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -41,7 +41,6 @@ else:
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
-    env.Append(CCFLAGS=['-DDEBUG'])
     env.Append(CCFLAGS=['-g'])
 
 re2files = [
@@ -86,6 +85,9 @@ if 'test' in COMMAND_LINE_TARGETS:
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
+
+if 'bench' in COMMAND_LINE_TARGETS:
+    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 && ./tora -V ; time ./tora benchmark/fib/fib.tra 39')
 
 if 'op' in COMMAND_LINE_TARGETS:
     env.Command('op', [], 'git log --oneline | head -1 && scons && ./tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')

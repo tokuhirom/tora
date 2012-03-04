@@ -54,8 +54,8 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->package_id(symbol_table_->get_id("main"));
     this->package_map = new PackageMap();
+    this->package_id(symbol_table_->get_id("main"));
     this->myrand = new boost::mt19937(time(NULL));
     this->mark_stack.reserve(1024);
 }
@@ -464,7 +464,7 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
 }
 
 static SharedPtr<Value> builtin_package(VM *vm) {
-    return new StrValue(vm->package());
+    return new StrValue(vm->package_name());
 }
 
 static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {

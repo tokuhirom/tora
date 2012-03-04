@@ -120,6 +120,7 @@ public:
 
 class VM {
     ID package_id_;
+    SharedPtr<Package> package_; // cached
 public:
     int sp; // stack pointer
     int pc; // program counter
@@ -131,12 +132,16 @@ public:
     Package* find_package(const char *name);
     tora::Stack stack;
 
-    std::string &package() {
+    std::string &package_name() {
         return symbol_table->id2name(package_id_);
     }
-    void package(const std::string& s) {
+    void package_name(const std::string& s) {
         // will be deprecate
         package_id_ = symbol_table->get_id(s);
+    }
+
+    const SharedPtr<Package> & package() {
+        return package_;
     }
 
     ID package_id() {
@@ -144,6 +149,7 @@ public:
     }
     void package_id(ID id) {
         package_id_ = id;
+        package_ = this->find_package(id);
     }
 
     std::map<ID, CallbackFunction*> builtin_functions;

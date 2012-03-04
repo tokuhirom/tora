@@ -181,7 +181,7 @@ OP_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-    Package* pkg = this->find_package(this->package_id());
+    const SharedPtr<Package>& pkg = this->package();
     auto iter = pkg->find(id);
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
