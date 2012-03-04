@@ -1,4 +1,5 @@
 #include "../vm.h"
+#include "../value/array.h"
 #include "array.h"
 
 using namespace tora;

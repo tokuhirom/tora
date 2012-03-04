@@ -4,6 +4,7 @@
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
+#include "util.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -62,11 +63,6 @@ class Value : public Prim {
 protected:
     Value(value_type_t t) : Prim(), value_type(t) { }
     virtual ~Value() { }
-    void print_indent(int indent) {
-        for (int i=0; i<indent; i++) {
-            printf("    ");
-        }
-    }
     Value(const Value&) = delete;
 public:
     value_type_t value_type;

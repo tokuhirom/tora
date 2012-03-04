@@ -9,6 +9,8 @@
 #include "value/file.h"
 #include "value/symbol.h"
 #include "value/pointer.h"
+#include "value/array.h"
+#include "value/tuple.h"
 #include "value/object.h"
 
 #include "object/array.h"
@@ -44,7 +46,9 @@
 
 using namespace tora;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
+const int INITIAL_STACK_SIZE = 1024;
+
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : stack(INITIAL_STACK_SIZE) {
     sp = 0;
     pc = 0;
     symbol_table = symbol_table_;
@@ -215,18 +219,14 @@ void VM::die(SharedPtr<Value> & exception) {
             pc = fframe->return_address;
             ops = fframe->orig_ops;
 
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
+            stack.resize(frame->top);
 
             frame_stack->pop_back();
         } else if (frame->type == FRAME_TYPE_TRY) {
             SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
             pc = tframe->return_address;
 
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
+            stack.resize(frame->top);
             SharedPtr<TupleValue> t = new TupleValue();
             t->push(UndefValue::instance());
             t->push(exception);
@@ -238,9 +238,7 @@ void VM::die(SharedPtr<Value> & exception) {
             break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
+            stack.resize(frame->top);
             frame_stack->pop_back();
         }
     }

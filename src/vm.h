@@ -105,8 +105,9 @@ public:
         print_indent(indent);
         printf("[dump] PackageMap(%zd)\n", data.size());
     }
-    void set(Package* &pkg) {
-        this->data[pkg->id()] = pkg;
+    void set(Package* pkg) {
+        ID id = pkg->id();
+        this->data[id] = pkg;
     }
     void set(SharedPtr<Package> &pkg) {
         this->data[pkg->id()] = pkg;
@@ -197,7 +198,7 @@ public:
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
 
-    const SharedPtr<Value>& TOP() { return stack.top(); }
+    Value* TOP() { return stack.top(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
 

@@ -12,7 +12,7 @@ env = Environment(
     LIBS=['re2', 'pthread'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-g', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -37,7 +37,7 @@ if ARGUMENTS.get('ndebug', 1) != '0':
     env.Append(CCFLAGS=['-DNDEBUG'])
     env.Append(CCFLAGS=['-O2'])
 else:
-    env.Append(CCFLAGS=['-O0'])
+    env.Append(CCFLAGS=['-O0', '-g'])
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
@@ -58,7 +58,7 @@ libfiles = [
         symbol_table.cc
         value/object.cc
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc
-        vm.cc
+        vm.cc util.cc
     ''')
 ]
 
