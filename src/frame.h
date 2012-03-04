@@ -78,6 +78,9 @@ public:
     FunctionFrame(int vars_cnt) : LexicalVarsFrame(vars_cnt) {
         this->type = FRAME_TYPE_FUNCTION;
     }
+    FunctionFrame(int vars_cnt, const SharedPtr<OPArray> & op) : LexicalVarsFrame(vars_cnt), orig_ops(op) {
+        this->type = FRAME_TYPE_FUNCTION;
+    }
     FunctionFrame(SharedPtr<Value>& self_, int vars_cnt) : LexicalVarsFrame(vars_cnt) {
         self = self_;
     }

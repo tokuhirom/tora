@@ -187,9 +187,8 @@ OP_FUNCALL {
         CodeValue* code = iter->second->upcast<CodeValue>();
         // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-        FunctionFrame* fframe = new FunctionFrame(argcnt);
+        FunctionFrame* fframe = new FunctionFrame(argcnt, this->ops);
         fframe->return_address = pc;
-        fframe->orig_ops = ops;
         fframe->top = stack.size();
         fframe->argcnt = argcnt;
         fframe->code = code;
