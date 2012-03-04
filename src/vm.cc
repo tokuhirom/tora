@@ -48,15 +48,13 @@ using namespace tora;
 
 const int INITIAL_STACK_SIZE = 1024;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : stack(INITIAL_STACK_SIZE) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(INITIAL_STACK_SIZE) {
     sp = 0;
     pc = 0;
-    symbol_table = symbol_table_;
-    ops = ops_;
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->package_id_ = symbol_table_->get_id("main");
+    this->package_id(symbol_table_->get_id("main"));
     this->package_map = new PackageMap();
     this->myrand = new boost::mt19937(time(NULL));
     this->mark_stack.reserve(1024);

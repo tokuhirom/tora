@@ -37,11 +37,12 @@ if ARGUMENTS.get('ndebug', 1) != '0':
     env.Append(CCFLAGS=['-DNDEBUG'])
     env.Append(CCFLAGS=['-O2'])
 else:
-    env.Append(CCFLAGS=['-O0', '-g'])
+    env.Append(CCFLAGS=['-O0'])
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
     env.Append(CCFLAGS=['-DDEBUG'])
+    env.Append(CCFLAGS=['-g'])
 
 re2files = [
     Glob('vendor/re2/re2/*.cc'),
@@ -85,6 +86,9 @@ if 'test' in COMMAND_LINE_TARGETS:
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
+
+if 'op' in COMMAND_LINE_TARGETS:
+    env.Command('op', [], 'git log --oneline | head -1 && scons && ./tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
 
 ########
 # main programs
