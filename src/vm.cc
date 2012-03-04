@@ -731,9 +731,9 @@ void VM::dump_frame() {
     int i = 0;
     for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
-        for (size_t n=0; n<(*f)->vars->size(); n++) {
+        for (size_t n=0; n<(*f)->vars.size(); n++) {
             printf("  %zd\n", n);
-            (*f)->vars->at(n)->dump();
+            (*f)->vars.at(n)->dump();
         }
     }
     printf("---------------\n");

@@ -877,6 +877,7 @@ OP_PACKAGE_ENTER {
 
 OP_PACKAGE_LEAVE {
     assert(this->frame_stack->back()->type == FRAME_TYPE_PACKAGE);
+    // TODO: this may not works since FrameStack object's destructor is not virtual.
     this->frame_stack->pop_back();
 }
 

@@ -87,7 +87,7 @@ if 'test' in COMMAND_LINE_TARGETS:
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
 
 if 'bench' in COMMAND_LINE_TARGETS:
-    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 && ./tora -V ; time ./tora benchmark/fib/fib.tra 39')
+    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./tora -V && time ./tora benchmark/fib/fib.tra 39')
 
 if 'op' in COMMAND_LINE_TARGETS:
     env.Command('op', [], 'git log --oneline | head -1 && scons && ./tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')

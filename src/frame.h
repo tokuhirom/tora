@@ -17,24 +17,21 @@ typedef enum {
 class LexicalVarsFrame : public Prim {
 private:
 public:
-    std::vector<SharedPtr<Value>> *vars;
+    std::vector<SharedPtr<Value>> vars;
     frame_type_t type;
     int top;
     SharedPtr<CodeValue> code;
-    LexicalVarsFrame(int vars_cnt) : Prim() {
+    LexicalVarsFrame(int vars_cnt) : Prim(), vars(vars_cnt) {
         type = FRAME_TYPE_LEXICAL;
-        vars = new std::vector<SharedPtr<Value>>(vars_cnt);
     }
-    ~LexicalVarsFrame() {
-        delete vars;
-    }
+    ~LexicalVarsFrame() { }
     void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars->capacity());
-        (*this->vars)[id] = v.get();
+        this->vars[id] = v.get();
     }
     SharedPtr<Value> find(int id) {
         assert(id < this->vars->capacity());
-        return (*this->vars)[id];
+        return this->vars[id];
     }
     const char *type_str() {
         switch (type) {
