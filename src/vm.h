@@ -105,7 +105,7 @@ public:
     SharedPtr<PackageMap> package_map;
     Package* find_package(ID id);
     Package* find_package(const char *name);
-    tora::Stack stack;
+    std::vector<SharedPtr<Value>> stack;
     bool exec_trace;
 
     std::string &package_name() {
@@ -180,9 +180,10 @@ public:
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
 
-    Value* TOP() { return stack.top(); }
+    const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
+    void extract_tuple(const SharedPtr<TupleValue> &t);
 
     boost::mt19937 *myrand;
 

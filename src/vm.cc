@@ -51,9 +51,10 @@ using namespace tora;
 
 const int INITIAL_STACK_SIZE = 1024;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(INITIAL_STACK_SIZE), exec_trace(false) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
     sp = 0;
     pc = 0;
+    this->stack.reserve(INITIAL_STACK_SIZE);
     this->frame_stack = new std::vector<LexicalVarsFrame*>();
     this->frame_stack->push_back(new LexicalVarsFrame(0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
@@ -113,14 +114,14 @@ void tora::VM::binop(operationI operation_i, operationD operation_d) {
     if (v2->value_type == VALUE_TYPE_DOUBLE) {
         if (v1->value_type == VALUE_TYPE_DOUBLE) {
             SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
-            stack.push(v);
+            stack.push_back(v);
         } else if (v1->value_type == VALUE_TYPE_INT) {
             SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
-            stack.push(v);
+            stack.push_back(v);
         }
     } else if (v2->value_type == VALUE_TYPE_INT) {
         SharedPtr<IntValue> v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
-        stack.push(v);
+        stack.push_back(v);
     } else { 
         SharedPtr<Value> s(v2->to_s());
         fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str());
@@ -239,7 +240,7 @@ void VM::die(SharedPtr<Value> & exception) {
 
             frame_stack->pop_back();
 
-            stack.push(t);
+            stack.push_back(t);
 
             break;
         } else {
@@ -323,9 +324,10 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
     }
 
     if (orig_stack_size < vm->stack.size()) {
-        SharedPtr<Value> ret = vm->stack.pop();
+        SharedPtr<Value> ret = vm->stack.back();
+        vm->stack.pop_back();
         while (orig_stack_size < vm->stack.size()) {
-            vm->stack.pop();
+            vm->stack.pop_back();
         }
         return ret;
     } else {
@@ -557,55 +559,66 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
         for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> arg = stack.pop();
+            SharedPtr<Value> arg = stack.back();
+            stack.pop_back();
             vec.push_back(arg);
         }
         SharedPtr<Value> ret = callback->func_vmv(this, vec);
-        stack.push(ret);
+        stack.push_back(ret);
     } else if (callback->argc==-2) {
         SharedPtr<Value> ret = callback->func_vm0(this);
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc==-3) {
-        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type != EXCEPTION_TYPE_STOP_ITERATION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc==-4) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm2(this, v.get(), v2.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm3) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
-        SharedPtr<Value> v3 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v3 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm3(this, v.get(), v2.get(), v3.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm4) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
-        SharedPtr<Value> v3 = stack.pop();
-        SharedPtr<Value> v4 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v3 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v4 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm4(this, v.get(), v2.get(), v3.get(), v4.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else {
         abort();
@@ -700,13 +713,13 @@ void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
         if (ie->is_exception()) { TODO(); }
         SharedPtr<IntValue> iv = ie->upcast<IntValue>();
         SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
-        stack.push(v);
+        stack.push_back(v);
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         // TODO: support null terminated string
         SharedPtr<StrValue>v = new StrValue();
         SharedPtr<Value> s(rhs->to_s());
         v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
-        stack.push(v);
+        stack.push_back(v);
     } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
         TODO();
     } else {
@@ -762,5 +775,12 @@ void VM::dump_stack() {
         stack.at(i)->dump();
     }
     printf("----------------\n");
+}
+
+void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
+    int tuple_size = t->size();
+    for (int i=0; i<tuple_size; i++) {
+        this->stack.push_back(t->at(i));
+    }
 }
 

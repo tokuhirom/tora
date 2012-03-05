@@ -92,7 +92,8 @@ void VM::<?= $method ?>() {
 ?       if ($with_trace) {
             printf("[%03d] calling PP_<?= $k->[0] ?>(%d).\n", pc, ops->at(pc)->op_type);
 ?       }
-            PP_<?= $k->[0] ?>();
+            { <?= $k->[1] ?> };
+            // PP_<?= $k->[0] ?>();
             pc++;
             goto *JUMPTABLE[ops->at(pc)->op_type];
         }
