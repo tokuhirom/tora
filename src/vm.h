@@ -6,7 +6,6 @@
 #include "value.h"
 #include <vector>
 #include <map>
-#include "stack.h"
 #include "shared_ptr.h"
 #include "symbol_table.h"
 #include "op_array.h"
@@ -21,6 +20,7 @@ namespace tora {
 class Stack;
 class LexicalVarsFrame;
 class PackageMap;
+class TupleValue;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
