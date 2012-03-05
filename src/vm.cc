@@ -197,60 +197,11 @@ void VM::die(const char *format, ...) {
     vsnprintf(p, 4096, format, ap);
     va_end(ap);
     std::string s = p;
-    SharedPtr<Value> v(new StrValue(s));
-    this->die(v);
+    throw SharedPtr<Value>(new StrValue(s));
 }
 
 void VM::die(SharedPtr<Value> & exception) {
-    while (1) {
-        if (frame_stack->size() == 1) {
-            if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
-            } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
-                if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
-                } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
-                } else {
-                    TODO();
-                }
-            } else {
-                fprintf(stderr, "died\n");
-                exception->dump();
-            }
-            exit(1);
-            break;
-        }
-
-        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
-        if (frame->type == FRAME_TYPE_FUNCTION) {
-            FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
-            pc = fframe->return_address;
-            ops = fframe->orig_ops;
-
-            stack.resize(frame->top);
-
-            frame_stack->pop_back();
-        } else if (frame->type == FRAME_TYPE_TRY) {
-            TryFrame* tframe = static_cast<TryFrame*>(frame.get());
-            pc = tframe->return_address;
-
-            stack.resize(frame->top);
-            SharedPtr<TupleValue> t = new TupleValue();
-            t->push(UndefValue::instance());
-            t->push(exception);
-
-            frame_stack->pop_back();
-
-            stack.push_back(t);
-
-            break;
-        } else {
-            // printf("THIS IS NOT A FUNCTION FRAME\n");
-            stack.resize(frame->top);
-            frame_stack->pop_back();
-        }
-    }
+    throw SharedPtr<Value>(exception);
 }
 
 static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
@@ -640,10 +591,69 @@ void VM::package_id(ID id) {
 }
 
 void VM::execute() {
-    if (exec_trace) {
-        this->execute_trace();
-    } else {
-        this->execute_normal();
-    }
+    bool next = false;
+    do {
+        try {
+            if (exec_trace) {
+                this->execute_trace();
+            } else {
+                this->execute_normal();
+            }
+            next = false;
+        } catch (SharedPtr<Value> exception) {
+            assert(frame_stack->size() > 0);
+
+            while (1) {
+                if (frame_stack->size() == 1) {
+                    if (exception->value_type == VALUE_TYPE_STR) {
+                        fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+                    } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
+                        if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
+                            fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                        } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
+                            fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
+                        } else {
+                            TODO();
+                        }
+                    } else {
+                        fprintf(stderr, "died\n");
+                        exception->dump(1);
+                    }
+                    exit(1);
+                }
+
+                boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
+                if (frame->type == FRAME_TYPE_FUNCTION) {
+                    FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
+                    pc = fframe->return_address;
+                    ops = fframe->orig_ops;
+
+                    stack.resize(frame->top);
+
+                    frame_stack->pop_back();
+                } else if (frame->type == FRAME_TYPE_TRY) {
+                    TryFrame* tframe = static_cast<TryFrame*>(frame.get());
+                    pc = tframe->return_address + 1;
+
+                    stack.resize(frame->top);
+                    SharedPtr<TupleValue> t = new TupleValue();
+                    t->push(UndefValue::instance());
+                    t->push(exception);
+
+                    frame_stack->pop_back();
+
+                    stack.push_back(t);
+
+                    break;
+                } else {
+                    // printf("THIS IS NOT A FUNCTION FRAME\n");
+                    stack.resize(frame->top);
+                    frame_stack->pop_back();
+                }
+            }
+
+            next = true;
+        };
+    } while (next);
 }
 
