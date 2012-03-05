@@ -55,6 +55,7 @@ OP_NEW_RANGE {
 OP_FUNCDEF {
     SharedPtr<Value> code = stack.pop(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
+    // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
     this->add_function(code->upcast<CodeValue>()->func_name_id, code);
 }
 
@@ -66,13 +67,14 @@ OP_CLOSUREDEF {
         SharedPtr<Value> v = stack.pop();
         code->upcast<CodeValue>()->closure_vars->push_back(v);
     }
+    // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
     this->add_function(code->upcast<CodeValue>()->func_name_id, code);
 }
 
 OP_GETCLOSURE {
     // take variable from code->closure_cells[n]
 
-    SharedPtr<LexicalVarsFrame> frame;
+    LexicalVarsFrame* frame = NULL;
     for (auto iter=frame_stack->rbegin(); iter!=frame_stack->rend(); iter++) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             frame = *iter;
@@ -90,7 +92,7 @@ OP_GETCLOSURE {
 
 OP_SETCLOSURE {
     // save variable to code->closure_cells[n]
-    SharedPtr<LexicalVarsFrame> frame;
+    LexicalVarsFrame* frame = NULL;
     for (auto iter=frame_stack->begin(); iter!=frame_stack->end(); iter++) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             frame = *iter;
@@ -209,6 +211,7 @@ OP_FUNCALL {
         frame_stack->push_back(fframe);
     } else {
         this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
+        // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
     }
 }
 
@@ -233,16 +236,17 @@ OP_METHOD_CALL {
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
             if (code->is_native()) {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
 
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
+                // fframe is not needed?
             } else {
                 {
-                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
+                    FunctionFrame* fframe = new FunctionFrame(argcnt);
                     fframe->return_address = pc;
                     fframe->orig_ops = ops;
                     fframe->top = stack.size();
@@ -294,7 +298,7 @@ OP_METHOD_CALL {
             int argcnt = get_int_operand();
 
             if (code->is_native()) {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
@@ -302,7 +306,7 @@ OP_METHOD_CALL {
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
             } else {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt);
                 fframe->return_address = pc;
                 fframe->orig_ops = ops;
                 fframe->top = stack.size();
@@ -335,7 +339,7 @@ OP_METHOD_CALL {
 OP_LAST {
     while (1) {
         assert(frame_stack->size() > 0);
-        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
         assert(frame->type != FRAME_TYPE_FUNCTION);
         assert(frame->type != FRAME_TYPE_TRY);
         stack.resize(stack.size());
@@ -356,9 +360,9 @@ OP_RETURN {
     // frame_stack->back()->dump();
     while (1) {
         assert(frame_stack->size() > 0);
-        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
         if (frame->type == FRAME_TYPE_FUNCTION) {
-            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
+            FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
             pc = fframe->return_address;
             ops = fframe->orig_ops;
             // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
@@ -370,7 +374,7 @@ OP_RETURN {
             stack.push(retval);
             break;
         } else if (frame->type == FRAME_TYPE_TRY) {
-            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
+            TryFrame* tframe = static_cast<TryFrame*>(frame.get());
             pc = tframe->return_address;
             // printf("RETURN :orig: %d, current: %d\n", tframe->top, stack.size());
 
@@ -382,34 +386,33 @@ OP_RETURN {
             break;
         } else {
             // printf("THIS IS NOT A FUNCTION FRAME\n");
-            stack.resize(stack.size());
             frame_stack->pop_back();
         }
     }
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_WHILE {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
     frame->type = FRAME_TYPE_WHILE;
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_FOR {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(get_int_operand());
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
     frame->type = FRAME_TYPE_FOR;
     frame->top = stack.size();
     frame_stack->push_back(frame);
 }
 
 OP_LEAVE {
-    SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+    boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
     stack.resize(frame->top);
     frame_stack->pop_back();
 }
@@ -503,7 +506,7 @@ OP_SETDYNAMIC {
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
-    SharedPtr<LexicalVarsFrame> frame = frame_stack->at(frame_stack->size()-level-1);
+    LexicalVarsFrame* frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value> rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         frame->setVar(
@@ -522,7 +525,7 @@ OP_GETDYNAMIC {
     // lexical vars
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
-    SharedPtr<LexicalVarsFrame> frame = frame_stack->at(frame_stack->size()-level-1);
+    LexicalVarsFrame* frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value>v = frame->find(no);
     if (v) {
         DBG2("found lexical var\n");
@@ -743,7 +746,7 @@ OP_ENTER_FOREACH {
     }
 
     int vars_cnt = get_int_operand();
-    SharedPtr<ForeachFrame> fframe = new ForeachFrame(vars_cnt);
+    ForeachFrame* fframe = new ForeachFrame(vars_cnt);
     fframe->top = stack.size();
     fframe->iter = iiter;
     frame_stack->push_back(fframe);
@@ -833,7 +836,7 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    SharedPtr<TryFrame> fframe = new TryFrame();
+    TryFrame* fframe = new TryFrame();
     fframe->return_address = get_int_operand()-1;
     fframe->top = stack.size();
     frame_stack->push_back(fframe);
@@ -869,7 +872,9 @@ OP_NOT {
 
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
-    SharedPtr<PackageFrame> pframe = new PackageFrame(this->package_id(), this);
+    // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
+    PackageFrame* pframe = new PackageFrame(this->package_id(), this);
+    pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
     this->package_id_ = package_id;
 }
@@ -877,6 +882,8 @@ OP_PACKAGE_ENTER {
 OP_PACKAGE_LEAVE {
     assert(this->frame_stack->back()->type == FRAME_TYPE_PACKAGE);
     // TODO: this may not works since FrameStack object's destructor is not virtual.
+    PackageFrame * pframe = static_cast<PackageFrame*>(this->frame_stack->back());
+    delete pframe;
     this->frame_stack->pop_back();
 }
 

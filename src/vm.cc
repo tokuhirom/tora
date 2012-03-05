@@ -43,15 +43,16 @@
 #include <random>
 
 #include <boost/random.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace tora;
 
 const int INITIAL_STACK_SIZE = 1024;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(INITIAL_STACK_SIZE) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(INITIAL_STACK_SIZE), exec_trace(false) {
     sp = 0;
     pc = 0;
-    this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
+    this->frame_stack = new std::vector<LexicalVarsFrame*>();
     this->frame_stack->push_back(new LexicalVarsFrame(0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
     this->package_map = new PackageMap();
@@ -62,6 +63,8 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
 
 VM::~VM() {
     delete this->global_vars;
+    // assert(this->frame_stack->size() == 1);
+    delete this->frame_stack->back();
     delete this->frame_stack;
     delete this->myrand;
 
@@ -211,9 +214,9 @@ void VM::die(SharedPtr<Value> & exception) {
             break;
         }
 
-        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
+        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
         if (frame->type == FRAME_TYPE_FUNCTION) {
-            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
+            FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
             pc = fframe->return_address;
             ops = fframe->orig_ops;
 
@@ -221,7 +224,7 @@ void VM::die(SharedPtr<Value> & exception) {
 
             frame_stack->pop_back();
         } else if (frame->type == FRAME_TYPE_TRY) {
-            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
+            TryFrame* tframe = static_cast<TryFrame*>(frame.get());
             pc = tframe->return_address;
 
             stack.resize(frame->top);
@@ -298,7 +301,11 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
 
     vm->ops = compiler.ops;
     vm->pc = 0;
-    vm->execute();
+    if (vm->exec_trace) {
+        vm->execute_trace();
+    } else {
+        vm->execute();
+    }
 
     // restore
     vm->ops= orig_ops;
@@ -306,6 +313,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
 
     // remove frames
     while (orig_frame_size < vm->frame_stack->size()) {
+        delete vm->frame_stack->back();
         vm->frame_stack->pop_back();
     }
 
@@ -633,11 +641,12 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);
 
-    // printf("Copying %s to %s\n", src.c_str(), dst.c_str());
+    // printf("Copying %d to %d\n", srcid, dstid);
     auto iter = srcpkg->begin();
     for (; iter!=srcpkg->end(); iter++) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
+            // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
         } else {
             // copy non-code value to other package?
@@ -660,6 +669,7 @@ void Package::add_function(ID function_name_id, SharedPtr<Value> code) {
 void Package::add_method(ID function_name_id, const CallbackFunction* code) {
     SharedPtr<CodeValue> cv = new CodeValue(code);
     cv->package_id = this->name_id;
+    // printf("package!! %d::%d\n", name_id, function_name_id);
     this->data[function_name_id] = cv;
 }
 

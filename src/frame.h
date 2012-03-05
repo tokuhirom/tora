@@ -14,23 +14,23 @@ typedef enum {
 } frame_type_t;
 
 // TODO rename LexicalVarsFrame to Frame
-class LexicalVarsFrame : public Prim {
+class LexicalVarsFrame {
 private:
 public:
     std::vector<SharedPtr<Value>> vars;
     frame_type_t type;
     int top;
     SharedPtr<CodeValue> code;
-    LexicalVarsFrame(int vars_cnt) : Prim(), vars(vars_cnt) {
+    LexicalVarsFrame(int vars_cnt) : vars(vars_cnt) {
         type = FRAME_TYPE_LEXICAL;
     }
-    ~LexicalVarsFrame() { }
+    virtual ~LexicalVarsFrame() { }
     void setVar(int id, const SharedPtr<Value>& v) {
-        assert(id < this->vars->capacity());
+        assert(id < this->vars.capacity());
         this->vars[id] = v.get();
     }
     SharedPtr<Value> find(int id) {
-        assert(id < this->vars->capacity());
+        assert(id < this->vars.capacity());
         return this->vars[id];
     }
     const char *type_str() {
@@ -106,7 +106,7 @@ public:
         vm_ = parent;
     }
     ~PackageFrame() {
-        // printf("LEAVE PACKAGE FROM %s. back to %s\n", vm_->package.c_str(), orig_package.c_str());
+        // printf("LEAVE PACKAGE FROM %s. back to %d\n", vm_->package_name().c_str(), orig_package_id_);
         vm_->package_id(orig_package_id_);
     }
 };

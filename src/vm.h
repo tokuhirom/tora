@@ -131,6 +131,7 @@ public:
     Package* find_package(ID id);
     Package* find_package(const char *name);
     tora::Stack stack;
+    bool exec_trace;
 
     std::string &package_name() {
         return symbol_table->id2name(package_id_);
@@ -163,7 +164,7 @@ public:
     /*
      * stack for lexical variables.
      */
-    std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
+    std::vector<LexicalVarsFrame*> *frame_stack;
     /**
      * mark for first argument in function call.
      */

@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
         Disasm::disasm(compiler.ops);
     }
     if (exec_trace) {
+        vm.exec_trace = true;
         vm.execute_trace();
     } else {
         vm.execute();
