@@ -2,6 +2,7 @@
 #include "value.h"
 #include "tora.h"
 #include "frame.h"
+#include "package_map.h"
 
 #include "value/hash.h"
 #include "value/code.h"

@@ -24,13 +24,13 @@ my %a = (
     VALUE_TYPE_HASH => 'HashValue',
     VALUE_TYPE_HASH_ITERATOR => 'HashValue::iterator',
     VALUE_TYPE_PACKAGE => 'Package',
-    VALUE_TYPE_PACKAGE_MAP => 'PackageMap',
     VALUE_TYPE_OBJECT => 'ObjectValue',
     VALUE_TYPE_POINTER => 'PointerValue',
 );
 
 my $ret = '';
 $ret .= qq{#include "value.h"\n};
+$ret .= qq{#include "package_map.h"\n};
 $ret .= qq{#include "value/range.h"\n};
 $ret .= qq{#include "value/symbol.h"\n};
 $ret .= qq{#include "value/pointer.h"\n};

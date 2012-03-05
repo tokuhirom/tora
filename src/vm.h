@@ -20,6 +20,7 @@ namespace tora {
 
 class Stack;
 class LexicalVarsFrame;
+class PackageMap;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
@@ -90,32 +91,6 @@ public:
     ID id() { return name_id; }
     iterator begin() { return data.begin(); }
     iterator end()   { return data.end(); }
-};
-
-class PackageMap : public Value {
-    std::map<ID, SharedPtr<Package>> data;
-public:
-    PackageMap() : Value(VALUE_TYPE_PACKAGE_MAP) {
-    }
-    ~PackageMap() { }
-    std::map<ID, SharedPtr<Package>>::iterator find(ID id) {
-        return data.find(id);
-    }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] PackageMap(%zd)\n", data.size());
-    }
-    void set(Package* pkg) {
-        ID id = pkg->id();
-        this->data[id] = pkg;
-    }
-    void set(SharedPtr<Package> &pkg) {
-        this->data[pkg->id()] = pkg;
-    }
-    const char *type_str() { return "package_map"; }
-    std::map<ID, SharedPtr<Package>>::iterator end() {
-        return data.end();
-    }
 };
 
 class VM {
