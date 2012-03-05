@@ -71,7 +71,7 @@ inline void VM::PP_<?= $k->[0] ?>() {
 }
 ? }
 
-? for (['execute', 0], ['execute_trace', 1]) {
+? for (['execute_normal', 0], ['execute_trace', 1]) {
 ?  my ($method, $with_trace) = @{$_};
 // run program
 void VM::<?= $method ?>() {

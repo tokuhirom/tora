@@ -297,11 +297,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
 
     vm->ops = compiler.ops;
     vm->pc = 0;
-    if (vm->exec_trace) {
-        vm->execute_trace();
-    } else {
-        vm->execute();
-    }
+    vm->execute();
 
     // restore
     vm->ops= orig_ops;
@@ -642,3 +638,12 @@ void VM::package_id(ID id) {
     package_id_ = id;
     package_ = this->find_package(id);
 }
+
+void VM::execute() {
+    if (exec_trace) {
+        this->execute_trace();
+    } else {
+        this->execute_normal();
+    }
+}
+

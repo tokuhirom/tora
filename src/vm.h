@@ -113,6 +113,7 @@ public:
     VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();
     void execute();
+    void execute_normal();
     void execute_trace();
 
     template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
