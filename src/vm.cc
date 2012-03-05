@@ -53,7 +53,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
     sp = 0;
     pc = 0;
     this->frame_stack = new std::vector<LexicalVarsFrame*>();
-    this->frame_stack->push_back(new LexicalVarsFrame(0));
+    this->frame_stack->push_back(new LexicalVarsFrame(0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
     this->package_map = new PackageMap();
     this->package_id(symbol_table_->get_id("main"));

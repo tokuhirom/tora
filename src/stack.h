@@ -25,6 +25,9 @@ public:
         }
     }
     ~Stack() {
+        while (size()) {
+            pop_back();
+        }
         free(data_);
     }
     Value * back() const {
@@ -62,8 +65,7 @@ public:
             }
         }
 
-        ++size_;
-        data_[size_-1] = v;
+        data_[size_++] = v;
         v->retain();
     }
     void push(const SharedPtr<Value> & v) {

@@ -189,9 +189,8 @@ OP_FUNCALL {
         CodeValue* code = iter->second->upcast<CodeValue>();
         // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-        FunctionFrame* fframe = new FunctionFrame(argcnt, this->ops);
+        FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), this->ops);
         fframe->return_address = pc;
-        fframe->top = stack.size();
         fframe->argcnt = argcnt;
         fframe->code = code;
 
@@ -236,7 +235,7 @@ OP_METHOD_CALL {
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
             if (code->is_native()) {
-                FunctionFrame* fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
                 fframe->return_address = pc;
                 fframe->top = stack.size() - argcnt;
                 fframe->code = code;
@@ -246,10 +245,8 @@ OP_METHOD_CALL {
                 // fframe is not needed?
             } else {
                 {
-                    FunctionFrame* fframe = new FunctionFrame(argcnt);
+                    FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
                     fframe->return_address = pc;
-                    fframe->orig_ops = ops;
-                    fframe->top = stack.size();
                     fframe->code = code;
                     fframe->argcnt = argcnt;
 
@@ -298,18 +295,15 @@ OP_METHOD_CALL {
             int argcnt = get_int_operand();
 
             if (code->is_native()) {
-                FunctionFrame* fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
                 fframe->return_address = pc;
-                fframe->top = stack.size() - argcnt;
                 fframe->code = code;
 
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
             } else {
-                FunctionFrame* fframe = new FunctionFrame(argcnt);
+                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
                 fframe->return_address = pc;
-                fframe->orig_ops = ops;
-                fframe->top = stack.size();
                 fframe->argcnt = argcnt;
                 fframe->code = code;
                 fframe->self = object;
@@ -392,22 +386,17 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
-    frame->top = stack.size();
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size());
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_WHILE {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
-    frame->type = FRAME_TYPE_WHILE;
-    frame->top = stack.size();
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size(), FRAME_TYPE_WHILE);
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_FOR {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand());
-    frame->type = FRAME_TYPE_FOR;
-    frame->top = stack.size();
+    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size(), FRAME_TYPE_FOR);
     frame_stack->push_back(frame);
 }
 
@@ -746,8 +735,7 @@ OP_ENTER_FOREACH {
     }
 
     int vars_cnt = get_int_operand();
-    ForeachFrame* fframe = new ForeachFrame(vars_cnt);
-    fframe->top = stack.size();
+    ForeachFrame* fframe = new ForeachFrame(vars_cnt, stack.size());
     fframe->iter = iiter;
     frame_stack->push_back(fframe);
 }
@@ -836,9 +824,8 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    TryFrame* fframe = new TryFrame();
+    TryFrame* fframe = new TryFrame(stack.size());
     fframe->return_address = get_int_operand()-1;
-    fframe->top = stack.size();
     frame_stack->push_back(fframe);
 }
 
@@ -873,7 +860,7 @@ OP_NOT {
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    PackageFrame* pframe = new PackageFrame(this->package_id(), this);
+    PackageFrame* pframe = new PackageFrame(stack.size(), this->package_id(), this);
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
     this->package_id_ = package_id;
