@@ -176,6 +176,7 @@ public:
     }
 
     SharedPtr<Value> copy_all_public_symbols(ID srcid, ID dstid);
+    SharedPtr<Value> get_self();
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);

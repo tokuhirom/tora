@@ -25,6 +25,8 @@
 #include "object/socket.h"
 #include "object/internals.h"
 
+#include "builtin.h"
+
 #include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <dirent.h>
@@ -251,18 +253,6 @@ void VM::die(SharedPtr<Value> & exception) {
     }
 }
 
-static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
-    arg1->dump();
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
-    assert(v->value_type == VALUE_TYPE_INT);
-    SharedPtr<Value> s(v->to_int());
-    if (s->is_exception()) { return s; }
-    exit(s->upcast<IntValue>()->int_value);
-}
-
 static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
     SharedPtr<Scanner> scanner(new Scanner(is));
 
@@ -339,15 +329,6 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
     return eval_foo(vm, is, "main");
 }
 
-static SharedPtr<Value> do_foo(VM *vm, const std::string &fname, std::string & package) {
-    std::ifstream *ifs = new std::ifstream(fname.c_str());
-    if (ifs->is_open()) {
-        return eval_foo(vm, ifs, package);
-    } else {
-        return new ExceptionValue(fname + " : " + strerror(errno));
-    }
-}
-
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
@@ -402,7 +383,13 @@ SharedPtr<Value> VM::require(Value * v) {
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
             required->set_item(new StrValue(s), realfilename_value);
-            SharedPtr<Value> ret = do_foo(vm, realfilename, package);
+            std::ifstream *ifs = new std::ifstream(realfilename.c_str());
+            SharedPtr<Value> ret;
+            if (ifs->is_open()) {
+                ret.reset(eval_foo(vm, ifs, package).get());
+            } else {
+                ret.reset(new ExceptionValue(realfilename + " : " + strerror(errno)));
+            }
             if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                 required->set_item(new StrValue(s), UndefValue::instance());
                 return ret;
@@ -419,141 +406,6 @@ SharedPtr<Value> VM::require(Value * v) {
     }
     return new ExceptionValue(message);
 }
-
-/**
- */
-static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
-    return vm->require(v);
-}
-
-/**
- * open(Str $fname) : FileHandle
- * open(Str $fname, Str $mode) : FileHandle
- */
-static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    if (args.size() != 1 && args.size() != 2) {
-        return new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
-    }
-
-    SharedPtr<Value> filename(args.at(0));
-    std::string mode;
-    if (args.size() == 2) {
-        mode = args.at(1)->upcast<StrValue>()->str_value.c_str();
-    } else {
-        mode = "rb";
-    }
-
-    // TODO: check \0
-    SharedPtr<FileValue> file = new FileValue();
-    if (file->open(
-        filename->upcast<StrValue>()->str_value,
-        mode
-    )) {
-        return file;
-    } else {
-        return new ExceptionValue("Cannot open file: %s: %s", filename->upcast<StrValue>()->str_value.c_str(), strerror(errno));
-    }
-}
-
-
-static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    auto iter = args.begin();
-    for (; iter!=args.end(); iter++) {
-        SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
-        printf("%s", s->upcast<StrValue>()->str_value.c_str());
-    }
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    auto iter = args.begin();
-    for (; iter!=args.end(); iter++) {
-        SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
-        // printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
-        fwrite(s->upcast<StrValue>()->str_value.c_str(), sizeof(char), s->upcast<StrValue>()->str_value.size(), stdout);
-        fputc('\n', stdout);
-    }
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_package(VM *vm) {
-    return new StrValue(vm->package_name());
-}
-
-static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
-    return new StrValue(v->type_str());
-}
-
-static SharedPtr<Value> builtin_self(VM *vm) {
-    auto iter = vm->frame_stack->begin();
-    for (; iter!=vm->frame_stack->end(); ++iter) {
-        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
-            if ((*iter)->upcast<FunctionFrame>()->self) {
-                return (*iter)->upcast<FunctionFrame>()->self;
-            } else {
-                return UndefValue::instance();
-            }
-        }
-    }
-    return new ExceptionValue("Cannot call 'self' method out of method.");
-}
-
-static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
-    SharedPtr<StrValue> dirname = s->to_s();
-    DIR * dp = opendir(dirname->c_str());
-    if (dp) {
-        SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Dir"), vm);
-        o->set_value(vm->symbol_table->get_id("__d"), new PointerValue(dp));
-        return o;
-    } else {
-        return UndefValue::instance();
-    }
-}
-
-/**
- * rand() : Double;
- * rand($n Double) : Double;
- * rand($n Int)     : Int;
- *
- * Get a random number.
- *
- * rand() returns [0, 1) in Double value.
- * rand($n :Double) returns [0, $n) in Double value.
- * rand($n :Int) returns [0, $n) in Int value.
- */
-static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>& args) {
-    // TODO: use std::mt19937 in c++11.
-    // in 2012, I use g++ 4.4.3. It does not support uniform_real_distribution
-    if (args.size() == 0) {
-        boost::uniform_real<double> dist(0.0, 1.0);
-        return new DoubleValue(dist(*(vm->myrand)));
-    } else if (args.size() == 1) {
-        SharedPtr<Value> v = args.at(0);
-        if (v->value_type == VALUE_TYPE_DOUBLE) {
-            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value);
-            return new DoubleValue(dist(*(vm->myrand)));
-        } else if (v->value_type == VALUE_TYPE_INT) {
-            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value);
-            return new IntValue(dist(*(vm->myrand)));
-        } else {
-            // support to_int?
-            return new ExceptionValue("Invalid arguments for rand() : %s", v->type_str());
-        }
-    } else {
-        return new ExceptionValue("Too many arguments for rand()");
-    }
-}
-
-#ifndef NDEBUG
-
-static SharedPtr<Value> builtin_dump_stack(VM *vm) {
-    vm->dump_stack();
-    return UndefValue::instance();
-}
-
-#endif
 
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==-1) {
@@ -638,22 +490,10 @@ void VM::register_standard_methods() {
     Init_Socket(this);
     Init_Internals(this);
 
-    this->add_builtin_function("p", builtin_p);
-    this->add_builtin_function("exit", builtin_exit);
-    this->add_builtin_function("say", builtin_say);
-    this->add_builtin_function("open", builtin_open);
-    this->add_builtin_function("print", builtin_print);
+    Init_builtins(this);
+
     this->add_builtin_function("eval", builtin_eval);
     this->add_builtin_function("do",   builtin_do);
-    this->add_builtin_function("require",   builtin_require);
-    this->add_builtin_function("self",   builtin_self);
-    this->add_builtin_function("__PACKAGE__",   builtin_package);
-    this->add_builtin_function("opendir",   builtin_opendir);
-    this->add_builtin_function("typeof",   builtin_typeof);
-    this->add_builtin_function("rand",   builtin_rand);
-#ifndef NDEBUG
-    this->add_builtin_function("dump_stack",   builtin_dump_stack);
-#endif
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
@@ -782,5 +622,19 @@ void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
     for (int i=0; i<tuple_size; i++) {
         this->stack.push_back(t->at(i));
     }
+}
+
+SharedPtr<Value> VM::get_self() {
+    auto iter = this->frame_stack->begin();
+    for (; iter!=this->frame_stack->end(); ++iter) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            if ((*iter)->upcast<FunctionFrame>()->self) {
+                return (*iter)->upcast<FunctionFrame>()->self;
+            } else {
+                return UndefValue::instance();
+            }
+        }
+    }
+    throw new ExceptionValue("Cannot call 'self' method out of method.");
 }
 
