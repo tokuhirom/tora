@@ -22,6 +22,7 @@
 #include "object/time.h"
 #include "object/file.h"
 #include "object/socket.h"
+#include "object/internals.h"
 
 #include <boost/foreach.hpp>
 #include <sys/types.h>
@@ -64,7 +65,10 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
 VM::~VM() {
     delete this->global_vars;
     // assert(this->frame_stack->size() == 1);
-    delete this->frame_stack->back();
+    while (frame_stack->size()) {
+        delete this->frame_stack->back();
+        frame_stack->pop_back();
+    }
     delete this->frame_stack;
     delete this->myrand;
 
@@ -618,6 +622,7 @@ void VM::register_standard_methods() {
     Init_Time(this);
     Init_File(this);
     Init_Socket(this);
+    Init_Internals(this);
 
     this->add_builtin_function("p", builtin_p);
     this->add_builtin_function("exit", builtin_exit);

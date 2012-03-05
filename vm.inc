@@ -235,14 +235,16 @@ OP_METHOD_CALL {
             SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
             int argcnt = get_int_operand();
             if (code->is_native()) {
-                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
-                fframe->return_address = pc;
-                fframe->top = stack.size() - argcnt;
-                fframe->code = code;
+                // FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
+                // fframe->return_address = pc;
+                // fframe->top = stack.size() - argcnt;
+                // fframe->code = code;
 
+                // frame_stack->push_back(fframe);
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
-                // fframe is not needed?
+                // delete fframe;
+                // frame_stack->pop_back();
             } else {
                 {
                     FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
@@ -295,12 +297,15 @@ OP_METHOD_CALL {
             int argcnt = get_int_operand();
 
             if (code->is_native()) {
-                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
-                fframe->return_address = pc;
-                fframe->code = code;
+                // FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
+                // fframe->return_address = pc;
+                // fframe->code = code;
 
+                // frame_stack->push_back(fframe);
                 stack.push(object);
                 this->call_native_func(code->callback(), argcnt+1);
+                // delete fframe;
+                // frame_stack->pop_back();
             } else {
                 FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
                 fframe->return_address = pc;
