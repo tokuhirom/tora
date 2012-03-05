@@ -30,6 +30,7 @@ my %a = (
 
 my $ret = '';
 $ret .= qq{#include "value.h"\n};
+$ret .= qq{#include "package.h"\n};
 $ret .= qq{#include "package_map.h"\n};
 $ret .= qq{#include "value/range.h"\n};
 $ret .= qq{#include "value/symbol.h"\n};

@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "package_map.h"
+#include "package.h"
 
 using namespace tora;
 

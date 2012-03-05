@@ -638,3 +638,7 @@ SharedPtr<Value> VM::get_self() {
     throw new ExceptionValue("Cannot call 'self' method out of method.");
 }
 
+void VM::package_id(ID id) {
+    package_id_ = id;
+    package_ = this->find_package(id);
+}

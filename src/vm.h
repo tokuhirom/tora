@@ -1,17 +1,18 @@
 #ifndef VM_H_
 #define VM_H_
 
+#include <vector>
+#include <map>
+#include <stdarg.h>
+
 #include "tora.h"
 #include "op.h"
 #include "value.h"
-#include <vector>
-#include <map>
 #include "shared_ptr.h"
 #include "symbol_table.h"
-#include "op_array.h"
 #include "value/hash.h"
 #include "value/code.h"
-#include <stdarg.h>
+#include "package.h"
 
 #include <boost/random.hpp>
 
@@ -21,6 +22,7 @@ class Stack;
 class LexicalVarsFrame;
 class PackageMap;
 class TupleValue;
+class Package;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
@@ -58,41 +60,6 @@ struct CallbackFunction {
     CallbackFunction(func_vm4_t func_) : argc(type_vm4) { func_vm4 = func_; }
 };
 
-class Package : public Value {
-    ID name_id;
-    std::map<ID, SharedPtr<Value>> data;
-public:
-    typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
-
-    Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
-    ~Package () { }
-    void add_function(ID function_name_id, SharedPtr<Value> code);
-
-    void add_method(ID function_name_id, const CallbackFunction* code);
-
-    iterator find(ID id) {
-        return data.find(id);
-    }
-    virtual void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
-        print_indent(indent);
-        printf("[dump] Package(%s):\n", symbol_table->id2name(name_id).c_str());
-        auto iter = data.begin();
-        for (; iter!=data.end(); iter++) {
-            print_indent(indent+1);
-            printf("%s:\n", symbol_table->id2name(iter->first).c_str());
-            iter->second->dump(indent+2);
-        }
-    }
-    virtual void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Package\n");
-    }
-    const char *type_str() { return "package"; }
-    ID id() { return name_id; }
-    iterator begin() { return data.begin(); }
-    iterator end()   { return data.end(); }
-};
-
 class VM {
     ID package_id_;
     SharedPtr<Package> package_; // cached
@@ -123,10 +90,7 @@ public:
     ID package_id() {
         return package_id_;
     }
-    void package_id(ID id) {
-        package_id_ = id;
-        package_ = this->find_package(id);
-    }
+    void package_id(ID id);
 
     std::map<ID, CallbackFunction*> builtin_functions;
 
