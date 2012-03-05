@@ -106,6 +106,30 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(new HashValue());
 }
 
+/**
+ * subtract lhs and rhs.
+ * return value must be return by caller.
+ */
+Value * tora::VM::sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
+            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - rhs->upcast<DoubleValue>()->double_value);
+        } else if (rhs->value_type == VALUE_TYPE_INT) {
+            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - (double)rhs->upcast<IntValue>()->int_value);
+        } else {
+            SharedPtr<Value> s(rhs->to_s());
+            this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        }
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        IntValue* rhsi = rhs->to_int();
+        return new IntValue(lhs->upcast<IntValue>()->int_value - rhsi->int_value);
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
 template <class operationI, class operationD>
 void tora::VM::binop(operationI operation_i, operationD operation_d) {
     SharedPtr<Value> v1(stack.back()); /* rvalue */
@@ -115,24 +139,22 @@ void tora::VM::binop(operationI operation_i, operationD operation_d) {
 
     if (v2->value_type == VALUE_TYPE_DOUBLE) {
         if (v1->value_type == VALUE_TYPE_DOUBLE) {
-            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
+            Value* v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
             stack.push_back(v);
         } else if (v1->value_type == VALUE_TYPE_INT) {
-            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
+            Value *v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
             stack.push_back(v);
         }
     } else if (v2->value_type == VALUE_TYPE_INT) {
-        SharedPtr<IntValue> v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
+        Value * v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
         stack.push_back(v);
     } else { 
         SharedPtr<Value> s(v2->to_s());
-        fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str());
-        exit(1); /* TODO: die */
+        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
     }
 }
 
 template void tora::VM::binop(std::multiplies<int> operation_i, std::multiplies<double> operation_d);
-template void tora::VM::binop(std::minus<int> operation_i, std::minus<double> operation_d);
 template void tora::VM::binop(std::divides<int> operation_i, std::divides<double> operation_d);
 
 // TODO: return SharedPtr<Value>
@@ -200,7 +222,7 @@ void VM::die(const char *format, ...) {
     throw SharedPtr<Value>(new StrValue(s));
 }
 
-void VM::die(SharedPtr<Value> & exception) {
+void VM::die(const SharedPtr<Value> & exception) {
     throw SharedPtr<Value>(exception);
 }
 

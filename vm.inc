@@ -108,9 +108,11 @@ OP_SETCLOSURE {
 }
 
 OP_SUB {
-    std::minus<int>    i;
-    std::minus<double> d;
-    this->binop(i, d);
+    const SharedPtr<Value>& rhs = stack.back();
+    stack.pop_back();
+    const SharedPtr<Value>& lhs = stack.back();
+    Value * ret = this->sub(lhs, rhs);
+    stack[stack.size()-1].reset(ret);
 }
 
 OP_DIV {

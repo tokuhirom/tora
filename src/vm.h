@@ -128,7 +128,7 @@ public:
     void add_function(std::string &name, SharedPtr<Value> code) {
         this->add_function(this->symbol_table->get_id(name), code);
     }
-    void die(SharedPtr<Value> & exception);
+    void die(const SharedPtr<Value> & exception);
     void die(const char *format, ...);
 
     void register_standard_methods();
@@ -145,6 +145,7 @@ public:
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
+    Value * sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
     const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
@@ -155,8 +156,6 @@ public:
 
 #include "vm.ops.inc.h"
 };
-
-class VM;
 
 };
 

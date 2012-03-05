@@ -74,7 +74,7 @@ public:
     }
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
-    Value *to_int();
+    IntValue *to_int();
     bool to_bool();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
