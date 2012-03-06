@@ -7,13 +7,15 @@ namespace tora {
 
 class CallbackFunction;
 
-class Package : public Value {
+class Package {
+    PRIM_DECL(Package);
+private:
     ID name_id;
     std::map<ID, SharedPtr<Value>> data;
 public:
     typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
 
-    Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
+    Package(ID id) : refcnt(0), name_id(id) { }
     ~Package () { }
     void add_function(ID function_name_id, SharedPtr<Value> code);
 

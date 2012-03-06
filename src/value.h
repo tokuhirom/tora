@@ -34,7 +34,6 @@ typedef enum {
     VALUE_TYPE_SYMBOL,
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
-    VALUE_TYPE_PACKAGE,
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
 } value_type_t;
@@ -58,9 +57,10 @@ class SymbolTable;
 /**
  * The value class
  */
-class Value : public Prim {
+class Value {
+    PRIM_DECL(Value);
 protected:
-    Value(value_type_t t) : Prim(), value_type(t) { }
+    Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
 public:

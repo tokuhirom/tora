@@ -52,8 +52,9 @@
 using namespace tora;
 
 const int INITIAL_STACK_SIZE = 1024;
+const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false), mark_stack(INITIAL_MARK_STACK_SIZE) {
     sp = 0;
     pc = 0;
     this->stack.reserve(INITIAL_STACK_SIZE);

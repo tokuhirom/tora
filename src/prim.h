@@ -4,6 +4,21 @@
 #include <cassert>
 #include <stdio.h>
 
+#define PRIM_DECL(klass) \
+protected: \
+    int refcnt; \
+public: \
+    void release() { \
+        --refcnt; \
+        if (refcnt == 0) { \
+            delete this; \
+        } \
+    } \
+    void retain() { \
+        assert(refcnt >= 0); \
+        ++refcnt; \
+    }
+
 class Prim {
 protected:
     Prim(): refcnt(0) { }
