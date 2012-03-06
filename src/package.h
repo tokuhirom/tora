@@ -5,7 +5,7 @@
 
 namespace tora {
 
-class CallbackFunction;
+struct CallbackFunction;
 
 class Package : public Value {
     ID name_id;
