@@ -1,6 +1,7 @@
 #include "value.h"
 #include "value/code.h"
 #include "value/tuple.h"
+#include "value/range.h"
 #include <stdarg.h>
 #include <errno.h>
 
@@ -20,36 +21,46 @@ bool Value::to_bool() {
     }
 }
 
-SharedPtr<StrValue> IntValue::to_s() {
-    SharedPtr<StrValue> v = new StrValue();
-    std::ostringstream os;
-    os << this->upcast<IntValue>()->int_value;
-    v->set_str(os.str());
-    return v;
-}
-
-SharedPtr<StrValue> DoubleValue::to_s() {
-    SharedPtr<StrValue> v = new StrValue();
-    std::ostringstream os;
-    os << this->double_value;
-    v->set_str(os.str());
-    return v;
-}
-
-SharedPtr<StrValue> BoolValue::to_s() {
-    return new StrValue(this->bool_value ? "true" : "false");
-}
-
-SharedPtr<StrValue> UndefValue::to_s() {
-    return new StrValue("undef"); // TODO
-}
 SharedPtr<StrValue> Value::to_s() {
-    if (this->value_type == VALUE_TYPE_EXCEPTION) {
+    switch (value_type) {
+    case VALUE_TYPE_STR:
+        return this->upcast<StrValue>();
+    case VALUE_TYPE_INT: {
+        SharedPtr<StrValue> v = new StrValue();
+        std::ostringstream os;
+        os << this->upcast<IntValue>()->int_value;
+        v->set_str(os.str());
+        return v;
+    }
+    case VALUE_TYPE_DOUBLE: {
+        SharedPtr<StrValue> v = new StrValue();
+        std::ostringstream os;
+        os << this->upcast<DoubleValue>()->double_value;
+        v->set_str(os.str());
+        return v;
+    }
+    case VALUE_TYPE_BOOL: {
+        return new StrValue(this->upcast<BoolValue>()->bool_value ? "true" : "false");
+    }
+    case VALUE_TYPE_UNDEF: {
+        return new StrValue("undef");
+    }
+    case VALUE_TYPE_EXCEPTION: {
         ExceptionValue * e = this->upcast<ExceptionValue>();
         return new StrValue(e->message());
-    } else {
-        fprintf(stderr, "%s don't support stringification.\n", this->type_str());
-        abort();
+    }
+    case VALUE_TYPE_RANGE: {
+        SharedPtr<StrValue> v = new StrValue();
+        std::ostringstream os;
+        os << this->upcast<RangeValue>()->left->int_value;
+        os << "..";
+        os << this->upcast<RangeValue>()->right->int_value;
+        v->set_str(os.str());
+        return v;
+    }
+    default: {
+        throw new ExceptionValue("%s don't support stringification.\n", this->type_str());
+    }
     }
 }
 

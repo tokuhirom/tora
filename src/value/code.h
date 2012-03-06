@@ -48,7 +48,6 @@ public:
         printf("----------------\n");
     }
     const char *type_str() { return "code"; }
-    SharedPtr<StrValue> to_s();
 };
 
 };

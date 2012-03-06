@@ -30,7 +30,3 @@ void CodeValue::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
     printf("----------------\n");
 }
 
-SharedPtr<StrValue> CodeValue::to_s() {
-    return new StrValue("<code>"); // TODO
-}
-

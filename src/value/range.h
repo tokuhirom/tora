@@ -19,7 +19,6 @@ public:
         print_indent(indent);
         printf("[dump] range: %d..%d\n", left->int_value, right->int_value);
     }
-    SharedPtr<StrValue> to_s();
     const char *type_str() { return "range"; }
 
     class iterator : public Value {

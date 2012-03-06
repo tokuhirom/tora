@@ -87,6 +87,8 @@ if 'test' in COMMAND_LINE_TARGETS:
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
 
+env.Command('test.valgrind', ['tora'], 'perl misc/valgrind.pl');
+
 if 'bench' in COMMAND_LINE_TARGETS:
     env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./tora -V && time ./tora benchmark/fib/fib.tra 39')
 
