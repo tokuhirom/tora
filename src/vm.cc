@@ -68,6 +68,8 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
 }
 
 VM::~VM() {
+    stack.resize(0);
+
     delete this->global_vars;
     // assert(this->frame_stack->size() == 1);
     while (frame_stack->size()) {
@@ -468,7 +470,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     for (; iter!=srcpkg->end(); iter++) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
-            printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
+            // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
         } else {
             // copy non-code value to other package?
@@ -661,7 +663,7 @@ void VM::execute() {
             SharedPtr<Value> v(exception);
             handle_exception(v);
             next = true;
-        } catch (SharedPtr<Value> exception) {
+        } catch (const SharedPtr<Value> &exception) {
             handle_exception(exception);
             next = true;
         };

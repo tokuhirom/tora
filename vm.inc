@@ -879,7 +879,6 @@ OP_TRY {
 OP_DIE {
     SharedPtr<Value> exception = stack.back();
     stack.pop_back();
-    exception->retain();
     throw exception;
 }
 
