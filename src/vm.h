@@ -154,7 +154,11 @@ public:
 
     boost::mt19937 *myrand;
 
+
 #include "vm.ops.inc.h"
+
+private:
+    void handle_exception(const SharedPtr<Value> & exception);
 };
 
 };
