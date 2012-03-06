@@ -468,7 +468,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     for (; iter!=srcpkg->end(); iter++) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
-            // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
+            printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
         } else {
             // copy non-code value to other package?
@@ -481,18 +481,6 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
 
 void VM::add_function(ID id, SharedPtr<Value> code) {
     this->find_package(this->package_id())->add_function(id, code);
-}
-
-void Package::add_function(ID function_name_id, SharedPtr<Value> code) {
-    this->data[function_name_id] = code;
-}
-
-// move package to package.h/package.cc
-void Package::add_method(ID function_name_id, const CallbackFunction* code) {
-    SharedPtr<CodeValue> cv = new CodeValue(code);
-    cv->package_id = this->name_id;
-    // printf("package!! %d::%d\n", name_id, function_name_id);
-    this->data[function_name_id] = cv;
 }
 
 Package* VM::find_package(const char * name) {

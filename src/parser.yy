@@ -447,13 +447,21 @@ primary_expression(A) ::= array_creation(B). { A = B; }
 primary_expression(A) ::= qw_creation(B). { A = B; }
 primary_expression(A) ::= hash_creation(B). { A = B; }
 /* tuple */
-primary_expression(A) ::= L_PAREN parameter_list(B) R_PAREN. {
-    if (B->size() > 1) {
-        B->type = NODE_TUPLE;
-        A = B;
-    } else {
-        A = B->at(0);
-    }
+primary_expression(A) ::= L_PAREN tuple_list(B) R_PAREN. {
+    A = B;
+}
+primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
+    A = B;
+}
+tuple_list(A) ::= expression(B) COMMA expression(C). {
+    ListNode * n = new ListNode(NODE_TUPLE);
+    n->push_back(B);
+    n->push_back(C);
+    A = n;
+}
+tuple_list(A) ::= tuple_list(B) COMMA expression(C). {
+    A = B;
+    A->upcast<ListNode>()->push_back(C);
 }
 primary_expression(A) ::= UNDEF. {
     A = new VoidNode(NODE_UNDEF);

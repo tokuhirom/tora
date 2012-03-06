@@ -391,9 +391,10 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
-        SharedPtr<CodeValue> code = new CodeValue();
-        code->package_id = this->symbol_table->get_id(this->package());
-        code->func_name_id = this->symbol_table->get_id(funcname);
+        SharedPtr<CodeValue> code = new CodeValue(
+            this->symbol_table->get_id(this->package()), // package id
+            this->symbol_table->get_id(funcname)         // func name id
+        );
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
