@@ -458,11 +458,10 @@ OP_NE {
 }
 
 OP_GT {
-    std::greater<int> i;
-    std::greater<double> d;
-    std::greater<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::greater<int> i;
+    static std::greater<double> d;
+    static std::greater<std::string> s;
+    stack.push_back(this->cmpop(i, d, s));
 }
 
 OP_LT {

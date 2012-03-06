@@ -54,7 +54,7 @@ using namespace tora;
 const int INITIAL_STACK_SIZE = 1024;
 const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false), mark_stack(INITIAL_MARK_STACK_SIZE) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
     sp = 0;
     pc = 0;
     this->stack.reserve(INITIAL_STACK_SIZE);
@@ -64,7 +64,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
     this->package_map = new PackageMap();
     this->package_id(symbol_table_->get_id("main"));
     this->myrand = new boost::mt19937(time(NULL));
-    this->mark_stack.reserve(1024);
+    this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
 }
 
 VM::~VM() {
@@ -168,9 +168,8 @@ SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, Opera
  
     switch (v1->value_type) {
     case VALUE_TYPE_INT: {
-        Value * ie2 = v2->to_int();
-        if (ie2->is_exception()) { return ie2; }
-        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, ie2->upcast<IntValue>()->int_value));
+        IntValue * ie2 = v2->to_int();
+        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, ie2->int_value));
         return result;
     }
     case VALUE_TYPE_STR: {
@@ -201,7 +200,7 @@ SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, Opera
     }
     default:
         // TODO: support object comparation
-        return new ExceptionValue("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
+        throw new ExceptionValue("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
     }
     abort();
 }
