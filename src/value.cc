@@ -14,7 +14,7 @@ bool Value::to_bool() {
     case VALUE_TYPE_UNDEF:
         return false;
     case VALUE_TYPE_BOOL:
-        return this->upcast<BoolValue>()->bool_value;
+        return static_cast<BoolValue*>(this)->bool_value;
     default:
         return true;
     }

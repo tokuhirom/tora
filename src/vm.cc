@@ -195,6 +195,9 @@ SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, Opera
         }
         break;
     }
+    case VALUE_TYPE_BOOL: {
+        return BoolValue::instance(v1->upcast<BoolValue>()->bool_value == v2->to_bool());
+    }
     case VALUE_TYPE_UNDEF: {
         return new BoolValue(v2->value_type == VALUE_TYPE_UNDEF);
     }

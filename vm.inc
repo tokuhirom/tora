@@ -429,10 +429,17 @@ OP_DUMP {
 }
 
 OP_JUMP_IF_FALSE {
-    SharedPtr<Value> v(stack.back());
-    stack.pop_back();
+    const SharedPtr<Value> & v = stack.back();
 
     if (!v->to_bool()) {
+        pc = get_int_operand()-1;
+    }
+}
+
+OP_JUMP_IF_TRUE {
+    const SharedPtr<Value> & v = stack.back();
+
+    if (v->to_bool()) {
         pc = get_int_operand()-1;
     }
 }

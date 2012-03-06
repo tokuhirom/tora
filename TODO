@@ -66,10 +66,12 @@ syntax
  * $PROGRAM_NAME($0)
  * $x ** 2
  * caller()
- * $x && $y
- * $x || $y
  * $x or $y
  * $x and $y
+ * $x | $y
+ * $x & $y
+ * $x << $y
+ * $x >> $y
  * dir()
  * file()
  * $x % $y
@@ -128,4 +130,6 @@ Finished
  * q{}
  * qq{}
  * last
+ * $x && $y
+ * $x || $y
 

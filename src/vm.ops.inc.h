@@ -29,6 +29,7 @@ void PP_OP_LEAVE();
 void PP_OP_PUSH_IDENTIFIER();
 void PP_OP_DUMP();
 void PP_OP_JUMP_IF_FALSE();
+void PP_OP_JUMP_IF_TRUE();
 void PP_OP_JUMP();
 void PP_OP_EQ();
 void PP_OP_NE();

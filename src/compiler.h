@@ -88,7 +88,7 @@ public:
         return -1;
     }
     void init_globals();
-    void compile(SharedPtr<Node> node);
+    void compile(const SharedPtr<Node> & node);
     void push_block(block_type_t t) {
         DBG("PUSH BLOCK: %d\n", this->blocks->size());
         this->blocks->push_back(new Block(t));

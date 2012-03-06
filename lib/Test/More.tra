@@ -9,6 +9,10 @@ sub ok($b) {
     }
 }
 
+sub fail() {
+    say("not ok " + ++$counter);
+}
+
 sub is($a, $b) {
     ++$counter;
     if ($a==$b) {

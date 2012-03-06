@@ -283,7 +283,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
     return false;
 }
 
-void tora::Compiler::compile(SharedPtr<Node> node) {
+void tora::Compiler::compile(const SharedPtr<Node> &node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block(BLOCK_TYPE_FILE);
@@ -1116,6 +1116,52 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->last_labels.push_back(&(op->operand.int_value));
             ops->push_back(op);
         }
+        break;
+    }
+    case NODE_LOGICAL_AND: {
+        /**
+         *    (lhs)
+         *    JUMP_IF_FALSE label1
+         *    POP_TOP
+         *    (rhs)
+         * label1:
+         */
+
+        const BinaryNode * n = static_cast<BinaryNode*>(node.get());
+
+        this->compile(n->left());
+
+        SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_FALSE);
+        ops->push_back(jump_else);
+
+        ops->push_back(new OP(OP_POP_TOP));
+        this->compile(n->right());
+
+        jump_else->operand.int_value = ops->size();
+
+        break;
+    }
+    case NODE_LOGICAL_OR: {
+        /**
+         *    (lhs)
+         *    JUMP_IF_TRUE label1
+         *    POP_TOP
+         *    (rhs)
+         * label1:
+         */
+
+        const BinaryNode * n = static_cast<BinaryNode*>(node.get());
+
+        this->compile(n->left());
+
+        SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_TRUE);
+        ops->push_back(jump_else);
+
+        ops->push_back(new OP(OP_POP_TOP));
+        this->compile(n->right());
+
+        jump_else->operand.int_value = ops->size();
+
         break;
     }
 

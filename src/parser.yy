@@ -1,19 +1,61 @@
+/* vim: set filetype=lemon: */
+/**
+    perlop is following:
+
+           left        terms and list operators (leftward)
+           left        ->
+           nonassoc    ++ --
+           right       **
+           right       ! ~ \ and unary + and -
+           left        =~ !~
+           left        * / % x
+           left        + - .
+           left        << >>
+           nonassoc    named unary operators
+           nonassoc    < > <= >= lt gt le ge
+           nonassoc    == != <=> eq ne cmp ~~
+           left        &
+           left        | ^
+           left        &&
+           left        || //
+           nonassoc    ..  ...
+           right       ?:
+           right       = += -= *= etc.
+           left        , =>
+           nonassoc    list operators (rightward)
+           right       not
+           left        and
+           left        or xor
+
+Missing part is following:
+
+    **
+    %
+    & | ^ 
+    *= -= &= |= ^= %=
+    not
+    and
+    or xor
+
+ */
+
 %right FILE_TEST.
-%right ASSIGN.
 %right MY.
-%left DIV_ASSIGN.
-%left MINUSMINUS.
-%left PLUSPLUS.
-%left DOT.
-%left DOTDOT.
 %left QW_START QW_END.
 %left L_BRACE R_BRACE.
 %left L_BRACKET R_BRACKET.
-%left EQ.
-%left LT GT LE GE.
+
+%right ASSIGN DIV_ASSIGN.
+%left DOTDOT.
+%left OROR.
+%left ANDAND.
+%nonassoc EQ.
+%nonassoc LT GT LE GE.
 %left ADD SUB.
 %left MUL DIV.
+%left PLUSPLUS MINUSMINUS.
 %right NOT.
+%left DOT.
 
 %token_type { Node* }
 
@@ -272,8 +314,15 @@ conditional_expression(A) ::= MY conditional_expression(B).   {
 }
 
 logical_or_expression(A) ::= logical_and_expression(B). { A = B; }
+logical_or_expression(A) ::= logical_or_expression(B) OROR logical_and_expression(C). {
+    A = new BinaryNode(NODE_LOGICAL_OR, B, C);
+}
 
+/* && */
 logical_and_expression(A) ::= inclusive_or_expression(B). { A = B; }
+logical_and_expression(A) ::= logical_and_expression(B) ANDAND inclusive_or_expression(C). {
+    A = new BinaryNode(NODE_LOGICAL_AND, B, C);
+}
 
 inclusive_or_expression(A) ::= exclusive_or_expression(B). { A = B; }
 
