@@ -6,16 +6,14 @@
 
 using namespace tora;
 
-SharedPtr<BoolValue> Value::to_b() {
+bool Value::to_bool() {
     switch (value_type) {
-    case VALUE_TYPE_UNDEF: {
-        return new BoolValue(false);
-    }
+    case VALUE_TYPE_UNDEF:
+        return false;
     case VALUE_TYPE_BOOL:
-        return this->upcast<BoolValue>();
-    default: {
-        return new BoolValue(true);
-    }
+        return this->upcast<BoolValue>()->bool_value;
+    default:
+        return true;
     }
 }
 
@@ -52,10 +50,10 @@ SharedPtr<StrValue> Value::to_s() {
     }
 }
 
-Value *Value::to_int() {
+IntValue *Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
         // IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
-        return this;
+        return this->upcast<IntValue>();
     } else if (value_type == VALUE_TYPE_TUPLE) {
         if (this->upcast<TupleValue>()->size() == 1) {
             return this->upcast<TupleValue>()->at(0)->to_int();
@@ -68,16 +66,16 @@ Value *Value::to_int() {
         if (errno == 0) {
             return new IntValue(ret);
         } else if (errno == EINVAL) {
-            return new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
+            throw SharedPtr<Value>(new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str()));
         } else if (errno == ERANGE) {
             // try to the bigint?
             TODO();
         } else {
-            return new ExceptionValue("Unknown error in strtol: %s(%d)", s->str_value.c_str(), errno);
+            throw SharedPtr<Value>(new ExceptionValue(errno));
         }
     }
 
-    return new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
+    throw SharedPtr<Value>(new ExceptionValue("to_i is not supported yet in %s\n", this->type_str()));
 }
 
 ExceptionValue::ExceptionValue(const char *format, ...)

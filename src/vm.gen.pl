@@ -48,6 +48,8 @@ sub vm_gen_cc {
 #include "vm.h"
 #include "frame.h"
 #include "value.h"
+#include "package_map.h"
+#include "package.h"
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/tuple.h"
@@ -60,6 +62,7 @@ sub vm_gen_cc {
 #include <algorithm>
 #include <functional>
 #include <sys/stat.h>
+#include <boost/scoped_ptr.hpp>
 
 using namespace tora;
 ? for my $k (@{$_[0]}) {
@@ -68,7 +71,7 @@ inline void VM::PP_<?= $k->[0] ?>() {
 }
 ? }
 
-? for (['execute', 0], ['execute_trace', 1]) {
+? for (['execute_normal', 0], ['execute_trace', 1]) {
 ?  my ($method, $with_trace) = @{$_};
 // run program
 void VM::<?= $method ?>() {

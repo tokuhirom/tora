@@ -12,7 +12,7 @@ env = Environment(
     LIBS=['re2', 'pthread'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-g', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native', '-g'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -41,7 +41,7 @@ else:
 
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
-    env.Append(CCFLAGS=['-DDEBUG'])
+    env.Append(CCFLAGS=['-g'])
 
 re2files = [
     Glob('vendor/re2/re2/*.cc'),
@@ -53,12 +53,13 @@ re2files = [
     'vendor/re2/util/stringpiece.cc',
 ]
 libfiles = [
-    "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc stack.cc
+    "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc
         token.gen.cc value.gen.cc
-        symbol_table.cc
+        symbol_table.cc package_map.cc
+        builtin.cc
         value/object.cc
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc
-        vm.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc
+        vm.cc util.cc
     ''')
 ]
 
@@ -85,6 +86,12 @@ if 'test' in COMMAND_LINE_TARGETS:
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
+
+if 'bench' in COMMAND_LINE_TARGETS:
+    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./tora -V && time ./tora benchmark/fib/fib.tra 39')
+
+if 'op' in COMMAND_LINE_TARGETS:
+    env.Command('op', [], 'git log --oneline | head -1 && scons && ./tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
 
 ########
 # main programs

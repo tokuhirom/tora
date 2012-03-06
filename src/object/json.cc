@@ -1,5 +1,6 @@
 #include "../tora.h"
 #include "../vm.h"
+#include "../value/array.h"
 #include "json.h"
 #include "../picojson.h"
 #include "array.h"

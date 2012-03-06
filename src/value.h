@@ -4,6 +4,7 @@
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
+#include "util.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -34,7 +35,6 @@ typedef enum {
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
     VALUE_TYPE_PACKAGE,
-    VALUE_TYPE_PACKAGE_MAP,
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
 } value_type_t;
@@ -62,11 +62,6 @@ class Value : public Prim {
 protected:
     Value(value_type_t t) : Prim(), value_type(t) { }
     virtual ~Value() { }
-    void print_indent(int indent) {
-        for (int i=0; i<indent; i++) {
-            printf("    ");
-        }
-    }
     Value(const Value&) = delete;
 public:
     value_type_t value_type;
@@ -79,9 +74,8 @@ public:
     }
     // TODO: rename to as_str
     virtual SharedPtr<StrValue> to_s();
-    Value *to_int();
-    // TODO: rename to as_bool
-    SharedPtr<BoolValue> to_b();
+    IntValue *to_int();
+    bool to_bool();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;
     }

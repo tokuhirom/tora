@@ -2,6 +2,7 @@
 #include "value.h"
 #include "tora.h"
 #include "frame.h"
+#include "package_map.h"
 
 #include "value/hash.h"
 #include "value/code.h"
@@ -9,6 +10,8 @@
 #include "value/file.h"
 #include "value/symbol.h"
 #include "value/pointer.h"
+#include "value/array.h"
+#include "value/tuple.h"
 #include "value/object.h"
 
 #include "object/array.h"
@@ -20,6 +23,9 @@
 #include "object/time.h"
 #include "object/file.h"
 #include "object/socket.h"
+#include "object/internals.h"
+
+#include "builtin.h"
 
 #include <boost/foreach.hpp>
 #include <sys/types.h>
@@ -41,24 +47,32 @@
 // #include <random>
 
 #include <boost/random.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace tora;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) {
+const int INITIAL_STACK_SIZE = 1024;
+
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
     sp = 0;
     pc = 0;
-    symbol_table = symbol_table_;
-    ops = ops_;
-    this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
-    this->frame_stack->push_back(new LexicalVarsFrame(0));
+    this->stack.reserve(INITIAL_STACK_SIZE);
+    this->frame_stack = new std::vector<LexicalVarsFrame*>();
+    this->frame_stack->push_back(new LexicalVarsFrame(0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->package_id_ = symbol_table_->get_id("main");
     this->package_map = new PackageMap();
+    this->package_id(symbol_table_->get_id("main"));
     this->myrand = new boost::mt19937(time(NULL));
+    this->mark_stack.reserve(1024);
 }
 
 VM::~VM() {
     delete this->global_vars;
+    // assert(this->frame_stack->size() == 1);
+    while (frame_stack->size()) {
+        delete this->frame_stack->back();
+        frame_stack->pop_back();
+    }
     delete this->frame_stack;
     delete this->myrand;
 
@@ -92,6 +106,30 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(new HashValue());
 }
 
+/**
+ * subtract lhs and rhs.
+ * return value must be return by caller.
+ */
+Value * tora::VM::sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
+            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - rhs->upcast<DoubleValue>()->double_value);
+        } else if (rhs->value_type == VALUE_TYPE_INT) {
+            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - (double)rhs->upcast<IntValue>()->int_value);
+        } else {
+            SharedPtr<Value> s(rhs->to_s());
+            this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        }
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        IntValue* rhsi = rhs->to_int();
+        return new IntValue(lhs->upcast<IntValue>()->int_value - rhsi->int_value);
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
 template <class operationI, class operationD>
 void tora::VM::binop(operationI operation_i, operationD operation_d) {
     SharedPtr<Value> v1(stack.back()); /* rvalue */
@@ -101,24 +139,22 @@ void tora::VM::binop(operationI operation_i, operationD operation_d) {
 
     if (v2->value_type == VALUE_TYPE_DOUBLE) {
         if (v1->value_type == VALUE_TYPE_DOUBLE) {
-            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
-            stack.push(v);
+            Value* v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
+            stack.push_back(v);
         } else if (v1->value_type == VALUE_TYPE_INT) {
-            SharedPtr<DoubleValue>v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
-            stack.push(v);
+            Value *v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
+            stack.push_back(v);
         }
     } else if (v2->value_type == VALUE_TYPE_INT) {
-        SharedPtr<IntValue> v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
-        stack.push(v);
+        Value * v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
+        stack.push_back(v);
     } else { 
         SharedPtr<Value> s(v2->to_s());
-        fprintf(stderr, "'%s' is not numeric.\n", s->upcast<StrValue>()->str_value.c_str());
-        exit(1); /* TODO: die */
+        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
     }
 }
 
 template void tora::VM::binop(std::multiplies<int> operation_i, std::multiplies<double> operation_d);
-template void tora::VM::binop(std::minus<int> operation_i, std::minus<double> operation_d);
 template void tora::VM::binop(std::divides<int> operation_i, std::divides<double> operation_d);
 
 // TODO: return SharedPtr<Value>
@@ -183,78 +219,11 @@ void VM::die(const char *format, ...) {
     vsnprintf(p, 4096, format, ap);
     va_end(ap);
     std::string s = p;
-    SharedPtr<Value> v(new StrValue(s));
-    this->die(v);
+    throw new StrValue(s);
 }
 
-void VM::die(SharedPtr<Value> & exception) {
-    while (1) {
-        if (frame_stack->size() == 1) {
-            if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
-            } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
-                if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
-                } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
-                } else {
-                    TODO();
-                }
-            } else {
-                fprintf(stderr, "died\n");
-                exception->dump();
-            }
-            exit(1);
-            break;
-        }
-
-        SharedPtr<LexicalVarsFrame> frame = frame_stack->back();
-        if (frame->type == FRAME_TYPE_FUNCTION) {
-            SharedPtr<FunctionFrame> fframe = frame->upcast<FunctionFrame>();
-            pc = fframe->return_address;
-            ops = fframe->orig_ops;
-
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
-
-            frame_stack->pop_back();
-        } else if (frame->type == FRAME_TYPE_TRY) {
-            SharedPtr<TryFrame> tframe = frame->upcast<TryFrame>();
-            pc = tframe->return_address;
-
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
-            SharedPtr<TupleValue> t = new TupleValue();
-            t->push(UndefValue::instance());
-            t->push(exception);
-
-            frame_stack->pop_back();
-
-            stack.push(t);
-
-            break;
-        } else {
-            // printf("THIS IS NOT A FUNCTION FRAME\n");
-            while (stack.size() > frame->top) {
-                stack.pop();
-            }
-            frame_stack->pop_back();
-        }
-    }
-}
-
-static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
-    arg1->dump();
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
-    assert(v->value_type == VALUE_TYPE_INT);
-    SharedPtr<Value> s(v->to_int());
-    if (s->is_exception()) { return s; }
-    exit(s->upcast<IntValue>()->int_value);
+void VM::die(const SharedPtr<Value> & exception) {
+    throw SharedPtr<Value>(exception);
 }
 
 static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
@@ -309,13 +278,15 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
 
     // remove frames
     while (orig_frame_size < vm->frame_stack->size()) {
+        delete vm->frame_stack->back();
         vm->frame_stack->pop_back();
     }
 
     if (orig_stack_size < vm->stack.size()) {
-        SharedPtr<Value> ret = vm->stack.pop();
+        SharedPtr<Value> ret = vm->stack.back();
+        vm->stack.pop_back();
         while (orig_stack_size < vm->stack.size()) {
-            vm->stack.pop();
+            vm->stack.pop_back();
         }
         return ret;
     } else {
@@ -325,15 +296,6 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
 static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
     // TODO use current vm's package
     return eval_foo(vm, is, "main");
-}
-
-static SharedPtr<Value> do_foo(VM *vm, const std::string &fname, std::string & package) {
-    std::ifstream *ifs = new std::ifstream(fname.c_str());
-    if (ifs->is_open()) {
-        return eval_foo(vm, ifs, package);
-    } else {
-        return new ExceptionValue(fname + " : " + strerror(errno));
-    }
 }
 
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
@@ -390,7 +352,13 @@ SharedPtr<Value> VM::require(Value * v) {
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
             required->set_item(new StrValue(s), realfilename_value);
-            SharedPtr<Value> ret = do_foo(vm, realfilename, package);
+            std::ifstream *ifs = new std::ifstream(realfilename.c_str());
+            SharedPtr<Value> ret;
+            if (ifs->is_open()) {
+                ret.reset(eval_foo(vm, ifs, package).get());
+            } else {
+                ret.reset(new ExceptionValue(realfilename + " : " + strerror(errno)));
+            }
             if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                 required->set_item(new StrValue(s), UndefValue::instance());
                 return ret;
@@ -408,194 +376,70 @@ SharedPtr<Value> VM::require(Value * v) {
     return new ExceptionValue(message);
 }
 
-/**
- */
-static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
-    return vm->require(v);
-}
-
-/**
- * open(Str $fname) : FileHandle
- * open(Str $fname, Str $mode) : FileHandle
- */
-static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    if (args.size() != 1 && args.size() != 2) {
-        return new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
-    }
-
-    SharedPtr<Value> filename(args.at(0));
-    std::string mode;
-    if (args.size() == 2) {
-        mode = args.at(1)->upcast<StrValue>()->str_value.c_str();
-    } else {
-        mode = "rb";
-    }
-
-    // TODO: check \0
-    SharedPtr<FileValue> file = new FileValue();
-    if (file->open(
-        filename->upcast<StrValue>()->str_value,
-        mode
-    )) {
-        return file;
-    } else {
-        return new ExceptionValue("Cannot open file: %s: %s", filename->upcast<StrValue>()->str_value.c_str(), strerror(errno));
-    }
-}
-
-
-static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    auto iter = args.begin();
-    for (; iter!=args.end(); iter++) {
-        SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
-        printf("%s", s->upcast<StrValue>()->str_value.c_str());
-    }
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    auto iter = args.begin();
-    for (; iter!=args.end(); iter++) {
-        SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
-        // printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
-        fwrite(s->upcast<StrValue>()->str_value.c_str(), sizeof(char), s->upcast<StrValue>()->str_value.size(), stdout);
-        fputc('\n', stdout);
-    }
-    return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_package(VM *vm) {
-    return new StrValue(vm->package());
-}
-
-static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
-    return new StrValue(v->type_str());
-}
-
-static SharedPtr<Value> builtin_self(VM *vm) {
-    auto iter = vm->frame_stack->begin();
-    for (; iter!=vm->frame_stack->end(); ++iter) {
-        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
-            if ((*iter)->upcast<FunctionFrame>()->self) {
-                return (*iter)->upcast<FunctionFrame>()->self;
-            } else {
-                return UndefValue::instance();
-            }
-        }
-    }
-    return new ExceptionValue("Cannot call 'self' method out of method.");
-}
-
-static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
-    SharedPtr<StrValue> dirname = s->to_s();
-    DIR * dp = opendir(dirname->c_str());
-    if (dp) {
-        SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Dir"), vm);
-        o->set_value(vm->symbol_table->get_id("__d"), new PointerValue(dp));
-        return o;
-    } else {
-        return UndefValue::instance();
-    }
-}
-
-/**
- * rand() : Double;
- * rand($n Double) : Double;
- * rand($n Int)     : Int;
- *
- * Get a random number.
- *
- * rand() returns [0, 1) in Double value.
- * rand($n :Double) returns [0, $n) in Double value.
- * rand($n :Int) returns [0, $n) in Int value.
- */
-static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>& args) {
-    // TODO: use std::mt19937 in c++11.
-    // in 2012, I use g++ 4.4.3. It does not support uniform_real_distribution
-    if (args.size() == 0) {
-        boost::uniform_real<double> dist(0.0, 1.0);
-        return new DoubleValue(dist(*(vm->myrand)));
-    } else if (args.size() == 1) {
-        SharedPtr<Value> v = args.at(0);
-        if (v->value_type == VALUE_TYPE_DOUBLE) {
-            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value);
-            return new DoubleValue(dist(*(vm->myrand)));
-        } else if (v->value_type == VALUE_TYPE_INT) {
-            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value);
-            return new IntValue(dist(*(vm->myrand)));
-        } else {
-            // support to_int?
-            return new ExceptionValue("Invalid arguments for rand() : %s", v->type_str());
-        }
-    } else {
-        return new ExceptionValue("Too many arguments for rand()");
-    }
-}
-
-#ifndef NDEBUG
-
-static SharedPtr<Value> builtin_dump_stack(VM *vm) {
-    vm->dump_stack();
-    return UndefValue::instance();
-}
-
-#endif
-
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
     if (callback->argc==-1) {
         std::vector<SharedPtr<Value>> vec;
         for (int i=0; i<argcnt; i++) {
-            SharedPtr<Value> arg = stack.pop();
+            SharedPtr<Value> arg = stack.back();
+            stack.pop_back();
             vec.push_back(arg);
         }
         SharedPtr<Value> ret = callback->func_vmv(this, vec);
-        stack.push(ret);
+        stack.push_back(ret);
     } else if (callback->argc==-2) {
         SharedPtr<Value> ret = callback->func_vm0(this);
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc==-3) {
-        SharedPtr<Value> v = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type != EXCEPTION_TYPE_STOP_ITERATION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc==-4) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm2(this, v.get(), v2.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm3) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
-        SharedPtr<Value> v3 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v3 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm3(this, v.get(), v2.get(), v3.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm4) {
-        SharedPtr<Value> v = stack.pop();
-        SharedPtr<Value> v2 = stack.pop();
-        SharedPtr<Value> v3 = stack.pop();
-        SharedPtr<Value> v4 = stack.pop();
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v2 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v3 = stack.back();
+        stack.pop_back();
+        SharedPtr<Value> v4 = stack.back();
+        stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm4(this, v.get(), v2.get(), v3.get(), v4.get());
         if (ret->value_type == VALUE_TYPE_EXCEPTION) {
             this->die(ret);
         } else {
-            stack.push(ret);
+            stack.push_back(ret);
         }
     } else {
         abort();
@@ -613,34 +457,24 @@ void VM::register_standard_methods() {
     Init_Time(this);
     Init_File(this);
     Init_Socket(this);
+    Init_Internals(this);
 
-    this->add_builtin_function("p", builtin_p);
-    this->add_builtin_function("exit", builtin_exit);
-    this->add_builtin_function("say", builtin_say);
-    this->add_builtin_function("open", builtin_open);
-    this->add_builtin_function("print", builtin_print);
+    Init_builtins(this);
+
     this->add_builtin_function("eval", builtin_eval);
     this->add_builtin_function("do",   builtin_do);
-    this->add_builtin_function("require",   builtin_require);
-    this->add_builtin_function("self",   builtin_self);
-    this->add_builtin_function("__PACKAGE__",   builtin_package);
-    this->add_builtin_function("opendir",   builtin_opendir);
-    this->add_builtin_function("typeof",   builtin_typeof);
-    this->add_builtin_function("rand",   builtin_rand);
-#ifndef NDEBUG
-    this->add_builtin_function("dump_stack",   builtin_dump_stack);
-#endif
 }
 
 SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);
 
-    // printf("Copying %s to %s\n", src.c_str(), dst.c_str());
+    // printf("Copying %d to %d\n", srcid, dstid);
     auto iter = srcpkg->begin();
     for (; iter!=srcpkg->end(); iter++) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
+            // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
         } else {
             // copy non-code value to other package?
@@ -663,6 +497,7 @@ void Package::add_function(ID function_name_id, SharedPtr<Value> code) {
 void Package::add_method(ID function_name_id, const CallbackFunction* code) {
     SharedPtr<CodeValue> cv = new CodeValue(code);
     cv->package_id = this->name_id;
+    // printf("package!! %d::%d\n", name_id, function_name_id);
     this->data[function_name_id] = cv;
 }
 
@@ -687,13 +522,13 @@ void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
         if (ie->is_exception()) { TODO(); }
         SharedPtr<IntValue> iv = ie->upcast<IntValue>();
         SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
-        stack.push(v);
+        stack.push_back(v);
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         // TODO: support null terminated string
         SharedPtr<StrValue>v = new StrValue();
         SharedPtr<Value> s(rhs->to_s());
         v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
-        stack.push(v);
+        stack.push_back(v);
     } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
         TODO();
     } else {
@@ -734,9 +569,9 @@ void VM::dump_frame() {
     int i = 0;
     for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
-        for (size_t n=0; n<(*f)->vars->size(); n++) {
+        for (size_t n=0; n<(*f)->vars.size(); n++) {
             printf("  %zd\n", n);
-            (*f)->vars->at(n)->dump();
+            (*f)->vars.at(n)->dump();
         }
     }
     printf("---------------\n");
@@ -749,5 +584,105 @@ void VM::dump_stack() {
         stack.at(i)->dump();
     }
     printf("----------------\n");
+}
+
+void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
+    int tuple_size = t->size();
+    for (int i=0; i<tuple_size; i++) {
+        this->stack.push_back(t->at(i));
+    }
+}
+
+SharedPtr<Value> VM::get_self() {
+    auto iter = this->frame_stack->begin();
+    for (; iter!=this->frame_stack->end(); ++iter) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            if ((*iter)->upcast<FunctionFrame>()->self) {
+                return (*iter)->upcast<FunctionFrame>()->self;
+            } else {
+                return UndefValue::instance();
+            }
+        }
+    }
+    throw new ExceptionValue("Cannot call 'self' method out of method.");
+}
+
+void VM::package_id(ID id) {
+    package_id_ = id;
+    package_ = this->find_package(id);
+}
+
+void VM::handle_exception(const SharedPtr<Value> & exception) {
+    assert(frame_stack->size() > 0);
+
+    while (1) {
+        if (frame_stack->size() == 1) {
+            if (exception->value_type == VALUE_TYPE_STR) {
+                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+            } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
+                if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
+                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
+                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
+                } else {
+                    TODO();
+                }
+            } else {
+                fprintf(stderr, "died\n");
+                exception->dump(1);
+            }
+            exit(1);
+        }
+
+        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
+        if (frame->type == FRAME_TYPE_FUNCTION) {
+            FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
+            pc = fframe->return_address;
+            ops = fframe->orig_ops;
+
+            stack.resize(frame->top);
+
+            frame_stack->pop_back();
+        } else if (frame->type == FRAME_TYPE_TRY) {
+            TryFrame* tframe = static_cast<TryFrame*>(frame.get());
+            pc = tframe->return_address + 1;
+
+            stack.resize(frame->top);
+            SharedPtr<TupleValue> t = new TupleValue();
+            t->push(UndefValue::instance());
+            t->push(exception.get());
+
+            frame_stack->pop_back();
+
+            stack.push_back(t);
+
+            break;
+        } else {
+            // printf("THIS IS NOT A FUNCTION FRAME\n");
+            stack.resize(frame->top);
+            frame_stack->pop_back();
+        }
+    }
+}
+
+void VM::execute() {
+    bool next = false;
+    do {
+        try {
+            if (exec_trace) {
+                this->execute_trace();
+            } else {
+                this->execute_normal();
+            }
+            next = false;
+        } catch (Value* exception) {
+            SharedPtr<Value> v(exception);
+            handle_exception(v);
+            next = true;
+        } catch (SharedPtr<Value> exception) {
+            handle_exception(exception);
+            next = true;
+        };
+    } while (next);
 }
 

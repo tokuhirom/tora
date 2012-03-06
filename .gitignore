@@ -20,3 +20,4 @@ tests/*.t
 libre2.a
 *.os
 src/config.h
+callgrind.out.*

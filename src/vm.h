@@ -1,18 +1,18 @@
 #ifndef VM_H_
 #define VM_H_
 
+#include <vector>
+#include <map>
+#include <stdarg.h>
+
 #include "tora.h"
 #include "op.h"
 #include "value.h"
-#include <vector>
-#include <map>
-#include "stack.h"
 #include "shared_ptr.h"
 #include "symbol_table.h"
-#include "op_array.h"
 #include "value/hash.h"
 #include "value/code.h"
-#include <stdarg.h>
+#include "package.h"
 
 #include <boost/random.hpp>
 
@@ -20,6 +20,9 @@ namespace tora {
 
 class Stack;
 class LexicalVarsFrame;
+class PackageMap;
+class TupleValue;
+class Package;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
@@ -57,68 +60,9 @@ struct CallbackFunction {
     CallbackFunction(func_vm4_t func_) : argc(type_vm4) { func_vm4 = func_; }
 };
 
-class Package : public Value {
-    ID name_id;
-    std::map<ID, SharedPtr<Value>> data;
-public:
-    typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
-
-    Package(ID id) : Value(VALUE_TYPE_PACKAGE), name_id(id) { }
-    ~Package () { }
-    void add_function(ID function_name_id, SharedPtr<Value> code);
-
-    void add_method(ID function_name_id, const CallbackFunction* code);
-
-    iterator find(ID id) {
-        return data.find(id);
-    }
-    virtual void dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
-        print_indent(indent);
-        printf("[dump] Package(%s):\n", symbol_table->id2name(name_id).c_str());
-        auto iter = data.begin();
-        for (; iter!=data.end(); iter++) {
-            print_indent(indent+1);
-            printf("%s:\n", symbol_table->id2name(iter->first).c_str());
-            iter->second->dump(indent+2);
-        }
-    }
-    virtual void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Package\n");
-    }
-    const char *type_str() { return "package"; }
-    ID id() { return name_id; }
-    iterator begin() { return data.begin(); }
-    iterator end()   { return data.end(); }
-};
-
-class PackageMap : public Value {
-    std::map<ID, SharedPtr<Package>> data;
-public:
-    PackageMap() : Value(VALUE_TYPE_PACKAGE_MAP) {
-    }
-    ~PackageMap() { }
-    std::map<ID, SharedPtr<Package>>::iterator find(ID id) {
-        return data.find(id);
-    }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] PackageMap(%zd)\n", data.size());
-    }
-    void set(Package* &pkg) {
-        this->data[pkg->id()] = pkg;
-    }
-    void set(SharedPtr<Package> &pkg) {
-        this->data[pkg->id()] = pkg;
-    }
-    const char *type_str() { return "package_map"; }
-    std::map<ID, SharedPtr<Package>>::iterator end() {
-        return data.end();
-    }
-};
-
 class VM {
     ID package_id_;
+    SharedPtr<Package> package_; // cached
 public:
     int sp; // stack pointer
     int pc; // program counter
@@ -128,22 +72,25 @@ public:
     SharedPtr<PackageMap> package_map;
     Package* find_package(ID id);
     Package* find_package(const char *name);
-    tora::Stack stack;
+    std::vector<SharedPtr<Value>> stack;
+    bool exec_trace;
 
-    std::string &package() {
+    std::string &package_name() {
         return symbol_table->id2name(package_id_);
     }
-    void package(const std::string& s) {
+    void package_name(const std::string& s) {
         // will be deprecate
         package_id_ = symbol_table->get_id(s);
+    }
+
+    const SharedPtr<Package> & package() {
+        return package_;
     }
 
     ID package_id() {
         return package_id_;
     }
-    void package_id(ID id) {
-        package_id_ = id;
-    }
+    void package_id(ID id);
 
     std::map<ID, CallbackFunction*> builtin_functions;
 
@@ -156,7 +103,7 @@ public:
     /*
      * stack for lexical variables.
      */
-    std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
+    std::vector<LexicalVarsFrame*> *frame_stack;
     /**
      * mark for first argument in function call.
      */
@@ -166,6 +113,7 @@ public:
     VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
     ~VM();
     void execute();
+    void execute_normal();
     void execute_trace();
 
     template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
@@ -180,7 +128,7 @@ public:
     void add_function(std::string &name, SharedPtr<Value> code) {
         this->add_function(this->symbol_table->get_id(name), code);
     }
-    void die(SharedPtr<Value> & exception);
+    void die(const SharedPtr<Value> & exception);
     void die(const char *format, ...);
 
     void register_standard_methods();
@@ -193,20 +141,25 @@ public:
     }
 
     SharedPtr<Value> copy_all_public_symbols(ID srcid, ID dstid);
+    SharedPtr<Value> get_self();
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
     void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
+    Value * sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
-    const SharedPtr<Value>& TOP() { return stack.top(); }
+    const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
+    void extract_tuple(const SharedPtr<TupleValue> &t);
 
     boost::mt19937 *myrand;
 
-#include "vm.ops.inc.h"
-};
 
-class VM;
+#include "vm.ops.inc.h"
+
+private:
+    void handle_exception(const SharedPtr<Value> & exception);
+};
 
 };
 

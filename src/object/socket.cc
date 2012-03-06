@@ -1,6 +1,9 @@
 #include "../vm.h"
 #include "socket.h"
 #include "../value/object.h"
+#include "../value/array.h"
+#include "../value/tuple.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
