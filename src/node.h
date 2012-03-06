@@ -256,8 +256,8 @@ public:
 
 class BinaryNode: public Node {
 public:
-    SharedPtr<Node>left () { return this->list->at(0); }
-    SharedPtr<Node>right() { return this->list->at(1); }
+    SharedPtr<Node>left () const { return this->list->at(0); }
+    SharedPtr<Node>right() const { return this->list->at(1); }
     BinaryNode(node_type_t t, SharedPtr<Node> l, SharedPtr<Node> r) {
         type = t;
         this->list->push_back(l);

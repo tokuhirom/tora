@@ -69,6 +69,9 @@ my @nodes = qw(
 
     NODE_CLASS
 
+    NODE_LOGICAL_AND
+    NODE_LOGICAL_OR
+
     NODE_REDO
     NODE_LAST
     NODE_NEXT

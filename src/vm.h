@@ -23,6 +23,7 @@ class LexicalVarsFrame;
 class PackageMap;
 class TupleValue;
 class Package;
+class FunctionFrame;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
@@ -117,7 +118,7 @@ public:
     void execute_trace();
 
     template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
-    template <class operationI, class operationD, class operationS> SharedPtr<Value> cmpop(operationI operation_i, operationD operation_d, operationS operation_s);
+    template <class operationI, class operationD, class operationS> bool cmpop(operationI operation_i, operationD operation_d, operationS operation_s, const SharedPtr<Value> & lhs, const SharedPtr<Value> & rhs);
 
     void init_globals(int argc, char**argv);
 

@@ -55,7 +55,7 @@ re2files = [
 libfiles = [
     "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc
         token.gen.cc value.gen.cc
-        symbol_table.cc package_map.cc
+        symbol_table.cc package_map.cc frame.cc package.cc
         builtin.cc
         value/object.cc
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc
@@ -86,6 +86,8 @@ if 'test' in COMMAND_LINE_TARGETS:
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra --source Perl t')
+
+env.Command('test.valgrind', ['tora'], 'perl misc/valgrind.pl');
 
 if 'bench' in COMMAND_LINE_TARGETS:
     env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./tora -V && time ./tora benchmark/fib/fib.tra 39')

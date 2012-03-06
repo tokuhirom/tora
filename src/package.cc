@@ -13,3 +13,15 @@ void Package::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
         iter->second->dump(indent+2);
     }
 }
+
+void Package::add_function(ID function_name_id, const SharedPtr<Value>& code) {
+    this->data[function_name_id] = code;
+}
+
+// move package to package.h/package.cc
+void Package::add_method(ID function_name_id, const CallbackFunction* code) {
+    SharedPtr<CodeValue> cv = new CodeValue(this->name_id, function_name_id, code);
+    // printf("package!! %d::%d\n", name_id, function_name_id);
+    this->data[function_name_id] = cv;
+}
+

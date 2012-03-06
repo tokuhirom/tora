@@ -8,4 +8,23 @@ is(JSON.encode($y), "3.140000");
 is(JSON.encode(-$y), "-3.140000");
 is(JSON.encode(-(-$y)), "3.140000");
 
+# &&
+is(false && false, false);
+is(false &&  true, false);
+is(true  && false, false);
+is(true  &&  true,  true);
+
+# do not run the rhs when lhs is false value
+is(false && fail(), false);
+
+# ||
+say("# ||");
+is(false || false, false);
+is(false ||  true,  true);
+is(true  || false,  true);
+is(true  ||  true,  true);
+
+# do not run the rhs when lhs is true value
+is(true || fail(), true);
+
 done_testing();

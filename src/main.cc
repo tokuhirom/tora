@@ -18,6 +18,7 @@
 #include "token.gen.h"
 #include "disasm.h"
 #include "config.h"
+#include "frame.h"
 
 using namespace tora;
 
@@ -135,6 +136,8 @@ int main(int argc, char **argv) {
     }
 
     // run it
+    // tora::FunctionFrame::initMemPool();
+
     tora::VM vm(compiler.ops, symbol_table);
     vm.init_globals(argc-optind, argv+optind);
     vm.register_standard_methods();

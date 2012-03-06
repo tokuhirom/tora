@@ -1,10 +1,6 @@
 #ifndef VALUE_H_
 #define VALUE_H_
 
-#include "tora.h"
-#include "shared_ptr.h"
-#include "prim.h"
-#include "util.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -13,6 +9,13 @@
 #include <vector>
 #include <map>
 #include <memory>
+
+#include <boost/pool/object_pool.hpp>
+
+#include "tora.h"
+#include "shared_ptr.h"
+#include "prim.h"
+#include "util.h"
 
 namespace tora {
 
@@ -34,7 +37,6 @@ typedef enum {
     VALUE_TYPE_SYMBOL,
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
-    VALUE_TYPE_PACKAGE,
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
 } value_type_t;
@@ -58,9 +60,10 @@ class SymbolTable;
 /**
  * The value class
  */
-class Value : public Prim {
+class Value {
+    PRIM_DECL(Value);
 protected:
-    Value(value_type_t t) : Prim(), value_type(t) { }
+    Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
 public:
@@ -72,8 +75,7 @@ public:
     virtual void dump(const SharedPtr<SymbolTable> & symbol_table, int indent) {
         this->dump(indent);
     }
-    // TODO: rename to as_str
-    virtual SharedPtr<StrValue> to_s();
+    SharedPtr<StrValue> to_s();
     IntValue *to_int();
     bool to_bool();
     bool is_numeric() {
@@ -110,7 +112,6 @@ public:
         printf("[dump] IV: %d\n", int_value);
     }
     const char *type_str() { return "int"; }
-    SharedPtr<StrValue> to_s();
     void tora__decr__() {
         this->int_value--;
     }
@@ -120,6 +121,11 @@ public:
     SharedPtr<IntValue> clone() {
         return new IntValue(this->int_value);
     }
+public:
+	void* operator new(size_t size) { return pool_.malloc(); }
+	void operator delete(void* doomed, size_t) { pool_.free((IntValue*)doomed); }
+private:
+    static boost::object_pool<IntValue> pool_;
 };
 
 class DoubleValue: public Value {
@@ -133,7 +139,6 @@ public:
         printf("[dump] NV: %lf\n", double_value);
     }
     const char *type_str() { return "double"; }
-    SharedPtr<StrValue> to_s();
 };
 
 class UndefValue: public Value {
@@ -148,7 +153,6 @@ public:
         printf("[dump] undef(refcnt: %d)\n", refcnt);
     }
     const char *type_str() { return "undef"; }
-    SharedPtr<StrValue> to_s();
 };
 
 // This is singleton
@@ -158,13 +162,13 @@ public:
         this->bool_value = b;
     }
     bool bool_value;
-    static SharedPtr<BoolValue> true_instance() {
+    static BoolValue* true_instance() {
         return new BoolValue(true);
     }
-    static SharedPtr<BoolValue> false_instance() {
+    static BoolValue* false_instance() {
         return new BoolValue(false);
     }
-    static SharedPtr<BoolValue> instance(bool b) {
+    static BoolValue* instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
     void dump(int indent) {
@@ -172,10 +176,11 @@ public:
         printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
     const char *type_str() { return "bool"; }
-    SharedPtr<StrValue>to_s();
-    BoolValue* tora__not__() {
-        return new BoolValue(!this->bool_value);
-    }
+public:
+	void* operator new(size_t size) { return pool_.malloc(); }
+	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }
+private:
+    static boost::object_pool<BoolValue> pool_;
 };
 
 class StrValue: public Value {
@@ -205,9 +210,6 @@ public:
         printf("[dump] str: %s(refcnt: %d)\n", str_value.c_str(), refcnt);
     }
     const char *type_str() { return "str"; }
-    SharedPtr<StrValue> to_s() {
-        return this;
-    }
 };
 
 class ExceptionValue : public Value {

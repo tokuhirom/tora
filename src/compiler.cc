@@ -283,7 +283,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
     return false;
 }
 
-void tora::Compiler::compile(SharedPtr<Node> node) {
+void tora::Compiler::compile(const SharedPtr<Node> &node) {
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block(BLOCK_TYPE_FILE);
@@ -391,9 +391,10 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
 
         // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
-        SharedPtr<CodeValue> code = new CodeValue();
-        code->package_id = this->symbol_table->get_id(this->package());
-        code->func_name_id = this->symbol_table->get_id(funcname);
+        SharedPtr<CodeValue> code = new CodeValue(
+            this->symbol_table->get_id(this->package()), // package id
+            this->symbol_table->get_id(funcname)         // func name id
+        );
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
@@ -1116,6 +1117,52 @@ void tora::Compiler::compile(SharedPtr<Node> node) {
             this->last_labels.push_back(&(op->operand.int_value));
             ops->push_back(op);
         }
+        break;
+    }
+    case NODE_LOGICAL_AND: {
+        /**
+         *    (lhs)
+         *    JUMP_IF_FALSE label1
+         *    POP_TOP
+         *    (rhs)
+         * label1:
+         */
+
+        const BinaryNode * n = static_cast<BinaryNode*>(node.get());
+
+        this->compile(n->left());
+
+        SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_FALSE);
+        ops->push_back(jump_else);
+
+        ops->push_back(new OP(OP_POP_TOP));
+        this->compile(n->right());
+
+        jump_else->operand.int_value = ops->size();
+
+        break;
+    }
+    case NODE_LOGICAL_OR: {
+        /**
+         *    (lhs)
+         *    JUMP_IF_TRUE label1
+         *    POP_TOP
+         *    (rhs)
+         * label1:
+         */
+
+        const BinaryNode * n = static_cast<BinaryNode*>(node.get());
+
+        this->compile(n->left());
+
+        SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_TRUE);
+        ops->push_back(jump_else);
+
+        ops->push_back(new OP(OP_POP_TOP));
+        this->compile(n->right());
+
+        jump_else->operand.int_value = ops->size();
+
         break;
     }
 

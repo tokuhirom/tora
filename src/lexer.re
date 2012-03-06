@@ -353,6 +353,8 @@ std:
     "}" { return R_BRACE; }
     "[" { return L_BRACKET; }
     "]" { divable = true; return R_BRACKET; }
+    "||" { return OROR; }
+    "&&" { return ANDAND; }
     "=" { return ASSIGN; }
     "my" { return MY; }
     "true" { return TRUE; }

@@ -29,10 +29,12 @@ public:
     bool is_native() { return is_native_; }
     const CallbackFunction* callback() { return callback_; }
 
-    CodeValue(): Value(VALUE_TYPE_CODE), callback_(NULL), is_native_(false) {
+    // for tora functions
+    CodeValue(ID package_id_, ID func_name_id_): Value(VALUE_TYPE_CODE), callback_(NULL), is_native_(false), package_id(package_id_), func_name_id(func_name_id_) {
         this->closure_vars = new std::vector<SharedPtr<Value>>();
     }
-    CodeValue(const CallbackFunction * cb): Value(VALUE_TYPE_CODE), callback_(cb), is_native_(true), code_params(NULL), closure_var_names(NULL) {
+    // for C++ functions
+    CodeValue(ID package_id_, ID func_name_id_, const CallbackFunction * cb): Value(VALUE_TYPE_CODE), callback_(cb), is_native_(true), package_id(package_id_), func_name_id(func_name_id_), code_params(NULL), closure_var_names(NULL) {
         this->closure_vars = new std::vector<SharedPtr<Value>>();
     }
     ~CodeValue();
@@ -48,7 +50,6 @@ public:
         printf("----------------\n");
     }
     const char *type_str() { return "code"; }
-    SharedPtr<StrValue> to_s();
 };
 
 };

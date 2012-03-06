@@ -23,7 +23,6 @@ my %a = (
     VALUE_TYPE_SYMBOL => 'SymbolValue',
     VALUE_TYPE_HASH => 'HashValue',
     VALUE_TYPE_HASH_ITERATOR => 'HashValue::iterator',
-    VALUE_TYPE_PACKAGE => 'Package',
     VALUE_TYPE_OBJECT => 'ObjectValue',
     VALUE_TYPE_POINTER => 'PointerValue',
 );
