@@ -23,6 +23,7 @@ class LexicalVarsFrame;
 class PackageMap;
 class TupleValue;
 class Package;
+class FunctionFrame;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 

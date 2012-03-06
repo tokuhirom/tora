@@ -6,6 +6,9 @@
 
 using namespace tora;
 
+boost::object_pool<IntValue> IntValue::pool_;
+boost::object_pool<BoolValue> BoolValue::pool_;
+
 bool Value::to_bool() {
     switch (value_type) {
     case VALUE_TYPE_UNDEF:

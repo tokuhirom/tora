@@ -55,7 +55,7 @@ re2files = [
 libfiles = [
     "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc
         token.gen.cc value.gen.cc
-        symbol_table.cc package_map.cc
+        symbol_table.cc package_map.cc frame.cc
         builtin.cc
         value/object.cc
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc

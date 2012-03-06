@@ -1,10 +1,6 @@
 #ifndef VALUE_H_
 #define VALUE_H_
 
-#include "tora.h"
-#include "shared_ptr.h"
-#include "prim.h"
-#include "util.h"
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -13,6 +9,13 @@
 #include <vector>
 #include <map>
 #include <memory>
+
+#include <boost/pool/object_pool.hpp>
+
+#include "tora.h"
+#include "shared_ptr.h"
+#include "prim.h"
+#include "util.h"
 
 namespace tora {
 
@@ -120,6 +123,11 @@ public:
     SharedPtr<IntValue> clone() {
         return new IntValue(this->int_value);
     }
+public:
+	void* operator new(size_t size) { return pool_.malloc(); }
+	void operator delete(void* doomed, size_t) { pool_.free((IntValue*)doomed); }
+private:
+    static boost::object_pool<IntValue> pool_;
 };
 
 class DoubleValue: public Value {
@@ -176,6 +184,11 @@ public:
     BoolValue* tora__not__() {
         return new BoolValue(!this->bool_value);
     }
+public:
+	void* operator new(size_t size) { return pool_.malloc(); }
+	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }
+private:
+    static boost::object_pool<BoolValue> pool_;
 };
 
 class StrValue: public Value {

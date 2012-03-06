@@ -1,14 +1,9 @@
 #include "tora.h"
 #include "node.h"
+#include "util.h"
 #include <vector>
 
 using namespace tora;
-
-static void print_indent(int indent) {
-    for (int i=0; i<indent*2; i++) {
-        printf(" ");
-    }
-}
 
 void tora::Node::dump(int indent) {
     print_indent(indent);

@@ -1,8 +1,18 @@
 #ifndef TORA_FRAME_H_
 #define TORA_FRAME_H_
 
+#include <vector>
+
+#include <boost/pool/object_pool.hpp>
+
+#include "shared_ptr.h"
+#include "value.h"
 
 namespace tora {
+
+class OPArray;
+class VM;
+class CodeValue;
 
 typedef enum {
     FRAME_TYPE_LEXICAL = 1,
@@ -22,7 +32,7 @@ public:
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
-    LexicalVarsFrame(int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL) : vars(vars_cnt), top(top), type(type_) { }
+    LexicalVarsFrame(int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
     virtual ~LexicalVarsFrame() { }
     void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars.capacity());
@@ -78,6 +88,11 @@ public:
     }
     FunctionFrame(int vars_cnt, size_t top, const SharedPtr<Value>& self_) : LexicalVarsFrame(vars_cnt, top), self(self_) { }
     ~FunctionFrame() { }
+public:
+	void* operator new(size_t size) { return pool_.malloc(); }
+	void operator delete(void* doomed, size_t) { pool_.free((FunctionFrame*)doomed); }
+private:
+    static boost::object_pool<FunctionFrame> pool_;
 };
 
 class ForeachFrame : public LexicalVarsFrame {
@@ -92,10 +107,7 @@ class PackageFrame : public LexicalVarsFrame {
     VM * vm_;
 public:
     PackageFrame(size_t top, ID pkgid, VM *parent) : LexicalVarsFrame(0, top, FRAME_TYPE_PACKAGE), orig_package_id_(pkgid), vm_(parent) { }
-    ~PackageFrame() {
-        // printf("LEAVE PACKAGE FROM %s. back to %d\n", vm_->package_name().c_str(), orig_package_id_);
-        vm_->package_id(orig_package_id_);
-    }
+    ~PackageFrame();
 };
 
 };
