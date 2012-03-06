@@ -166,13 +166,13 @@ public:
         this->bool_value = b;
     }
     bool bool_value;
-    static SharedPtr<BoolValue> true_instance() {
+    static BoolValue* true_instance() {
         return new BoolValue(true);
     }
-    static SharedPtr<BoolValue> false_instance() {
+    static BoolValue* false_instance() {
         return new BoolValue(false);
     }
-    static SharedPtr<BoolValue> instance(bool b) {
+    static BoolValue* instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
     void dump(int indent) {

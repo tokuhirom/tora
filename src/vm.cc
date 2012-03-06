@@ -160,33 +160,24 @@ template void tora::VM::binop(std::divides<int> operation_i, std::divides<double
 
 // TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
-SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s) {
-    SharedPtr<Value> v1(stack.back());
-    stack.pop_back();
-    SharedPtr<Value> v2(stack.back());
-    stack.pop_back();
+bool VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s, const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
  
-    switch (v1->value_type) {
+    switch (lhs->value_type) {
     case VALUE_TYPE_INT: {
-        IntValue * ie2 = v2->to_int();
-        SharedPtr<BoolValue> result = BoolValue::instance(operation_i(v1->upcast<IntValue>()->int_value, ie2->int_value));
-        return result;
+        SharedPtr<IntValue> ie2 = rhs->to_int();
+        return operation_i(lhs->upcast<IntValue>()->int_value, ie2->int_value);
     }
     case VALUE_TYPE_STR: {
-        SharedPtr<Value> s2(v2->to_s());
-        if (s2->is_exception()) { return s2; }
-        SharedPtr<BoolValue> result = BoolValue::instance(operation_s(v1->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
-        return result;
+        SharedPtr<Value> s2(rhs->to_s());
+        return (operation_s(lhs->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
     }
     case VALUE_TYPE_DOUBLE: {
-        switch (v2->value_type) {
+        switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
-            SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, (double)v2->upcast<IntValue>()->int_value));
-            return result;
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value, (double)rhs->upcast<IntValue>()->int_value));
         }
         case VALUE_TYPE_DOUBLE: {
-            SharedPtr<BoolValue> result = BoolValue::instance(operation_d(v1->upcast<DoubleValue>()->double_value, v2->upcast<DoubleValue>()->double_value));
-            return result;
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value, rhs->upcast<DoubleValue>()->double_value));
         }
         default: {
             TODO(); // throw exception
@@ -196,10 +187,10 @@ SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, Opera
         break;
     }
     case VALUE_TYPE_BOOL: {
-        return BoolValue::instance(v1->upcast<BoolValue>()->bool_value == v2->to_bool());
+        return lhs->upcast<BoolValue>()->bool_value == rhs->to_bool();
     }
     case VALUE_TYPE_UNDEF: {
-        return new BoolValue(v2->value_type == VALUE_TYPE_UNDEF);
+        return rhs->value_type == VALUE_TYPE_UNDEF;
     }
     default:
         // TODO: support object comparation
@@ -208,12 +199,12 @@ SharedPtr<Value> VM::cmpop(operationI operation_i, operationD operation_d, Opera
     abort();
 }
 
-template SharedPtr<Value> VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>);
-template SharedPtr<Value> VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>);
-template SharedPtr<Value> VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>);
-template SharedPtr<Value> VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>);
-template SharedPtr<Value> VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>);
-template SharedPtr<Value> VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>);
+template bool VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
 
 void VM::die(const char *format, ...) {
     va_list ap;

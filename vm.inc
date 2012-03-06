@@ -449,50 +449,69 @@ OP_JUMP {
 }
 
 OP_EQ {
-    std::equal_to<int> i;
-    std::equal_to<double> d;
-    std::equal_to<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::equal_to<int> i;
+    static std::equal_to<double> d;
+    static std::equal_to<std::string> s;
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_NE {
-    std::not_equal_to<int> i;
-    std::not_equal_to<double> d;
-    std::not_equal_to<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::not_equal_to<int> i;
+    static std::not_equal_to<double> d;
+    static std::not_equal_to<std::string> s;
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GT {
     static std::greater<int> i;
     static std::greater<double> d;
     static std::greater<std::string> s;
-    stack.push_back(this->cmpop(i, d, s));
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LT {
-    std::less<int> i;
-    std::less<double> d;
-    std::less<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::less<int> i;
+    static std::less<double> d;
+    static std::less<std::string> s;
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GE {
-    std::greater_equal<int> i;
-    std::greater_equal<double> d;
-    std::greater_equal<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::greater_equal<int> i;
+    static std::greater_equal<double> d;
+    static std::greater_equal<std::string> s;
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LE {
-    std::less_equal<int> i;
-    std::less_equal<double> d;
-    std::less_equal<std::string> s;
-    SharedPtr<Value> v = this->cmpop(i, d, s);
-    if (v->is_exception()) { this->die(v); } else { stack.push_back(v); }
+    static std::less_equal<int> i;
+    static std::less_equal<double> d;
+    static std::less_equal<std::string> s;
+
+    const SharedPtr<Value> lhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> rhs(stack.back());
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_SETLOCAL {
