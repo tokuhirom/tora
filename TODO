@@ -62,8 +62,6 @@ syntax
  * next
  * continue
  * $PROGRAM_NAME($0)
- * $x | $y
- * $x & $y
  * $x << $y
  * $x >> $y
  * dir()
@@ -141,4 +139,7 @@ Finished
  * to_double()
  * caller()
  * $x ** 2
+ * $x | $y
+ * $x & $y
+ * $x ^ $y
 

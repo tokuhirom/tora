@@ -551,6 +551,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_GE:  C_OP_BINARY(OP_GE);
     case NODE_EQ:  C_OP_BINARY(OP_EQ);
     case NODE_NE:  C_OP_BINARY(OP_NE);
+    case NODE_BITAND: C_OP_BINARY(OP_BITAND);
+    case NODE_BITOR:  C_OP_BINARY(OP_BITOR);
+    case NODE_BITXOR: C_OP_BINARY(OP_BITXOR);
 #undef C_OP_BINARY
 
     // TODO: deprecate?

@@ -48,6 +48,8 @@ Missing part is following:
 %left DOTDOT.
 %left OROR.
 %left ANDAND.
+%left BITOR BITXOR.
+%left BITAND.
 %nonassoc EQ.
 %nonassoc LT GT LE GE.
 %left ADD SUB.
@@ -325,10 +327,19 @@ logical_and_expression(A) ::= logical_and_expression(B) ANDAND inclusive_or_expr
 }
 
 inclusive_or_expression(A) ::= exclusive_or_expression(B). { A = B; }
+inclusive_or_expression(A) ::= inclusive_or_expression(B) BITOR exclusive_or_expression(C). {
+    A = new BinaryNode(NODE_BITOR, B, C);
+}
 
 exclusive_or_expression(A) ::= and_expression(B). { A = B; }
+exclusive_or_expression(A) ::= exclusive_or_expression(B) BITXOR and_expression(C). {
+    A = new BinaryNode(NODE_BITXOR, B, C);
+}
 
 and_expression(A) ::= equality_expression(B). { A = B; }
+and_expression(A) ::= and_expression(B) BITAND equality_expression(C). {
+    A = new BinaryNode(NODE_BITAND, B, C);
+}
 
 equality_expression(A) ::= relational_expression(B). { A = B; }
 equality_expression(A) ::= equality_expression(B) EQ relational_expression(C). {

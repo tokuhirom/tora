@@ -144,12 +144,28 @@ OP_MUL {
 }
 
 OP_POW {
-    SharedPtr<Value> rhs = stack.back();
-    stack.pop_back();
-    const SharedPtr<Value>& lhs = stack.back();
+#define BINOP(meth) \
+    SharedPtr<Value> rhs = stack.back(); \
+    stack.pop_back(); \
+    const SharedPtr<Value>& lhs = stack.back(); \
+    \
+    Value * ret = this->meth(lhs, rhs); \
+    stack[stack.size()-1].reset(ret); \
 
-    Value * ret = this->op_pow(lhs, rhs);
-    stack[stack.size()-1].reset(ret);
+    BINOP(op_pow);
+}
+
+OP_BITAND {
+    BINOP(op_bitand);
+}
+
+OP_BITOR {
+    BINOP(op_bitor);
+}
+
+OP_BITXOR {
+    BINOP(op_bitxor);
+#undef BINOP
 }
 
 OP_BUILTIN_FUNCALL {

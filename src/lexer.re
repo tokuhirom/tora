@@ -357,6 +357,9 @@ std:
     "]" { divable = true; return R_BRACKET; }
     "||" { return OROR; }
     "&&" { return ANDAND; }
+    "|" { return BITOR; }
+    "&" { return BITAND; }
+    "^" { return BITXOR; }
     "=" { return ASSIGN; }
     "my" { return MY; }
     "true" { return TRUE; }
