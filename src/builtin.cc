@@ -4,9 +4,11 @@
 #include "builtin.h"
 #include "vm.h"
 #include "value.h"
+#include "frame.h"
 #include "value/file.h"
 #include "value/object.h"
 #include "value/pointer.h"
+#include "value/array.h"
 
 using namespace tora;
 
@@ -135,6 +137,47 @@ static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
     return vm->require(v);
 }
 
+/**
+ * caller(0) : Caller
+ * caller() : Array[Caller]
+ *
+ */
+static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value>>& args) {
+    if (args.size() == 0) {
+        int skiped_first = false;
+        SharedPtr<ArrayValue> av = new ArrayValue();
+        for (auto iter = vm->frame_stack->rbegin(); iter != vm->frame_stack->rend(); ++iter) {
+            if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+                if (skiped_first) {
+                    FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Caller"), vm);
+                    o->set_value(vm->symbol_table->get_id("code"), fframe->code);
+                    av->push(o);
+                } else {
+                    skiped_first = true; // skip myself.
+                }
+            }
+        }
+        return av.get();
+    } else if (args.size() == 1) {
+        int seen = 0;
+        int need = args.at(0)->to_int();
+        for (auto iter = vm->frame_stack->rbegin(); iter != vm->frame_stack->rend(); ++iter) {
+            if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+                FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
+                if (seen == need+1) {
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Caller"), vm);
+                    o->set_value(vm->symbol_table->get_id("code"), fframe->code);
+                    return o;
+                }
+                ++seen;
+            }
+        }
+        return UndefValue::instance();
+    } else {
+        throw new ExceptionValue("Too many arguments for caller.");
+    }
+}
 
 void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
@@ -148,5 +191,6 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("self",   builtin_self);
     vm->add_builtin_function("opendir",   builtin_opendir);
     vm->add_builtin_function("rand",   builtin_rand);
+    vm->add_builtin_function("caller",   builtin_caller);
 }
 

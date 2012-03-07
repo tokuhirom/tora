@@ -58,7 +58,7 @@ libfiles = [
         symbol_table.cc package_map.cc frame.cc package.cc
         builtin.cc
         value/object.cc
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc
         vm.cc util.cc
     ''')
 ]

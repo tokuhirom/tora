@@ -1,0 +1,31 @@
+use Test::More *;
+
+sub foo () {
+    bar();
+}
+
+sub bar () {
+    baz();
+}
+
+sub baz () {
+    is(typeof(caller(0)), "Caller");
+    is(caller(0).code().package(), "main");
+
+    is(typeof(caller(0).code()), "Code");
+
+    is(caller(1).code().name(), "foo");
+    is(caller(0).code().name(), "bar");
+
+    is(caller(2), undef);
+    is(caller(3), undef);
+
+    is(typeof(caller()), 'Array');
+    is(caller().size(), 2);
+    is((caller())[1].code().name(), 'foo');
+    is((caller())[0].code().name(), 'bar');
+}
+
+foo();
+
+done_testing;

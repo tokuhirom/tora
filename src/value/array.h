@@ -21,7 +21,7 @@ public:
     void push(Value *v) {
         this->values->push_back(v);
     }
-    void push(SharedPtr<Value> &v) {
+    void push(const SharedPtr<Value> &v) {
         this->values->push_back(v);
     }
     size_t size() {
@@ -47,7 +47,7 @@ public:
     }
     SharedPtr<Value>get_item(SharedPtr<Value>index);
     Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
-    virtual const char *type_str() { return "array"; }
+    virtual const char *type_str() { return "Array"; }
 
     class iterator : public Value {
     public:

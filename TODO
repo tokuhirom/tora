@@ -6,7 +6,6 @@ builtin functions
 
 stat()
 hex()
-caller()
 
 builtin objects
 ---------------
@@ -64,7 +63,6 @@ syntax
  * continue
  * $PROGRAM_NAME($0)
  * $x ** 2
- * caller()
  * $x or $y
  * $x and $y
  * $x | $y
@@ -74,7 +72,6 @@ syntax
  * dir()
  * file()
  * $x % $y
- * to_double()
  * overload(+) {
       $a + $b;
    }
@@ -137,4 +134,6 @@ Finished
   * require
   * import
   * ENV
+ * to_double()
+ * caller()
 

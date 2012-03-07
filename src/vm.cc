@@ -24,6 +24,8 @@
 #include "object/file.h"
 #include "object/socket.h"
 #include "object/internals.h"
+#include "object/caller.h"
+#include "object/code.h"
 
 #include "builtin.h"
 
@@ -463,15 +465,24 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
 
 
 void VM::register_standard_methods() {
+    // language core
     Init_Array(this);
     Init_Str(this);
+    Init_Caller(this);
+    Init_Code(this);
+
+    // OS
     Init_Dir(this);
-    Init_Stat(this);
     Init_Env(this);
-    Init_JSON(this);
-    Init_Time(this);
-    Init_File(this);
+    Init_Stat(this);
     Init_Socket(this);
+    Init_File(this);
+    Init_Time(this);
+
+    // Utility
+    Init_JSON(this);
+
+    // misc
     Init_Internals(this);
 
     Init_builtins(this);
