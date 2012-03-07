@@ -430,6 +430,14 @@ postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
     A = new MethodCallNode(B, C, new ListNode());
 }
+postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN R_PAREN.  {
+    // $foo.();
+    A = new MethodCallNode(B, NULL, new ListNode());
+}
+postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN argument_list(C) R_PAREN.  {
+    // $foo.(1,2,3);
+    A = new MethodCallNode(B, NULL, C->upcast<ListNode>());
+}
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
@@ -496,6 +504,12 @@ primary_expression(A) ::= HEREDOC_START(B). {
 }
 primary_expression(A) ::= PACKAGE_LITERAL. {
     A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new ListNode());
+}
+primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN block(B). {
+    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), B);
+}
+primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN L_BRACE R_BRACE. {
+    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), new VoidNode(NODE_VOID));
 }
 
 /* qw */

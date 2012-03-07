@@ -432,6 +432,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             push_op(define_method);
         }
 
+        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
+
         break;
     }
     case NODE_STRING: {
@@ -977,14 +979,21 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->compile(args->back());
             args->pop_back();
         }
-        if (mcn->method()->type == NODE_IDENTIFIER) {
-            ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
+        if (mcn->method()) {
+            if (mcn->method()->type == NODE_IDENTIFIER) {
+                ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
+                SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+                push_op(o);
+            } else {
+                fprintf(stderr, "Compilation error. This is not a id.\n");
+                error++;
+                break;
+            }
+        } else {
+            // closure call
+            ID id = symbol_table->get_id("()");
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
             push_op(o);
-        } else {
-            fprintf(stderr, "Compilation error. This is not a id.\n");
-            error++;
-            break;
         }
         this->compile(mcn->object());
 

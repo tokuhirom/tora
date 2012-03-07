@@ -1,0 +1,12 @@
+use Test::More *;
+
+my $n = 0;
+my $code = sub () {
+    $n++;
+};
+$code.();
+
+is(typeof($code), 'Code');
+is($n, 1);
+
+done_testing;
