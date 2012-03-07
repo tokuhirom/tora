@@ -600,6 +600,12 @@ static void yy_reduce(
   */
 %%
   };
+
+  /* set lineno by tokuhirom */
+  if (yygotominor.yy0) {
+    yygotominor.yy0->lineno = state->lineno;
+  }
+
   yygoto = yyRuleInfo[yyruleno].lhs;
   yysize = yyRuleInfo[yyruleno].nrhs;
   yypParser->yyidx -= yysize;

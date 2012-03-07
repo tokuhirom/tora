@@ -43,6 +43,10 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
     }
 }
 
+void Compiler::push_op(OP * op) {
+    this->ops->push_back(op, this->current_node->lineno);
+}
+
 void Compiler::define_my(SharedPtr<Node> node) {
     SharedPtr<ListNode>ln = node->upcast<ListNode>();
     for (size_t i=0; i < ln->size(); i++) {
@@ -51,7 +55,7 @@ void Compiler::define_my(SharedPtr<Node> node) {
         case NODE_GETVARIABLE: {
             std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
             this->define_localvar(name);
-            ops->push_back(new OP(OP_PUSH_UNDEF));
+            push_op(new OP(OP_PUSH_UNDEF));
             break;
         }
         case NODE_TUPLE: {
@@ -131,7 +135,7 @@ void tora::Compiler::set_variable(std::string &varname) {
             SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_SETARG;
             tmp->operand.int_value = no;
-            ops->push_back(tmp);
+            push_op(tmp);
         } else if (level == 0) {
             DBG2("LOCAL\n");
             tmp->op_type = OP_SETLOCAL;
@@ -142,7 +146,7 @@ void tora::Compiler::set_variable(std::string &varname) {
             tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
         }
     }
-    ops->push_back(tmp);
+    push_op(tmp);
 }
 
 void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
@@ -162,7 +166,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_SET_ITEM;
-       ops->push_back(tmp);
+       push_op(tmp);
         break;
     }
     case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
@@ -171,7 +175,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         // extract
         OP* op = new OP(OP_EXTRACT_TUPLE);
         op->operand.int_value = ln->size();
-        ops->push_back(op);
+        push_op(op);
 
         // and set to variables
         for (size_t i=0; i < ln->size(); i++) {
@@ -188,7 +192,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
                     auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
                     this->compile(index);
-                    ops->push_back(new OP(OP_SET_ITEM));
+                    push_op(new OP(OP_SET_ITEM));
                     break;
                 }
                 default: {
@@ -198,7 +202,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
                     break;
                 }
             }
-            ops->push_back(new OP(OP_POP_TOP));
+            push_op(new OP(OP_POP_TOP));
         }
         break;
     }
@@ -242,7 +246,7 @@ public:
         compiler_ = compiler;
         if (decvar_in_cond) {
             enter = new OP(OP_ENTER);
-            compiler->ops->push_back(enter);
+            compiler->push_op(enter);
             compiler->push_block(BLOCK_TYPE_BLOCK);
         } else {
             enter = NULL;
@@ -250,7 +254,7 @@ public:
     }
     ~OptimizableEnterScope() {
         if (enter) {
-            compiler_->ops->push_back(new OP(OP_LEAVE));
+            compiler_->push_op(new OP(OP_LEAVE));
             enter->operand.int_value = compiler_->blocks->back()->vars.size();
             compiler_->pop_block();
         }
@@ -284,26 +288,28 @@ bool tora::Compiler::is_builtin(const std::string &s) {
 }
 
 void tora::Compiler::compile(const SharedPtr<Node> &node) {
+    this->current_node.reset(node.get());
+
     switch (node->type) {
     case NODE_ROOT: {
         this->push_block(BLOCK_TYPE_FILE);
         ID package_id = this->symbol_table->get_id(this->package());
         OP *pkg = new OP(OP_PACKAGE_ENTER);
         pkg->operand.int_value = package_id;
-        ops->push_back(pkg);
+        push_op(pkg);
 
         this->push_block(BLOCK_TYPE_BLOCK);
         OP *enter = new OP(OP_ENTER);
-        ops->push_back(enter);
+        push_op(enter);
 
         this->compile(node->upcast<NodeNode>()->node());
 
-        ops->push_back(new OP(OP_END));
+        push_op(new OP(OP_END));
 
         enter->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
-        ops->push_back(new OP(OP_PACKAGE_LEAVE));
+        push_op(new OP(OP_PACKAGE_LEAVE));
         this->pop_block();
 
         break;
@@ -321,10 +327,10 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         if (ln->size() == 1) {
             this->compile(ln->at(0));
-            ops->push_back(new OP(OP_RETURN));
+            push_op(new OP(OP_RETURN));
         } else if (ln->size() == 0) {
-            ops->push_back(new OP(OP_PUSH_UNDEF));
-            ops->push_back(new OP(OP_RETURN));
+            push_op(new OP(OP_PUSH_UNDEF));
+            push_op(new OP(OP_RETURN));
         } else {
             for (size_t i=0; i < ln->size(); i++) {
                 this->compile(ln->at(i));
@@ -332,9 +338,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
             SharedPtr<OP> op = new OP(OP_MAKE_TUPLE);
             op->operand.int_value = ln->size();
-            ops->push_back(op);
+            push_op(op);
 
-            ops->push_back(new OP(OP_RETURN));
+            push_op(new OP(OP_RETURN));
         }
 
         break;
@@ -383,8 +389,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         funccomp.compile(funcdef_node->block());
         this->pop_block();
 
-        funccomp.ops->push_back(new OP(OP_PUSH_UNDEF));
-        funccomp.ops->push_back(new OP(OP_RETURN));
+        funccomp.push_op(new OP(OP_PUSH_UNDEF));
+        funccomp.push_op(new OP(OP_RETURN));
         if (this->dump_ops) {
             Disasm::disasm(funccomp.ops);
         }
@@ -410,19 +416,19 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             }
 
             SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
-            ops->push_back(putval);
+            push_op(putval);
 
             // define method.
             SharedPtr<OP> op = new OP(OP_CLOSUREDEF);
             op->operand.int_value = funccomp.closure_vars->size();
-            ops->push_back(op);
+            push_op(op);
         } else {
             SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
-            ops->push_back(putval);
+            push_op(putval);
 
             // create normal function
             SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
-            ops->push_back(define_method);
+            push_op(define_method);
         }
 
         break;
@@ -430,7 +436,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_STRING: {
         SharedPtr<StrValue> sv = new StrValue(node->upcast<StrNode>()->str_value);
         SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_REGEXP: {
@@ -440,50 +446,50 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->error++;
             break;
         }
-        ops->push_back(new ValueOP(OP_PUSH_VALUE, sv));
+        push_op(new ValueOP(OP_PUSH_VALUE, sv));
         break;
     }
     case NODE_RANGE: {
         this->compile(node->upcast<BinaryNode>()->right());
         this->compile(node->upcast<BinaryNode>()->left());
-        ops->push_back(new OP(OP_NEW_RANGE));
+        push_op(new OP(OP_NEW_RANGE));
         break;
     }
     case NODE_INT: {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_INT;
         tmp->operand.int_value = node->upcast<IntNode>()->int_value;
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_DOUBLE: {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_DOUBLE;
         tmp->operand.double_value = node->upcast<DoubleNode>()->double_value;
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_TRUE: {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_UNDEF: {
-        ops->push_back(new OP(OP_PUSH_UNDEF));
+        push_op(new OP(OP_PUSH_UNDEF));
         break;
     }
     case NODE_FALSE: {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_FALSE;
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_IDENTIFIER: {
         ID id = this->symbol_table->get_id(node->upcast<StrNode>()->str_value);
         SharedPtr<OP> o = new OP(OP_PUSH_IDENTIFIER);
         o->operand.int_value = id;
-        ops->push_back(o);
+        push_op(o);
         break;
     }
 
@@ -501,11 +507,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (this->is_builtin(funcname)) {
             ID id = this->symbol_table->get_id(node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value);
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
-            ops->push_back(o);
+            push_op(o);
             SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_BUILTIN_FUNCALL;
             tmp->operand.int_value = args_len; // the number of args
-            ops->push_back(tmp);
+            push_op(tmp);
         } else {
             /*
             std::string funcname2 = funcname.find("::")==std::string::npos
@@ -515,11 +521,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             std::string funcname2 = funcname;
             ID id = this->symbol_table->get_id(funcname2);
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
-            ops->push_back(o);
+            push_op(o);
             SharedPtr<OP> tmp = new OP;
             tmp->op_type = OP_FUNCALL;
             tmp->operand.int_value = args_len; // the number of args
-            ops->push_back(tmp);
+            push_op(tmp);
         }
         break;
     }
@@ -529,7 +535,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->compile(node->upcast<BinaryNode>()->right()); \
         SharedPtr<OP> tmp = new OP; \
         tmp->op_type = (type); \
-        ops->push_back(tmp); \
+        push_op(tmp); \
         break; \
     }
 
@@ -547,16 +553,16 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
     // TODO: deprecate?
     case NODE_STMTS: {
-        ops->push_back(new OP(OP_NEXTSTATE));
+        push_op(new OP(OP_NEXTSTATE));
         this->compile(node->upcast<BinaryNode>()->left());
-        ops->push_back(new OP(OP_NEXTSTATE));
+        push_op(new OP(OP_NEXTSTATE));
         this->compile(node->upcast<BinaryNode>()->right());
         break;
     }
     case NODE_STMTS_LIST: {
         SharedPtr<ListNode> ln = node->upcast<ListNode>();
         for (int i=0; i<ln->size(); i++) {
-            ops->push_back(new OP(OP_NEXTSTATE));
+            push_op(new OP(OP_NEXTSTATE));
             this->compile(ln->at(i));
         }
         break;
@@ -594,7 +600,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
             SharedPtr<OP> jump_else = new OP;
             jump_else->op_type = OP_JUMP_IF_FALSE;
-            ops->push_back(jump_else);
+            push_op(jump_else);
 
             if (if_node->if_body()) {
                 this->compile(if_node->if_body());
@@ -602,7 +608,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
             SharedPtr<OP> jump_end = new OP;
             jump_end->op_type = OP_JUMP;
-            ops->push_back(jump_end);
+            push_op(jump_end);
 
             int else_label = ops->size();
             jump_else->operand.int_value = else_label;
@@ -634,22 +640,22 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<OP> jump_if_false = new OP;
         jump_if_false->op_type = OP_JUMP_IF_FALSE;
-        ops->push_back(jump_if_false);
+        push_op(jump_if_false);
 
         OP *enter = new OP(OP_ENTER_WHILE);
-        ops->push_back(enter);
+        push_op(enter);
         this->push_block(BLOCK_TYPE_BLOCK);
 
             this->compile(node->upcast<BinaryNode>()->right()); //body
 
-        ops->push_back(new OP(OP_LEAVE));
+        push_op(new OP(OP_LEAVE));
         enter->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
         SharedPtr<OP> goto_ = new OP;
         goto_->op_type = OP_JUMP;
         goto_->operand.int_value = label1;
-        ops->push_back(goto_);
+        push_op(goto_);
 
         int label2 = ops->size();
         jump_if_false->operand.int_value = label2;
@@ -674,7 +680,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             SharedPtr<OP> tmp = new OP();
             tmp->op_type = OP_GETGLOBAL;
             tmp->operand.int_value = global;
-            ops->push_back(tmp);
+            push_op(tmp);
         } else {
             // find local variable
             int level;
@@ -703,25 +709,25 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                     closure_vars->push_back(varname);
                     tmp->operand.int_value = closure_vars->size()-1;
                 }
-                ops->push_back(tmp);
+                push_op(tmp);
             } else {
                 if (is_arg) {
                     SharedPtr<OP> tmp = new OP;
                     tmp->op_type = OP_GETARG;
                     tmp->operand.int_value = no;
-                    ops->push_back(tmp);
+                    push_op(tmp);
                 } else if (level == 0) {
                     DBG2("LOCAL\n");
                     SharedPtr<OP> tmp = new OP;
                     tmp->op_type = OP_GETLOCAL;
                     tmp->operand.int_value = no;
-                    ops->push_back(tmp);
+                    push_op(tmp);
                 } else {
                     SharedPtr<OP> tmp = new OP;
                     DBG2("DYNAMIC\n");
                     tmp->op_type = OP_GETDYNAMIC;
                     tmp->operand.int_value = (((level)&0x0000ffff) << 16) | (no&0x0000ffff);
-                    ops->push_back(tmp);
+                    push_op(tmp);
                 }
             }
         }
@@ -751,7 +757,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         // extract
         OP* op = new OP(OP_EXTRACT_TUPLE);
         op->operand.int_value = ln->size();
-        ops->push_back(op);
+        push_op(op);
 
         // and set to variables
         // TODO use set_lvalue method?
@@ -769,7 +775,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                     auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
                     this->compile(index);
-                    ops->push_back(new OP(OP_SET_ITEM));
+                    push_op(new OP(OP_SET_ITEM));
                     break;
                 }
                 default: {
@@ -778,7 +784,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                     break;
                 }
             }
-            ops->push_back(new OP(OP_POP_TOP));
+            push_op(new OP(OP_POP_TOP));
         }
 
         break;
@@ -794,7 +800,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_MAKE_ARRAY;
         tmp->operand.int_value = args_len; // the number of args
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_MAKE_HASH: {
@@ -808,7 +814,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_MAKE_HASH;
         tmp->operand.int_value = args_len; // the number of args
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_GET_ITEM: {
@@ -817,14 +823,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
-        ops->push_back(tmp);
+        push_op(tmp);
         break;
     }
 
     case NODE_UNARY_NEGATIVE: {
         this->compile(node->upcast<NodeNode>()->node());
 
-        ops->push_back(new OP(OP_UNARY_NEGATIVE));
+        push_op(new OP(OP_UNARY_NEGATIVE));
 
         break;
     }
@@ -851,7 +857,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         */
 
         OP *enter = new OP(OP_ENTER_FOR);
-        ops->push_back(enter);
+        push_op(enter);
         this->push_block(BLOCK_TYPE_BLOCK);
 
         this->compile(node->upcast<ForNode>()->initialize());
@@ -860,7 +866,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<OP> jump_label2 = new OP;
         jump_label2->op_type = OP_JUMP_IF_FALSE;
-        ops->push_back(jump_label2);
+        push_op(jump_label2);
 
         {
             LoopContext lc(this, true);
@@ -872,12 +878,12 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         SharedPtr<OP> jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
         jump_label1->operand.int_value = label1;
-        ops->push_back(jump_label1);
+        push_op(jump_label1);
 
         int label2 = ops->size();
         jump_label2->operand.int_value = label2;
 
-        ops->push_back(new OP(OP_LEAVE));
+        push_op(new OP(OP_LEAVE));
         enter->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
@@ -913,14 +919,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         this->push_block(BLOCK_TYPE_BLOCK);
         OP *enter_foreach = new OP(OP_ENTER_FOREACH);
-        ops->push_back(enter_foreach);
+        push_op(enter_foreach);
 
         size_t label1 = ops->size();
 
-        ops->push_back(new OP(OP_FOR_ITER));
+        push_op(new OP(OP_FOR_ITER));
         SharedPtr<OP> jump_label2 = new OP();
         jump_label2->op_type = OP_JUMP_IF_STOP_EXCEPTION;
-        ops->push_back(jump_label2); // FIX ME?
+        push_op(jump_label2); // FIX ME?
 
         // store variables
         this->set_lvalue(node->upcast<ForEachNode>()->vars());
@@ -930,7 +936,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         SharedPtr<OP> jump_label1 = new OP;
         jump_label1->op_type = OP_JUMP;
         jump_label1->operand.int_value = label1;
-        ops->push_back(jump_label1);
+        push_op(jump_label1);
 
         size_t label2 = ops->size();
         jump_label2->operand.int_value = label2;
@@ -938,7 +944,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         enter_foreach->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
-        ops->push_back(new OP(OP_LEAVE));
+        push_op(new OP(OP_LEAVE));
 
         BOOST_FOREACH(auto n, last_labels) {
             *n = label2;
@@ -966,7 +972,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (mcn->method()->type == NODE_IDENTIFIER) {
             ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
-            ops->push_back(o);
+            push_op(o);
         } else {
             fprintf(stderr, "Compilation error. This is not a id.\n");
             error++;
@@ -976,13 +982,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<OP> op = new OP(OP_METHOD_CALL);
         op->operand.int_value = args_len;
-        ops->push_back(op);
+        push_op(op);
         break;
     }
     case NODE_NOT: {
         // ! $val
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_NOT));
+        push_op(new OP(OP_NOT));
         break;
     }
     case NODE_FILE_TEST: {
@@ -990,31 +996,31 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         OP *op = new OP(OP_FILE_TEST);
         op->operand.int_value = node->upcast<BinaryNode>()->left()->upcast<IntNode>()->int_value;
         this->compile(node->upcast<BinaryNode>()->right());
-        ops->push_back(op);
+        push_op(op);
         break;
     }
     case NODE_POST_DECREMENT: {
         // $i--
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_POST_DECREMENT));
+        push_op(new OP(OP_POST_DECREMENT));
         break;
     }
     case NODE_PRE_DECREMENT: {
         // --$i
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_PRE_DECREMENT));
+        push_op(new OP(OP_PRE_DECREMENT));
         break;
     }
     case NODE_POST_INCREMENT: {
         // $i++
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_POST_INCREMENT));
+        push_op(new OP(OP_POST_INCREMENT));
         break;
     }
     case NODE_PRE_INCREMENT: {
         // ++$i
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_PRE_INCREMENT));
+        push_op(new OP(OP_PRE_INCREMENT));
         break;
     }
     case NODE_TUPLE: {
@@ -1024,11 +1030,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
         OP *op = new OP(OP_MAKE_TUPLE);
         op->operand.int_value = ln->size();
-        ops->push_back(op);
+        push_op(op);
         break;
     }
     case NODE_DOTDOTDOT: {
-        ops->push_back(new OP(OP_DOTDOTDOT));
+        push_op(new OP(OP_DOTDOTDOT));
         break;
     }
     case NODE_TRY: {
@@ -1037,21 +1043,21 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         Compiler::TryGuard guard(this, true);
 
         OP *try_op = new OP(OP_TRY);
-        ops->push_back(try_op);
+        push_op(try_op);
 
         this->push_block(BLOCK_TYPE_TRY);
         OP *enter_op = new OP(OP_ENTER);
-        ops->push_back(enter_op);
+        push_op(enter_op);
 
         SharedPtr<NodeNode> n = node->upcast<NodeNode>();
         this->compile(n->node());
 
-        ops->push_back(new OP(OP_PUSH_UNDEF));
-        ops->push_back(new OP(OP_PUSH_UNDEF));
+        push_op(new OP(OP_PUSH_UNDEF));
+        push_op(new OP(OP_PUSH_UNDEF));
         OP *op = new OP(OP_MAKE_TUPLE);
         op->operand.int_value = 2;
-        ops->push_back(op);
-        ops->push_back(new OP(OP_RETURN));
+        push_op(op);
+        push_op(new OP(OP_RETURN));
 
         enter_op->operand.int_value = this->blocks->back()->vars.size();
 
@@ -1063,7 +1069,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_DIE: {
         this->compile(node->upcast<NodeNode>()->node());
-        ops->push_back(new OP(OP_DIE));
+        push_op(new OP(OP_DIE));
         break;
     }
     case NODE_USE: {
@@ -1072,7 +1078,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         // use Test::More qw(ok is); # => 1
         this->compile(node->upcast<BinaryNode>()->right());
         this->compile(node->upcast<BinaryNode>()->left());
-        ops->push_back(new OP(OP_USE));
+        push_op(new OP(OP_USE));
         break;
     }
 
@@ -1095,13 +1101,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         );
         OP *pkg = new OP(OP_PACKAGE_ENTER);
         pkg->operand.int_value = package_id;
-        ops->push_back(pkg);
+        push_op(pkg);
 
         if (n->block() != NULL) {
             this->compile(n->block());
         }
 
-        ops->push_back(new OP(OP_PACKAGE_LEAVE));
+        push_op(new OP(OP_PACKAGE_LEAVE));
         this->pop_block();
 
         this->in_class_context = false;
@@ -1115,7 +1121,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         } else {
             OP * op = new OP(OP_LAST);
             this->last_labels.push_back(&(op->operand.int_value));
-            ops->push_back(op);
+            push_op(op);
         }
         break;
     }
@@ -1133,9 +1139,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->compile(n->left());
 
         SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_FALSE);
-        ops->push_back(jump_else);
+        push_op(jump_else);
 
-        ops->push_back(new OP(OP_POP_TOP));
+        push_op(new OP(OP_POP_TOP));
         this->compile(n->right());
 
         jump_else->operand.int_value = ops->size();
@@ -1156,9 +1162,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->compile(n->left());
 
         SharedPtr<OP> jump_else = new OP(OP_JUMP_IF_TRUE);
-        ops->push_back(jump_else);
+        push_op(jump_else);
 
-        ops->push_back(new OP(OP_POP_TOP));
+        push_op(new OP(OP_POP_TOP));
         this->compile(n->right());
 
         jump_else->operand.int_value = ops->size();

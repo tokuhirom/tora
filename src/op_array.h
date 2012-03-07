@@ -8,6 +8,7 @@ namespace tora {
 class OPArray : public Prim {
 private:
     std::vector<OP*> ops;
+    std::vector<size_t> lineno;
 public:
     OPArray() { }
     ~OPArray() {
@@ -27,17 +28,24 @@ public:
     size_t size() const {
         return this->ops.size();
     }
-    void push_back(OP* o) {
+    void push_back(OP* o, size_t lineno) {
         o->retain();
         this->ops.push_back(o);
+        this->lineno.push_back(lineno);
     }
-    void push_back(SharedPtr<ValueOP>& o) {
+    void push_back(SharedPtr<ValueOP>& o, size_t lineno) {
         o->retain();
         this->ops.push_back(&(*(o)));
+        this->lineno.push_back(lineno);
     }
-    void push_back(SharedPtr<OP>& o) {
+    void push_back(const SharedPtr<OP>& o, size_t lineno) {
         o->retain();
         this->ops.push_back(&(*(o)));
+        this->lineno.push_back(lineno);
+    }
+
+    size_t get_lineno(size_t pc) {
+        return lineno[pc];
     }
 };
 

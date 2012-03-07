@@ -597,10 +597,12 @@ void VM::package_id(ID id) {
 void VM::handle_exception(const SharedPtr<Value> & exception) {
     assert(frame_stack->size() > 0);
 
+    int lineno = ops->get_lineno(pc);
+
     while (1) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value.c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
