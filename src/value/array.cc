@@ -28,10 +28,7 @@ void ArrayValue::sort() {
 // TODO: Array#stable_sort()
 
 SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
-    SharedPtr<Value> v = index->to_int();
-    if (v->is_exception()) { return v; }
-    SharedPtr<IntValue> iv = v->upcast<IntValue>();
-    int i = iv->int_value;
+    int i = index->to_int();
     if (i > (int)this->values->size()) {
         return UndefValue::instance();
     } else {
@@ -40,11 +37,7 @@ SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
 }
 
 Value* ArrayValue::set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
-    Value* idx_i = index->to_int();
-    if (idx_i->is_exception()) { return idx_i; }
-
-    SharedPtr<IntValue> iv = idx_i->upcast<IntValue>();
-    int i = iv->int_value;
+    int i = index->to_int();
     if ((int)this->values->size()-1 < i) {
         for (int j=this->values->size()-1; j<i-1; j++) {
             this->values->push_back(UndefValue::instance());

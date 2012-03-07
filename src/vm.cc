@@ -24,6 +24,8 @@
 #include "object/file.h"
 #include "object/socket.h"
 #include "object/internals.h"
+#include "object/caller.h"
+#include "object/code.h"
 
 #include "builtin.h"
 
@@ -110,55 +112,82 @@ void VM::init_globals(int argc, char**argv) {
 }
 
 /**
+ * binary addition operator
+ */
+Value * VM::op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
+            // upgrade to double type
+            return new DoubleValue(lhs->to_double() + rhs->to_double());
+        } else {
+            int i = rhs->to_int();
+            return new IntValue(lhs->upcast<IntValue>()->int_value + i);
+        }
+    } else if (lhs->value_type == VALUE_TYPE_STR) {
+        // TODO: support null terminated string
+        SharedPtr<Value> s(rhs->to_s());
+        return new StrValue(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
+    } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() + rhs->to_double());
+    } else {
+        SharedPtr<Value> s(lhs->to_s());
+        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
+    }
+}
+
+/**
  * subtract lhs and rhs.
  * return value must be return by caller.
  */
-Value * tora::VM::sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
+Value * tora::VM::op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
     if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
-            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - rhs->upcast<DoubleValue>()->double_value);
-        } else if (rhs->value_type == VALUE_TYPE_INT) {
-            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - (double)rhs->upcast<IntValue>()->int_value);
-        } else {
-            SharedPtr<Value> s(rhs->to_s());
-            this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
-        }
+        return new DoubleValue(lhs->to_double() - rhs->to_double());
     } else if (lhs->value_type == VALUE_TYPE_INT) {
-        IntValue* rhsi = rhs->to_int();
-        return new IntValue(lhs->upcast<IntValue>()->int_value - rhsi->int_value);
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            return new DoubleValue(lhs->to_double() - rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value - rhs->to_int());
+        }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        this->die("'%s' is not numeric. You cannot subtract.", s->upcast<StrValue>()->str_value.c_str());
     }
     abort();
 }
 
-template <class operationI, class operationD>
-void tora::VM::binop(operationI operation_i, operationD operation_d) {
-    SharedPtr<Value> v1(stack.back()); /* rvalue */
-    stack.pop_back();
-    SharedPtr<Value> v2(stack.back()); /* lvalue */
-    stack.pop_back();
-
-    if (v2->value_type == VALUE_TYPE_DOUBLE) {
-        if (v1->value_type == VALUE_TYPE_DOUBLE) {
-            Value* v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
-            stack.push_back(v);
-        } else if (v1->value_type == VALUE_TYPE_INT) {
-            Value *v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
-            stack.push_back(v);
+Value * tora::VM::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() / rhs->to_double());
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            lhs->dump();
+            rhs->dump();
+            return new DoubleValue(lhs->to_double() / rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value / rhs->upcast<IntValue>()->int_value);
         }
-    } else if (v2->value_type == VALUE_TYPE_INT) {
-        Value * v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
-        stack.push_back(v);
     } else { 
-        SharedPtr<Value> s(v2->to_s());
-        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric. You cannot divide.", s->upcast<StrValue>()->str_value.c_str());
     }
+    abort();
 }
 
-template void tora::VM::binop(std::multiplies<int> operation_i, std::multiplies<double> operation_d);
-template void tora::VM::binop(std::divides<int> operation_i, std::divides<double> operation_d);
+Value * tora::VM::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() * rhs->to_double());
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            return new DoubleValue(lhs->to_double() * rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value * rhs->upcast<IntValue>()->int_value);
+        }
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
 
 // TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
@@ -166,8 +195,8 @@ bool VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
  
     switch (lhs->value_type) {
     case VALUE_TYPE_INT: {
-        SharedPtr<IntValue> ie2 = rhs->to_int();
-        return operation_i(lhs->upcast<IntValue>()->int_value, ie2->int_value);
+        int ie2 = rhs->to_int();
+        return operation_i(lhs->upcast<IntValue>()->int_value, ie2);
     }
     case VALUE_TYPE_STR: {
         SharedPtr<Value> s2(rhs->to_s());
@@ -222,22 +251,22 @@ void VM::die(const SharedPtr<Value> & exception) {
     throw SharedPtr<Value>(exception);
 }
 
-static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
-    SharedPtr<Scanner> scanner(new Scanner(is));
+static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & package, const std::string & fname) {
+    Scanner scanner(is, fname);
 
     Node *yylval = NULL;
     int token_number;
     tora::Parser parser;
     do {
-        token_number = scanner->scan(&yylval);
-        parser.set_lineno(scanner->lineno());
+        token_number = scanner.scan(&yylval);
+        parser.set_lineno(scanner.lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);
-    if (scanner->in_heredoc()) {
-        return new ExceptionValue("Unexpected EOF in heredoc.");
+    if (scanner.in_heredoc()) {
+        throw new ExceptionValue("Unexpected EOF in heredoc.");
     }
     if (parser.is_failure()) {
-        return new ExceptionValue("Parsing failed.");
+        throw new ExceptionValue("Parsing failed.");
     }
 
     // compile
@@ -247,7 +276,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
     compiler.package(package);
     compiler.compile(parser.root_node());
     if (compiler.error) {
-        return new ExceptionValue("Compilation failed.");
+        throw new ExceptionValue("Compilation failed.");
     }
 
     // run it
@@ -289,16 +318,12 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
         return UndefValue::instance();
     }
 }
-static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
-    // TODO use current vm's package
-    return eval_foo(vm, is, "main");
-}
 
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
-    std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
-    return eval_foo(vm, ss);
+    std::stringstream ss(v->upcast<StrValue>()->str_value + ";");
+    return eval_foo(vm, &ss, vm->package_name(), "<eval>");
 }
 
 /**
@@ -306,9 +331,10 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
  */
 static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
-    std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value.c_str(), std::ios::in);
-    if (ifs->is_open()) {
-        return eval_foo(vm, ifs);
+    SharedPtr<StrValue> fname = v->to_s();
+    std::ifstream ifs(fname->str_value.c_str(), std::ios::in);
+    if (ifs.is_open()) {
+        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value);
     } else {
         return new ExceptionValue(v->upcast<StrValue>()->str_value + " : " + strerror(errno));
     }
@@ -348,18 +374,13 @@ SharedPtr<Value> VM::require(Value * v) {
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
             required->set_item(new StrValue(s), realfilename_value);
-            std::ifstream *ifs = new std::ifstream(realfilename.c_str());
-            SharedPtr<Value> ret;
-            if (ifs->is_open()) {
-                ret.reset(eval_foo(vm, ifs, package).get());
+            std::ifstream ifs(realfilename.c_str());
+            if (ifs.is_open()) {
+                SharedPtr<Value> ret = eval_foo(vm, &ifs, package, realfilename).get();
+                return ret;
             } else {
-                ret.reset(new ExceptionValue(realfilename + " : " + strerror(errno)));
-            }
-            if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                 required->set_item(new StrValue(s), UndefValue::instance());
-                return ret;
-            } else {
-                return ret;
+                throw new ExceptionValue(realfilename + " : " + strerror(errno));
             }
         }
     }
@@ -444,15 +465,24 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
 
 
 void VM::register_standard_methods() {
+    // language core
     Init_Array(this);
     Init_Str(this);
+    Init_Caller(this);
+    Init_Code(this);
+
+    // OS
     Init_Dir(this);
-    Init_Stat(this);
     Init_Env(this);
-    Init_JSON(this);
-    Init_Time(this);
-    Init_File(this);
+    Init_Stat(this);
     Init_Socket(this);
+    Init_File(this);
+    Init_Time(this);
+
+    // Utility
+    Init_JSON(this);
+
+    // misc
     Init_Internals(this);
 
     Init_builtins(this);
@@ -500,29 +530,6 @@ Package* VM::find_package(ID id) {
     }
 }
 
-void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
-    if (lhs->value_type == VALUE_TYPE_INT) {
-        Value * ie = rhs->to_int();
-        if (ie->is_exception()) { TODO(); }
-        SharedPtr<IntValue> iv = ie->upcast<IntValue>();
-        SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
-        stack.push_back(v);
-    } else if (lhs->value_type == VALUE_TYPE_STR) {
-        // TODO: support null terminated string
-        SharedPtr<StrValue>v = new StrValue();
-        SharedPtr<Value> s(rhs->to_s());
-        v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
-        stack.push_back(v);
-    } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        TODO();
-    } else {
-        SharedPtr<Value> s(lhs->to_s());
-        fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
-        rhs->dump();
-        lhs->dump();
-        exit(1); // TODO : die
-    }
-}
 
 SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
     switch (v->value_type) {
@@ -530,6 +537,8 @@ SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
         return new IntValue(-(v->upcast<IntValue>()->int_value));
     case VALUE_TYPE_DOUBLE:
         return new DoubleValue(-(v->upcast<DoubleValue>()->double_value));
+    case VALUE_TYPE_OBJECT:
+        TODO();
     default:
         return new ExceptionValue("%s is not a numeric. You cannot apply unary negative operator.\n", v->type_str());
     }
@@ -599,10 +608,12 @@ void VM::package_id(ID id) {
 void VM::handle_exception(const SharedPtr<Value> & exception) {
     assert(frame_stack->size() > 0);
 
+    int lineno = ops->get_lineno(pc);
+
     while (1) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s\n", exception->upcast<StrValue>()->str_value.c_str());
+                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value.c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());

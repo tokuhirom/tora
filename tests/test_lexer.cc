@@ -7,7 +7,7 @@ using namespace tora;
 
 #define TOKEN_IS(x) is(scanner.scan(&yylval), x)
 #define LVAL_STR_IS(x) is(yylval->upcast<StrNode>()->str_value, std::string(x));
-#define BEGIN(x) std::stringstream *ss = new std::stringstream(std::string(x)); Scanner scanner(ss); Node *yylval = NULL;
+#define BEGIN(x) std::stringstream ss(std::string((const char*)(x))); Scanner scanner(&ss, "<eval>"); Node *yylval = NULL;
 
 int main() {
     {
@@ -28,53 +28,41 @@ int main() {
         TOKEN_IS( 0 );
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("qw[];"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("qw[];");
         is(scanner.scan(&yylval), QW_START);
         is(scanner.scan(&yylval), QW_END);
         is(scanner.scan(&yylval), SEMICOLON);
         is(scanner.scan(&yylval), 0);
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("qw!!;"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("qw!!;");
         is(scanner.scan(&yylval), QW_START);
         is(scanner.scan(&yylval), QW_END);
         is(scanner.scan(&yylval), SEMICOLON);
         is(scanner.scan(&yylval), 0);
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("qw{};"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("qw{};");
         is(scanner.scan(&yylval), QW_START);
         is(scanner.scan(&yylval), QW_END);
         is(scanner.scan(&yylval), SEMICOLON);
         is(scanner.scan(&yylval), 0);
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("4649;"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("4649;");
         is(scanner.scan(&yylval), INT_LITERAL);
         is(scanner.scan(&yylval), SEMICOLON);
         is(scanner.scan(&yylval), 0);
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("3.14;"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("3.14;");
         is(scanner.scan(&yylval), DOUBLE_LITERAL);
         is(yylval->upcast<DoubleNode>()->double_value, 3.14);
         is(scanner.scan(&yylval), SEMICOLON);
         is(scanner.scan(&yylval), 0);
     }
     {
-        std::stringstream *ss = new std::stringstream(std::string("'ab\\'c';"));
-        Scanner scanner(ss);
-        Node *yylval;
+        BEGIN("'ab\\'c';");
         is(scanner.scan(&yylval), STRING_LITERAL);
         is(yylval->upcast<StrNode>()->str_value, std::string("ab'c"));
         is(scanner.scan(&yylval), SEMICOLON);

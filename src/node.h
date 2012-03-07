@@ -34,6 +34,7 @@ public:
     std::vector<SharedPtr<Node>> *list;
     typedef std::vector<SharedPtr<Node>>::iterator iterator;
     typedef std::vector<SharedPtr<Node>>::reverse_iterator reverse_iterator;
+    int lineno;
     Node() {
         type = NODE_UNKNOWN;
         list = new std::vector<SharedPtr<Node>>();

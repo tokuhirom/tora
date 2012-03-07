@@ -26,12 +26,12 @@ say($e);
 say($x);
 ...
 
-run_is(<<'...', '', qq{'hoge' is not numeric.\n}, 1);
+run_is(<<'...', '', qq{'hoge' is not numeric. You cannot divide. line 2.\n}, 1);
 my $x = "hoge";
 say($x/"fuga");
 ...
 
-run_is(<<'...', '', qq{Unknown function: foo\n}, 1);
+run_is(<<'...', '', qq{Unknown function: foo line 2.\n}, 1);
 foo();
 ...
 

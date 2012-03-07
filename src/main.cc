@@ -8,6 +8,8 @@
 #include <sstream>
 #include <memory>
 
+#include <boost/scoped_ptr.hpp>
+
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
@@ -68,22 +70,23 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::ifstream *ifs = NULL;
+    boost::scoped_ptr<std::ifstream> ifs;
+    boost::scoped_ptr<std::stringstream> ss;
     SharedPtr<Scanner> scanner;
     if (code) {
-        std::stringstream *s = new std::stringstream(std::string(code) + ";");
-        scanner = new Scanner(s);
+        ss.reset(new std::stringstream(std::string(code) + ";"));
+        scanner = new Scanner(ss.get(), "<eval>");
     } else if (optind < argc) { // source code
-        ifs = new std::ifstream(argv[optind], std::ios::in);
+        ifs.reset(new std::ifstream(argv[optind], std::ios::in));
         assert(ifs);
         if (!ifs->is_open()) {
             perror(argv[optind]);
             exit(EXIT_FAILURE);
         }
+        scanner = new Scanner(ifs.get(), argv[optind]);
         optind++;
-        scanner = new Scanner(ifs);
     } else {
-        scanner = new Scanner(&std::cin);
+        scanner = new Scanner(&std::cin, "<stdin>");
     }
 
 #ifndef NDEBUG

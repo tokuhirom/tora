@@ -107,32 +107,40 @@ OP_SETCLOSURE {
     *dst = *v;
 }
 
-OP_SUB {
-    const SharedPtr<Value>& rhs = stack.back();
+OP_ADD {
+    SharedPtr<Value> rhs = stack.back();
     stack.pop_back();
     const SharedPtr<Value>& lhs = stack.back();
-    Value * ret = this->sub(lhs, rhs);
+
+    Value * ret = this->op_add(lhs, rhs);
+    stack[stack.size()-1].reset(ret);
+}
+
+OP_SUB {
+    SharedPtr<Value> rhs = stack.back();
+    stack.pop_back();
+    const SharedPtr<Value>& lhs = stack.back();
+
+    Value * ret = this->op_sub(lhs, rhs);
     stack[stack.size()-1].reset(ret);
 }
 
 OP_DIV {
-    std::divides<int>    i;
-    std::divides<double> d;
-    this->binop(i, d);
+    SharedPtr<Value> rhs(stack.back()); /* rvalue */
+    stack.pop_back();
+    const SharedPtr<Value>& lhs = stack.back();
+
+    Value * ret = this->op_div(lhs, rhs);
+    stack[stack.size()-1].reset(ret);
 }
 
 OP_MUL {
-    std::multiplies<int>    i;
-    std::multiplies<double> d;
-    this->binop(i, d);
-}
+    SharedPtr<Value> rhs(stack.back()); /* rvalue */
+    stack.pop_back();
+    const SharedPtr<Value>& lhs = stack.back();
 
-OP_ADD {
-    SharedPtr<Value> v1(stack.back());
-    stack.pop_back();
-    SharedPtr<Value> v2(stack.back());
-    stack.pop_back();
-    this->add(v2, v1);
+    Value * ret = this->op_mul(lhs, rhs);
+    stack[stack.size()-1].reset(ret);
 }
 
 OP_BUILTIN_FUNCALL {
@@ -282,6 +290,7 @@ OP_METHOD_CALL {
         break;
     }
     case VALUE_TYPE_STR:
+    case VALUE_TYPE_CODE:
     case VALUE_TYPE_ARRAY:
     case VALUE_TYPE_FILE:
     case VALUE_TYPE_OBJECT:{
@@ -292,6 +301,8 @@ OP_METHOD_CALL {
             pkgid = this->symbol_table->get_id("Array");
         } else if (object->value_type == VALUE_TYPE_FILE) {
             pkgid = this->symbol_table->get_id("File");
+        } else if (object->value_type == VALUE_TYPE_CODE) {
+            pkgid = this->symbol_table->get_id("Code");
         } else if (object->value_type == VALUE_TYPE_OBJECT) {
             pkgid = object->upcast<ObjectValue>()->package_id();
         } else {

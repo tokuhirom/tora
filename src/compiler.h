@@ -47,6 +47,8 @@ public:
     bool in_loop_context;
     std::vector<int*> last_labels;
 
+    SharedPtr<Node> current_node;
+
     void package(const std::string & p) { package_ = p; }
     std::string & package() { return package_; }
 
@@ -134,6 +136,14 @@ public:
         va_end(ap);
 
         error++;
+    }
+
+    void push_op(OP * op);
+    void push_op(const SharedPtr<OP> & op) {
+        this->push_op(op.get());
+    }
+    void push_op(const SharedPtr<ValueOP> & op) {
+        this->push_op(op.get());
     }
 
     bool is_builtin(const std::string &s);

@@ -6,7 +6,6 @@ builtin functions
 
 stat()
 hex()
-caller()
 
 builtin objects
 ---------------
@@ -62,10 +61,8 @@ syntax
  * next with label
  * next
  * continue
- * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
- * caller()
  * $x or $y
  * $x and $y
  * $x | $y
@@ -75,18 +72,18 @@ syntax
  * dir()
  * file()
  * $x % $y
+ * overload(+) {
+      $a + $b;
+   }
 
 feature
 -------
 
-  * require
-  * import
-  * ENV
+  * use Test::More qw(is);
   * <DATA>
   * -n option
   * -p option
   * -i option
-  * __FILE__
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
@@ -95,7 +92,6 @@ feature
   * sub f() { { 1 => 2 } } f()
   * bignum support using ttmath?
   * for (1..10) { say($_) }
-  * statement scope
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
   * Bytes class.
@@ -132,4 +128,12 @@ Finished
  * last
  * $x && $y
  * $x || $y
+ * __FILE__
+  * __FILE__
+  * statement scope
+  * require
+  * import
+  * ENV
+ * to_double()
+ * caller()
 

@@ -33,20 +33,14 @@ const int GETFD(VM *vm, Value * self) {
  *
  */
 static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Value* type_v, Value* protocol_v) {
-    SharedPtr<Value> domain_i = domain_v->to_int();
-    if (domain_i->value_type == VALUE_TYPE_EXCEPTION) { return domain_i; }
-    int domain = domain_i->upcast<IntValue>()->int_value;
+    int domain = domain_v->to_int();
 
-    SharedPtr<Value> type_i = type_v->to_int();
-    if (type_i->value_type == VALUE_TYPE_EXCEPTION) { return type_i; }
-    int type = type_i->upcast<IntValue>()->int_value;
+    int type = type_v->to_int();
 #ifdef SOCK_CLOEXEC
     type |= SOCK_CLOEXEC;
 #endif
 
-    SharedPtr<Value> protocol_i = protocol_v->to_int();
-    if (protocol_i->value_type == VALUE_TYPE_EXCEPTION) { return protocol_i; }
-    int protocol = protocol_i->upcast<IntValue>()->int_value;
+    int protocol = protocol_v->to_int();
 
     int sock = socket(domain, type, protocol);
     if (sock == -1) {
@@ -86,8 +80,7 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
  */
 static SharedPtr<Value> sock_sockaddr_in(VM * vm, Value*klass, Value* port, Value* host) {
     // TODO: return bytes.
-    SharedPtr<Value> port_i = port->to_int();
-    if (port_i->is_exception()) { return port_i; }
+    int port_i = port->to_int();
 
     SharedPtr<Value> host_s = host->to_s();
     if (host_s->is_exception()) { return host_s; }
@@ -107,7 +100,7 @@ static SharedPtr<Value> sock_sockaddr_in(VM * vm, Value*klass, Value* port, Valu
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(port_i->upcast<IntValue>()->int_value);
+    sin.sin_port = htons(port_i);
     sin.sin_addr.s_addr = htonl(addr.s_addr);
 #  ifdef HAS_SOCKADDR_SA_LEN
     sin.sin_len = sizeof (sin);
@@ -181,10 +174,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             }
         }
     } else if (args.size() == 2) {
-        SharedPtr<Value> size_v = args.at(1)->to_int();
-        if (size_v->is_exception()) { return size_v; }
-
-        int size = size_v->upcast<IntValue>()->int_value;
+        int size = args.at(1)->to_int();
         boost::scoped_array<char> buf(new char[size]);
 #ifndef NDEBUG
         memset(buf.get(), 0, size);
@@ -215,10 +205,9 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
 }
 
 static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
-    SharedPtr<Value> queue_i = queue_v->to_int();
-    if (queue_i->is_exception()) { return queue_i; }
+    int queue = queue_v->to_int();
 
-    int ret = listen(GETFD(vm, self), queue_i->upcast<IntValue>()->int_value);
+    int ret = listen(GETFD(vm, self), queue);
     if (ret == 0) {
         return UndefValue::instance();
     } else {
@@ -227,11 +216,9 @@ static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
 }
 
 static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_v, Value* optname_v, Value *optval_v) {
-    SharedPtr<Value> level_i = level_v->to_int();
-    if (level_i->is_exception()) { return level_i; }
+    int level = level_v->to_int();
 
-    SharedPtr<Value> optname_i = optname_v->to_int();
-    if (optname_i->is_exception()) { return optname_i; }
+    int optname = optname_v->to_int();
 
     const void *optval;
     socklen_t optlen;
@@ -247,7 +234,7 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
         optlen = optval_s->upcast<StrValue>()->str_value.size();
     }
 
-    int ret = setsockopt(GETFD(vm, self), level_i->upcast<IntValue>()->int_value, optname_i->upcast<IntValue>()->int_value, optval, optlen);
+    int ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);
     if (ret == 0) {
         return UndefValue::instance();
     } else {

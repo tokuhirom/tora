@@ -1,0 +1,5 @@
+use Test::More *;
+
+is(__FILE__, "t/tra/__file__.tra");
+
+done_testing;
