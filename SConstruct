@@ -105,14 +105,16 @@ env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.p
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy && mv src/parser.c src/parser.cc');
 Clean(t, 'src/parser.out')
 
-lib = re2_env.Library('re2', re2files)
+libre2 = re2_env.Library('re2', re2files)
+# config.h
 with open('src/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
+
 tora = env.Program('tora', [
     ['src/main.cc'],
     libfiles,
-    lib
+    libre2
 ])
 Default(tora)
 

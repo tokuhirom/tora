@@ -17,10 +17,10 @@ using namespace tora;
  */
 static SharedPtr<Value> time_new(VM* vm, Value* klass, Value* t) {
     ObjectValue *o = new ObjectValue(klass->upcast<SymbolValue>()->id, vm);
-    SharedPtr<Value> iv = t->to_int();
+    time_t i = t->to_int();
 
     struct tm * buf = new tm;
-    struct tm * retlocal = localtime_r((const time_t *)&(iv->upcast<IntValue>()->int_value), buf);
+    struct tm * retlocal = localtime_r(&i, buf);
     if (!retlocal) {
         delete buf;
         return new ExceptionValue("Error in localtime_r: %s", strerror(errno));

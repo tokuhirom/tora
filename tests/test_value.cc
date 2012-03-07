@@ -5,9 +5,8 @@ using namespace tora;
 
 inline void X(const char *src, int expected) {
     SharedPtr<StrValue> v = new StrValue(src);
-    SharedPtr<Value> iev = v->to_int();
-    ok(!iev->is_exception());
-    is(iev->upcast<IntValue>()->int_value, expected);
+    int iev = v->to_int();
+    is(iev, expected);
 }
 
 int main() {

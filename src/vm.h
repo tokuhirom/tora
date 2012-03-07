@@ -145,8 +145,12 @@ public:
     SharedPtr<Value> get_self();
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
-    void add(const SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
-    Value * sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+
+    // binary operators
+    Value * op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+    Value * op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+    Value * op_div(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+    Value * op_mul(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
     const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);

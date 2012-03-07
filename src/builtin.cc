@@ -11,10 +11,7 @@
 using namespace tora;
 
 static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
-    assert(v->value_type == VALUE_TYPE_INT);
-    SharedPtr<Value> s(v->to_int());
-    if (s->is_exception()) { return s; }
-    exit(s->upcast<IntValue>()->int_value);
+    exit(v->to_int());
 }
 
 static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {

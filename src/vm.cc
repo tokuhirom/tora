@@ -110,42 +110,82 @@ void VM::init_globals(int argc, char**argv) {
 }
 
 /**
+ * binary addition operator
+ */
+Value * VM::op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
+            // upgrade to double type
+            return new DoubleValue(lhs->to_double() + rhs->to_double());
+        } else {
+            int i = rhs->to_int();
+            return new IntValue(lhs->upcast<IntValue>()->int_value + i);
+        }
+    } else if (lhs->value_type == VALUE_TYPE_STR) {
+        // TODO: support null terminated string
+        SharedPtr<Value> s(rhs->to_s());
+        return new StrValue(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
+    } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() + rhs->to_double());
+    } else {
+        SharedPtr<Value> s(lhs->to_s());
+        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
+    }
+}
+
+/**
  * subtract lhs and rhs.
  * return value must be return by caller.
  */
-Value * tora::VM::sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
+Value * tora::VM::op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
     if (lhs->value_type == VALUE_TYPE_DOUBLE) {
         return new DoubleValue(lhs->to_double() - rhs->to_double());
     } else if (lhs->value_type == VALUE_TYPE_INT) {
-        IntValue* rhsi = rhs->to_int();
-        return new IntValue(lhs->upcast<IntValue>()->int_value - rhsi->int_value);
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            return new DoubleValue(lhs->to_double() - rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value - rhs->to_int());
+        }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        this->die("'%s' is not numeric. You cannot subtract.", s->upcast<StrValue>()->str_value.c_str());
     }
     abort();
 }
 
-template <class operationI, class operationD>
-void tora::VM::binop(operationI operation_i, operationD operation_d) {
-    SharedPtr<Value> v1(stack.back()); /* rvalue */
-    stack.pop_back();
-    SharedPtr<Value> v2(stack.back()); /* lvalue */
-    stack.pop_back();
-
-    if (v2->value_type == VALUE_TYPE_DOUBLE) {
-        stack.push_back(new DoubleValue(operation_d(v2->to_double(), v1->to_double())));
-    } else if (v2->value_type == VALUE_TYPE_INT) {
-        Value * v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
-        stack.push_back(v);
+Value * tora::VM::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() / rhs->to_double());
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            lhs->dump();
+            rhs->dump();
+            return new DoubleValue(lhs->to_double() / rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value / rhs->upcast<IntValue>()->int_value);
+        }
     } else { 
-        SharedPtr<Value> s(v2->to_s());
-        this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric. You cannot divide.", s->upcast<StrValue>()->str_value.c_str());
     }
+    abort();
 }
 
-template void tora::VM::binop(std::multiplies<int> operation_i, std::multiplies<double> operation_d);
-template void tora::VM::binop(std::divides<int> operation_i, std::divides<double> operation_d);
+Value * tora::VM::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(lhs->to_double() * rhs->to_double());
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            return new DoubleValue(lhs->to_double() * rhs->to_double());
+        } else {
+            return new IntValue(lhs->upcast<IntValue>()->int_value * rhs->upcast<IntValue>()->int_value);
+        }
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
 
 // TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
@@ -153,8 +193,8 @@ bool VM::cmpop(operationI operation_i, operationD operation_d, OperationS operat
  
     switch (lhs->value_type) {
     case VALUE_TYPE_INT: {
-        SharedPtr<IntValue> ie2 = rhs->to_int();
-        return operation_i(lhs->upcast<IntValue>()->int_value, ie2->int_value);
+        int ie2 = rhs->to_int();
+        return operation_i(lhs->upcast<IntValue>()->int_value, ie2);
     }
     case VALUE_TYPE_STR: {
         SharedPtr<Value> s2(rhs->to_s());
@@ -479,25 +519,6 @@ Package* VM::find_package(ID id) {
     }
 }
 
-void VM::add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
-    if (lhs->value_type == VALUE_TYPE_INT) {
-        Value * ie = rhs->to_int();
-        SharedPtr<IntValue> iv = ie->upcast<IntValue>();
-        SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
-        stack.push_back(v);
-    } else if (lhs->value_type == VALUE_TYPE_STR) {
-        // TODO: support null terminated string
-        SharedPtr<StrValue>v = new StrValue();
-        SharedPtr<Value> s(rhs->to_s());
-        v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
-        stack.push_back(v);
-    } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        stack.push_back(new DoubleValue(lhs->to_double() + rhs->to_double()));
-    } else {
-        SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
-    }
-}
 
 SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
     switch (v->value_type) {
@@ -505,6 +526,8 @@ SharedPtr<Value> VM::unary_negative(const SharedPtr<Value> & v) {
         return new IntValue(-(v->upcast<IntValue>()->int_value));
     case VALUE_TYPE_DOUBLE:
         return new DoubleValue(-(v->upcast<DoubleValue>()->double_value));
+    case VALUE_TYPE_OBJECT:
+        TODO();
     default:
         return new ExceptionValue("%s is not a numeric. You cannot apply unary negative operator.\n", v->type_str());
     }

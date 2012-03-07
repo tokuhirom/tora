@@ -93,13 +93,16 @@ SharedPtr<StrValue> Value::to_s() {
     }
 }
 
-IntValue *Value::to_int() {
+int Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
-        // IntValue *v = new IntValue(this->upcast<IntValue>()->int_value);
-        return this->upcast<IntValue>();
+        return this->upcast<IntValue>()->int_value;
+    } else if (value_type == VALUE_TYPE_INT) {
+        return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
         if (this->upcast<TupleValue>()->size() == 1) {
             return this->upcast<TupleValue>()->at(0)->to_int();
+        } else {
+            throw new ExceptionValue("Cannot coerce tuple to integer");
         }
     } else if (value_type == VALUE_TYPE_STR) {
         StrValue *s = this->upcast<StrValue>();
@@ -107,18 +110,18 @@ IntValue *Value::to_int() {
         char *endptr = (char*)(s->str_value.c_str()+s->str_value.size());
         long ret = strtol(s->str_value.c_str(), &endptr, 10);
         if (errno == 0) {
-            return new IntValue(ret);
+            return ret;
         } else if (errno == EINVAL) {
-            throw SharedPtr<Value>(new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str()));
+            throw new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
         } else if (errno == ERANGE) {
             // try to the bigint?
             TODO();
         } else {
-            throw SharedPtr<Value>(new ExceptionValue(errno));
+            throw new ExceptionValue(errno);
         }
     }
 
-    throw SharedPtr<Value>(new ExceptionValue("to_i is not supported yet in %s\n", this->type_str()));
+    throw new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
 }
 
 ExceptionValue::ExceptionValue(const char *format, ...)

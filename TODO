@@ -75,6 +75,9 @@ syntax
  * file()
  * $x % $y
  * to_double()
+ * overload(+) {
+      $a + $b;
+   }
 
 feature
 -------
