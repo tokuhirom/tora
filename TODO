@@ -62,9 +62,6 @@ syntax
  * next
  * continue
  * $PROGRAM_NAME($0)
- * $x ** 2
- * $x or $y
- * $x and $y
  * $x | $y
  * $x & $y
  * $x << $y
@@ -72,9 +69,16 @@ syntax
  * dir()
  * file()
  * $x % $y
+ * callee()
  * overload(+) {
       $a + $b;
    }
+
+Pending
+-------
+
+ * $x or $y
+ * $x and $y
 
 feature
 -------
@@ -136,4 +140,5 @@ Finished
   * ENV
  * to_double()
  * caller()
+ * $x ** 2
 

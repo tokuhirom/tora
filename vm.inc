@@ -143,6 +143,15 @@ OP_MUL {
     stack[stack.size()-1].reset(ret);
 }
 
+OP_POW {
+    SharedPtr<Value> rhs = stack.back();
+    stack.pop_back();
+    const SharedPtr<Value>& lhs = stack.back();
+
+    Value * ret = this->op_pow(lhs, rhs);
+    stack[stack.size()-1].reset(ret);
+}
+
 OP_BUILTIN_FUNCALL {
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();

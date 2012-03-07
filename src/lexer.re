@@ -249,6 +249,7 @@ std:
     "+" { return ADD; }
     "!=" { return NE; }
     "-" { return SUB; }
+    "**" { return POW; }
     "*" { return MUL; }
     "/" {
         if (divable) {

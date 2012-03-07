@@ -151,6 +151,7 @@ public:
     Value * op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
     Value * op_div(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
     Value * op_mul(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+    Value * op_pow(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
     const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);

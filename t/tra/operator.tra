@@ -27,4 +27,9 @@ is(true  ||  true,  true);
 # do not run the rhs when lhs is true value
 is(true || fail(), true);
 
+# **
+is(3**3, 27);
+is(3**3.1, '30.1353');
+is(3.2**3.1, '36.8099');
+
 done_testing();

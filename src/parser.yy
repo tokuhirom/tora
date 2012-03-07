@@ -29,7 +29,6 @@
 
 Missing part is following:
 
-    **
     %
     & | ^ 
     *= -= &= |= ^= %=
@@ -53,7 +52,8 @@ Missing part is following:
 %nonassoc LT GT LE GE.
 %left ADD SUB.
 %left MUL DIV.
-%left PLUSPLUS MINUSMINUS.
+%right POW.
+%nonassoc PLUSPLUS MINUSMINUS.
 %right NOT.
 %left DOT.
 
@@ -368,6 +368,9 @@ multiplicative_expression(A) ::= multiplicative_expression(B) MUL unary_expressi
 }
 multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expression(C). {
     A = new BinaryNode(NODE_DIV, B, C);
+}
+multiplicative_expression(A) ::= multiplicative_expression(B) POW unary_expression(C). {
+    A = new BinaryNode(NODE_POW, B, C);
 }
 
 unary_expression(A) ::= postfix_expression(B). { A = B; }

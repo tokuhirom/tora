@@ -544,6 +544,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_SUB: C_OP_BINARY(OP_SUB);
     case NODE_MUL: C_OP_BINARY(OP_MUL);
     case NODE_DIV: C_OP_BINARY(OP_DIV);
+    case NODE_POW: C_OP_BINARY(OP_POW);
     case NODE_LT:  C_OP_BINARY(OP_LT);
     case NODE_GT:  C_OP_BINARY(OP_GT);
     case NODE_LE:  C_OP_BINARY(OP_LE);

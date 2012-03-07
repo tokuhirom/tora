@@ -16,6 +16,7 @@ void PP_OP_ADD();
 void PP_OP_SUB();
 void PP_OP_DIV();
 void PP_OP_MUL();
+void PP_OP_POW();
 void PP_OP_BUILTIN_FUNCALL();
 void PP_OP_NEXTSTATE();
 void PP_OP_FUNCALL();
