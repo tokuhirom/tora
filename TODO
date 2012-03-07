@@ -62,7 +62,6 @@ syntax
  * next with label
  * next
  * continue
- * __FILE__
  * $PROGRAM_NAME($0)
  * $x ** 2
  * caller()
@@ -86,7 +85,6 @@ feature
   * -n option
   * -p option
   * -i option
-  * __FILE__
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
@@ -132,4 +130,6 @@ Finished
  * last
  * $x && $y
  * $x || $y
+ * __FILE__
+  * __FILE__
 

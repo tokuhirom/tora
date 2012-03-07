@@ -41,6 +41,7 @@ private:
         std::string marker;
     };
     std::queue<HereDoc*> heredoc_queue;
+    std::string filename_;
  
 public:
 
@@ -68,7 +69,7 @@ public:
         (*string_buffer) << c;
     }
  
-    Scanner( std::istream *ifs_, int init_size=1024 )
+    Scanner( std::istream *ifs_, const std::string & filename, int init_size=1024 )
         : m_buffer(0)
         , m_cursor(0)
         , m_limit(0)
@@ -80,6 +81,7 @@ public:
         , string_buffer(NULL)
         , qw_mode('\0')
         , next_token(0)
+        , filename_(filename)
     {
         m_buffer = new char[m_buffer_size];
         assert(m_buffer);
@@ -88,7 +90,6 @@ public:
     }
  
     ~Scanner() {
-        if (ifs != &std::cin) { delete ifs; }
         delete [] m_buffer;
         if (string_buffer) { delete string_buffer; }
     }
@@ -375,6 +376,10 @@ std:
         *yylval = new IntNode(NODE_INT, this->lineno());
         divable = true;
         return INT_LITERAL;
+    }
+    "__FILE__" {
+        *yylval = new StrNode(NODE_STRING, this->filename_);
+        return STRING_LITERAL;
     }
     "\n__END__\n" {
         increment_line_number();

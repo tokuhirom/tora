@@ -222,22 +222,22 @@ void VM::die(const SharedPtr<Value> & exception) {
     throw SharedPtr<Value>(exception);
 }
 
-static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & package) {
-    SharedPtr<Scanner> scanner(new Scanner(is));
+static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & package, const std::string & fname) {
+    Scanner scanner(is, fname);
 
     Node *yylval = NULL;
     int token_number;
     tora::Parser parser;
     do {
-        token_number = scanner->scan(&yylval);
-        parser.set_lineno(scanner->lineno());
+        token_number = scanner.scan(&yylval);
+        parser.set_lineno(scanner.lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);
-    if (scanner->in_heredoc()) {
-        return new ExceptionValue("Unexpected EOF in heredoc.");
+    if (scanner.in_heredoc()) {
+        throw new ExceptionValue("Unexpected EOF in heredoc.");
     }
     if (parser.is_failure()) {
-        return new ExceptionValue("Parsing failed.");
+        throw new ExceptionValue("Parsing failed.");
     }
 
     // compile
@@ -247,7 +247,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
     compiler.package(package);
     compiler.compile(parser.root_node());
     if (compiler.error) {
-        return new ExceptionValue("Compilation failed.");
+        throw new ExceptionValue("Compilation failed.");
     }
 
     // run it
@@ -289,16 +289,12 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream * is, const std::string & 
         return UndefValue::instance();
     }
 }
-static SharedPtr<Value> eval_foo(VM *vm, std::istream * is) {
-    // TODO use current vm's package
-    return eval_foo(vm, is, "main");
-}
 
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
-    std::stringstream *ss = new std::stringstream(v->upcast<StrValue>()->str_value + ";");
-    return eval_foo(vm, ss);
+    std::stringstream ss(v->upcast<StrValue>()->str_value + ";");
+    return eval_foo(vm, &ss, vm->package_name(), "<eval>");
 }
 
 /**
@@ -306,9 +302,10 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
  */
 static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
-    std::ifstream *ifs = new std::ifstream(v->upcast<StrValue>()->str_value.c_str(), std::ios::in);
-    if (ifs->is_open()) {
-        return eval_foo(vm, ifs);
+    SharedPtr<StrValue> fname = v->to_s();
+    std::ifstream ifs(fname->str_value.c_str(), std::ios::in);
+    if (ifs.is_open()) {
+        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value);
     } else {
         return new ExceptionValue(v->upcast<StrValue>()->str_value + " : " + strerror(errno));
     }
@@ -348,18 +345,13 @@ SharedPtr<Value> VM::require(Value * v) {
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
             required->set_item(new StrValue(s), realfilename_value);
-            std::ifstream *ifs = new std::ifstream(realfilename.c_str());
-            SharedPtr<Value> ret;
-            if (ifs->is_open()) {
-                ret.reset(eval_foo(vm, ifs, package).get());
+            std::ifstream ifs(realfilename.c_str());
+            if (ifs.is_open()) {
+                SharedPtr<Value> ret = eval_foo(vm, &ifs, package, realfilename).get();
+                return ret;
             } else {
-                ret.reset(new ExceptionValue(realfilename + " : " + strerror(errno)));
-            }
-            if (ret->value_type == VALUE_TYPE_EXCEPTION) {
                 required->set_item(new StrValue(s), UndefValue::instance());
-                return ret;
-            } else {
-                return ret;
+                throw new ExceptionValue(realfilename + " : " + strerror(errno));
             }
         }
     }
