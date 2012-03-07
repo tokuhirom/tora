@@ -74,6 +74,7 @@ syntax
  * dir()
  * file()
  * $x % $y
+ * to_double()
 
 feature
 -------

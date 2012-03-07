@@ -21,6 +21,35 @@ bool Value::to_bool() {
     }
 }
 
+double Value::to_double() {
+    switch (value_type) {
+    case VALUE_TYPE_INT:
+        return static_cast<double>(static_cast<IntValue*>(this)->int_value);
+    case VALUE_TYPE_DOUBLE:
+        return static_cast<double>(static_cast<DoubleValue*>(this)->double_value);
+    case VALUE_TYPE_OBJECT:
+        TODO();
+    case VALUE_TYPE_BOOL:
+    case VALUE_TYPE_CODE:
+    case VALUE_TYPE_ARRAY:
+    case VALUE_TYPE_REGEXP:
+    case VALUE_TYPE_TUPLE:
+    case VALUE_TYPE_FILE:
+    case VALUE_TYPE_SYMBOL:
+    case VALUE_TYPE_ARRAY_ITERATOR:
+    case VALUE_TYPE_RANGE_ITERATOR:
+    case VALUE_TYPE_HASH_ITERATOR:
+    case VALUE_TYPE_HASH:
+    case VALUE_TYPE_POINTER:
+    case VALUE_TYPE_UNDEF:
+    case VALUE_TYPE_EXCEPTION:
+    case VALUE_TYPE_RANGE:
+    case VALUE_TYPE_STR:
+        throw new ExceptionValue("%s cannot support to convert double value.", this->type_str());
+    }
+    abort();
+}
+
 SharedPtr<StrValue> Value::to_s() {
     switch (value_type) {
     case VALUE_TYPE_STR:

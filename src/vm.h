@@ -145,7 +145,7 @@ public:
     SharedPtr<Value> get_self();
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
-    void add(SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
+    void add(const SharedPtr<Value>& v1, const SharedPtr<Value>& v2);
     Value * sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
     const SharedPtr<Value>& TOP() { return stack.back(); }

@@ -77,6 +77,7 @@ public:
     }
     SharedPtr<StrValue> to_s();
     IntValue *to_int();
+    double to_double();
     bool to_bool();
     bool is_numeric() {
         return this->value_type == VALUE_TYPE_INT;

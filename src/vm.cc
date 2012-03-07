@@ -115,14 +115,7 @@ void VM::init_globals(int argc, char**argv) {
  */
 Value * tora::VM::sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) {
     if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        if (rhs->value_type == VALUE_TYPE_DOUBLE) {
-            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - rhs->upcast<DoubleValue>()->double_value);
-        } else if (rhs->value_type == VALUE_TYPE_INT) {
-            return new DoubleValue(lhs->upcast<DoubleValue>()->double_value - (double)rhs->upcast<IntValue>()->int_value);
-        } else {
-            SharedPtr<Value> s(rhs->to_s());
-            this->die("'%s' is not numeric.", s->upcast<StrValue>()->str_value.c_str());
-        }
+        return new DoubleValue(lhs->to_double() - rhs->to_double());
     } else if (lhs->value_type == VALUE_TYPE_INT) {
         IntValue* rhsi = rhs->to_int();
         return new IntValue(lhs->upcast<IntValue>()->int_value - rhsi->int_value);
@@ -141,13 +134,7 @@ void tora::VM::binop(operationI operation_i, operationD operation_d) {
     stack.pop_back();
 
     if (v2->value_type == VALUE_TYPE_DOUBLE) {
-        if (v1->value_type == VALUE_TYPE_DOUBLE) {
-            Value* v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, v1->upcast<DoubleValue>()->double_value));
-            stack.push_back(v);
-        } else if (v1->value_type == VALUE_TYPE_INT) {
-            Value *v = new DoubleValue(operation_d(v2->upcast<DoubleValue>()->double_value, (double)v1->upcast<IntValue>()->int_value));
-            stack.push_back(v);
-        }
+        stack.push_back(new DoubleValue(operation_d(v2->to_double(), v1->to_double())));
     } else if (v2->value_type == VALUE_TYPE_INT) {
         Value * v = new IntValue(operation_i(v2->upcast<IntValue>()->int_value, v1->upcast<IntValue>()->int_value));
         stack.push_back(v);
@@ -492,10 +479,9 @@ Package* VM::find_package(ID id) {
     }
 }
 
-void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
+void VM::add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
     if (lhs->value_type == VALUE_TYPE_INT) {
         Value * ie = rhs->to_int();
-        if (ie->is_exception()) { TODO(); }
         SharedPtr<IntValue> iv = ie->upcast<IntValue>();
         SharedPtr<IntValue>v = new IntValue(lhs->upcast<IntValue>()->int_value + iv->int_value);
         stack.push_back(v);
@@ -506,13 +492,10 @@ void VM::add(SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
         v->set_str(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
         stack.push_back(v);
     } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        TODO();
+        stack.push_back(new DoubleValue(lhs->to_double() + rhs->to_double()));
     } else {
         SharedPtr<Value> s(lhs->to_s());
-        fprintf(stderr, "'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
-        rhs->dump();
-        lhs->dump();
-        exit(1); // TODO : die
+        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
     }
 }
 
