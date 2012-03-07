@@ -543,6 +543,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_ADD: C_OP_BINARY(OP_ADD);
     case NODE_SUB: C_OP_BINARY(OP_SUB);
     case NODE_MUL: C_OP_BINARY(OP_MUL);
+    case NODE_MOD: C_OP_BINARY(OP_MOD);
     case NODE_DIV: C_OP_BINARY(OP_DIV);
     case NODE_POW: C_OP_BINARY(OP_POW);
     case NODE_LT:  C_OP_BINARY(OP_LT);
@@ -554,6 +555,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_BITAND: C_OP_BINARY(OP_BITAND);
     case NODE_BITOR:  C_OP_BINARY(OP_BITOR);
     case NODE_BITXOR: C_OP_BINARY(OP_BITXOR);
+    case NODE_BITLSHIFT: C_OP_BINARY(OP_BITLSHIFT);
+    case NODE_BITRSHIFT: C_OP_BINARY(OP_BITRSHIFT);
 #undef C_OP_BINARY
 
     // TODO: deprecate?

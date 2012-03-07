@@ -165,10 +165,23 @@ OP_BITOR {
 
 OP_BITXOR {
     BINOP(op_bitxor);
-#undef BINOP
+}
+
+OP_BITLSHIFT {
+    BINOP(op_bitlshift);
+}
+
+OP_BITRSHIFT {
+    BINOP(op_bitrshift);
+}
+
+OP_MOD {
+    BINOP(op_modulo);
 }
 
 OP_BUILTIN_FUNCALL {
+#undef BINOP
+
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();
 

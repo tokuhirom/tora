@@ -233,6 +233,38 @@ Value * tora::VM::op_bitxor(const SharedPtr<Value> &lhs, const SharedPtr<Value> 
     abort();
 }
 
+Value * tora::VM::op_bitlshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() << rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot <<.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitrshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() >> rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_modulo(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        double x = lhs->to_int();
+        double y = rhs->to_int();
+        return new IntValue(x-y*floor(x/y));
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
 // TODO: return SharedPtr<Value>
 template <class operationI, class operationD, class OperationS>
 bool VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s, const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {

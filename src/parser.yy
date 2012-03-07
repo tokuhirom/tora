@@ -2,35 +2,33 @@
 /**
     perlop is following:
 
-           left        terms and list operators (leftward)
-           left        ->
-           nonassoc    ++ --
-           right       **
-           right       ! ~ \ and unary + and -
-           left        =~ !~
-           left        * / % x
-           left        + - .
-           left        << >>
-           nonassoc    named unary operators
-           nonassoc    < > <= >= lt gt le ge
-           nonassoc    == != <=> eq ne cmp ~~
-           left        &
-           left        | ^
-           left        &&
-           left        || //
-           nonassoc    ..  ...
-           right       ?:
-           right       = += -= *= etc.
-           left        , =>
-           nonassoc    list operators (rightward)
-           right       not
-           left        and
            left        or xor
+           left        and
+           right       not
+           nonassoc    list operators (rightward)
+           left        , =>
+           right       = += -= *= etc.
+           right       ?:
+           nonassoc    ..  ...
+           left        || //
+           left        &&
+           left        | ^
+           left        &
+           nonassoc    == != <=> eq ne cmp ~~
+           nonassoc    < > <= >= lt gt le ge
+           nonassoc    named unary operators
+           left        << >>
+           left        + - .
+           left        * / % x
+           left        =~ !~
+           right       ! ~ \ and unary + and -
+           right       **
+           nonassoc    ++ --
+           left        ->
+           left        terms and list operators (leftward)
 
 Missing part is following:
 
-    %
-    & | ^ 
     *= -= &= |= ^= %=
     not
     and
@@ -52,8 +50,9 @@ Missing part is following:
 %left BITAND.
 %nonassoc EQ.
 %nonassoc LT GT LE GE.
+%left BITLSHIFT BITRSHIFT.
 %left ADD SUB.
-%left MUL DIV.
+%left MUL DIV MOD.
 %right POW.
 %nonassoc PLUSPLUS MINUSMINUS.
 %right NOT.
@@ -364,6 +363,12 @@ relational_expression(A) ::= relational_expression(B) GE shift_expression(C). {
 }
 
 shift_expression(A) ::= additive_expression(B). { A = B; }
+shift_expression(A) ::= shift_expression(B) BITLSHIFT additive_expression(C). {
+    A = new BinaryNode(NODE_BITLSHIFT, B, C);
+}
+shift_expression(A) ::= shift_expression(B) BITRSHIFT additive_expression(C). {
+    A = new BinaryNode(NODE_BITRSHIFT, B, C);
+}
 
 additive_expression(A) ::= multiplicative_expression(B). { A = B; }
 additive_expression(A) ::= additive_expression(B) ADD multiplicative_expression(C). {
@@ -376,6 +381,9 @@ additive_expression(A) ::= additive_expression(B) SUB multiplicative_expression(
 multiplicative_expression(A) ::= unary_expression(B). { A = B; }
 multiplicative_expression(A) ::= multiplicative_expression(B) MUL unary_expression(C). {
     A = new BinaryNode(NODE_MUL, B, C);
+}
+multiplicative_expression(A) ::= multiplicative_expression(B) MOD unary_expression(C). {
+    A = new BinaryNode(NODE_MOD, B, C);
 }
 multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expression(C). {
     A = new BinaryNode(NODE_DIV, B, C);

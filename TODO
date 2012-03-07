@@ -62,12 +62,10 @@ syntax
  * next
  * continue
  * $PROGRAM_NAME($0)
- * $x << $y
- * $x >> $y
  * dir()
  * file()
- * $x % $y
  * callee()
+ * fiber
  * overload(+) {
       $a + $b;
    }
@@ -142,4 +140,7 @@ Finished
  * $x | $y
  * $x & $y
  * $x ^ $y
+ * $x << $y
+ * $x >> $y
+ * $x % $y
 
