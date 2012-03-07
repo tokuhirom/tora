@@ -78,9 +78,7 @@ syntax
 feature
 -------
 
-  * require
-  * import
-  * ENV
+  * use Test::More qw(is);
   * <DATA>
   * -n option
   * -p option
@@ -93,7 +91,6 @@ feature
   * sub f() { { 1 => 2 } } f()
   * bignum support using ttmath?
   * for (1..10) { say($_) }
-  * statement scope
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
   * Bytes class.
@@ -132,4 +129,8 @@ Finished
  * $x || $y
  * __FILE__
   * __FILE__
+  * statement scope
+  * require
+  * import
+  * ENV
 
