@@ -23,7 +23,7 @@ if os.uname()[0]=='Darwin':
     re2_env.Replace(CXX='clang++', CC='clang')
     env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
-    env.Append(CCFLAGS=['-Wno-unused-function'])
+    env.Append(CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T'])
     env.Append(CXXFLAGS=['-Wno-unneeded-internal-declaration'])
 else:
     re2_env.Replace(CXX='g++')
