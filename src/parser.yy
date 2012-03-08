@@ -156,6 +156,12 @@ statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
 statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN L_BRACE R_BRACE. {
     A = new ForEachNode(B, C, new VoidNode(NODE_VOID));
 }
+statement(A) ::= FOR L_PAREN expression(B) R_PAREN block(C). {
+    A = new ForEachNode(NULL, B, C);
+}
+statement(A) ::= FOR L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
+    A = new ForEachNode(NULL, B, new VoidNode(NODE_VOID));
+}
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
 statement(A) ::= class_statement(B). { A = B; }

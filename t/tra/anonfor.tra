@@ -1,0 +1,9 @@
+use Test::More *;
+
+my $i = 0;
+for (1..10) {
+    $i = $i + $_;
+}
+is($i, 55);
+
+done_testing;

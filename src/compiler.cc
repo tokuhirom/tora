@@ -938,7 +938,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(jump_label2); // FIX ME?
 
         // store variables
-        this->set_lvalue(node->upcast<ForEachNode>()->vars());
+        if (node->upcast<ForEachNode>()->vars()) {
+            this->set_lvalue(node->upcast<ForEachNode>()->vars());
+        } else {
+            SharedPtr<ListNode> nl = new ListNode(NODE_MY);
+            nl->push_back(new StrNode(NODE_GETVARIABLE, "$_"));
+            this->set_lvalue(nl.get());
+        }
 
         this->compile(node->upcast<ForEachNode>()->block());
 

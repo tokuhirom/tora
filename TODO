@@ -89,7 +89,6 @@ feature
   * undef == undef
   * === operator?
   * bignum support using ttmath?
-  * for (1..10) { say($_) }
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
   * Bytes class.
@@ -143,4 +142,5 @@ Finished
  * $x % $y
   * sub f() { { say('hoge') } } f()
   * sub f() { { 1 => 2 } } f()
+  * for (1..10) { say($_) }
 
