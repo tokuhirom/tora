@@ -50,6 +50,7 @@ sub vm_gen_cc {
 #include "value.h"
 #include "package_map.h"
 #include "package.h"
+#include "operator.h"
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/tuple.h"

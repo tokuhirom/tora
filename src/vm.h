@@ -117,7 +117,6 @@ public:
     void execute_normal();
     void execute_trace();
 
-    template <class operationI, class operationD> void binop(operationI operation_i, operationD operation_d);
     template <class operationI, class operationD, class operationS> bool cmpop(operationI operation_i, operationD operation_d, operationS operation_s, const SharedPtr<Value> & lhs, const SharedPtr<Value> & rhs);
 
     void init_globals(int argc, char**argv);
@@ -146,21 +145,7 @@ public:
 
     void call_native_func(const CallbackFunction* callback, int argcnt);
 
-    // binary operators
-    Value * op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_div(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_mul(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_modulo(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_pow(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_bitand(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_bitor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_bitxor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_bitlshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-    Value * op_bitrshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-
     const SharedPtr<Value>& TOP() { return stack.back(); }
-    SharedPtr<Value> unary_negative(const SharedPtr<Value>& v);
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
     void extract_tuple(const SharedPtr<TupleValue> &t);
 

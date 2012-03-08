@@ -1,6 +1,6 @@
+#include "compiler.h"
 #include "nodes.gen.h"
 #include "node.h"
-#include "compiler.h"
 #include "value/code.h"
 #include "value/symbol.h"
 #include "value/regexp.h"

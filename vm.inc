@@ -108,50 +108,32 @@ OP_SETCLOSURE {
 }
 
 OP_ADD {
-    SharedPtr<Value> rhs = stack.back();
-    stack.pop_back();
-    const SharedPtr<Value>& lhs = stack.back();
-
-    Value * ret = this->op_add(lhs, rhs);
-    stack[stack.size()-1].reset(ret);
-}
-
-OP_SUB {
-    SharedPtr<Value> rhs = stack.back();
-    stack.pop_back();
-    const SharedPtr<Value>& lhs = stack.back();
-
-    Value * ret = this->op_sub(lhs, rhs);
-    stack[stack.size()-1].reset(ret);
-}
-
-OP_DIV {
-    SharedPtr<Value> rhs(stack.back()); /* rvalue */
-    stack.pop_back();
-    const SharedPtr<Value>& lhs = stack.back();
-
-    Value * ret = this->op_div(lhs, rhs);
-    stack[stack.size()-1].reset(ret);
-}
-
-OP_MUL {
-    SharedPtr<Value> rhs(stack.back()); /* rvalue */
-    stack.pop_back();
-    const SharedPtr<Value>& lhs = stack.back();
-
-    Value * ret = this->op_mul(lhs, rhs);
-    stack[stack.size()-1].reset(ret);
-}
-
-OP_POW {
 #define BINOP(meth) \
+    do { \
     SharedPtr<Value> rhs = stack.back(); \
     stack.pop_back(); \
     const SharedPtr<Value>& lhs = stack.back(); \
     \
-    Value * ret = this->meth(lhs, rhs); \
+    Value * ret = meth(lhs, rhs); \
     stack[stack.size()-1].reset(ret); \
+    } while (0)
 
+    BINOP(op_add);
+}
+
+OP_SUB {
+    BINOP(op_sub);
+}
+
+OP_DIV {
+    BINOP(op_div);
+}
+
+OP_MUL {
+    BINOP(op_mul);
+}
+
+OP_POW {
     BINOP(op_pow);
 }
 
@@ -684,11 +666,8 @@ OP_SET_ITEM {
 }
 
 OP_UNARY_NEGATIVE {
-    const SharedPtr<Value>& v = TOP();
-    SharedPtr<Value> r = this->unary_negative(v);
-    if (r->is_exception()) { this->die(r); }
-    stack.pop_back();
-    stack.push_back(r);
+    const SharedPtr<Value>& v = stack.back();
+    stack[stack.size()-1].reset(op_unary_negative(v));
 }
 
 OP_MAKE_HASH {
