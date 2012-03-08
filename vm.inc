@@ -515,7 +515,7 @@ OP_EQ {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_NE {
@@ -526,7 +526,7 @@ OP_NE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GT {
@@ -537,7 +537,7 @@ OP_GT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LT {
@@ -548,7 +548,7 @@ OP_LT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GE {
@@ -559,7 +559,7 @@ OP_GE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LE {
@@ -570,7 +570,7 @@ OP_LE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(this->cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_SETLOCAL {

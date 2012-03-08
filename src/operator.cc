@@ -1,5 +1,6 @@
 #include "operator.h"
 #include "value.h"
+#include "ops.gen.h"
 
 using namespace tora;
 
@@ -169,4 +170,51 @@ Value* tora::op_unary_negative(const SharedPtr<Value> & v) {
         throw new ExceptionValue("%s is not a numeric. You cannot apply unary negative operator.\n", v->type_str());
     }
 }
+
+template <class operationI, class operationD, class OperationS>
+bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s, const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
+ 
+    switch (lhs->value_type) {
+    case VALUE_TYPE_INT: {
+        int ie2 = rhs->to_int();
+        return operation_i(lhs->upcast<IntValue>()->int_value, ie2);
+    }
+    case VALUE_TYPE_STR: {
+        SharedPtr<Value> s2(rhs->to_s());
+        return (operation_s(lhs->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
+    }
+    case VALUE_TYPE_DOUBLE: {
+        switch (rhs->value_type) {
+        case VALUE_TYPE_INT: {
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value, (double)rhs->upcast<IntValue>()->int_value));
+        }
+        case VALUE_TYPE_DOUBLE: {
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value, rhs->upcast<DoubleValue>()->double_value));
+        }
+        default: {
+            TODO(); // throw exception
+            abort();
+        }
+        }
+        break;
+    }
+    case VALUE_TYPE_BOOL: {
+        return lhs->upcast<BoolValue>()->bool_value == rhs->to_bool();
+    }
+    case VALUE_TYPE_UNDEF: {
+        return rhs->value_type == VALUE_TYPE_UNDEF;
+    }
+    default:
+        // TODO: support object comparation
+        throw new ExceptionValue("UNKNOWN MATCHING PATTERN\n");
+    }
+    abort();
+}
+
+template bool tora::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool tora::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool tora::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool tora::cmpop(std::less<int>, std::less<double>, std::less<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool tora::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
+template bool tora::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
 

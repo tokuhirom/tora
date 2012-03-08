@@ -23,6 +23,8 @@ Value * op_bitrshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 // unary operators
 Value* op_unary_negative(const SharedPtr<Value>& v);
 
+template <class operationI, class operationD, class operationS> bool cmpop(operationI operation_i, operationD operation_d, operationS operation_s, const SharedPtr<Value> & lhs, const SharedPtr<Value> & rhs);
+
 };
 
 #endif // TORA_OPERATOR_H_

@@ -117,7 +117,6 @@ public:
     void execute_normal();
     void execute_trace();
 
-    template <class operationI, class operationD, class operationS> bool cmpop(operationI operation_i, operationD operation_d, operationS operation_s, const SharedPtr<Value> & lhs, const SharedPtr<Value> & rhs);
 
     void init_globals(int argc, char**argv);
 

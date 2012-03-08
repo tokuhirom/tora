@@ -111,54 +111,6 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(new HashValue());
 }
 
-// TODO: return SharedPtr<Value>
-template <class operationI, class operationD, class OperationS>
-bool VM::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s, const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
- 
-    switch (lhs->value_type) {
-    case VALUE_TYPE_INT: {
-        int ie2 = rhs->to_int();
-        return operation_i(lhs->upcast<IntValue>()->int_value, ie2);
-    }
-    case VALUE_TYPE_STR: {
-        SharedPtr<Value> s2(rhs->to_s());
-        return (operation_s(lhs->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
-    }
-    case VALUE_TYPE_DOUBLE: {
-        switch (rhs->value_type) {
-        case VALUE_TYPE_INT: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value, (double)rhs->upcast<IntValue>()->int_value));
-        }
-        case VALUE_TYPE_DOUBLE: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value, rhs->upcast<DoubleValue>()->double_value));
-        }
-        default: {
-            TODO(); // throw exception
-            abort();
-        }
-        }
-        break;
-    }
-    case VALUE_TYPE_BOOL: {
-        return lhs->upcast<BoolValue>()->bool_value == rhs->to_bool();
-    }
-    case VALUE_TYPE_UNDEF: {
-        return rhs->value_type == VALUE_TYPE_UNDEF;
-    }
-    default:
-        // TODO: support object comparation
-        throw new ExceptionValue("UNKNOWN MATCHING PATTERN:: %s\n", opcode2name[ops->at(pc)->op_type]);
-    }
-    abort();
-}
-
-template bool VM::cmpop(std::equal_to<int>, std::equal_to<double>, std::equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-template bool VM::cmpop(std::greater<int>, std::greater<double>, std::greater<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-template bool VM::cmpop(std::greater_equal<int>, std::greater_equal<double>, std::greater_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-template bool VM::cmpop(std::less<int>, std::less<double>, std::less<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-template bool VM::cmpop(std::less_equal<int>, std::less_equal<double>, std::less_equal<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-template bool VM::cmpop(std::not_equal_to<int>, std::not_equal_to<double>, std::not_equal_to<std::string>, const SharedPtr<Value>&, const SharedPtr<Value> &);
-
 void VM::die(const char *format, ...) {
     va_list ap;
     char p[4096+1];
