@@ -1,0 +1,22 @@
+use Test::More *;
+
+my $a = [];
+$a.push(1);
+$a.push(2);
+is(JSON.encode($a), "[1,2]");
+
+is($a.pop(), 2);
+is(JSON.encode($a), "[1]");
+
+$a.unshift(10);
+is(JSON.encode($a), "[10,1]");
+
+my $n = $a.shift();
+is($n, 10);
+is(JSON.encode($a), "[1]");
+
+$a.push(5);
+is(JSON.encode($a), '[1,5]');
+is(JSON.encode($a.reverse()), '[5,1]');
+
+done_testing;

@@ -12,15 +12,11 @@ builtin objects
 
 Array.new()
 Array#sort!()
-Array#reverse()
 Array#map()
 Array#any()
 Array#shuffle()
 Array#flatten()
-Array#push()
-Array#pop()
-Array#shift()
-Array#unshift()
+Array#reverse!()
 
 for (my $e in dir('t')) { ... }
 dir('t').is_dir()
@@ -98,6 +94,12 @@ feature
     * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
     * https://metacpan.org/module/Guard
 
+benchmarking
+------------
+
+ * http://cpanidx.org/perlbench/
+ * http://shootout.alioth.debian.org/
+
 Library
 -------
 
@@ -143,4 +145,9 @@ Finished
   * sub f() { { say('hoge') } } f()
   * sub f() { { 1 => 2 } } f()
   * for (1..10) { say($_) }
+Array#push()
+Array#pop()
+Array#shift()
+Array#unshift()
+Array#reverse()
 

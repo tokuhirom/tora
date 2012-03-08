@@ -1,15 +1,16 @@
 #ifndef TORA_ARRAY_H_
 #define TORA_ARRAY_H_
 
+#include <deque>
 #include "../value.h"
 
 namespace tora {
 
 class ArrayValue: public Value {
 public:
-    std::vector<SharedPtr<Value>> *values;
+    std::deque<SharedPtr<Value>> *values;
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
-        this->values = new std::vector<SharedPtr<Value>>;
+        this->values = new std::deque<SharedPtr<Value>>;
     }
     ArrayValue(const ArrayValue & a);
     ~ArrayValue() {

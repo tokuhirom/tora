@@ -193,9 +193,8 @@ OP_BUILTIN_FUNCALL {
         this->extract_tuple(t);
     }
     if (!(stack.size() >= (size_t) argcnt)) {
-        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
         dump_stack();
-        abort();
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
     }
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
@@ -227,9 +226,8 @@ OP_FUNCALL {
     }
 #ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
-        printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
         dump_stack();
-        abort();
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
     }
 #endif
     ID id = funname->upcast<SymbolValue>()->id;

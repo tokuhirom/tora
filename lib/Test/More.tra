@@ -35,6 +35,11 @@ sub like($a, $b) {
     }
 }
 
+sub note($msg) {
+    say("# " + $msg);
+}
+
+
 sub done_testing() {
     say("1.." + $counter);
 }
