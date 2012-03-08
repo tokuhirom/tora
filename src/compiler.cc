@@ -1,9 +1,11 @@
 #include "compiler.h"
+#include "op_array.h"
 #include "nodes.gen.h"
 #include "node.h"
 #include "value/code.h"
 #include "value/symbol.h"
 #include "value/regexp.h"
+#include "symbol_table.h"
 #include "disasm.h"
 #include <boost/scope_exit.hpp>
 #include <boost/foreach.hpp>
@@ -41,6 +43,24 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
         }
         return ret;
     }
+}
+
+Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_) : in_class_context(false) {
+    error = 0;
+    blocks = new std::vector<SharedPtr<Block>>();
+    global_vars = new std::vector<std::string>();
+    ops = new OPArray();
+    in_try_block = false;
+    symbol_table = symbol_table_;
+    dump_ops = false;
+    package_ = "main";
+    closure_vars = new std::vector<std::string>();
+    in_loop_context = false;
+}
+Compiler::~Compiler() {
+    delete global_vars;
+    delete blocks;
+    delete closure_vars;
 }
 
 void Compiler::push_op(OP * op) {

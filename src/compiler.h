@@ -1,14 +1,20 @@
 #ifndef TORA_COMPILER_H_
 #define TORA_COMPILER_H_
 
-#include "node.h"
-#include "vm.h"
-#include "symbol_table.h"
 #include "shared_ptr.h"
-#include "op_array.h"
+#include "prim.h"
+#include "op.h"
 #include <stdarg.h>
+#include <vector>
+#include <string>
 
 namespace tora {
+
+class Node;
+class OPArray;
+class OP;
+class ValueOP;
+class SymbolTable;
 
 enum block_type_t {
     BLOCK_TYPE_BLOCK,
@@ -52,23 +58,9 @@ public:
     void package(const std::string & p) { package_ = p; }
     std::string & package() { return package_; }
 
-    Compiler(SharedPtr<SymbolTable> &symbol_table_) : in_class_context(false) {
-        error = 0;
-        blocks = new std::vector<SharedPtr<Block>>();
-        global_vars = new std::vector<std::string>();
-        ops = new OPArray();
-        in_try_block = false;
-        symbol_table = symbol_table_;
-        dump_ops = false;
-        package_ = "main";
-        closure_vars = new std::vector<std::string>();
-        in_loop_context = false;
-    }
-    ~Compiler() {
-        delete global_vars;
-        delete blocks;
-        delete closure_vars;
-    }
+    Compiler(const SharedPtr<SymbolTable> &symbol_table_);
+    ~Compiler();
+
     void define_my(SharedPtr<Node> node);
     void define_global_var(const char *name) {
         auto iter = global_vars->begin();
@@ -92,11 +84,9 @@ public:
     void init_globals();
     void compile(const SharedPtr<Node> & node);
     void push_block(block_type_t t) {
-        DBG("PUSH BLOCK: %d\n", this->blocks->size());
         this->blocks->push_back(new Block(t));
     }
     void pop_block() {
-        DBG("POP BLOCK: %d\n", this->blocks->size());
         this->blocks->pop_back();
     }
     void set_lvalue(SharedPtr<Node> node);
@@ -114,7 +104,6 @@ public:
             }
         }
         block->vars.push_back(new std::string(name));
-        DBG("Defined local variable: %s\n", name.c_str());
     }
     void dump_localvars() {
         printf("-- dump_localvars --\n");
