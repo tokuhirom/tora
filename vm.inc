@@ -28,7 +28,7 @@ OP_PUSH_STRING {
 
 OP_GETARG {
     int no = get_int_operand();
-    stack.push_back(stack.at(mark_stack.back() - no));
+    stack.push_back(stack.at(mark_stack.back() - no - 1));
 }
 
 OP_SETARG {
@@ -37,7 +37,7 @@ OP_SETARG {
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         rvalue = rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1);
     }
-    stack[mark_stack.back() - no].reset(rvalue.get());
+    stack[mark_stack.back() - no - 1].reset(rvalue.get());
 }
 
 OP_PUSH_VALUE {
@@ -257,7 +257,7 @@ OP_FUNCALL {
          *   | arg1 | <- mark, frame->top
          *   +------+
          */
-        mark_stack.push_back(stack.size()-1);
+        mark_stack.push_back(stack.size());
         frame_stack->push_back(fframe);
     } else {
         this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
@@ -311,7 +311,7 @@ OP_METHOD_CALL {
                     // TODO: vargs support
                     // TODO: kwargs support
                     assert(argcnt == (int)code->code_params->size());
-                    mark_stack.push_back(stack.size()-1);
+                    mark_stack.push_back(stack.size());
                     frame_stack->push_back(fframe);
                 }
             }
@@ -375,7 +375,7 @@ OP_METHOD_CALL {
                 // TODO: vargs support
                 // TODO: kwargs support
                 assert(argcnt == (int)code->code_params->size());
-                mark_stack.push_back(stack.size()-1);
+                mark_stack.push_back(stack.size());
                 frame_stack->push_back(fframe);
             }
         } else {
@@ -397,7 +397,7 @@ OP_METHOD_CALL {
                     // TODO: vargs support
                     // TODO: kwargs support
                     assert(argcnt == (int)code->code_params->size());
-                    mark_stack.push_back(stack.size()-1);
+                    mark_stack.push_back(stack.size());
                     frame_stack->push_back(fframe);
                 }
             } else {
@@ -430,9 +430,17 @@ OP_LAST {
 }
 
 OP_RETURN {
-    SharedPtr<Value> retval = stack.back();
-    stack.pop_back();
-
+    assert(mark_stack.size() > 0);
+    int top = mark_stack.back();
+    SharedPtr<Value> retval;
+    // printf("TOP: %zd, %d, %zd\n", mark_stack.size(), top, stack.size());
+    // dump_stack();
+    if (top < stack.size()) {
+        retval.reset(stack.back().get());
+        stack.pop_back();
+    } else {
+        retval.reset(UndefValue::instance());
+    }
     mark_stack.pop_back();
 
     // frame_stack->back()->dump();
@@ -454,7 +462,6 @@ OP_RETURN {
         } else if (frame->type == FRAME_TYPE_TRY) {
             TryFrame* tframe = static_cast<TryFrame*>(frame.get());
             pc = tframe->return_address;
-            // printf("RETURN :orig: %d, current: %d\n", tframe->top, stack.size());
 
             stack.resize(frame->top);
 
@@ -944,6 +951,7 @@ OP_TRY {
     TryFrame* fframe = new TryFrame(stack.size());
     fframe->return_address = get_int_operand()-1;
     frame_stack->push_back(fframe);
+    mark_stack.push_back(stack.size());
 }
 
 OP_DIE {
