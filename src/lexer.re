@@ -246,6 +246,14 @@ std:
         qw_mode = '[';
         return QW_START;
     }
+    "+=" { return ADD_ASSIGN; }
+    "-=" { return SUB_ASSIGN; }
+    "*=" { return MUL_ASSIGN; }
+    "/=" { return DIV_ASSIGN; }
+    "&=" { return AND_ASSIGN; }
+    "|=" { return OR_ASSIGN; }
+    "^=" { return XOR_ASSIGN; }
+    "%=" { return MOD_ASSIGN; }
     "+" { return ADD; }
     "!=" { return NE; }
     "-" { return SUB; }
@@ -338,7 +346,6 @@ std:
     "==" { return EQ; }
     "++" { return PLUSPLUS; }
     "--" { return MINUSMINUS; }
-    "/=" { return DIV_ASSIGN; }
     "-f" { *yylval = new IntNode(NODE_INT, 'f'); return FILE_TEST; }
     "-d" { *yylval = new IntNode(NODE_INT, 'd'); return FILE_TEST; }
     "-e" { *yylval = new IntNode(NODE_INT, 'e'); return FILE_TEST; }

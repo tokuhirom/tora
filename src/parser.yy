@@ -42,7 +42,7 @@ Missing part is following:
 %left L_BRACE R_BRACE.
 %left L_BRACKET R_BRACKET.
 
-%right ASSIGN DIV_ASSIGN.
+%right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN.
 %left DOTDOT.
 %left OROR.
 %left ANDAND.
@@ -306,8 +306,29 @@ assignment_expression(A) ::= conditional_expression(B). {
 assignment_expression(A) ::= conditional_expression(B) ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_SETVARIABLE, B, C);
 }
+assignment_expression(A) ::= conditional_expression(B) ADD_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_ADD_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) SUB_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_SUB_ASSIGN, B, C);
+}
 assignment_expression(A) ::= conditional_expression(B) DIV_ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_DIV_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) MUL_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_MUL_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) AND_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_AND_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) OR_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_OR_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) XOR_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_XOR_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) MOD_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_MOD_ASSIGN, B, C);
 }
 
 conditional_expression(A) ::= logical_or_expression(B). { A = B; }

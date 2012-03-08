@@ -39,9 +39,20 @@ String#replace(regexp|str, code)
 String#replace(regexp|str, str)
 String#match(regexp|str, code)
 
+Code#file
+Code#line
+
 syntax
 -------
 
+ * *=
+ * -=
+ * &=
+ * |=
+ * ^=
+ * %=
+ * +=
+ * "\u3042"
  * given-when
  * say $_ for $array;
  * unless () { }

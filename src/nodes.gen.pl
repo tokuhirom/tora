@@ -64,7 +64,6 @@ my @nodes = qw(
 
     NODE_FILE_TEST
 
-    NODE_DIV_ASSIGN
     NODE_RANGE
     NODE_REGEXP
     NODE_DOTDOTDOT
@@ -82,6 +81,15 @@ my @nodes = qw(
     NODE_REDO
     NODE_LAST
     NODE_NEXT
+
+    NODE_ADD_ASSIGN
+    NODE_SUB_ASSIGN
+    NODE_DIV_ASSIGN
+    NODE_MUL_ASSIGN
+    NODE_AND_ASSIGN
+    NODE_OR_ASSIGN
+    NODE_XOR_ASSIGN
+    NODE_MOD_ASSIGN
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';
