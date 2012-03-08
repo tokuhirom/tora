@@ -390,7 +390,6 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         funccomp.compile(funcdef_node->block());
         this->pop_block();
 
-        funccomp.push_op(new OP(OP_PUSH_UNDEF));
         funccomp.push_op(new OP(OP_RETURN));
         if (this->dump_ops) {
             Disasm::disasm(funccomp.ops);

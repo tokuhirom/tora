@@ -1,0 +1,11 @@
+use Test::More *;
+
+sub f() { { ok(true); } }
+sub e() { { 1 => 2 } } 
+sub g() { "YES" } 
+
+f();
+is(typeof(e()), 'hash');
+is(g(), "YES");
+
+done_testing;
