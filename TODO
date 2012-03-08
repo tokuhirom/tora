@@ -62,19 +62,19 @@ syntax
  * next
  * continue
  * $PROGRAM_NAME($0)
- * $x ** 2
- * $x or $y
- * $x and $y
- * $x | $y
- * $x & $y
- * $x << $y
- * $x >> $y
  * dir()
  * file()
- * $x % $y
+ * callee()
+ * fiber
  * overload(+) {
       $a + $b;
    }
+
+Pending
+-------
+
+ * $x or $y
+ * $x and $y
 
 feature
 -------
@@ -88,10 +88,7 @@ feature
   * [1,2,3].sort(^{ $_[0] <=> $_[1] })
   * undef == undef
   * === operator?
-  * sub f() { { say('hoge') } } f()
-  * sub f() { { 1 => 2 } } f()
   * bignum support using ttmath?
-  * for (1..10) { say($_) }
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
   * Bytes class.
@@ -136,4 +133,14 @@ Finished
   * ENV
  * to_double()
  * caller()
+ * $x ** 2
+ * $x | $y
+ * $x & $y
+ * $x ^ $y
+ * $x << $y
+ * $x >> $y
+ * $x % $y
+  * sub f() { { say('hoge') } } f()
+  * sub f() { { 1 => 2 } } f()
+  * for (1..10) { say($_) }
 

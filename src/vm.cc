@@ -160,8 +160,6 @@ Value * tora::VM::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
         return new DoubleValue(lhs->to_double() / rhs->to_double());
     } else if (lhs->value_type == VALUE_TYPE_INT) {
         if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
-            lhs->dump();
-            rhs->dump();
             return new DoubleValue(lhs->to_double() / rhs->to_double());
         } else {
             return new IntValue(lhs->upcast<IntValue>()->int_value / rhs->upcast<IntValue>()->int_value);
@@ -185,6 +183,84 @@ Value * tora::VM::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
     } else { 
         SharedPtr<Value> s(lhs->to_s());
         this->die("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_DOUBLE) {
+        return new DoubleValue(pow(lhs->to_double(), rhs->to_double()));
+    } else if (lhs->value_type == VALUE_TYPE_INT) {
+        if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
+            return new DoubleValue(pow(lhs->to_double(), rhs->to_double()));
+        } else {
+            return new IntValue((int)pow(lhs->to_double(), rhs->to_double()));
+        }
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not numeric. You cannot pow.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitand(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() & rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot and.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitor(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() | rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot bit or.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitxor(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() ^ rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot xor.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitlshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() << rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot <<.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_bitrshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        return new IntValue(lhs->to_int() >> rhs->to_int());
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
+    }
+    abort();
+}
+
+Value * tora::VM::op_modulo(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+    if (lhs->value_type == VALUE_TYPE_INT) {
+        double x = lhs->to_int();
+        double y = rhs->to_int();
+        return new IntValue(x-y*floor(x/y));
+    } else { 
+        SharedPtr<Value> s(lhs->to_s());
+        this->die("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
     }
     abort();
 }

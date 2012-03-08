@@ -2,36 +2,33 @@
 /**
     perlop is following:
 
-           left        terms and list operators (leftward)
-           left        ->
-           nonassoc    ++ --
-           right       **
-           right       ! ~ \ and unary + and -
-           left        =~ !~
-           left        * / % x
-           left        + - .
-           left        << >>
-           nonassoc    named unary operators
-           nonassoc    < > <= >= lt gt le ge
-           nonassoc    == != <=> eq ne cmp ~~
-           left        &
-           left        | ^
-           left        &&
-           left        || //
-           nonassoc    ..  ...
-           right       ?:
-           right       = += -= *= etc.
-           left        , =>
-           nonassoc    list operators (rightward)
-           right       not
-           left        and
            left        or xor
+           left        and
+           right       not
+           nonassoc    list operators (rightward)
+           left        , =>
+           right       = += -= *= etc.
+           right       ?:
+           nonassoc    ..  ...
+           left        || //
+           left        &&
+           left        | ^
+           left        &
+           nonassoc    == != <=> eq ne cmp ~~
+           nonassoc    < > <= >= lt gt le ge
+           nonassoc    named unary operators
+           left        << >>
+           left        + - .
+           left        * / % x
+           left        =~ !~
+           right       ! ~ \ and unary + and -
+           right       **
+           nonassoc    ++ --
+           left        ->
+           left        terms and list operators (leftward)
 
 Missing part is following:
 
-    **
-    %
-    & | ^ 
     *= -= &= |= ^= %=
     not
     and
@@ -49,11 +46,15 @@ Missing part is following:
 %left DOTDOT.
 %left OROR.
 %left ANDAND.
+%left BITOR BITXOR.
+%left BITAND.
 %nonassoc EQ.
 %nonassoc LT GT LE GE.
+%left BITLSHIFT BITRSHIFT.
 %left ADD SUB.
-%left MUL DIV.
-%left PLUSPLUS MINUSMINUS.
+%left MUL DIV MOD.
+%right POW.
+%nonassoc PLUSPLUS MINUSMINUS.
 %right NOT.
 %left DOT.
 
@@ -154,6 +155,12 @@ statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
 }
 statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN L_BRACE R_BRACE. {
     A = new ForEachNode(B, C, new VoidNode(NODE_VOID));
+}
+statement(A) ::= FOR L_PAREN expression(B) R_PAREN block(C). {
+    A = new ForEachNode(NULL, B, C);
+}
+statement(A) ::= FOR L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
+    A = new ForEachNode(NULL, B, new VoidNode(NODE_VOID));
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
@@ -325,10 +332,19 @@ logical_and_expression(A) ::= logical_and_expression(B) ANDAND inclusive_or_expr
 }
 
 inclusive_or_expression(A) ::= exclusive_or_expression(B). { A = B; }
+inclusive_or_expression(A) ::= inclusive_or_expression(B) BITOR exclusive_or_expression(C). {
+    A = new BinaryNode(NODE_BITOR, B, C);
+}
 
 exclusive_or_expression(A) ::= and_expression(B). { A = B; }
+exclusive_or_expression(A) ::= exclusive_or_expression(B) BITXOR and_expression(C). {
+    A = new BinaryNode(NODE_BITXOR, B, C);
+}
 
 and_expression(A) ::= equality_expression(B). { A = B; }
+and_expression(A) ::= and_expression(B) BITAND equality_expression(C). {
+    A = new BinaryNode(NODE_BITAND, B, C);
+}
 
 equality_expression(A) ::= relational_expression(B). { A = B; }
 equality_expression(A) ::= equality_expression(B) EQ relational_expression(C). {
@@ -353,6 +369,12 @@ relational_expression(A) ::= relational_expression(B) GE shift_expression(C). {
 }
 
 shift_expression(A) ::= additive_expression(B). { A = B; }
+shift_expression(A) ::= shift_expression(B) BITLSHIFT additive_expression(C). {
+    A = new BinaryNode(NODE_BITLSHIFT, B, C);
+}
+shift_expression(A) ::= shift_expression(B) BITRSHIFT additive_expression(C). {
+    A = new BinaryNode(NODE_BITRSHIFT, B, C);
+}
 
 additive_expression(A) ::= multiplicative_expression(B). { A = B; }
 additive_expression(A) ::= additive_expression(B) ADD multiplicative_expression(C). {
@@ -366,8 +388,14 @@ multiplicative_expression(A) ::= unary_expression(B). { A = B; }
 multiplicative_expression(A) ::= multiplicative_expression(B) MUL unary_expression(C). {
     A = new BinaryNode(NODE_MUL, B, C);
 }
+multiplicative_expression(A) ::= multiplicative_expression(B) MOD unary_expression(C). {
+    A = new BinaryNode(NODE_MOD, B, C);
+}
 multiplicative_expression(A) ::= multiplicative_expression(B) DIV unary_expression(C). {
     A = new BinaryNode(NODE_DIV, B, C);
+}
+multiplicative_expression(A) ::= multiplicative_expression(B) POW unary_expression(C). {
+    A = new BinaryNode(NODE_POW, B, C);
 }
 
 unary_expression(A) ::= postfix_expression(B). { A = B; }
@@ -407,6 +435,14 @@ postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
     A = new MethodCallNode(B, C, new ListNode());
+}
+postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN R_PAREN.  {
+    // $foo.();
+    A = new MethodCallNode(B, NULL, new ListNode());
+}
+postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN argument_list(C) R_PAREN.  {
+    // $foo.(1,2,3);
+    A = new MethodCallNode(B, NULL, C->upcast<ListNode>());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
@@ -474,6 +510,12 @@ primary_expression(A) ::= HEREDOC_START(B). {
 }
 primary_expression(A) ::= PACKAGE_LITERAL. {
     A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new ListNode());
+}
+primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN block(B). {
+    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), B);
+}
+primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN L_BRACE R_BRACE. {
+    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), new VoidNode(NODE_VOID));
 }
 
 /* qw */

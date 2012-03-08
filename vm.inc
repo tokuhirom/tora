@@ -143,7 +143,45 @@ OP_MUL {
     stack[stack.size()-1].reset(ret);
 }
 
+OP_POW {
+#define BINOP(meth) \
+    SharedPtr<Value> rhs = stack.back(); \
+    stack.pop_back(); \
+    const SharedPtr<Value>& lhs = stack.back(); \
+    \
+    Value * ret = this->meth(lhs, rhs); \
+    stack[stack.size()-1].reset(ret); \
+
+    BINOP(op_pow);
+}
+
+OP_BITAND {
+    BINOP(op_bitand);
+}
+
+OP_BITOR {
+    BINOP(op_bitor);
+}
+
+OP_BITXOR {
+    BINOP(op_bitxor);
+}
+
+OP_BITLSHIFT {
+    BINOP(op_bitlshift);
+}
+
+OP_BITRSHIFT {
+    BINOP(op_bitrshift);
+}
+
+OP_MOD {
+    BINOP(op_modulo);
+}
+
 OP_BUILTIN_FUNCALL {
+#undef BINOP
+
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();
 
@@ -343,9 +381,32 @@ OP_METHOD_CALL {
                 frame_stack->push_back(fframe);
             }
         } else {
-            funid->dump(1);
-            object->dump(1);
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<ObjectValue>()->package_id()).c_str());
+            if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("()") && object->value_type == VALUE_TYPE_CODE) {
+                int argcnt = get_int_operand();
+                SharedPtr<CodeValue> code = object->upcast<CodeValue>();
+                if (code->is_native()) {
+                    TODO();
+                } else {
+                    FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
+                    fframe->return_address = pc;
+                    fframe->argcnt = argcnt;
+                    fframe->code = code;
+                    fframe->self = object;
+
+                    pc = -1;
+                    this->ops = code->code_opcodes;
+
+                    // TODO: vargs support
+                    // TODO: kwargs support
+                    assert(argcnt == (int)code->code_params->size());
+                    mark_stack.push_back(stack.size()-1);
+                    frame_stack->push_back(fframe);
+                }
+            } else {
+                funid->dump(1);
+                object->dump(1);
+                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<ObjectValue>()->package_id()).c_str());
+            }
         }
         break;
     }

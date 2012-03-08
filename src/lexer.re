@@ -184,7 +184,7 @@ std:
         IDENTIFIER             = [A-Za-z_][A-Za-z0-9_]*;
         DOUBLE                 = ([1-9][0-9]*[.][0-9]+) | ([0][.][0-9]+);
         LF                     = "\\n";
-        HEREDOC_MARKER         = [A-Za-z0-9_]+;
+        HEREDOC_MARKER         = [A-Za-z_][A-Za-z0-9_]*;
         HEREDOC_START          = "<<" HEREDOC_MARKER;
         CLASS_NAME             = IDENTIFIER ( "::" IDENTIFIER )*;
     */
@@ -249,7 +249,9 @@ std:
     "+" { return ADD; }
     "!=" { return NE; }
     "-" { return SUB; }
+    "**" { return POW; }
     "*" { return MUL; }
+    "%" { return MOD; }
     "/" {
         if (divable) {
             return DIV;
@@ -356,6 +358,11 @@ std:
     "]" { divable = true; return R_BRACKET; }
     "||" { return OROR; }
     "&&" { return ANDAND; }
+    "|" { return BITOR; }
+    "&" { return BITAND; }
+    "^" { return BITXOR; }
+    "<<" { return BITLSHIFT; }
+    ">>" { return BITRSHIFT; }
     "=" { return ASSIGN; }
     "my" { return MY; }
     "true" { return TRUE; }

@@ -390,7 +390,6 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         funccomp.compile(funcdef_node->block());
         this->pop_block();
 
-        funccomp.push_op(new OP(OP_PUSH_UNDEF));
         funccomp.push_op(new OP(OP_RETURN));
         if (this->dump_ops) {
             Disasm::disasm(funccomp.ops);
@@ -431,6 +430,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
             push_op(define_method);
         }
+
+        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
 
         break;
     }
@@ -543,13 +544,20 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_ADD: C_OP_BINARY(OP_ADD);
     case NODE_SUB: C_OP_BINARY(OP_SUB);
     case NODE_MUL: C_OP_BINARY(OP_MUL);
+    case NODE_MOD: C_OP_BINARY(OP_MOD);
     case NODE_DIV: C_OP_BINARY(OP_DIV);
+    case NODE_POW: C_OP_BINARY(OP_POW);
     case NODE_LT:  C_OP_BINARY(OP_LT);
     case NODE_GT:  C_OP_BINARY(OP_GT);
     case NODE_LE:  C_OP_BINARY(OP_LE);
     case NODE_GE:  C_OP_BINARY(OP_GE);
     case NODE_EQ:  C_OP_BINARY(OP_EQ);
     case NODE_NE:  C_OP_BINARY(OP_NE);
+    case NODE_BITAND: C_OP_BINARY(OP_BITAND);
+    case NODE_BITOR:  C_OP_BINARY(OP_BITOR);
+    case NODE_BITXOR: C_OP_BINARY(OP_BITXOR);
+    case NODE_BITLSHIFT: C_OP_BINARY(OP_BITLSHIFT);
+    case NODE_BITRSHIFT: C_OP_BINARY(OP_BITRSHIFT);
 #undef C_OP_BINARY
 
     // TODO: deprecate?
@@ -930,7 +938,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(jump_label2); // FIX ME?
 
         // store variables
-        this->set_lvalue(node->upcast<ForEachNode>()->vars());
+        if (node->upcast<ForEachNode>()->vars()) {
+            this->set_lvalue(node->upcast<ForEachNode>()->vars());
+        } else {
+            SharedPtr<ListNode> nl = new ListNode(NODE_MY);
+            nl->push_back(new StrNode(NODE_GETVARIABLE, "$_"));
+            this->set_lvalue(nl.get());
+        }
 
         this->compile(node->upcast<ForEachNode>()->block());
 
@@ -970,14 +984,21 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->compile(args->back());
             args->pop_back();
         }
-        if (mcn->method()->type == NODE_IDENTIFIER) {
-            ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
+        if (mcn->method()) {
+            if (mcn->method()->type == NODE_IDENTIFIER) {
+                ID id = this->symbol_table->get_id(mcn->method()->upcast<StrNode>()->str_value);
+                SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+                push_op(o);
+            } else {
+                fprintf(stderr, "Compilation error. This is not a id.\n");
+                error++;
+                break;
+            }
+        } else {
+            // closure call
+            ID id = symbol_table->get_id("()");
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
             push_op(o);
-        } else {
-            fprintf(stderr, "Compilation error. This is not a id.\n");
-            error++;
-            break;
         }
         this->compile(mcn->object());
 
