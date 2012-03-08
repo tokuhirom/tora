@@ -1,5 +1,7 @@
 #include "nanotap.h"
-#include "../src/lexer.gen.h"
+#include "../src/lexer.h"
+#include "../src/nodes.gen.h"
+#include "../src/parser.h"
 #include <boost/scoped_ptr.hpp>
 #include <stdarg.h>
 

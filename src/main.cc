@@ -15,7 +15,6 @@
 #include "compiler.h"
 #include "node.h"
 #include "lexer.h"
-#include "lexer.gen.h"
 #include "parser.class.h"
 #include "token.gen.h"
 #include "disasm.h"

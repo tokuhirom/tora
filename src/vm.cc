@@ -32,7 +32,7 @@
 #include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <dirent.h>
-#include "lexer.gen.h"
+#include "lexer.h"
 #include "parser.class.h"
 #include "compiler.h"
 #include "disasm.h"
