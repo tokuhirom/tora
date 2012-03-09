@@ -3,7 +3,7 @@ use Test::More *;
 my $fh = open("t/dat/file/f1");
 ok($fh);
 is($fh.slurp(), "Hello, John.\n");
-is(typeof($fh.fileno()), "int");
+is(typeof($fh.fileno()), "Int");
 ok($fh.fileno() > 2);
 
 $fh.close();

@@ -810,7 +810,7 @@ OP_ENTER_FOREACH {
         iter->counter = 0;
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_RANGE) {
-        SharedPtr<RangeValue::iterator> iter = new RangeValue::iterator(a->upcast<RangeValue>());
+        SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a->upcast<RangeValue>());
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_HASH) {
         SharedPtr<HashValue::iterator> iter = new HashValue::iterator(a->upcast<HashValue>());
@@ -849,8 +849,6 @@ OP_ENTER_FOREACH {
 }
 
 OP_FOR_ITER {
-    // TOS is an iterator. Call its next() method. If this yields a new value, push it on the stack (leaving the iterator below it). If the iterator indicates it is exhausted TOS is popped, and the byte code counter is incremented by delta.
-
     auto fframe = frame_stack->back()->upcast<ForeachFrame>();
     assert(fframe->type == FRAME_TYPE_FOREACH);
     stack.resize(fframe->top);
@@ -870,9 +868,13 @@ OP_FOR_ITER {
         break;
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
-        RangeValue::iterator* riter = static_cast<RangeValue::iterator*>(iter.get());
+        RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
         if (riter->counter <= riter->parent->right->int_value) {
-            stack.push_back(new IntValue(riter->counter));
+            // peek(fframe->current_value.get());
+            const SharedPtr<Value> & cur = fframe->current_value;
+            IntValue * iv = new IntValue(riter->counter);
+            // fframe->current_value.reset(iv);
+            stack.push_back(iv);
             riter->counter++;
         } else {
             stack.push_back(new StopIterationExceptionValue());
@@ -928,7 +930,7 @@ OP_FOR_ITER {
 }
 
 OP_JUMP_IF_STOP_EXCEPTION {
-    SharedPtr<Value> top = stack.back();
+    const SharedPtr<Value> &top = stack.back();
     if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
         pc = get_int_operand()-1;
     }

@@ -2,7 +2,7 @@ use Test::More *;
 
 for (my $i in 1..100) {
     my $n = rand();
-    is(typeof($n), 'double');
+    is(typeof($n), 'Double');
     ok(0.0 <= $n);
     ok($n <= 1.0);
 }
@@ -10,7 +10,7 @@ for (my $i in 1..100) {
 # rand(int)
 for (my $i in 1..100) {
     my $n = rand(100);
-    is(typeof($n), 'int');
+    is(typeof($n), 'Int');
     ok(0 <= $n);
     ok($n <= 100);
 }
@@ -18,7 +18,7 @@ for (my $i in 1..100) {
 # rand(double)
 for (my $i in 1..100) {
     my $n = rand(100.0);
-    is(typeof($n), 'double');
+    is(typeof($n), 'Double');
     ok(0.0 <= $n);
     ok($n <= 100.0);
 }

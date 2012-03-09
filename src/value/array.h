@@ -44,7 +44,6 @@ public:
     }
     SharedPtr<Value> get_item(const SharedPtr<Value> &index);
     Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
-    virtual const char *type_str() { return "Array"; }
 
     class iterator : public Value {
     public:
@@ -52,7 +51,6 @@ public:
         SharedPtr<ArrayValue> parent;
         iterator() : Value(VALUE_TYPE_ARRAY_ITERATOR), counter(0) {
         }
-        const char *type_str() { return "array_iterator"; }
     };
 };
 

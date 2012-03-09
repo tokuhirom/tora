@@ -48,6 +48,7 @@ sub vm_gen_cc {
 #include "vm.h"
 #include "frame.h"
 #include "value.h"
+#include "peek.h"
 #include "package_map.h"
 #include "package.h"
 #include "operator.h"
@@ -92,7 +93,7 @@ void VM::<?= $method ?>() {
     };
 
     {
-        goto *JUMPTABLE[ops->at(pc)->op_type];
+        goto *JUMPTABLE[ops->op_type_at(pc)];
 
 ? for my $k (@{$_[0]}) {
         CODE_<?= $k->[0] ?>: {
@@ -101,7 +102,7 @@ void VM::<?= $method ?>() {
 ?       }
             PP_<?= $k->[0] ?>();
             pc++;
-            goto *JUMPTABLE[ops->at(pc)->op_type];
+            goto *JUMPTABLE[ops->op_type_at(pc)];
         }
 ? }
 

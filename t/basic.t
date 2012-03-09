@@ -133,7 +133,7 @@ if (true) { say("OK"); }
 say("HERE");
 ...
 
-run_is(<<'...', "str\nhash\n");
+run_is(<<'...', "Str\nHash\n");
 say(typeof("hoge"));
 say(typeof({}));
 ...

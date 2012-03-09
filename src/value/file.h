@@ -38,7 +38,6 @@ public:
             abort();
         }
     }
-    const char *type_str() { return "file"; }
 };
 
 };

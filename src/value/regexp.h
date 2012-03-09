@@ -42,7 +42,6 @@ public:
         print_indent(indent);
         printf("/%s/", re_value->pattern().c_str());
     }
-    const char * type_str() { return "regexp"; }
 };
 
 };

@@ -5,7 +5,7 @@ sub e() { { 1 => 2 } }
 sub g() { "YES" } 
 
 f();
-is(typeof(e()), 'hash');
+is(typeof(e()), 'Hash');
 is(g(), "YES");
 
 done_testing;

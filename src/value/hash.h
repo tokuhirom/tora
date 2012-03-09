@@ -20,7 +20,6 @@ public:
     void set(const std::string & key , const SharedPtr<Value>&val) {
         data[key] = val;
     }
-    const char *type_str() { return "hash"; }
 
     iter begin() { return data.begin(); }
     iter end()   { return data.end(); }

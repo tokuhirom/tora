@@ -5,7 +5,7 @@
 
 using namespace tora;
 
-const char *ObjectValue::type_str() {
+const char *ObjectValue::type_str() const {
     return vm_->symbol_table->id2name(package_id_).c_str();
 }
 

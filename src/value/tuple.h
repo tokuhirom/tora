@@ -20,7 +20,6 @@ public:
         printf("tuple is a read only value.\n");
         abort(); // TODO throw exception
     }
-    const char *type_str() { return "tuple"; }
 };
 
 };

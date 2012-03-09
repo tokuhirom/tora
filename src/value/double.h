@@ -11,7 +11,6 @@ public:
     DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
         this->double_value = d;
     }
-    const char *type_str() { return "double"; }
 };
 
 };

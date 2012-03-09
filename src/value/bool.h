@@ -22,7 +22,6 @@ public:
     static BoolValue* instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
-    const char *type_str() { return "bool"; }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }
 	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }

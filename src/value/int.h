@@ -14,7 +14,6 @@ public:
         this->int_value = i;
     }
     ~IntValue() { }
-    const char *type_str() { return "int"; }
     void tora__decr__() {
         this->int_value--;
     }

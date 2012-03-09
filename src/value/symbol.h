@@ -16,7 +16,6 @@ public:
         print_indent(indent);
         printf("[dump] Symbol: %d\n", id);
     }
-    const char *type_str() { return "symbol"; }
 };
 
 }

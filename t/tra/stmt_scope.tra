@@ -3,12 +3,12 @@ use Test::More *;
 for (my $i in 1..1) {
     (1,2);
     my $n = rand();
-    is(typeof($n), 'double');
+    is(typeof($n), 'Double');
 }
 
 for (my ($k, $v) in {"A" => "B"}) {
     my $n = rand();
-    is(typeof($n), 'double');
+    is(typeof($n), 'Double');
 }
 
 done_testing();

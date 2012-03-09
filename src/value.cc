@@ -4,10 +4,38 @@
 #include "value/range.h"
 #include "value/bool.h"
 #include "value/double.h"
+#include "value/object.h"
 #include <stdarg.h>
 #include <errno.h>
 
 using namespace tora;
+
+const char * Value::type_str() const {
+    switch (this->value_type) {
+    case VALUE_TYPE_RANGE: return "Range";
+    case VALUE_TYPE_BOOL: return "Bool";
+    case VALUE_TYPE_EXCEPTION: return "Exception";
+    case VALUE_TYPE_HASH: return "Hash";
+    case VALUE_TYPE_DOUBLE: return "Double";
+    case VALUE_TYPE_INT: return "Int";
+    case VALUE_TYPE_STR: return "Str";
+    case VALUE_TYPE_FILE: return "File";
+    case VALUE_TYPE_CODE: return "Code";
+    case VALUE_TYPE_TUPLE: return "Tuple";
+    case VALUE_TYPE_POINTER: return "Pointer";
+    case VALUE_TYPE_REGEXP: return "AbstractRegexp";
+    case VALUE_TYPE_RANGE_ITERATOR: return "Range::Iterator";
+    case VALUE_TYPE_ARRAY: return "Array";
+    case VALUE_TYPE_UNDEF: return "Undef";
+    case VALUE_TYPE_SYMBOL: return "Symbol";
+    case VALUE_TYPE_HASH_ITERATOR: return "Hash::Iterator";
+    case VALUE_TYPE_ARRAY_ITERATOR: return "Array::Iterator";
+    case VALUE_TYPE_OBJECT: {
+        return ((const ObjectValue*)this)->type_str();
+    }
+    }
+    abort();
+}
 
 bool Value::to_bool() {
     switch (value_type) {

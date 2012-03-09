@@ -8,7 +8,7 @@ is($err2, "OK");
 my ($err) = try {
     Socket.socket(99, 499, 552);
 };
-is(typeof($err), "exception");
+is(typeof($err), "Exception");
 
 my $err3;
 {

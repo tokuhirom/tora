@@ -62,7 +62,8 @@ public:
     int to_int();
     double to_double();
     bool to_bool();
-    bool is_numeric() {
+    bool is_numeric() const {
+        // TODO: remove?
         return this->value_type == VALUE_TYPE_INT;
     }
 
@@ -72,10 +73,10 @@ public:
     }
 
     // GET type name in const char*
-    const char *type_str();
+    const char *type_str() const;
 
 
-    bool is_exception() {
+    bool is_exception() const {
         return value_type == VALUE_TYPE_EXCEPTION;
     }
 };

@@ -27,7 +27,6 @@ public:
     void set_str(const std::string & s) {
         str_value = s;
     }
-    const char *type_str() { return "str"; }
 };
 
 };

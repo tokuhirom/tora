@@ -50,7 +50,6 @@ public:
         }
         printf("----------------\n");
     }
-    const char *type_str() { return "Code"; }
 };
 
 };

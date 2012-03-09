@@ -99,6 +99,7 @@ private:
 class ForeachFrame : public LexicalVarsFrame {
 public:
     SharedPtr<Value> iter;
+    SharedPtr<Value> current_value;
     ForeachFrame(int vars_cnt, size_t top) : LexicalVarsFrame(vars_cnt, top, FRAME_TYPE_FOREACH) { }
 };
 

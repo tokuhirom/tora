@@ -25,6 +25,9 @@ public:
         return this->ops.at(i);
 #endif
     }
+    const op_type_t op_type_at(size_t i) const {
+        return this->ops[i]->op_type;
+    }
     size_t size() const {
         return this->ops.size();
     }

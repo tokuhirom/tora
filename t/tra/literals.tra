@@ -1,6 +1,6 @@
 use Test::More *;
 
-is(typeof(0.0), 'double');
+is(typeof(0.0), 'Double');
 
 done_testing();
 

@@ -13,17 +13,15 @@ public:
     SharedPtr<IntValue> right;
 
     RangeValue(SharedPtr<IntValue> l, SharedPtr<IntValue> r);
-    const char *type_str() { return "range"; }
 
-    class iterator : public Value {
+    class Iterator : public Value {
     public:
         int counter;
         SharedPtr<RangeValue> parent;
-        iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
-            parent = parent_;
+        Iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
+            parent  = parent_;
             counter = parent->left->int_value;
         }
-        const char *type_str() { return "array_iterator"; }
     };
 };
 

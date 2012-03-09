@@ -5,9 +5,8 @@
 #include <stdio.h>
 
 #define PRIM_DECL(klass) \
-protected: \
-    int refcnt; \
 public: \
+    int refcnt; \
     void release() { \
         --refcnt; \
         if (refcnt == 0) { \

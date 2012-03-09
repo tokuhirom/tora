@@ -12,7 +12,6 @@ public:
     static UndefValue *instance() {
         return new UndefValue();
     }
-    const char *type_str() { return "undef"; }
 };
 
 };

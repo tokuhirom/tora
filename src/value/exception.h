@@ -30,7 +30,6 @@ public:
             return message_;
         }
     }
-    const char *type_str() { return "exception"; }
 };
 
 class StopIterationExceptionValue : public ExceptionValue {
