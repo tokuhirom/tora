@@ -145,39 +145,24 @@ statement(A) ::= SEMICOLON. {
 }
 statement(A) ::= jump_statement(B). { A = B; }
 statement(A) ::= if_statement(B).   { A = B; }
-statement(A) ::= WHILE L_PAREN expression(B) R_PAREN block(C). {
+statement(A) ::= WHILE L_PAREN expression(B) R_PAREN maybe_block(C). {
     A = new BinaryNode(NODE_WHILE, B, C);
 }
-statement(A) ::= WHILE L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
-    A = new BinaryNode(NODE_WHILE, B, new ListNode(NODE_STMTS_LIST));
-}
-statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN block(E). {
+statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN maybe_block(E). {
     A = new ForNode(B, C, D, E);
 }
-statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN L_BRACE R_BRACE. {
-    A = new ForNode(B, C, D, new VoidNode(NODE_VOID));
-}
-statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN block(D). {
+statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN maybe_block(D). {
     A = new ForEachNode(B, C, D);
 }
-statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN L_BRACE R_BRACE. {
-    A = new ForEachNode(B, C, new VoidNode(NODE_VOID));
-}
-statement(A) ::= FOR L_PAREN expression(B) R_PAREN block(C). {
+statement(A) ::= FOR L_PAREN expression(B) R_PAREN maybe_block(C). {
     A = new ForEachNode(NULL, B, C);
-}
-statement(A) ::= FOR L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
-    A = new ForEachNode(NULL, B, new VoidNode(NODE_VOID));
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }
 statement(A) ::= class_statement(B). { A = B; }
 
-class_statement(A) ::= CLASS identifier(B) block(C). {
+class_statement(A) ::= CLASS identifier(B) maybe_block(C). {
     A = new ClassNode(B, NULL, NULL, C);
-}
-class_statement(A) ::= CLASS identifier(B) L_BRACE R_BRACE. {
-    A = new ClassNode(B, NULL, NULL, NULL);
 }
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
@@ -185,49 +170,38 @@ jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     A = B;
 }
 
-if_statement(A) ::= UNLESS L_PAREN expression(B) R_PAREN block(C). {
+if_statement(A) ::= UNLESS expression(B) maybe_block(C). {
     A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, B), C, NULL);
 }
-if_statement(A) ::= UNLESS L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
-    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, B), NULL, NULL);
-}
 
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
+if_statement(A) ::= IF expression(B) maybe_block(C). {
     A = new IfNode(NODE_IF, B, C, NULL);
 }
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
-    A = new IfNode(NODE_IF, B, NULL, NULL);
-}
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
+if_statement(A) ::= IF expression(B) maybe_block(C) elsif_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
 }
-if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+if_statement(A) ::= IF expression(B) maybe_block(C) else_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
 }
-elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C). {
+elsif_clause(A) ::= ELSIF expression(B) maybe_block(C). {
     A = new IfNode(NODE_IF, B, C, NULL);
 }
-elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) else_clause(D). {
+elsif_clause(A) ::= ELSIF expression(B) maybe_block(C) else_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
 }
-elsif_clause(A) ::= ELSIF L_PAREN expression(B) R_PAREN block(C) elsif_clause(D). {
+elsif_clause(A) ::= ELSIF expression(B) maybe_block(C) elsif_clause(D). {
     A = new IfNode(NODE_IF, B, C, D);
 }
-else_clause(A) ::= ELSE block(B). {
+else_clause(A) ::= ELSE maybe_block(B). {
     A = B;
 }
 
-sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN block(D). {
+sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN maybe_block(D). {
     A = new FuncdefNode(B, C->upcast<ListNode>(), D);
 }
-sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN L_BRACE R_BRACE. {
-    A = new FuncdefNode(B, C->upcast<ListNode>(), new VoidNode(NODE_VOID));
-}
-sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN block(C). {
+sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
+    /* sub foo() { } */
     A = new FuncdefNode(B, new ListNode(), C);
-}
-sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN L_BRACE R_BRACE. {
-    A = new FuncdefNode(B, new ListNode(), new VoidNode(NODE_VOID));
 }
 
 parameter_list(A) ::= expression(B). {
@@ -456,7 +430,7 @@ unary_expression(A) ::= SUB unary_expression(B). {
     A = new NodeNode(NODE_UNARY_NEGATIVE, B);
 }
 /* my ($err, $ret) = try { }; */
-unary_expression(A) ::= TRY block(B). {
+unary_expression(A) ::= TRY maybe_block(B). {
     A = new NodeNode(NODE_TRY, B);
 }
 unary_expression(A) ::= LAMBDA maybe_block(C). {
@@ -555,11 +529,8 @@ primary_expression(A) ::= HEREDOC_START(B). {
 primary_expression(A) ::= PACKAGE_LITERAL. {
     A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new ListNode());
 }
-primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN block(B). {
+primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN maybe_block(B). {
     A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), B);
-}
-primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN L_BRACE R_BRACE. {
-    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), new VoidNode(NODE_VOID));
 }
 
 /* qw */
