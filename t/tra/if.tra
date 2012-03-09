@@ -5,5 +5,16 @@ $i++ if true;
 is($i, 1);
 $i++ if false;
 is($i, 1);
+$i++ unless false;
+is($i, 2);
+$i++ unless true;
+is($i, 2);
+
+unless (true) {
+    fail();
+}
+my $n = 0;
+unless (false) { $n++ }
+is($n, 1);
 
 done_testing();

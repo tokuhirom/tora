@@ -1,0 +1,10 @@
+use Test::More *;
+
+my ($x, $y) = (1,2);
+is($x, 1);
+is($y, 2);
+($x,$y) = ($y,$x);
+is($x, 2);
+is($y, 1);
+
+done_testing;

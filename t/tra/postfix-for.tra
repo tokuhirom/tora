@@ -1,5 +1,7 @@
 use Test::More *;
 
-ok(1);
+my $n =0;
+$n += $_ for 1..10;
+is($n, 55);
 
 done_testing;

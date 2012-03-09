@@ -232,6 +232,7 @@ std:
         return INT_LITERAL;
     }
     "if" { return IF; }
+    "unless" { return UNLESS; }
     "undef" { return UNDEF; }
     "in" { return IN; }
     "class" { return CLASS; }

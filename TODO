@@ -45,18 +45,8 @@ Code#line
 syntax
 -------
 
- * *=
- * -=
- * &=
- * |=
- * ^=
- * %=
- * +=
  * "\u3042"
  * given-when
- * say $_ for $array;
- * unless () { }
- * x unless foo;
  * $array.map(^{ say($_); });
  * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
@@ -162,4 +152,14 @@ Array#pop()
 Array#shift()
 Array#unshift()
 Array#reverse()
+ * *=
+ * -=
+ * &=
+ * |=
+ * ^=
+ * %=
+ * +=
+ * say $_ for $array;
+ * unless () { }
+ * x unless foo;
 

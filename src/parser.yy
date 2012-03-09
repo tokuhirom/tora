@@ -130,8 +130,14 @@ expression(A) ::= REDO. {
 statement(A) ::= expression(B) SEMICOLON . {
     A = B;
 }
+statement(A) ::= expression(B) UNLESS expression(C) SEMICOLON. {
+    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, C), B, NULL);
+}
 statement(A) ::= expression(B) IF expression(C) SEMICOLON. {
     A = new IfNode(NODE_IF, C, B, NULL);
+}
+statement(A) ::= expression(B) FOR expression(C) SEMICOLON. {
+    A = new ForEachNode(NULL, C, B);
 }
 statement(A) ::= SEMICOLON. {
     A = new VoidNode(NODE_VOID);
@@ -176,6 +182,13 @@ class_statement(A) ::= CLASS identifier(B) L_BRACE R_BRACE. {
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;
     A = B;
+}
+
+if_statement(A) ::= UNLESS L_PAREN expression(B) R_PAREN block(C). {
+    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, B), C, NULL);
+}
+if_statement(A) ::= UNLESS L_PAREN expression(B) R_PAREN L_BRACE R_BRACE. {
+    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, B), NULL, NULL);
 }
 
 if_statement(A) ::= IF L_PAREN expression(B) R_PAREN block(C). {
