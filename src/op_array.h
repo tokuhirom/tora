@@ -5,7 +5,8 @@
 
 namespace tora {
 
-class OPArray : public Prim {
+class OPArray {
+    PRIM_DECL(OPArray)
 private:
     std::vector<OP*> ops;
     std::vector<size_t> lineno;
