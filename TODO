@@ -69,6 +69,12 @@ syntax
       $a + $b;
    }
 
+
+lambda
+------
+
+
+
 Pending
 -------
 

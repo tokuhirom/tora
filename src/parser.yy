@@ -434,7 +434,8 @@ unary_expression(A) ::= TRY maybe_block(B). {
     A = new NodeNode(NODE_TRY, B);
 }
 unary_expression(A) ::= LAMBDA maybe_block(C). {
-    A = new BinaryNode(NODE_LAMBDA, NULL, C);
+    A = new FuncdefNode(NULL, new ListNode(), C);
+    A->type = NODE_LAMBDA;
 }
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }

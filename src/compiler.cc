@@ -374,6 +374,91 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         break;
     }
+    case NODE_LAMBDA: {
+        /*
+        struct {
+            std::vector<Node*> *params;
+            Node *block;
+        } funcdef;
+        
+        putcodevalue v
+        make_function
+        */
+
+        Compiler::TryGuard guard(this, false);
+
+        auto funcdef_node = node->upcast<FuncdefNode>();
+
+        // function name
+
+        this->push_block(BLOCK_TYPE_FUNCDEF);
+        auto params = new std::vector<std::string *>();
+        /*
+        for (size_t i=0; i<funcdef_node->params()->size(); i++) {
+            params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+            this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+        }
+        */
+        params->push_back(new std::string("$_"));
+        this->define_localvar(std::string("$_"));
+
+        Compiler funccomp(this->symbol_table);
+        if (funccomp.blocks) {
+            delete funccomp.blocks;
+            funccomp.blocks = NULL;
+        }
+        funccomp.package(this->package());
+        funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
+        if (funcdef_node->block()) {
+            funccomp.compile(funcdef_node->block());
+        }
+        this->pop_block();
+
+        funccomp.push_op(new OP(OP_RETURN));
+        if (this->dump_ops) {
+            Disasm::disasm(funccomp.ops);
+        }
+
+        // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
+
+        SharedPtr<CodeValue> code = new CodeValue(
+            this->symbol_table->get_id("<lambda>"), // package id
+            this->symbol_table->get_id("<lambda>") // func name id
+        );
+        code->code_params = params;
+        code->code_opcodes = funccomp.ops;
+        code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
+
+        // if (funccomp.closure_vars->size() > 0) {
+            // create closure
+            // push variables  to stack.
+            auto iter = funccomp.closure_vars->begin();
+            for (; iter!=funccomp.closure_vars->end(); iter++) {
+                this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+            }
+
+            SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
+            push_op(putval);
+
+            // define method.
+            SharedPtr<OP> op = new OP(OP_CLOSUREDEF);
+            op->operand.int_value = funccomp.closure_vars->size();
+            push_op(op);
+        // } else {
+            /*
+            SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
+            push_op(putval);
+
+            // create normal function
+            SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
+            push_op(define_method);
+            */
+        // }
+
+        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
+
+        break;
+    }
     case NODE_FUNCDEF: {
         /*
         struct {
