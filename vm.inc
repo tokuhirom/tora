@@ -49,8 +49,12 @@ OP_PUSH_VALUE {
 OP_NEW_RANGE {
     SharedPtr<Value> l = stack.back();
     stack.pop_back();
-    SharedPtr<Value> r = stack.back(); stack.pop_back();
-    stack.push_back(new RangeValue(l->upcast<IntValue>(), r->upcast<IntValue>()));
+    SharedPtr<Value> r = stack.back();
+    stack.pop_back();
+
+    SharedPtr<IntValue> l2 = l->value_type == VALUE_TYPE_INT ? l->upcast<IntValue>() : new IntValue(l->to_int());
+    SharedPtr<IntValue> r2 = r->value_type == VALUE_TYPE_INT ? r->upcast<IntValue>() : new IntValue(r->to_int());
+    stack.push_back(new RangeValue(l2, r2));
 }
 
 OP_FUNCDEF {
@@ -850,8 +854,9 @@ OP_FOR_ITER {
     auto fframe = frame_stack->back()->upcast<ForeachFrame>();
     assert(fframe->type == FRAME_TYPE_FOREACH);
     stack.resize(fframe->top);
-    SharedPtr<Value> iter = fframe->iter;
-    if (iter->value_type == VALUE_TYPE_ARRAY_ITERATOR) {
+    const SharedPtr<Value> & iter = fframe->iter;
+    switch (iter->value_type) {
+    case VALUE_TYPE_ARRAY_ITERATOR: {
         SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();
         if (aiter->counter < aiter->parent->size()) {
             SharedPtr<Value> val = aiter->parent->at(aiter->counter);
@@ -862,16 +867,19 @@ OP_FOR_ITER {
         } else {
             stack.push_back(new StopIterationExceptionValue());
         }
-    } else if (iter->value_type == VALUE_TYPE_RANGE_ITERATOR) {
-        SharedPtr<RangeValue::iterator> riter = iter->upcast<RangeValue::iterator>();
+        break;
+    }
+    case VALUE_TYPE_RANGE_ITERATOR: {
+        RangeValue::iterator* riter = static_cast<RangeValue::iterator*>(iter.get());
         if (riter->counter <= riter->parent->right->int_value) {
-            SharedPtr<IntValue> val = new IntValue(riter->counter);
+            stack.push_back(new IntValue(riter->counter));
             riter->counter++;
-            stack.push_back(val);
         } else {
             stack.push_back(new StopIterationExceptionValue());
         }
-    } else if (iter->value_type == VALUE_TYPE_HASH_ITERATOR) {
+        break;
+    }
+    case VALUE_TYPE_HASH_ITERATOR: {
         SharedPtr<HashValue::iterator> riter = iter->upcast<HashValue::iterator>();
         if (!riter->finished()) {
             SharedPtr<Value> key = riter->getkey();
@@ -884,7 +892,9 @@ OP_FOR_ITER {
         } else {
             stack.push_back(new StopIterationExceptionValue());
         }
-    } else if (iter->value_type == VALUE_TYPE_OBJECT) {
+        break;
+    }
+    case VALUE_TYPE_OBJECT: {
         ObjectValue * o = iter->upcast<ObjectValue>();
         Package *pkg = this->find_package(o->package_id());
         auto iter = pkg->find(this->symbol_table->get_id("__next__"));
@@ -910,7 +920,9 @@ OP_FOR_ITER {
         } else {
             this->die("'%s' does not have a '__next__' method.", symbol_table->id2name(o->package_id()).c_str());
         }
-    } else {
+        break;
+    }
+    default:
         this->die("[BUG] TOS is not a iterator object: %s.", iter->type_str());
     }
 }

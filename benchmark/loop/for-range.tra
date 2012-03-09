@@ -1,6 +1,8 @@
+my $max = $ARGV.size() > 0 ? 0+$ARGV[0] : 30000000;
+say($max);
 my $foo;
-for (1..30000000) {
-    $foo = $_
+for (1..$max) {
+    $foo = $_;
 }
 say($foo);
 

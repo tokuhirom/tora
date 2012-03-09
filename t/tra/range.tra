@@ -1,0 +1,10 @@
+use Test::More *;
+
+my $n = 0+'10';
+my $r = 0;
+for (1..$n) {
+    $r += $_;
+}
+is($r, 55);
+
+done_testing;

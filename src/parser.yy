@@ -484,7 +484,7 @@ primary_expression(A) ::= int(B). { A = B; }
 primary_expression(A) ::= DOUBLE_LITERAL(B). {
     A = B;
 }
-primary_expression(A) ::= int(B) DOTDOT int(C). {
+primary_expression(A) ::= primary_expression(B) DOTDOT primary_expression(C). {
     A = new BinaryNode(NODE_RANGE, B, C);
 }
 primary_expression(A) ::= FALSE. {

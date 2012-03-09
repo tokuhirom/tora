@@ -65,7 +65,7 @@ public:
 
     template<class Y>
     Y* upcast() {
-        return dynamic_cast<Y*>(&(*(this)));
+        return static_cast<Y*>(&(*(this)));
     }
 
 };
