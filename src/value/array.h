@@ -8,6 +8,8 @@ namespace tora {
 
 class ArrayValue: public Value {
 public:
+    typedef std::deque<SharedPtr<Value>>::iterator iterator2;
+
     std::deque<SharedPtr<Value>> *values;
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
         this->values = new std::deque<SharedPtr<Value>>;
@@ -17,6 +19,9 @@ public:
         delete values;
     }
     void sort();
+
+    iterator2 begin() { return values->begin(); }
+    iterator2 end()   { return values->end();   }
 
     // retain before push
     void push(Value *v) {
@@ -37,15 +42,6 @@ public:
     SharedPtr<Value>at(int i) {
         return this->values->at(i);
     }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] %s(%zd):\n", this->type_str(), values->size());
-        for (size_t i=0; i<values->size(); i++) {
-            print_indent(indent+1);
-            printf("[%zd] ", i);
-            values->at(i)->dump(indent+1);
-        }
-    }
     SharedPtr<Value> get_item(const SharedPtr<Value> &index);
     Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
     virtual const char *type_str() { return "Array"; }
@@ -55,11 +51,6 @@ public:
         int counter;
         SharedPtr<ArrayValue> parent;
         iterator() : Value(VALUE_TYPE_ARRAY_ITERATOR), counter(0) {
-        }
-        void dump(int indent) {
-            print_indent(indent);
-            printf("[dump] array_iterator(%d):\n", counter);
-            parent->dump(indent+1);
         }
         const char *type_str() { return "array_iterator"; }
     };

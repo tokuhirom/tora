@@ -1,10 +1,12 @@
-#include "../shared_ptr.h"
-#include "../vm.h"
-#include "../value/object.h"
-#include "../value/pointer.h"
-#include "dir.h"
 #include <sys/types.h>
 #include <dirent.h>
+
+#include "dir.h"
+#include "../shared_ptr.h"
+#include "../vm.h"
+#include "../package.h"
+#include "../value/object.h"
+#include "../value/pointer.h"
 
 using namespace tora;
 

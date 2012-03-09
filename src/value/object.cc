@@ -1,5 +1,7 @@
 #include "object.h"
 #include "../vm.h"
+#include "../package.h"
+#include "code.h"
 
 using namespace tora;
 

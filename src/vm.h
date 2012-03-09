@@ -10,9 +10,7 @@
 #include "value.h"
 #include "shared_ptr.h"
 #include "symbol_table.h"
-#include "value/hash.h"
-#include "value/code.h"
-#include "package.h"
+#include "op_array.h"
 
 #include <boost/random.hpp>
 
@@ -155,6 +153,7 @@ public:
 
 private:
     void handle_exception(const SharedPtr<Value> & exception);
+    void dump_value(const SharedPtr<Value> & v);
 };
 
 };

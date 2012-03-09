@@ -1,6 +1,7 @@
+#include "array.h"
 #include "../vm.h"
 #include "../value/array.h"
-#include "array.h"
+#include "../package.h"
 
 using namespace tora;
 

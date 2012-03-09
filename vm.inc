@@ -383,8 +383,8 @@ OP_METHOD_CALL {
                     frame_stack->push_back(fframe);
                 }
             } else {
-                funid->dump(1);
-                object->dump(1);
+                dump_value(funid);
+                dump_value(object);
                 this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<ObjectValue>()->package_id()).c_str());
             }
         }

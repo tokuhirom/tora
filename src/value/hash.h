@@ -15,10 +15,9 @@ public:
     SharedPtr<Value> get(const std::string &key) {
         return data[key];
     }
-    void set(const std::string & key , SharedPtr<Value>&val) {
+    void set(const std::string & key , const SharedPtr<Value>&val) {
         data[key] = val;
     }
-    void dump(int indent);
     const char *type_str() { return "hash"; }
 
     iter begin() { return data.begin(); }
@@ -63,11 +62,6 @@ public:
         }
         void increment() {
             iter++;
-        }
-        void dump(int indent) {
-            print_indent(indent);
-            printf("[dump] hash_iterator:\n");
-            parent->dump(indent+1);
         }
         const char *type_str() { return "hash_iterator"; }
     };

@@ -1,5 +1,6 @@
-#include "../vm.h"
 #include "internals.h"
+#include "../vm.h"
+#include "../package.h"
 
 using namespace tora;
 

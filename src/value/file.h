@@ -38,10 +38,6 @@ public:
             abort();
         }
     }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] #<FILE>\n");
-    }
     const char *type_str() { return "file"; }
 };
 

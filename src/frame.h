@@ -7,6 +7,7 @@
 
 #include "shared_ptr.h"
 #include "value.h"
+#include "value/code.h"
 
 namespace tora {
 

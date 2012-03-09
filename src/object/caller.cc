@@ -2,6 +2,7 @@
 
 #include "caller.h"
 #include "../vm.h"
+#include "../package.h"
 #include "../value/object.h"
 
 using namespace tora;

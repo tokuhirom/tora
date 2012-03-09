@@ -12,6 +12,7 @@
 namespace tora {
 
 struct CallbackFunction;
+class SymbolTable;
 
 class CodeValue: public Value {
     const CallbackFunction * callback_;

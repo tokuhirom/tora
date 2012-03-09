@@ -51,14 +51,6 @@ $ret .= "    case $k: return this->upcast<${v}>()->type_str();\n";
 $ret .= "    }\n";
 $ret .= "    abort();\n";
 $ret .= "}\n";
-$ret .= "void tora::Value::dump(int indent) {\n";
-$ret .= "    switch (value_type) {\n";
-while (my ($k, $v) = each %a) {
-$ret .= "    case $k: return this->upcast<${v}>()->dump(indent);\n";
-}
-$ret .= "    }\n";
-$ret .= "    abort();\n";
-$ret .= "}\n";
 open my $fh, '>', 'src/value.gen.cc';
 print $fh $ret;
 close $fh;

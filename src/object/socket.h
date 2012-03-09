@@ -3,6 +3,8 @@
 
 namespace tora {
 
+class VM;
+
 void Init_Socket(VM *vm);
 
 };

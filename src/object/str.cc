@@ -1,8 +1,9 @@
+#include "str.h"
 #include "../vm.h"
 #include "../value.h"
 #include "../shared_ptr.h"
-#include "str.h"
 #include "../value/regexp.h"
+#include "../package.h"
 
 using namespace tora;
 

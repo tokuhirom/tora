@@ -3,6 +3,8 @@
 #include "tora.h"
 #include "frame.h"
 #include "package_map.h"
+#include "package.h"
+#include "inspector.h"
 
 #include "value/hash.h"
 #include "value/code.h"
@@ -30,8 +32,6 @@
 #include "builtin.h"
 
 #include <boost/foreach.hpp>
-#include <sys/types.h>
-#include <dirent.h>
 #include "lexer.h"
 #include "parser.class.h"
 #include "compiler.h"
@@ -425,7 +425,7 @@ void VM::dump_frame() {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
         for (size_t n=0; n<(*f)->vars.size(); n++) {
             printf("  %zd\n", n);
-            (*f)->vars.at(n)->dump();
+            dump_value((*f)->vars.at(n));
         }
     }
     printf("---------------\n");
@@ -435,7 +435,7 @@ void VM::dump_stack() {
     printf("-- STACK DUMP --\nSP: %d\n", sp);
     for (size_t i=0; i<stack.size(); i++) {
         printf("[%zd] ", i);
-        stack.at(i)->dump();
+        dump_value(stack.at(i));
     }
     printf("----------------\n");
 }
@@ -485,7 +485,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 }
             } else {
                 fprintf(stderr, "died\n");
-                exception->dump(1);
+                dump_value(exception);
             }
             exit(1);
         }
@@ -540,5 +540,10 @@ void VM::execute() {
             next = true;
         };
     } while (next);
+}
+
+void VM::dump_value(const SharedPtr<Value> & v) {
+    Inspector ins(this);
+    printf("%s\n", ins.inspect(v).c_str());
 }
 

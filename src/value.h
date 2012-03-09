@@ -48,13 +48,10 @@ typedef enum {
     EXCEPTION_TYPE_ERRNO,
 } exception_type_t;
 
-class CodeValue;
 class IntValue;
 class DoubleValue;
 class StrValue;
 class BoolValue;
-class ArrayValue;
-class SymbolTable;
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -70,11 +67,6 @@ public:
     value_type_t value_type;
     Value& operator=(const Value&v);
 
-    void dump() { this->dump(0); }
-    void dump(int indent);
-    virtual void dump(const SharedPtr<SymbolTable> & symbol_table, int indent) {
-        this->dump(indent);
-    }
     SharedPtr<StrValue> to_s();
     int to_int();
     double to_double();
@@ -91,6 +83,7 @@ public:
     // GET type name in const char*
     const char *type_str();
 
+
     bool is_exception() {
         return value_type == VALUE_TYPE_EXCEPTION;
     }
@@ -103,10 +96,6 @@ public:
         this->int_value = i;
     }
     ~IntValue() { }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] IV: %d\n", int_value);
-    }
     const char *type_str() { return "int"; }
     void tora__decr__() {
         this->int_value--;
@@ -130,10 +119,6 @@ public:
     DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
         this->double_value = d;
     }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] NV: %lf\n", double_value);
-    }
     const char *type_str() { return "double"; }
 };
 
@@ -143,10 +128,6 @@ private:
 public:
     static UndefValue *instance() {
         return new UndefValue();
-    }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] undef(refcnt: %d)\n", refcnt);
     }
     const char *type_str() { return "undef"; }
 };
@@ -166,10 +147,6 @@ public:
     }
     static BoolValue* instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
-    }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] bool: %s\n", bool_value ? "true" : "false");
     }
     const char *type_str() { return "bool"; }
 public:
@@ -201,10 +178,6 @@ public:
     void set_str(const std::string & s) {
         str_value = s;
     }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] str: %s(refcnt: %d)\n", str_value.c_str(), refcnt);
-    }
     const char *type_str() { return "str"; }
 };
 
@@ -219,10 +192,6 @@ public:
     }
     ExceptionValue(int err) : Value(VALUE_TYPE_EXCEPTION), errno_(err), exception_type(EXCEPTION_TYPE_ERRNO) { }
     int get_errno() { return this->errno_; }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] exception(%d)\n", exception_type);
-    }
     std::string message() {
         if (errno_) {
             return std::string(strerror(this->errno_));

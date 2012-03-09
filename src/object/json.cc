@@ -1,9 +1,11 @@
+#include "json.h"
+
 #include "../tora.h"
 #include "../vm.h"
 #include "../value/array.h"
-#include "json.h"
+#include "../value/hash.h"
+#include "../package.h"
 #include "../picojson.h"
-#include "array.h"
 
 using namespace tora;
 

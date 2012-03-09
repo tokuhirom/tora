@@ -1,11 +1,15 @@
 #ifndef TORA_PACKAGE_H_
 #define TORA_PACKAGE_H_
 
-#include "value.h"
+#include "tora.h"
+#include "shared_ptr.h"
+#include "prim.h"
+#include <map>
 
 namespace tora {
 
 struct CallbackFunction;
+class VM;
 
 class Package {
     PRIM_DECL(Package);
@@ -24,11 +28,7 @@ public:
     iterator find(ID id) {
         return data.find(id);
     }
-    void dump(SharedPtr<SymbolTable> & symbol_table, int indent);
-    virtual void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Package\n");
-    }
+    void dump(VM *vm, int indent);
     const char *type_str() { return "package"; }
     ID id() { return name_id; }
     iterator begin() { return data.begin(); }

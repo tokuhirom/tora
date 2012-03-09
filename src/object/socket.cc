@@ -1,8 +1,9 @@
-#include "../vm.h"
 #include "socket.h"
+#include "../vm.h"
 #include "../value/object.h"
 #include "../value/array.h"
 #include "../value/tuple.h"
+#include "../package.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

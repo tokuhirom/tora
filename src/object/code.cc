@@ -1,6 +1,8 @@
+#include "code.h"
+
 #include "../vm.h"
 #include "../value/code.h"
-#include "code.h"
+#include "../package.h"
 
 using namespace tora;
 

@@ -9,6 +9,7 @@
 #include "value/object.h"
 #include "value/pointer.h"
 #include "value/array.h"
+#include "inspector.h"
 
 using namespace tora;
 
@@ -17,7 +18,8 @@ static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
 }
 
 static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
-    arg1->dump();
+    Inspector ins(vm);
+    printf("%s\n", ins.inspect(arg1).c_str());
     return UndefValue::instance();
 }
 
