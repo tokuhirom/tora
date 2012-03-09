@@ -27,7 +27,7 @@ void ArrayValue::sort() {
 }
 // TODO: Array#stable_sort()
 
-SharedPtr<Value> ArrayValue::get_item(SharedPtr<Value> index) {
+SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
     int i = index->to_int();
     if (i > (int)this->values->size()) {
         return UndefValue::instance();

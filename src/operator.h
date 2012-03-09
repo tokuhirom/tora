@@ -23,6 +23,9 @@ Value * op_bitrshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 // unary operators
 Value* op_unary_negative(const SharedPtr<Value>& v);
 
+// container operators
+SharedPtr<Value> op_get_item(const SharedPtr<Value>& container, const SharedPtr<Value> &index);
+
 template <class operationI, class operationD, class operationS> bool cmpop(operationI operation_i, operationD operation_d, operationS operation_s, const SharedPtr<Value> & lhs, const SharedPtr<Value> & rhs);
 
 };

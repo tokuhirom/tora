@@ -91,11 +91,6 @@ public:
     // GET type name in const char*
     const char *type_str();
 
-    virtual SharedPtr<Value> get_item(SharedPtr<Value> index) {
-        printf("This is not a container type: %s\n", this->type_str());
-        abort();
-    }
-
     bool is_exception() {
         return value_type == VALUE_TYPE_EXCEPTION;
     }

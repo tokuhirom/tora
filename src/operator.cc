@@ -1,5 +1,8 @@
 #include "operator.h"
 #include "value.h"
+#include "value/hash.h"
+#include "value/object.h"
+#include "value/array.h"
 #include "ops.gen.h"
 
 using namespace tora;
@@ -168,6 +171,19 @@ Value* tora::op_unary_negative(const SharedPtr<Value> & v) {
         TODO();
     default:
         throw new ExceptionValue("%s is not a numeric. You cannot apply unary negative operator.\n", v->type_str());
+    }
+}
+
+SharedPtr<Value> tora::op_get_item(const SharedPtr<Value>& container, const SharedPtr<Value> & index) {
+    switch (container->value_type) {
+    case VALUE_TYPE_HASH:
+        return container->upcast<HashValue>()->get_item(index);
+    case VALUE_TYPE_ARRAY:
+        return container->upcast<ArrayValue>()->get_item(index);
+    case VALUE_TYPE_OBJECT:
+        return container->upcast<ObjectValue>()->get_item(index);
+    default:
+        throw new ExceptionValue("%s is not a container.\n", container->type_str());
     }
 }
 

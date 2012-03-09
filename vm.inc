@@ -641,12 +641,10 @@ OP_GETLOCAL {
 OP_GET_ITEM {
     SharedPtr<Value> index(stack.back());
     stack.pop_back();
-    SharedPtr<Value> container(stack.back());
-    stack.pop_back();
+    const SharedPtr<Value> & container = stack.back();
 
-    SharedPtr<Value> ret = container->get_item(&(*index));
-    if (ret->is_exception()) { this->die(ret); }
-    else { stack.push_back(ret); }
+    SharedPtr<Value> ret(op_get_item(container, index));
+    stack.back().reset(ret.get());
 }
 
 OP_SET_ITEM {

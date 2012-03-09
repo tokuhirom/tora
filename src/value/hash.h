@@ -31,7 +31,7 @@ public:
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
         SharedPtr<StrValue> s = index->to_s();
-        return this->get(s->str_value);
+        return this->data[s->str_value];
     }
     size_t size() {
         return data.size();

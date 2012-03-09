@@ -46,7 +46,7 @@ public:
             values->at(i)->dump(indent+1);
         }
     }
-    SharedPtr<Value>get_item(SharedPtr<Value>index);
+    SharedPtr<Value> get_item(const SharedPtr<Value> &index);
     Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
     virtual const char *type_str() { return "Array"; }
 
