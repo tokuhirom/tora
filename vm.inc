@@ -870,11 +870,18 @@ OP_FOR_ITER {
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
         if (riter->counter <= riter->parent->right->int_value) {
-            // peek(fframe->current_value.get());
             const SharedPtr<Value> & cur = fframe->current_value;
-            IntValue * iv = new IntValue(riter->counter);
+            if (cur.get() && cur->refcnt == 2) {
+                // value is not copied.
+                assert(cur->value_type == VALUE_TYPE_INT);
+                cur->upcast<IntValue>()->int_value = riter->counter;
+                stack.push_back(cur);
+            } else {
+                IntValue * iv = new IntValue(riter->counter);
+                stack.push_back(iv);
+                fframe->current_value.reset(iv);
+            }
             // fframe->current_value.reset(iv);
-            stack.push_back(iv);
             riter->counter++;
         } else {
             stack.push_back(new StopIterationExceptionValue());
