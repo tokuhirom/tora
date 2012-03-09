@@ -3,6 +3,7 @@
 
 #include "../value.h"
 #include "../shared_ptr.h"
+#include "int.h"
 
 namespace tora {
 
@@ -11,10 +12,7 @@ public:
     SharedPtr<IntValue> left;
     SharedPtr<IntValue> right;
 
-    RangeValue(SharedPtr<IntValue> l, SharedPtr<IntValue> r) : Value(VALUE_TYPE_RANGE) {
-        left = l;
-        right = r;
-    }
+    RangeValue(SharedPtr<IntValue> l, SharedPtr<IntValue> r);
     const char *type_str() { return "range"; }
 
     class iterator : public Value {

@@ -2,13 +2,12 @@
 #include "value/code.h"
 #include "value/tuple.h"
 #include "value/range.h"
+#include "value/bool.h"
+#include "value/double.h"
 #include <stdarg.h>
 #include <errno.h>
 
 using namespace tora;
-
-boost::object_pool<IntValue> IntValue::pool_;
-boost::object_pool<BoolValue> BoolValue::pool_;
 
 bool Value::to_bool() {
     switch (value_type) {
@@ -122,17 +121,6 @@ int Value::to_int() {
     }
 
     throw new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
-}
-
-ExceptionValue::ExceptionValue(const char *format, ...)
-    : Value(VALUE_TYPE_EXCEPTION), errno_(0), exception_type(EXCEPTION_TYPE_GENERAL) {
-
-    va_list ap;
-    char p[4096+1];
-    va_start(ap, format);
-    vsnprintf(p, 4096, format, ap);
-    va_end(ap);
-    message_ = p;
 }
 
 Value& tora::Value::operator=(const Value&v) {

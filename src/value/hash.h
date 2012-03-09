@@ -3,6 +3,8 @@
 
 #include "../value.h"
 #include "../shared_ptr.h"
+#include "str.h"
+#include "undef.h"
 
 namespace tora {
 

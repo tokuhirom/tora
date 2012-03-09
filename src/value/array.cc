@@ -1,5 +1,6 @@
 #include "../value.h"
 #include "array.h"
+#include "str.h"
 #include <algorithm>
 
 using namespace tora;

@@ -10,8 +10,6 @@
 #include <map>
 #include <memory>
 
-#include <boost/pool/object_pool.hpp>
-
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
@@ -40,13 +38,6 @@ typedef enum {
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
 } value_type_t;
-
-typedef enum {
-    EXCEPTION_TYPE_UNDEF,
-    EXCEPTION_TYPE_STOP_ITERATION,
-    EXCEPTION_TYPE_GENERAL,
-    EXCEPTION_TYPE_ERRNO,
-} exception_type_t;
 
 class IntValue;
 class DoubleValue;
@@ -89,126 +80,13 @@ public:
     }
 };
 
-class IntValue: public Value {
-public:
-    int  int_value;
-    IntValue(int i): Value(VALUE_TYPE_INT) {
-        this->int_value = i;
-    }
-    ~IntValue() { }
-    const char *type_str() { return "int"; }
-    void tora__decr__() {
-        this->int_value--;
-    }
-    void tora__incr__() {
-        this->int_value++;
-    }
-    SharedPtr<IntValue> clone() {
-        return new IntValue(this->int_value);
-    }
-public:
-	void* operator new(size_t size) { return pool_.malloc(); }
-	void operator delete(void* doomed, size_t) { pool_.free((IntValue*)doomed); }
-private:
-    static boost::object_pool<IntValue> pool_;
 };
 
-class DoubleValue: public Value {
-public:
-    double  double_value;
-    DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
-        this->double_value = d;
-    }
-    const char *type_str() { return "double"; }
-};
-
-class UndefValue: public Value {
-private:
-    UndefValue(): Value(VALUE_TYPE_UNDEF) { }
-public:
-    static UndefValue *instance() {
-        return new UndefValue();
-    }
-    const char *type_str() { return "undef"; }
-};
-
-// This is singleton
-class BoolValue: public Value {
-public:
-    BoolValue(bool b): Value(VALUE_TYPE_BOOL) {
-        this->bool_value = b;
-    }
-    bool bool_value;
-    static BoolValue* true_instance() {
-        return new BoolValue(true);
-    }
-    static BoolValue* false_instance() {
-        return new BoolValue(false);
-    }
-    static BoolValue* instance(bool b) {
-        return b ? BoolValue::true_instance() : BoolValue::false_instance();
-    }
-    const char *type_str() { return "bool"; }
-public:
-	void* operator new(size_t size) { return pool_.malloc(); }
-	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }
-private:
-    static boost::object_pool<BoolValue> pool_;
-};
-
-class StrValue: public Value {
-public:
-    std::string str_value;
-    StrValue(): Value(VALUE_TYPE_STR) {
-    }
-    StrValue(const char *str): Value(VALUE_TYPE_STR) {
-        this->str_value = str;
-    }
-    StrValue(const std::string str): Value(VALUE_TYPE_STR) {
-        this->str_value = str;
-    }
-    ~StrValue();
-    const char * c_str() {
-        return this->str_value.c_str();
-    }
-    void set_str(const char*s) {
-        str_value = s;
-    }
-    int length();
-    void set_str(const std::string & s) {
-        str_value = s;
-    }
-    const char *type_str() { return "str"; }
-};
-
-class ExceptionValue : public Value {
-    std::string message_;
-    int errno_;
-public:
-    exception_type_t exception_type;
-    ExceptionValue(const char *format, ...);
-    ExceptionValue(const std::string &msg) : Value(VALUE_TYPE_EXCEPTION), errno_(0), exception_type(EXCEPTION_TYPE_GENERAL) {
-        message_ = msg;
-    }
-    ExceptionValue(int err) : Value(VALUE_TYPE_EXCEPTION), errno_(err), exception_type(EXCEPTION_TYPE_ERRNO) { }
-    int get_errno() { return this->errno_; }
-    std::string message() {
-        if (errno_) {
-            return std::string(strerror(this->errno_));
-        } else {
-            return message_;
-        }
-    }
-    const char *type_str() { return "exception"; }
-};
-
-class StopIterationExceptionValue : public ExceptionValue {
-public:
-    StopIterationExceptionValue() : ExceptionValue("") {
-        exception_type = EXCEPTION_TYPE_STOP_ITERATION;
-    }
-};
-
-};
+#include "value/undef.h"
+#include "value/str.h"
+#include "value/bool.h"
+#include "value/int.h"
+#include "value/double.h"
+#include "value/exception.h"
 
 #endif // VALUE_H_

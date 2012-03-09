@@ -1,6 +1,5 @@
+#include "str.h"
 #include "../value.h"
-#include "code.h"
-#include "../../vendor/re2/util/utf.h"
 
 using namespace tora;
 
