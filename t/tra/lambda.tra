@@ -1,0 +1,34 @@
+use Test::More *;
+
+# .each(-> { $i += $_ })
+# .each(-> { $i += $n })
+# .sort(-> { $^a.length() <=> $^b.length() })
+# .sort(-> { $_[0].length() <=> $_[1].length() })
+# .sort(-> $x, $y { $_[0].length() <=> $_[1].length() })
+# for 1..10 -> { say $_ }
+
+# normal case.
+{
+    my $i = 4;
+    my $a = -> { $i += $_; 9; };
+    is($a.(12), 9);
+    is($i, 16);
+}
+
+# pass array
+{
+    my $i = 4;
+    my $a = -> { $i += $_[0] * $_[1]; 9; };
+    is($a.([5,8]), 9);
+    is($i, 44);
+}
+
+note('pass by named arguments');
+{
+    my $i = 4;
+    my $a = -> $a, $b { $i += $a * $b; 9; };
+    is($a.(5, 8), 9);
+    is($i, 44);
+}
+
+done_testing;

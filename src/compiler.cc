@@ -393,14 +393,15 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         this->push_block(BLOCK_TYPE_FUNCDEF);
         auto params = new std::vector<std::string *>();
-        /*
-        for (size_t i=0; i<funcdef_node->params()->size(); i++) {
-            params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
-            this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+        if (funcdef_node->params() && funcdef_node->params()->size() > 0) {
+            for (size_t i=0; i<funcdef_node->params()->size(); i++) {
+                params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+                this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+            }
+        } else {
+            params->push_back(new std::string("$_"));
+            this->define_localvar(std::string("$_"));
         }
-        */
-        params->push_back(new std::string("$_"));
-        this->define_localvar(std::string("$_"));
 
         Compiler funccomp(this->symbol_table);
         if (funccomp.blocks) {

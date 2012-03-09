@@ -204,7 +204,7 @@ sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
     A = new FuncdefNode(B, new ListNode(), C);
 }
 
-parameter_list(A) ::= expression(B). {
+parameter_list(A) ::= variable(B). {
     A = new ListNode();
     A->upcast<ListNode>()->push_back(B);
 }
@@ -432,6 +432,10 @@ unary_expression(A) ::= SUB unary_expression(B). {
 /* my ($err, $ret) = try { }; */
 unary_expression(A) ::= TRY maybe_block(B). {
     A = new NodeNode(NODE_TRY, B);
+}
+unary_expression(A) ::= LAMBDA parameter_list(B) maybe_block(C). {
+    A = new FuncdefNode(NULL, B->upcast<ListNode>(), C);
+    A->type = NODE_LAMBDA;
 }
 unary_expression(A) ::= LAMBDA maybe_block(C). {
     A = new FuncdefNode(NULL, new ListNode(), C);
