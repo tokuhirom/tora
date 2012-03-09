@@ -53,14 +53,21 @@ re2files = [
     'vendor/re2/util/stringpiece.cc',
 ]
 libfiles = [
-    "src/" + x for x in Split('''value/range.cc vm.gen.cc value/code.cc value/hash.cc value/str.cc value/array.cc parser.cc value.cc compiler.cc nodes.gen.cc node.cc op.cc ops.gen.cc value/regexp.cc disasm.cc
-        token.gen.cc lexer.gen.cc
+    "src/" + x for x in Split('''
+        parser.cc value.cc compiler.cc
+        node.cc op.cc vm.cc util.cc
         symbol_table.cc package_map.cc frame.cc package.cc operator.cc
         builtin.cc
-        inspector.cc peek.cc
+
+        ops.gen.cc token.gen.cc lexer.gen.cc vm.gen.cc nodes.gen.cc
+
+        inspector.cc peek.cc disasm.cc
+
+        value/code.cc value/hash.cc value/str.cc value/array.cc value/regexp.cc value/range.cc
         value/object.cc value/int.cc value/bool.cc value/exception.cc
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc
-        vm.cc util.cc
+
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
+
     ''')
 ]
 

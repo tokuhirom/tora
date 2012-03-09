@@ -290,6 +290,7 @@ OP_METHOD_CALL {
                     fframe->return_address = pc;
                     fframe->code = code;
                     fframe->argcnt = argcnt;
+                    fframe->self = object;
 
                     pc = -1;
                     this->ops = code->code_opcodes;
@@ -304,9 +305,16 @@ OP_METHOD_CALL {
         } else {
             if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("new")) {
                 // process parameters
-                stack.push_back(new ObjectValue(object->upcast<SymbolValue>()->id, this));
+                SharedPtr<Value> data(new HashValue());
+                stack.push_back(new ObjectValue(this, object->upcast<SymbolValue>()->id, data));
+            } else if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("bless")) {
+                int argcnt = get_int_operand();
+                if (argcnt != 1) {
+                    this->die("argument count must be 1 for blessing.\n");
+                }
+                stack[stack.size()-1].reset(new ObjectValue(this, object->upcast<SymbolValue>()->id, stack.back()));
             } else {
-                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
+                this->die("Unknown method %s for symbol '%s'", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
             }
         }
         break;
@@ -1001,5 +1009,14 @@ OP_PACKAGE_LEAVE {
     PackageFrame * pframe = static_cast<PackageFrame*>(this->frame_stack->back());
     delete pframe;
     this->frame_stack->pop_back();
+}
+
+OP_DEREF {
+    // dereference object
+    const SharedPtr<Value> & obj = stack.back();
+    if (obj->value_type != VALUE_TYPE_OBJECT) {
+        throw new ExceptionValue("You cannot dereference no object value.");
+    }
+    stack[stack.size()-1].reset(obj->upcast<ObjectValue>()->data().get());
 }
 

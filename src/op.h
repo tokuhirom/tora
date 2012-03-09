@@ -8,6 +8,7 @@
 namespace tora {
 
 class OP : public Prim {
+    PRIM_DECL(OP);
 public:
     op_type_t op_type;
     union {
@@ -15,9 +16,9 @@ public:
         double double_value;
         bool bool_value;
     } operand;
-    OP() { }
-    OP(op_type_t type) :op_type(type)  { }
-    OP(op_type_t type, int i) :op_type(type)  {
+    OP() :refcnt(0) { }
+    OP(op_type_t type) :refcnt(0), op_type(type)  { }
+    OP(op_type_t type, int i) :refcnt(0), op_type(type)  {
         operand.int_value = i;
     }
     // This is not a virtual destructor. Do not define destructor in child class.
@@ -25,7 +26,7 @@ public:
 
     template<class Y>
     Y* upcast() {
-        return dynamic_cast<Y*>(&(*(this)));
+        return static_cast<Y*>(&(*(this)));
     }
 };
 

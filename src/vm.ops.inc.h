@@ -72,3 +72,4 @@ void PP_OP_USE();
 void PP_OP_NOT();
 void PP_OP_PACKAGE_ENTER();
 void PP_OP_PACKAGE_LEAVE();
+void PP_OP_DEREF();

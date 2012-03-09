@@ -480,6 +480,10 @@ postfix_expression(A) ::= /* $i++ */ postfix_expression(B) PLUSPLUS. {
     A = new NodeNode(NODE_POST_INCREMENT, B);
 }
 
+primary_expression(A) ::= DEREF expression(B) R_BRACE. {
+    /* ${ obj } */
+    A = new NodeNode(NODE_DEREF, B);
+}
 primary_expression(A) ::= int(B). { A = B; }
 primary_expression(A) ::= DOUBLE_LITERAL(B). {
     A = B;

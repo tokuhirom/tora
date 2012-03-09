@@ -126,6 +126,9 @@ std:
         string_close_char = '!';
         goto single_string_literal;
     }
+    "${" {
+        return DEREF;
+    }
     "qw{" {
         qw_mode = '{';
         return QW_START;

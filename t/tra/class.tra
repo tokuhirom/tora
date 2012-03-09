@@ -1,0 +1,21 @@
+use Test::More *;
+
+my $n =0;
+class Foo {
+    sub new() {
+        $n++;
+        return self().bless(44);
+    }
+    sub incr() {
+        ${self()}++;
+    }
+};
+
+my $foo = Foo.new();
+is(typeof($foo), 'Foo');
+is($n, 1);
+is($foo.incr(), 44);
+is($foo.incr(), 45);
+is($foo.incr(), 46);
+
+done_testing;

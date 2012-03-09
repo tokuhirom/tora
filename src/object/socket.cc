@@ -24,7 +24,7 @@ using namespace tora;
 
 const int GETFD(VM *vm, Value * self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
-    SharedPtr<Value> fd = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("_fd"));
+    SharedPtr<Value> fd = self->upcast<ObjectValue>()->data();
     return fd->value_type == VALUE_TYPE_INT ? fd->upcast<IntValue>()->int_value : -1;
 }
 
@@ -45,18 +45,15 @@ static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Valu
 
     int sock = socket(domain, type, protocol);
     if (sock == -1) {
-        return new ExceptionValue(errno);
+        throw new ExceptionValue(errno);
     } else {
-        ObjectValue * ov = new ObjectValue(vm->symbol_table->get_id("Socket::Socket"), vm);
-        ov->set_value(vm->symbol_table->get_id("_fd"), new IntValue(sock));
-
-        return ov;
+        return new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(sock));
     }
 }
 
 static SharedPtr<Value> sock_sock_DESTROY(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
-    SharedPtr<Value> v = self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("_fd"));
+    SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
     if (v.get()) { v.get()->upcast<IntValue>(); }
     return UndefValue::instance();
 }
@@ -261,8 +258,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
 
     int fd = accept(GETFD(vm, self), (struct sockaddr *)namebuf, &len);
     if (fd >= 0) {
-        ObjectValue *new_sock = new ObjectValue(vm->symbol_table->get_id("Socket::Socket"), vm);
-        new_sock->set_value(vm->symbol_table->get_id("_fd"), new IntValue(fd));
+        SharedPtr<ObjectValue> new_sock = new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(fd));
         SharedPtr<TupleValue> t = new TupleValue();
         t->push(new StrValue(std::string(namebuf, len)));
         t->push(new_sock);

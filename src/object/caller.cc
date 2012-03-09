@@ -14,7 +14,7 @@ using namespace tora;
  */
 static SharedPtr<Value> caller_code(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
-    return self->upcast<ObjectValue>()->get_value(vm->symbol_table->get_id("code"));
+    return self->upcast<ObjectValue>()->data();
 }
 
 void tora::Init_Caller(VM *vm) {

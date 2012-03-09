@@ -28,6 +28,7 @@
 #include "object/internals.h"
 #include "object/caller.h"
 #include "object/code.h"
+#include "object/symbol.h"
 
 #include "builtin.h"
 
@@ -99,7 +100,7 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(avalue);
 
     // $ENV
-    SharedPtr<ObjectValue> env = new ObjectValue(this->symbol_table->get_id("Env"), this);
+    SharedPtr<ObjectValue> env = new ObjectValue(this, this->symbol_table->get_id("Env"), UndefValue::instance());
     this->global_vars->push_back(env);
 
     // $LIBPATH : Array
@@ -344,6 +345,7 @@ void VM::register_standard_methods() {
     Init_Str(this);
     Init_Caller(this);
     Init_Code(this);
+    Init_Symbol(this);
 
     // OS
     Init_Dir(this);

@@ -9,6 +9,7 @@
 #include "value/object.h"
 #include "value/pointer.h"
 #include "value/array.h"
+#include "object/dir.h"
 #include "inspector.h"
 
 using namespace tora;
@@ -84,14 +85,7 @@ static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>
 
 static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
     SharedPtr<StrValue> dirname = s->to_s();
-    DIR * dp = opendir(dirname->c_str());
-    if (dp) {
-        SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Dir"), vm);
-        o->set_value(vm->symbol_table->get_id("__d"), new PointerValue(dp));
-        return o;
-    } else {
-        return UndefValue::instance();
-    }
+    return Dir_new(vm, dirname.get());
 }
 
 /**
@@ -152,8 +146,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
             if ((*iter)->type == FRAME_TYPE_FUNCTION) {
                 if (skiped_first) {
                     FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
-                    SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Caller"), vm);
-                    o->set_value(vm->symbol_table->get_id("code"), fframe->code);
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->symbol_table->get_id("Caller"), fframe->code);
                     av->push(o);
                 } else {
                     skiped_first = true; // skip myself.
@@ -168,8 +161,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
             if ((*iter)->type == FRAME_TYPE_FUNCTION) {
                 FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
                 if (seen == need+1) {
-                    SharedPtr<ObjectValue> o = new ObjectValue(vm->symbol_table->get_id("Caller"), vm);
-                    o->set_value(vm->symbol_table->get_id("code"), fframe->code);
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->symbol_table->get_id("Caller"), fframe->code);
                     return o;
                 }
                 ++seen;

@@ -1309,6 +1309,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         break;
     }
+    case NODE_DEREF: {
+        this->compile(node->at(0));
+        push_op(new OP(OP_DEREF));
+        break;
+    }
 
     default:
         this->error++;

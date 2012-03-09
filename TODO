@@ -35,6 +35,8 @@ File#seek()
 File#rewind()
 File#tell()
 
+String.lc()
+String.uc()
 String#substr(n)
 String#substr(n, m)
 String#replace(regexp|str, code)
@@ -65,6 +67,7 @@ syntax
  * file()
  * callee()
  * fiber
+ * inheritance
  * overload(+) {
       $a + $b;
    }
@@ -90,9 +93,9 @@ feature
   * -p option
   * -i option
   * eval() with upper stack introspeciton like 'my $x=4649; eval("say($x)")'
-  * [1,2,3].sort(^{ $_[0] <=> $_[1] })
-  * undef == undef
+  * [1,2,3].sort(-> $a, $b { $a <=> $b })
   * === operator?
+  * ~~
   * bignum support using ttmath?
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
