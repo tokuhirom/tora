@@ -62,10 +62,6 @@ public:
     int to_int();
     double to_double();
     bool to_bool();
-    bool is_numeric() const {
-        // TODO: remove?
-        return this->value_type == VALUE_TYPE_INT;
-    }
 
     template<class Y>
     Y* upcast() {
