@@ -104,6 +104,7 @@ feature
     * BOOST_SCOPE_EXIT
     * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
     * https://metacpan.org/module/Guard
+  * -x
 
 benchmarking
 ------------

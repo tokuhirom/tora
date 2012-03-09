@@ -246,6 +246,7 @@ std:
     "-d" { *yylval = new IntNode(NODE_INT, 'd'); return FILE_TEST; }
     "-e" { *yylval = new IntNode(NODE_INT, 'e'); return FILE_TEST; }
     "-s" { *yylval = new IntNode(NODE_INT, 's'); return FILE_TEST; }
+    "-x" { *yylval = new IntNode(NODE_INT, 'x'); return FILE_TEST; }
     "!" { return NOT; }
     "(" { 
         divable = false;

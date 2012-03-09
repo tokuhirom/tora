@@ -762,17 +762,27 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
         break;
     }
-    case NODE_DIV_ASSIGN: {
-        // '$x /= 3;' => '$x = $x / 3'
-        // TODO: optimize
-        SharedPtr<BinaryNode> r = new BinaryNode(NODE_DIV,
-            node->upcast<BinaryNode>()->left(),
-            node->upcast<BinaryNode>()->right()
-        );
-        SharedPtr<BinaryNode> p = new BinaryNode(NODE_SETVARIABLE, &(*(node->upcast<BinaryNode>()->left())), &(*(r->upcast<Node>())));
-        this->compile(p);
-        break;
+    // '$x /= 3;' => '$x = $x / 3'
+    // TODO: optimize
+#define BINARY_ASSIGN(ccc, nnn) \
+    case ccc: { \
+        SharedPtr<BinaryNode> r = new BinaryNode(nnn, \
+            node->upcast<BinaryNode>()->left(), \
+            node->upcast<BinaryNode>()->right() \
+        ); \
+        SharedPtr<BinaryNode> p = new BinaryNode(NODE_SETVARIABLE, &(*(node->upcast<BinaryNode>()->left())), &(*(r->upcast<Node>()))); \
+        this->compile(p); \
+        break; \
     }
+    BINARY_ASSIGN(NODE_ADD_ASSIGN, NODE_ADD)
+    BINARY_ASSIGN(NODE_SUB_ASSIGN, NODE_SUB)
+    BINARY_ASSIGN(NODE_MUL_ASSIGN, NODE_MUL)
+    BINARY_ASSIGN(NODE_DIV_ASSIGN, NODE_DIV)
+    BINARY_ASSIGN(NODE_AND_ASSIGN, NODE_BITAND)
+    BINARY_ASSIGN(NODE_OR_ASSIGN,  NODE_BITOR)
+    BINARY_ASSIGN(NODE_XOR_ASSIGN, NODE_BITXOR)
+    BINARY_ASSIGN(NODE_MOD_ASSIGN, NODE_MOD)
+#undef BINARY_ASSIGN
     case NODE_SETVARIABLE: {
         this->compile(node->upcast<BinaryNode>()->right());
         this->set_lvalue(node->upcast<BinaryNode>()->left());
