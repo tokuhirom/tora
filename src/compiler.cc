@@ -1226,7 +1226,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
     default:
         this->error++;
-        printf("Unknown node: %s\n", node->type_name_str());
+        printf("[BUG] Unknown node: %s\n", node->type_name_str());
         abort();
         break;
     }

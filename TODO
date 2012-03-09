@@ -18,6 +18,8 @@ Array#shuffle()
 Array#flatten()
 Array#reverse!()
 
+Enumerable#reduce()
+
 for (my $e in dir('t')) { ... }
 dir('t').is_dir()
 dir('t').file($fname)
@@ -95,6 +97,7 @@ feature
     * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
     * https://metacpan.org/module/Guard
   * -x
+  * DynaLoader
 
 benchmarking
 ------------

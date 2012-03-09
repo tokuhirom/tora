@@ -770,6 +770,9 @@ OP_FILE_TEST {
     case 'd':
         stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
         break;
+    case 'x':
+        stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IXUSR));
+        break;
     case 'e':
         stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0));
         break;

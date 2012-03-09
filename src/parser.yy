@@ -42,6 +42,7 @@ Missing part is following:
 %left L_BRACE R_BRACE.
 %left L_BRACKET R_BRACKET.
 
+%right LAMBDA.
 %right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN.
 %left DOTDOT.
 %left OROR.
@@ -277,6 +278,12 @@ pair_list(A) ::= pair_list(B) COMMA expression(C) FAT_COMMA expression(D). {
     A->upcast<ListNode>()->push_back(D);
 }
 
+maybe_block(A) ::= block(B). {
+    A = B;
+}
+maybe_block(A) ::= L_BRACE R_BRACE. {
+    A = new ListNode(NODE_VOID);
+}
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
     A = new NodeNode(NODE_BLOCK, B);
 }
@@ -451,6 +458,9 @@ unary_expression(A) ::= SUB unary_expression(B). {
 /* my ($err, $ret) = try { }; */
 unary_expression(A) ::= TRY block(B). {
     A = new NodeNode(NODE_TRY, B);
+}
+unary_expression(A) ::= LAMBDA maybe_block(C). {
+    A = new BinaryNode(NODE_LAMBDA, NULL, C);
 }
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }

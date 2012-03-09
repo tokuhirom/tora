@@ -26,6 +26,8 @@ my @nodes = qw(
     NODE_NEWLINE
     NODE_IF
 
+    NODE_LAMBDA
+
     NODE_LT
     NODE_GT
     NODE_LE

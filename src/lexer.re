@@ -231,6 +231,7 @@ std:
         divable = true;
         return INT_LITERAL;
     }
+    "->" { return LAMBDA; }
     "if" { return IF; }
     "unless" { return UNLESS; }
     "undef" { return UNDEF; }

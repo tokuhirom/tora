@@ -15,5 +15,8 @@ ok(!-e "fjdaslkfjadslfjalf");
 is(-s "jiojklj", undef);
 is(-s "t/dat/filetest/foo", 8);
 
+is(-x './tora', true);
+is(-x __FILE__, false);
+
 done_testing;
 
