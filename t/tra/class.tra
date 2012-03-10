@@ -4,10 +4,10 @@ my $n =0;
 class Foo {
     sub new() {
         $n++;
-        return self().bless(44);
+        return self.bless(44);
     }
     sub incr() {
-        ${self()}++;
+        ${self}++;
     }
 };
 

@@ -27,6 +27,7 @@ my @nodes = qw(
     NODE_IF
 
     NODE_DEREF
+    NODE_SELF
 
     NODE_LAMBDA
 

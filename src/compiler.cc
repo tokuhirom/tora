@@ -577,6 +577,10 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(tmp);
         break;
     }
+    case NODE_SELF: {
+        push_op(new OP(OP_PUSH_SELF));
+        break;
+    }
     case NODE_TRUE: {
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_PUSH_TRUE;

@@ -8,6 +8,10 @@ OP_PUSH_FALSE {
     stack.push_back(new BoolValue(false));
 }
 
+OP_PUSH_SELF {
+    stack.push_back(this->get_self());
+}
+
 OP_PUSH_UNDEF {
     stack.push_back(UndefValue::instance());
 }

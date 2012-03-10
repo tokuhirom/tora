@@ -1,5 +1,6 @@
 void PP_OP_PUSH_TRUE();
 void PP_OP_PUSH_FALSE();
+void PP_OP_PUSH_SELF();
 void PP_OP_PUSH_UNDEF();
 void PP_OP_PUSH_INT();
 void PP_OP_PUSH_DOUBLE();

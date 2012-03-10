@@ -494,6 +494,9 @@ primary_expression(A) ::= primary_expression(B) DOTDOT primary_expression(C). {
 primary_expression(A) ::= FALSE. {
     A = new VoidNode(NODE_FALSE);
 }
+primary_expression(A) ::= SELF. {
+    A = new VoidNode(NODE_SELF);
+}
 primary_expression(A) ::= TRUE. {
     A = new VoidNode(NODE_TRUE);
 }

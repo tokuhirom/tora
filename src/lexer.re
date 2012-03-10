@@ -126,6 +126,9 @@ std:
         string_close_char = '!';
         goto single_string_literal;
     }
+    "self" {
+        return SELF;
+    }
     "${" {
         return DEREF;
     }
