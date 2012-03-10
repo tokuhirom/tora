@@ -1291,6 +1291,10 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         break;
     }
+    case NODE_MY: {
+        this->define_my(node);
+        break;
+    }
     case NODE_LAST: {
         // break from for/foreach/while
         if (!in_loop_context) {
