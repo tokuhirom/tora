@@ -7,6 +7,7 @@
 #include "../package.h"
 #include "../value/object.h"
 #include "../value/pointer.h"
+#include "../value.h"
 
 using namespace tora;
 
@@ -47,7 +48,7 @@ static SharedPtr<Value> dir_close(VM * vm, Value* self) {
 static SharedPtr<Value> dir_DESTROY(VM * vm, Value* self) {
     dir_close(vm, self);
 #ifndef NDEBUG
-    self->upcast<ObjectValue>()->data().reset(UndefValue::instance());
+    // self->upcast<ObjectValue>()->data().reset(UndefValue::instance());
 #endif
     return UndefValue::instance();
 }

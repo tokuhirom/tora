@@ -37,7 +37,7 @@ Missing part is following:
  */
 
 %right FILE_TEST.
-%right MY.
+%right MY OUR.
 %left QW_START QW_END.
 %left L_BRACE R_BRACE.
 %left L_BRACKET R_BRACKET.
@@ -333,6 +333,9 @@ conditional_expression(A) ::= MY conditional_expression(B).   {
     ListNode*nl = new ListNode(NODE_MY);
     nl->push_back(B);
     A = nl;
+}
+conditional_expression(A) ::= LOCAL variable(B).   {
+    A = new NodeNode(NODE_LOCAL, B);
 }
 
 logical_or_expression(A) ::= logical_and_expression(B). { A = B; }

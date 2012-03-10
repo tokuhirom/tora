@@ -9,6 +9,7 @@
 #include "disasm.h"
 #include <boost/scope_exit.hpp>
 #include <boost/foreach.hpp>
+#include <iostream>
 
 using namespace tora;
 
@@ -123,7 +124,20 @@ void tora::Compiler::init_globals() {
     this->define_global_var("$REQUIRED");
 }
 
+
 void tora::Compiler::set_variable(std::string &varname) {
+    {
+        auto pos = varname.rfind("::");
+        if (pos != std::string::npos) {
+            // package variable $Foo::Bar.
+            std::string pkgname = varname.substr(1, pos-1);
+            std::string detail = varname.substr(pos+2);
+            push_op(new OP(OP_PUSH_IDENTIFIER, symbol_table->get_id(pkgname)));
+            push_op(new OP(OP_SET_PACKAGE_VARIABLE, symbol_table->get_id(std::string("$") + detail)));
+            return;
+        }
+    }
+
     int level;
     bool need_closure;
     bool is_arg;
@@ -249,6 +263,20 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         }
         break;
     }
+    case NODE_LOCAL: {
+        if (node->size() == 1) {
+            std::string &name = node->at(0)->upcast<StrNode>()->str_value;
+            push_op(new OP(OP_GET_PACKAGE_VARIABLE));
+            push_op(new OP(OP_LOCAL));
+
+            this->set_lvalue(node->at(0));
+        } else {
+            printf("This is not lvalue(MY):\n");
+            node->dump(1);
+            this->error++;
+        }
+        break;
+    }
     default:
         printf("This is not lvalue:\n");
         node->dump(1);
@@ -335,8 +363,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         break;
     }
-    case NODE_MY: {
-        this->define_my(node);
+    case NODE_LOCAL: {
+        this->compile(node->at(0));
+        push_op(new OP(OP_LOCAL));
         break;
     }
     case NODE_RETURN: {
@@ -795,13 +824,19 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_GETVARIABLE: {
         std::string & varname = node->upcast<StrNode>()->str_value;
         int global = this->find_global_var(varname);
+        auto pos = varname.rfind("::");
         if (global >= 0) {
             SharedPtr<OP> tmp = new OP();
             tmp->op_type = OP_GETGLOBAL;
             tmp->operand.int_value = global;
             push_op(tmp);
+        } else if (pos != std::string::npos) {
+            // package variable $Foo::Bar.
+            std::string pkgname = varname.substr(1, pos-1);
+            std::string detail = varname.substr(pos+2);
+            push_op(new OP(OP_PUSH_IDENTIFIER, symbol_table->get_id(pkgname)));
+            push_op(new OP(OP_GET_PACKAGE_VARIABLE, symbol_table->get_id(std::string("$") + detail)));
         } else {
-            // find local variable
             int level;
             bool need_closure;
             bool is_arg;

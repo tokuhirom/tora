@@ -1016,11 +1016,46 @@ OP_PACKAGE_LEAVE {
 }
 
 OP_DEREF {
+    // ${self}
     // dereference object
     const SharedPtr<Value> & obj = stack.back();
     if (obj->value_type != VALUE_TYPE_OBJECT) {
         throw new ExceptionValue("You cannot dereference no object value.");
     }
     stack[stack.size()-1].reset(obj->upcast<ObjectValue>()->data().get());
+}
+
+OP_SET_PACKAGE_VARIABLE {
+    // $Foo::Bar = 3;
+    SharedPtr<Value> pkgid = stack.back();
+    stack.pop_back();
+
+    SharedPtr<Value> rval = stack.back();
+    stack.pop_back();
+
+    int vid = get_int_operand();
+    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id);
+    pkg->set_variable(vid, rval);
+
+    stack.push_back(rval);
+}
+
+OP_GET_PACKAGE_VARIABLE {
+    // $Foo::Bar = 3;
+    SharedPtr<Value> pkgid = stack.back();
+    stack.pop_back();
+
+    int vid = get_int_operand();
+    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id);
+    auto iter = pkg->find(vid);
+    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
+    stack.push_back(ret);
+}
+
+OP_LOCAL {
+    TODO();
+
+    SharedPtr<Value> var = stack.back();
+    frame_stack->back()->push_dynamic_scope_var(var);
 }
 

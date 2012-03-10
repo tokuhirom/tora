@@ -4,13 +4,14 @@
 namespace tora {
 
 class Value;
+class VM;
 
 /**
  * Dump a debug information.
  *
  * This is Devel::Peek in Perl5.
  */
-void peek(const Value * v);
+void peek(VM *vm, const Value * v);
 
 };
 

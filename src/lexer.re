@@ -78,6 +78,7 @@ std:
         ANY_CHARACTER          = [^];
         VARNAME                = [$][A-Za-z_][A-Za-z0-9_]*;
         IDENTIFIER             = [A-Za-z_][A-Za-z0-9_]*;
+        PACKAGE_VARNAME        = [$] ( IDENTIFIER "::" )* IDENTIFIER;
         DOUBLE                 = ([1-9][0-9]*[.][0-9]+) | ([0][.][0-9]+);
         LF                     = "\\n";
         HEREDOC_MARKER         = [A-Za-z_][A-Za-z0-9_]*;
@@ -277,6 +278,7 @@ std:
     ">>" { return BITRSHIFT; }
     "=" { return ASSIGN; }
     "my" { return MY; }
+    "local" { return LOCAL; }
     "true" { return TRUE; }
     "false" { return FALSE; }
     "while" { return WHILE; }
@@ -316,6 +318,12 @@ std:
         *yylval = new StrNode(NODE_IDENTIFIER, token);
         divable = true;
         return IDENTIFIER;
+    }
+    PACKAGE_VARNAME {
+        std::string token(m_token, m_cursor-m_token);
+        *yylval = new StrNode(NODE_GET_PACKAGE_VARIABLE, token);
+        divable = true;
+        return VARIABLE;
     }
     VARNAME {
         std::string token(m_token, m_cursor-m_token);

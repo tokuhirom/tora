@@ -33,35 +33,20 @@ public:
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
+    std::vector<SharedPtr<Value>> dynamic_scope_vars;
+
     LexicalVarsFrame(int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
-    virtual ~LexicalVarsFrame() { }
+    virtual ~LexicalVarsFrame();
     void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars.capacity());
         this->vars[id] = v.get();
     }
-    SharedPtr<Value> find(int id) {
+    SharedPtr<Value> find(int id) const {
         assert(id < this->vars.capacity());
         return this->vars[id];
     }
-    const char *type_str() {
-        switch (type) {
-        case FRAME_TYPE_FUNCTION:
-            return "function";
-        case FRAME_TYPE_LEXICAL:
-            return "lexical";
-        case FRAME_TYPE_PACKAGE:
-            return "package";
-        case FRAME_TYPE_TRY:
-            return "try";
-        case FRAME_TYPE_FOREACH:
-            return "foreach";
-        case FRAME_TYPE_WHILE:
-            return "while";
-        case FRAME_TYPE_FOR:
-            return "for";
-        }
-        abort();
-    }
+    void push_dynamic_scope_var(const SharedPtr<Value> &target);
+    const char *type_str() const;
 
     template<class Y>
     Y* upcast() {

@@ -12,12 +12,13 @@ namespace tora {
 
 class Package;
 
-class PackageMap : public Prim {
+class PackageMap {
+    PRIM_DECL(PackageMap)
     boost::unordered_map<ID, SharedPtr<Package>> data;
 public:
     typedef boost::unordered_map<ID, SharedPtr<Package>>::iterator iterator;
 
-    PackageMap() : Prim() { }
+    PackageMap() : refcnt(0) { }
     ~PackageMap() { }
     void dump(int indent) {
         print_indent(indent);

@@ -28,6 +28,9 @@ my @nodes = qw(
 
     NODE_DEREF
     NODE_SELF
+    NODE_GET_PACKAGE_VARIABLE
+
+    NODE_LOCAL
 
     NODE_LAMBDA
 

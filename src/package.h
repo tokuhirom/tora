@@ -24,11 +24,15 @@ public:
     void add_function(ID function_name_id, const SharedPtr<Value> &code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
+    void set_variable(ID var_name_id, const SharedPtr<Value> & v);
 
     iterator find(ID id) {
         return data.find(id);
     }
     void dump(VM *vm, int indent);
+    void dump(VM *vm) {
+        this->dump(vm, 0);
+    }
     const char *type_str() { return "package"; }
     ID id() { return name_id; }
     iterator begin() { return data.begin(); }

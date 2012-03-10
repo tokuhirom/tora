@@ -6,6 +6,8 @@ builtin functions
 
 stat()
 hex()
+getcwd()
+getpid()
 
 builtin objects
 ---------------
@@ -49,6 +51,7 @@ Code#line
 syntax
 -------
 
+ * local $FOO[$var];
  * "\u3042"
  * given-when
  * $array.map(^{ say($_); });
