@@ -11,5 +11,7 @@ my $m = {
     foo => 1,
 };
 is($m[foo], 1);
+$m[bar] = 3;
+is($m[bar], 3);
 
 done_testing;

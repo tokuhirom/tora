@@ -48,6 +48,23 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
     }
 }
 
+/**
+ * make the node to string node if it's bareword.
+ *
+ * $foo[word]       =>    $foo['word']
+ * $foo[word] = 3   =>    $foo['word'] = 3
+ * {foo => 'bar'}   =>    {'foo' => 'bar'}
+ */
+inline static SharedPtr<Node> STRING_IF_BAREWORD(SharedPtr<Node>& node) {
+    if (node->type == NODE_FUNCALL && static_cast<FuncallNode*>(node.get())->is_bare) {
+        SharedPtr<Node> tmp = node->at(0);
+        tmp->type = NODE_STRING;
+        return tmp;
+    } else {
+        return node;
+    }
+}
+
 Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_) : in_class_context(false) {
     error = 0;
     blocks = new std::vector<SharedPtr<Block>>();
@@ -209,11 +226,11 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         auto container = node->upcast<BinaryNode>()->left();
         auto index     = node->upcast<BinaryNode>()->right();
         this->compile(container);
-        this->compile(index);
+        this->compile(STRING_IF_BAREWORD(index));
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_SET_ITEM;
-       push_op(tmp);
+        push_op(tmp);
         break;
     }
     case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
@@ -238,7 +255,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
                     auto container = ln->at(i)->upcast<BinaryNode>()->left();
                     auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
-                    this->compile(index);
+                    this->compile(STRING_IF_BAREWORD(index));
                     push_op(new OP(OP_SET_ITEM));
                     break;
                 }
@@ -980,7 +997,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                     auto container = ln->at(i)->upcast<BinaryNode>()->left();
                     auto index     = ln->at(i)->upcast<BinaryNode>()->right();
                     this->compile(container);
-                    this->compile(index);
+                    this->compile(STRING_IF_BAREWORD(index));
                     push_op(new OP(OP_SET_ITEM));
                     break;
                 }
@@ -1019,13 +1036,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             // key
             // in hash key, bareword is string literal.
             SharedPtr<Node> key = args->at(i);
-            if (key->type == NODE_FUNCALL && static_cast<FuncallNode*>(key.get())->is_bare) {
-                SharedPtr<Node> tmp = key->at(0);
-                tmp->type = NODE_STRING;
-                this->compile(tmp);
-            } else {
-                this->compile(args->at(i));
-            }
+            this->compile(STRING_IF_BAREWORD(key));
         }
 
         SharedPtr<OP> tmp = new OP;
@@ -1038,13 +1049,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->compile(node->upcast<BinaryNode>()->left());  // container
 
         SharedPtr<Node> index = node->upcast<BinaryNode>()->right();
-        if (index->type == NODE_FUNCALL && static_cast<FuncallNode*>(index.get())->is_bare) {
-            SharedPtr<Node> tmp = index->at(0);
-            tmp->type = NODE_STRING;
-            this->compile(tmp);
-        } else {
-            this->compile(index);
-        }
+        this->compile(STRING_IF_BAREWORD(index));
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
