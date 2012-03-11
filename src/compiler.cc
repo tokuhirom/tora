@@ -1013,8 +1013,19 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         auto args = node->upcast<ListNode>();
         int args_len = args->size();
         for (int i=0; i<args_len; i+=2) {
+            // val
             this->compile(args->at(i+1));
-            this->compile(args->at(i));
+
+            // key
+            // in hash key, bareword is string literal.
+            SharedPtr<Node> key = args->at(i);
+            if (key->type == NODE_FUNCALL && static_cast<FuncallNode*>(key.get())->is_bare) {
+                SharedPtr<Node> tmp = key->at(0);
+                tmp->type = NODE_STRING;
+                this->compile(tmp);
+            } else {
+                this->compile(args->at(i));
+            }
         }
 
         SharedPtr<OP> tmp = new OP;

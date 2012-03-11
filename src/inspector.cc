@@ -4,10 +4,12 @@
 #include "value/array.h"
 #include "value/hash.h"
 #include "value/range.h"
+#include "value/object.h"
 
 using namespace tora;
 
-Inspector::Inspector(VM *vm) : vm_(vm_) {
+Inspector::Inspector(VM *vm) : vm_(vm) {
+    assert(vm);
 }
 
 std::string Inspector::inspect(const SharedPtr<Value> & v) {
@@ -74,8 +76,17 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
         ret += "}";
         return ret;
     }
-    case VALUE_TYPE_OBJECT:
-        return "#<Object>"; // TODO
+    case VALUE_TYPE_OBJECT: {
+        std::string ret;
+        ID pkgid = v->upcast<ObjectValue>()->package_id();
+        assert(vm_);
+        assert(vm_->symbol_table);
+        ret += vm_->symbol_table->id2name(pkgid);
+        ret += ".bless(";
+        ret += this->inspect(v->upcast<ObjectValue>()->data());
+        ret += ")";
+        return ret;
+    }
     case VALUE_TYPE_POINTER:
         return "#<Pointer>"; // TODO
     }

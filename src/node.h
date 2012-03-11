@@ -131,12 +131,14 @@ public:
 
 class FuncallNode: public Node {
 public:
+    bool is_bare;
     SharedPtr<Node>name() { return this->list->at(0); }
     SharedPtr<ListNode> args() { return this->list->at(1)->upcast<ListNode>(); }
-    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_) {
+    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_, bool bare=false) {
         this->type = NODE_FUNCALL;
         this->list->push_back(name_);
         this->list->push_back(args_);
+        is_bare = bare;
     }
     ~FuncallNode() { }
 };

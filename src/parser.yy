@@ -223,6 +223,10 @@ array_creation(A) ::= L_BRACKET R_BRACKET. {
     A = new ListNode(NODE_MAKE_ARRAY);
 }
 
+hash_creation(A) ::= L_BRACE pair_list(B) COMMA R_BRACE. {
+    B->type = NODE_MAKE_HASH;
+    A = B;
+}
 hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
     B->type = NODE_MAKE_HASH;
     A = B;
@@ -297,7 +301,8 @@ expression(A) ::= DIE expression(B). {
 }
 expression(A) ::= use_expression(B).   { A = B; }
 expression(A) ::= identifier(B). {
-    A = new FuncallNode(B, new ListNode());
+    // in hash creation, It's a key.
+    A = new FuncallNode(B, new ListNode(), true);
 }
 use_expression(A) ::= USE identifier(B) MUL. {
     A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));

@@ -380,7 +380,6 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
         } else {
             // copy non-code value to other package?
-            abort();
         }
     }
     // dstpkg->dump(this->symbol_table, 1);

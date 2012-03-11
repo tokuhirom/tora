@@ -1,0 +1,15 @@
+use Test::More *;
+
+# allow last comma
+my $n = {
+    "foo" => 1,
+};
+is($n['foo'], 1);
+
+# allow bare word
+my $m = {
+    foo => 1,
+};
+is($m['foo'], 1);
+
+done_testing;

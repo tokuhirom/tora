@@ -1,0 +1,87 @@
+my $counter = 0;
+
+        p({
+            'counter' => 0,
+            'level'   => 3
+        });
+
+class Test::Builder {
+    sub new ($level) {
+        self.bless({
+            counter => 0,
+            level   => $level
+        });
+    }
+    sub level() {
+        return ${self}['level'];
+    }
+    sub counter() {
+        return ${self}['counter'];
+    }
+    sub incr_counter() {
+        self.counter(self.counter() + 1);
+    }
+    sub ok($b) {
+        self.incr_counter();
+        if ($b) {
+            say("ok " + $counter);
+        } else {
+            say("not ok " + $counter);
+        }
+    }
+};
+
+sub subtest($name, $code) {
+    note($name);
+    p($Test::More::BUILDER);
+    my $current_level = $Test::More::BUILDER.level()+1;
+    local $Test::More::BUILDER = Test::Builder.new($current_level);
+    $code.();
+}
+
+sub ok($b) {
+    ++$counter;
+    if ($b) {
+        say("ok " + $counter);
+    } else {
+        say("not ok " + $counter);
+    }
+}
+
+sub fail() {
+    say("not ok " + ++$counter);
+}
+
+sub is($a, $b) {
+    ++$counter;
+    if ($a==$b) {
+        say("ok " + $counter);
+    } else {
+        say("not ok " + $counter);
+        say(" # got:      " + $a);
+        say(" # expected: " + $b);
+    }
+}
+
+sub like($a, $b) {
+    ++$counter;
+    if ($a.match($b)) {
+        say("ok " + $counter);
+    } else {
+        say("not ok " + $counter);
+        say(" # got:      " + $a);
+        say(" # expected: " + $b);
+    }
+}
+
+sub note($msg) {
+    say("# " + $msg);
+}
+
+
+sub done_testing() {
+    say("1.." + $counter);
+}
+
+$Test::More::BUILDER = Test::Builder.new(0);
+

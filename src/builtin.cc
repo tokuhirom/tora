@@ -20,6 +20,8 @@ static SharedPtr<Value> builtin_exit(VM *vm, Value* v) {
 
 static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
     Inspector ins(vm);
+    assert(vm);
+    assert(vm->symbol_table);
     printf("%s\n", ins.inspect(arg1).c_str());
     return UndefValue::instance();
 }
