@@ -5,6 +5,10 @@
 
 using namespace tora;
 
+void tora::peek(VM *vm, const SharedPtr<Value>& v) {
+    peek(vm, v.get());
+}
+
 void tora::peek(VM *vm, const Value * v) {
     if (v) {
         printf("Value: %s\n", v->type_str());

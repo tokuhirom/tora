@@ -53,7 +53,7 @@ public:
     void dump();
 
     Node* at(int i) {
-        return &(*(list->at(i)));
+        return list->at(i).get();
     }
 
     size_t size() {

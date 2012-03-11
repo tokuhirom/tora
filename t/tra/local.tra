@@ -1,0 +1,20 @@
+use Test::More *;
+
+$FOO::BAR=3;
+is($FOO::BAR, 3);
+{
+    local $FOO::BAR;
+    is($FOO::BAR, undef);
+    $FOO::BAR = 5;
+    is($FOO::BAR, 5);
+}
+is($FOO::BAR, 3);
+
+{
+    local $FOO::BAR = 9;
+    is($FOO::BAR, 9);
+}
+is($FOO::BAR, 3);
+
+done_testing;
+

@@ -1,23 +1,25 @@
 #include "frame.h"
 #include "vm.h"
 #include "peek.h"
+#include "package.h"
 #include "value/code.h"
 
 using namespace tora;
 
 
-LexicalVarsFrame::LexicalVarsFrame(int vars_cnt, size_t top, frame_type_t type_) : vars(vars_cnt), top(top), type(type_) {
+LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_) : vm_(vm), vars(vars_cnt), top(top), type(type_) {
 }
 
 LexicalVarsFrame::~LexicalVarsFrame() {
     for (auto iter = dynamic_scope_vars.begin(); iter != dynamic_scope_vars.end(); ++iter) {
-        const SharedPtr<Value> &p = *iter;
-        peek(NULL, p.get());
+        DynamicScopeData* dat = *iter;
+        dat->package()->set_variable(dat->moniker_id(), dat->value());
     }
 }
 
-void LexicalVarsFrame::push_dynamic_scope_var(const SharedPtr<Value> &v) {
-    dynamic_scope_vars.push_back(v);
+void LexicalVarsFrame::push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target) {
+    DynamicScopeData* v = new DynamicScopeData(pkgid, monikerid, target);
+    this->dynamic_scope_vars.push_back(v);
 }
 
 const char *LexicalVarsFrame::type_str() const {

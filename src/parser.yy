@@ -280,6 +280,18 @@ statement_list(A) ::= statement_list(B) statement(C).  {
 expression(A) ::= assignment_expression(B). {
     A = B;
 }
+expression(A) ::= LOCAL variable(B).   {
+    ListNode * ln = new ListNode(NODE_LOCAL);
+    ln->push_back(B);
+    ln->push_back(NULL);
+    A = ln;
+}
+expression(A) ::= LOCAL variable(B) ASSIGN expression(C).   {
+    ListNode * ln = new ListNode(NODE_LOCAL);
+    ln->push_back(B);
+    ln->push_back(C);
+    A = ln;
+}
 expression(A) ::= DIE expression(B). {
     A = new NodeNode(NODE_DIE, B);
 }
@@ -333,9 +345,6 @@ conditional_expression(A) ::= MY conditional_expression(B).   {
     ListNode*nl = new ListNode(NODE_MY);
     nl->push_back(B);
     A = nl;
-}
-conditional_expression(A) ::= LOCAL variable(B).   {
-    A = new NodeNode(NODE_LOCAL, B);
 }
 
 logical_or_expression(A) ::= logical_and_expression(B). { A = B; }

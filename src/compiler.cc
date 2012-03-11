@@ -34,6 +34,8 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
     if (node->type == NODE_MY) {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
         return ln->size();
+    } else if (node->type == NODE_LOCAL) {
+        return 1;
     } else {
         auto iter = node->list->begin();
         int ret = 0;
@@ -91,6 +93,11 @@ void Compiler::define_my(SharedPtr<Node> node) {
     }
 }
 
+/**
+ * Find local vars level in compilation phase.
+ *
+ * @return $n > 0 when found var. return -1 when var is not found.
+ */
 int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closure, bool &is_arg) {
     DBG("FIND LOCAL VAR %d\n", 0);
     need_closure = false;
@@ -183,6 +190,12 @@ void tora::Compiler::set_variable(std::string &varname) {
     push_op(tmp);
 }
 
+/**
+ * assign Top of Stack to lvalue.
+ *
+ * @args node: lvalue node.
+ * @return none.
+ */
 void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
     switch (node->type) {
     case NODE_GETVARIABLE: { // $a = $b;
@@ -264,8 +277,9 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         break;
     }
     case NODE_LOCAL: {
+        this->fail("Straight assign for local variable is not supported yet.");
+        /*
         if (node->size() == 1) {
-            std::string &name = node->at(0)->upcast<StrNode>()->str_value;
             push_op(new OP(OP_GET_PACKAGE_VARIABLE));
             push_op(new OP(OP_LOCAL));
 
@@ -275,6 +289,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
             node->dump(1);
             this->error++;
         }
+        */
         break;
     }
     default:
@@ -364,8 +379,33 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_LOCAL: {
-        this->compile(node->at(0));
+        if (node->at(0)->type != NODE_GET_PACKAGE_VARIABLE && node->at(0)->type != NODE_GETVARIABLE) {
+            this->fail("You cannot localize %s\n", node->at(0)->type_name_str());
+            break;
+        }
+        const std::string & name = node->at(0)->upcast<StrNode>()->str_value;
+
+        int level; bool need_closure; bool is_arg;
+        int ret = find_localvar(name, level, need_closure, is_arg);
+        if (ret >= 0) {
+            this->fail("You cannot localize lexical vars: %s\n", name.c_str());
+            break;
+        }
+
+        SharedPtr<StrValue> sv = new StrValue(node->at(0)->upcast<StrNode>()->str_value);
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
+        push_op(tmp);
         push_op(new OP(OP_LOCAL));
+
+        if (node->at(1)) {
+            // local $Foo::Bar(at0) = $val(at1);
+            this->compile(node->at(1));
+            this->set_lvalue(node->at(0));
+        } else {
+            // local $Foo::Bar(at0);
+            this->compile(node->at(0));
+        }
+
         break;
     }
     case NODE_RETURN: {
@@ -909,7 +949,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     BINARY_ASSIGN(NODE_MOD_ASSIGN, NODE_MOD)
 #undef BINARY_ASSIGN
     case NODE_SETVARIABLE: {
+        // compile rvalue.
         this->compile(node->upcast<BinaryNode>()->right());
+        // and assign it to lvalue.
         this->set_lvalue(node->upcast<BinaryNode>()->left());
         break;
     }

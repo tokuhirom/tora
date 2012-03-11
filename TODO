@@ -76,6 +76,7 @@ syntax
    }
  * destructor in pure tora function
  * localize STDOUT
+ * local Foo::method = sub { };
 
 lambda
 ------

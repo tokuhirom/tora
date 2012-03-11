@@ -14,6 +14,7 @@ namespace tora {
 class OPArray;
 class VM;
 class CodeValue;
+class Package;
 
 typedef enum {
     FRAME_TYPE_LEXICAL = 1,
@@ -25,17 +26,30 @@ typedef enum {
     FRAME_TYPE_FOR,
 } frame_type_t;
 
+struct DynamicScopeData {
+    Package * package_;
+    ID moniker_id_;
+    SharedPtr<Value> value_;
+public:
+    DynamicScopeData(Package * pkg, ID m, const SharedPtr<Value> & val) :package_(pkg), moniker_id_(m), value_(val) {
+    }
+    ID moniker_id() const { return moniker_id_; }
+    Package * package() const { return package_; }
+    SharedPtr<Value> value() const { return value_; }
+};
+
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame {
-private:
+protected:
+    VM * vm_;
 public:
     std::vector<SharedPtr<Value>> vars;
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
-    std::vector<SharedPtr<Value>> dynamic_scope_vars;
+    std::vector<DynamicScopeData*> dynamic_scope_vars;
 
-    LexicalVarsFrame(int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
+    LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
     virtual ~LexicalVarsFrame();
     void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars.capacity());
@@ -45,7 +59,7 @@ public:
         assert(id < this->vars.capacity());
         return this->vars[id];
     }
-    void push_dynamic_scope_var(const SharedPtr<Value> &target);
+    void push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target);
     const char *type_str() const;
 
     template<class Y>
@@ -59,7 +73,7 @@ class TryFrame : public LexicalVarsFrame {
 public:
     int return_address;
     // try frame does not have variables.
-    TryFrame(size_t top) : LexicalVarsFrame(0, top, FRAME_TYPE_TRY) { }
+    TryFrame(VM *vm, size_t top) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_TRY) { }
 };
 
 class FunctionFrame : public LexicalVarsFrame {
@@ -68,11 +82,11 @@ public:
     SharedPtr<OPArray> orig_ops;
     SharedPtr<Value> self;
     int argcnt;
-    FunctionFrame(int vars_cnt, size_t top) : LexicalVarsFrame(vars_cnt, top, FRAME_TYPE_FUNCTION) { }
-    FunctionFrame(int vars_cnt, size_t top, const SharedPtr<OPArray> & op) : LexicalVarsFrame(vars_cnt, top), orig_ops(op) {
+    FunctionFrame(VM *vm, int vars_cnt, size_t top) : LexicalVarsFrame(vm, vars_cnt, top, FRAME_TYPE_FUNCTION) { }
+    FunctionFrame(VM *vm, int vars_cnt, size_t top, const SharedPtr<OPArray> & op) : LexicalVarsFrame(vm, vars_cnt, top), orig_ops(op) {
         this->type = FRAME_TYPE_FUNCTION;
     }
-    FunctionFrame(int vars_cnt, size_t top, const SharedPtr<Value>& self_) : LexicalVarsFrame(vars_cnt, top), self(self_) { }
+    FunctionFrame(VM *vm, int vars_cnt, size_t top, const SharedPtr<Value>& self_) : LexicalVarsFrame(vm, vars_cnt, top), self(self_) { }
     ~FunctionFrame() { }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }
@@ -85,15 +99,14 @@ class ForeachFrame : public LexicalVarsFrame {
 public:
     SharedPtr<Value> iter;
     SharedPtr<Value> current_value;
-    ForeachFrame(int vars_cnt, size_t top) : LexicalVarsFrame(vars_cnt, top, FRAME_TYPE_FOREACH) { }
+    ForeachFrame(VM *vm, int vars_cnt, size_t top) : LexicalVarsFrame(vm, vars_cnt, top, FRAME_TYPE_FOREACH) { }
 };
 
 
 class PackageFrame : public LexicalVarsFrame {
     ID orig_package_id_;
-    VM * vm_;
 public:
-    PackageFrame(size_t top, ID pkgid, VM *parent) : LexicalVarsFrame(0, top, FRAME_TYPE_PACKAGE), orig_package_id_(pkgid), vm_(parent) { }
+    PackageFrame(VM *vm, size_t top, ID pkgid) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_PACKAGE), orig_package_id_(pkgid) { }
     ~PackageFrame();
 };
 

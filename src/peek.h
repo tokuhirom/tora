@@ -1,6 +1,8 @@
 #ifndef TORA_PEEK_H_
 #define TORA_PEEK_H_
 
+#include "shared_ptr.h"
+
 namespace tora {
 
 class Value;
@@ -12,6 +14,7 @@ class VM;
  * This is Devel::Peek in Perl5.
  */
 void peek(VM *vm, const Value * v);
+void peek(VM *vm, const SharedPtr<Value>& v);
 
 };
 

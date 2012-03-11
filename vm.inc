@@ -230,7 +230,7 @@ OP_FUNCALL {
         CodeValue* code = iter->second->upcast<CodeValue>();
         // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
-        FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), this->ops);
+        FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
         fframe->return_address = pc;
         fframe->argcnt = argcnt;
         fframe->code = code;
@@ -290,7 +290,7 @@ OP_METHOD_CALL {
                 // frame_stack->pop_back();
             } else {
                 {
-                    FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
+                    FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
                     fframe->return_address = pc;
                     fframe->code = code;
                     fframe->argcnt = argcnt;
@@ -351,7 +351,7 @@ OP_METHOD_CALL {
             int argcnt = get_int_operand();
 
             if (code->is_native()) {
-                // FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
+                // FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size()-argcnt);
                 // fframe->return_address = pc;
                 // fframe->code = code;
 
@@ -361,7 +361,7 @@ OP_METHOD_CALL {
                 // delete fframe;
                 // frame_stack->pop_back();
             } else {
-                FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
+                FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
                 fframe->return_address = pc;
                 fframe->argcnt = argcnt;
                 fframe->code = code;
@@ -383,7 +383,7 @@ OP_METHOD_CALL {
                 if (code->is_native()) {
                     TODO();
                 } else {
-                    FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size(), ops);
+                    FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
                     fframe->return_address = pc;
                     fframe->argcnt = argcnt;
                     fframe->code = code;
@@ -475,17 +475,17 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size());
+    LexicalVarsFrame* frame = new LexicalVarsFrame(this, get_int_operand(), stack.size());
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_WHILE {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size(), FRAME_TYPE_WHILE);
+    LexicalVarsFrame* frame = new LexicalVarsFrame(this, get_int_operand(), stack.size(), FRAME_TYPE_WHILE);
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_FOR {
-    LexicalVarsFrame* frame = new LexicalVarsFrame(get_int_operand(), stack.size(), FRAME_TYPE_FOR);
+    LexicalVarsFrame* frame = new LexicalVarsFrame(this, get_int_operand(), stack.size(), FRAME_TYPE_FOR);
     frame_stack->push_back(frame);
 }
 
@@ -855,7 +855,7 @@ OP_ENTER_FOREACH {
     }
 
     int vars_cnt = get_int_operand();
-    ForeachFrame* fframe = new ForeachFrame(vars_cnt, stack.size());
+    ForeachFrame* fframe = new ForeachFrame(this, vars_cnt, stack.size());
     fframe->iter = iiter;
     frame_stack->push_back(fframe);
 }
@@ -961,7 +961,7 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    TryFrame* fframe = new TryFrame(stack.size());
+    TryFrame* fframe = new TryFrame(this, stack.size());
     fframe->return_address = get_int_operand()-1;
     frame_stack->push_back(fframe);
     mark_stack.push_back(stack.size());
@@ -1001,7 +1001,7 @@ OP_NOT {
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    PackageFrame* pframe = new PackageFrame(stack.size(), this->package_id(), this);
+    PackageFrame* pframe = new PackageFrame(this, stack.size(), this->package_id());
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
     this->package_id_ = package_id;
@@ -1053,9 +1053,30 @@ OP_GET_PACKAGE_VARIABLE {
 }
 
 OP_LOCAL {
-    TODO();
+    /**
+     * stacks: varname, 
+     */
 
-    SharedPtr<Value> var = stack.back();
-    frame_stack->back()->push_dynamic_scope_var(var);
+    // I know it's very slow. but dynamic scope is not important part in tora interpreter.
+    // If you want to improvents performance, patches welcome.
+    // TODO: optimize
+    const SharedPtr<Value> & snode = stack.back();
+    assert(snode->value_type == VALUE_TYPE_STR);
+
+    std::string package;
+    std::string moniker;
+    split_package(snode->upcast<StrValue>()->str_value, package, moniker);
+
+    ID pkgid = symbol_table->get_id(package);
+    ID vid = symbol_table->get_id(std::string("$") + moniker);
+
+    Package *pkg = find_package(pkgid);
+    auto iter = pkg->find(vid);
+
+    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
+    frame_stack->back()->push_dynamic_scope_var(pkg, vid, ret);
+    pkg->set_variable(vid, UndefValue::instance());
+
+    stack.pop_back();
 }
 
