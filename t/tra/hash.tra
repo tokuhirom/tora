@@ -10,6 +10,6 @@ is($n['foo'], 1);
 my $m = {
     foo => 1,
 };
-is($m['foo'], 1);
+is($m[foo], 1);
 
 done_testing;

@@ -1036,7 +1036,15 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_GET_ITEM: {
         this->compile(node->upcast<BinaryNode>()->left());  // container
-        this->compile(node->upcast<BinaryNode>()->right()); // index
+
+        SharedPtr<Node> index = node->upcast<BinaryNode>()->right();
+        if (index->type == NODE_FUNCALL && static_cast<FuncallNode*>(index.get())->is_bare) {
+            SharedPtr<Node> tmp = index->at(0);
+            tmp->type = NODE_STRING;
+            this->compile(tmp);
+        } else {
+            this->compile(index);
+        }
 
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_GET_ITEM;
