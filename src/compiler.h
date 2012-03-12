@@ -39,6 +39,7 @@ public:
 
 class Compiler {
     std::string package_;
+    std::string filename_;
 public:
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Block>> *blocks;
@@ -58,7 +59,7 @@ public:
     void package(const std::string & p) { package_ = p; }
     std::string & package() { return package_; }
 
-    Compiler(const SharedPtr<SymbolTable> &symbol_table_);
+    Compiler(const SharedPtr<SymbolTable> &symbol_table_, const std::string & filename);
     ~Compiler();
 
     void define_my(SharedPtr<Node> node);

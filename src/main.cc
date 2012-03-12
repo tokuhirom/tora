@@ -72,8 +72,10 @@ int main(int argc, char **argv) {
     boost::scoped_ptr<std::ifstream> ifs;
     boost::scoped_ptr<std::stringstream> ss;
     SharedPtr<Scanner> scanner;
+    std::string filename;
     if (code) {
         ss.reset(new std::stringstream(std::string(code) + ";"));
+        filename = "<eval>";
         scanner = new Scanner(ss.get(), "<eval>");
     } else if (optind < argc) { // source code
         ifs.reset(new std::ifstream(argv[optind], std::ios::in));
@@ -83,8 +85,10 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
         scanner = new Scanner(ifs.get(), argv[optind]);
+        filename = argv[optind];
         optind++;
     } else {
+        filename = "<stdin>";
         scanner = new Scanner(&std::cin, "<stdin>");
     }
 
@@ -128,7 +132,7 @@ int main(int argc, char **argv) {
 
     // compile
     SharedPtr<SymbolTable> symbol_table = new SymbolTable();
-    tora::Compiler compiler(symbol_table);
+    tora::Compiler compiler(symbol_table, filename);
     compiler.dump_ops = dump_ops;
     compiler.init_globals();
     compiler.compile(parser.root_node());

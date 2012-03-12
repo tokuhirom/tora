@@ -146,7 +146,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
 
     // compile
     // SharedPtr<SymbolTable> symbol_table = new SymbolTable();
-    Compiler compiler(vm->symbol_table);
+    Compiler compiler(vm->symbol_table, fname);
     compiler.init_globals();
     compiler.package(package);
     compiler.compile(parser.root_node());

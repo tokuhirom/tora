@@ -65,7 +65,7 @@ inline static SharedPtr<Node> STRING_IF_BAREWORD(SharedPtr<Node>& node) {
     }
 }
 
-Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_) : in_class_context(false) {
+Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_, const std::string &filename) : filename_(filename), in_class_context(false) {
     error = 0;
     blocks = new std::vector<SharedPtr<Block>>();
     global_vars = new std::vector<std::string>();
@@ -491,7 +491,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->define_localvar(std::string("$_"));
         }
 
-        Compiler funccomp(this->symbol_table);
+        Compiler funccomp(this->symbol_table, filename_);
         if (funccomp.blocks) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;
@@ -512,7 +512,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<CodeValue> code = new CodeValue(
             this->symbol_table->get_id("<lambda>"), // package id
-            this->symbol_table->get_id("<lambda>") // func name id
+            this->symbol_table->get_id("<lambda>"), // func name id
+            filename_,
+            node->lineno
         );
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
@@ -574,7 +576,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
         }
 
-        Compiler funccomp(this->symbol_table);
+        Compiler funccomp(this->symbol_table, filename_);
         if (funccomp.blocks) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;
@@ -593,7 +595,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         SharedPtr<CodeValue> code = new CodeValue(
             this->symbol_table->get_id(this->package()), // package id
-            this->symbol_table->get_id(funcname)         // func name id
+            this->symbol_table->get_id(funcname),        // func name id
+            filename_,
+            node->lineno
         );
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
