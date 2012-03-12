@@ -430,7 +430,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         SharedPtr<ListNode>ln = node->upcast<ListNode>();
 
         if (this->in_try_block) {
-            ln->list->insert(ln->list->begin(), new VoidNode(NODE_UNDEF));
+            ln->list->insert(ln->list->begin(), new Node(NODE_UNDEF));
         }
 
         if (ln->size() == 1) {

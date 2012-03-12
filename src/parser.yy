@@ -110,7 +110,7 @@ root ::= translation_unit(A). {
     state->root_node = new NodeNode(NODE_ROOT, A);
 }
 root ::= . {
-    state->root_node = new NodeNode(NODE_ROOT, new VoidNode(NODE_VOID));
+    state->root_node = new NodeNode(NODE_ROOT, new Node(NODE_VOID));
 }
 
 translation_unit(A) ::= statement(B). { A = B; }
@@ -122,10 +122,10 @@ expression(A) ::= LAST. {
     A = new Node(NODE_LAST);
 }
 expression(A) ::= NEXT. {
-    A = new VoidNode(NODE_NEXT);
+    A = new Node(NODE_NEXT);
 }
 expression(A) ::= REDO. {
-    A = new VoidNode(NODE_REDO);
+    A = new Node(NODE_REDO);
 }
 
 statement(A) ::= expression(B) SEMICOLON . {
@@ -144,7 +144,7 @@ statement(A) ::= expression(B) FOR expression(C) SEMICOLON. {
     A = new ForEachNode(NULL, C, B);
 }
 statement(A) ::= SEMICOLON. {
-    A = new VoidNode(NODE_VOID);
+    A = new Node(NODE_VOID);
 }
 statement(A) ::= jump_statement(B). { A = B; }
 statement(A) ::= if_statement(B).   { A = B; }
@@ -512,13 +512,13 @@ primary_expression(A) ::= primary_expression(B) DOTDOT primary_expression(C). {
     A = new BinaryNode(NODE_RANGE, B, C);
 }
 primary_expression(A) ::= FALSE. {
-    A = new VoidNode(NODE_FALSE);
+    A = new Node(NODE_FALSE);
 }
 primary_expression(A) ::= SELF. {
-    A = new VoidNode(NODE_SELF);
+    A = new Node(NODE_SELF);
 }
 primary_expression(A) ::= TRUE. {
-    A = new VoidNode(NODE_TRUE);
+    A = new Node(NODE_TRUE);
 }
 primary_expression(A) ::= REGEXP_LITERAL(B). {
     B->type = NODE_REGEXP;
@@ -550,10 +550,10 @@ tuple_list(A) ::= tuple_list(B) COMMA expression(C). {
     A->upcast<ListNode>()->push_back(C);
 }
 primary_expression(A) ::= UNDEF. {
-    A = new VoidNode(NODE_UNDEF);
+    A = new Node(NODE_UNDEF);
 }
 primary_expression(A) ::= DOTDOTDOT. {
-    A = new VoidNode(NODE_DOTDOTDOT);
+    A = new Node(NODE_DOTDOTDOT);
 }
 primary_expression(A) ::= HEREDOC_START(B). {
     A = B;

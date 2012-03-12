@@ -33,20 +33,20 @@ public:
     node_type_t type;
     std::vector<SharedPtr<Node>> *list;
     typedef std::vector<SharedPtr<Node>>::iterator iterator;
+    typedef std::vector<SharedPtr<Node>>::const_iterator const_iterator;
     typedef std::vector<SharedPtr<Node>>::reverse_iterator reverse_iterator;
     int lineno;
-    Node() {
-        type = NODE_UNKNOWN;
-        list = new std::vector<SharedPtr<Node>>();
-    }
-    Node(node_type_t n) {
+
+    Node(node_type_t n=NODE_UNKNOWN) {
         type = n;
         list = new std::vector<SharedPtr<Node>>();
     }
-    virtual ~Node() {
-        delete list;
-    }
-    const char *type_name_str() {
+    /**
+     * ~Node is not a virtual for performance reason.
+     * Do not override it.
+     */
+    ~Node() { delete list; }
+    const char *type_name_str() const {
         return node_type2name[this->type];
     }
     virtual void dump(int indent);
@@ -56,17 +56,19 @@ public:
         return list->at(i).get();
     }
 
-    size_t size() {
+    size_t size() const {
         return list->size();
     }
 
     template<class Y>
     Y* upcast() {
-        return dynamic_cast<Y*>(&(*(this)));
+        return static_cast<Y*>(this);
     }
 
     iterator begin() { return list->begin(); }
     iterator end() { return list->end(); }
+    const_iterator begin() const { return list->begin(); }
+    const_iterator end()  const { return list->end(); }
     reverse_iterator rbegin() { return list->rbegin(); }
     reverse_iterator rend() { return list->rend(); }
 };
@@ -74,15 +76,8 @@ public:
 class StrNode : public Node {
 public:
     std::string str_value;
-    StrNode(node_type_t type_, const char *str) {
-        this->type = type_;
-        this->str_value = str;
-    }
-    StrNode(node_type_t type_, const std::string &str) {
-        this->type = type_;
-        this->str_value = str;
-    }
-    ~StrNode() { }
+    StrNode(node_type_t type_, const char *str) : Node(type_), str_value(str) { }
+    StrNode(node_type_t type_, const std::string &str) :Node(type_), str_value(str) { }
     void dump(int indent);
 };
 
@@ -93,16 +88,7 @@ public:
         this->type = type_;
         this->regexp_value = str;
     }
-    ~RegexpNode() { }
     void dump(int indent);
-};
-
-class VoidNode: public Node {
-public:
-    VoidNode(node_type_t t) {
-        this->type = t;
-    }
-    ~VoidNode() { }
 };
 
 class IntNode: public Node {
@@ -111,8 +97,6 @@ public:
     IntNode(node_type_t type_, int i): Node() {
         type = type_;
         int_value = i;
-    }
-    ~IntNode() {
     }
     void dump(int indent);
 };
@@ -123,8 +107,6 @@ public:
     DoubleNode(node_type_t type_, double d): Node() {
         type = type_;
         double_value = d;
-    }
-    ~DoubleNode() {
     }
     void dump(int indent);
 };
@@ -140,7 +122,6 @@ public:
         this->list->push_back(args_);
         is_bare = bare;
     }
-    ~FuncallNode() { }
 };
 
 class FuncdefNode: public Node {
@@ -154,7 +135,6 @@ public:
         this->list->push_back(p);
         this->list->push_back(b);
     }
-    ~FuncdefNode() { }
 };
 
 class ListNode: public Node {
@@ -179,7 +159,6 @@ public:
         this->list->push_back(p);
         this->list->push_back(b);
     }
-    ~ForNode() { }
     SharedPtr<Node> initialize() { return this->list->at(0); }
     SharedPtr<Node> cond() { return this->list->at(1); }
     SharedPtr<Node> postfix() { return this->list->at(2); }
@@ -197,7 +176,6 @@ public:
         this->list->push_back(s);
         this->list->push_back(b);
     }
-    ~ForEachNode() { }
 };
 
 class IfNode: public Node {
@@ -211,7 +189,6 @@ public:
         this->list->push_back(i);
         this->list->push_back(e);
     }
-    ~IfNode() { }
 };
 
 class NodeNode: public Node {
@@ -220,7 +197,6 @@ public:
         type = t;
         this->list->push_back(n);
     }
-    ~NodeNode() { }
     SharedPtr<Node> node() { return this->list->at(0); }
 };
 
@@ -236,7 +212,6 @@ public:
         this->list->push_back(m);
         this->list->push_back(a);
     }
-    ~MethodCallNode() { }
 };
 
 class ClassNode : public Node {
@@ -253,7 +228,6 @@ public:
         this->list->push_back(r);
         this->list->push_back(b);
     }
-    ~ClassNode() { }
 };
 
 
@@ -266,7 +240,6 @@ public:
         this->list->push_back(l);
         this->list->push_back(r);
     }
-    ~BinaryNode() { }
 };
 
 };
