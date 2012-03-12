@@ -361,6 +361,8 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "caller",
         "callee",
         "getcwd",
+        "getpid",
+        "getppid",
         NULL
     };
     for (int i=0; bs[i]; i++) {

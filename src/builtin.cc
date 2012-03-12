@@ -210,6 +210,22 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
     }
 }
 
+/**
+ * Get a current process id.
+ */
+static SharedPtr<Value> builtin_getpid(VM *vm) {
+    // POSIX.1-2001, 4.3BSD, SVr4.
+    return new IntValue(getpid());
+}
+
+/**
+ * Get a parent process id.
+ */
+static SharedPtr<Value> builtin_getppid(VM *vm) {
+    // POSIX.1-2001, 4.3BSD, SVr4.
+    return new IntValue(getppid());
+}
+
 void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
     vm->add_builtin_function("exit", builtin_exit);
@@ -225,5 +241,7 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("caller",   builtin_caller);
     vm->add_builtin_function("callee",   builtin_callee);
     vm->add_builtin_function("getcwd",   builtin_getcwd);
+    vm->add_builtin_function("getpid",   builtin_getpid);
+    vm->add_builtin_function("getppid",   builtin_getppid);
 }
 

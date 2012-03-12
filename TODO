@@ -6,7 +6,6 @@ builtin functions
 
 stat()
 hex()
-getpid()
 
 builtin objects
 ---------------
@@ -181,3 +180,5 @@ getcwd()
 Code#file
 Code#line
 
+getpid()
+getppid()
