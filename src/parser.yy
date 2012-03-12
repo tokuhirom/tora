@@ -137,6 +137,9 @@ statement(A) ::= expression(B) UNLESS expression(C) SEMICOLON. {
 statement(A) ::= expression(B) IF expression(C) SEMICOLON. {
     A = new IfNode(NODE_IF, C, B, NULL);
 }
+statement(A) ::= expression(B) WHILE expression(C) SEMICOLON. {
+    A = new BinaryNode(NODE_WHILE, C, B);
+}
 statement(A) ::= expression(B) FOR expression(C) SEMICOLON. {
     A = new ForEachNode(NULL, C, B);
 }

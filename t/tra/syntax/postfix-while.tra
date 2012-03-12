@@ -1,0 +1,9 @@
+use Test::More *;
+
+my $n=0;
+my $i=10;
+$n++ while $i-- != 5;
+
+is($n, 5);
+
+done_testing;

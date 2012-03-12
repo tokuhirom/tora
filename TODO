@@ -6,7 +6,6 @@ builtin functions
 
 stat()
 hex()
-getcwd()
 getpid()
 
 builtin objects
@@ -21,6 +20,7 @@ Array#flatten()
 Array#reverse!()
 
 Enumerable#reduce()
+Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
 dir('t').is_dir()
@@ -179,4 +179,6 @@ Array#reverse()
  * say $_ for $array;
  * unless () { }
  * x unless foo;
+getcwd()
+ * x while y;
 
