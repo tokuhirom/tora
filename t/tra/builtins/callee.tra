@@ -1,0 +1,13 @@
+use Test::More *;
+
+is(callee(), undef);
+
+sub foo() {
+    my $code = callee();
+    is(typeof($code), 'Code');
+    is($code.name(), 'foo');
+}
+
+foo();
+
+done_testing;

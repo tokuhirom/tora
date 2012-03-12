@@ -139,6 +139,22 @@ static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
 }
 
 /**
+ * my $code = callee() : Code;
+ *
+ * Returns callee code object.
+ * Return undef if it's not in subroutine.
+ */
+static SharedPtr<Value> builtin_callee(VM *vm) {
+    for (auto iter = vm->frame_stack->rbegin(); iter != vm->frame_stack->rend(); ++iter) {
+        if ((*iter)->type == FRAME_TYPE_FUNCTION) {
+            FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
+            return fframe->code;
+        }
+    }
+    return UndefValue::instance();
+}
+
+/**
  * caller(0) : Caller
  * caller() : Array[Caller]
  *
@@ -207,6 +223,7 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("opendir",   builtin_opendir);
     vm->add_builtin_function("rand",   builtin_rand);
     vm->add_builtin_function("caller",   builtin_caller);
+    vm->add_builtin_function("callee",   builtin_callee);
     vm->add_builtin_function("getcwd",   builtin_getcwd);
 }
 
