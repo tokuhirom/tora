@@ -49,7 +49,18 @@ class BoolValue;
  * The value class
  */
 class Value {
-    PRIM_DECL(Value);
+public:
+    int refcnt;
+    virtual void release() {
+        --refcnt;
+        if (refcnt == 0) {
+            delete this;
+        }
+    }
+    void retain() {
+        assert(refcnt >= 0);
+        ++refcnt;
+    }
 protected:
     Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }

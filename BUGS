@@ -9,3 +9,23 @@ KNOWN BUGS LIST
 * zero divided error
 * close directory at destructor
 
+__END__
+use Test::More *;
+
+my $n;
+class Foo {
+    sub new() {
+        self.bless(4649);
+    }
+    sub DESTROY() {
+        $n = ${self};
+    }
+}
+
+{
+    my $foo = Foo.new();
+}
+
+is($Foo::Bar, 4649);
+
+done_testing;

@@ -13,6 +13,11 @@ private:
     std::vector<size_t> lineno;
 public:
     OPArray() :refcnt(0) { }
+    OPArray(const OPArray &opa) :refcnt(0) {
+        op_types = opa.op_types;
+        ops = opa.ops;
+        lineno = opa.lineno;
+    }
     ~OPArray() {
         auto iter = ops.begin();
         for (; iter!=ops.end(); iter++) {

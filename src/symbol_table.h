@@ -7,12 +7,14 @@
 
 namespace tora {
 
-class SymbolTable : public Prim {
+class SymbolTable {
+    PRIM_DECL(SymbolTable);
+private:
     int counter;
     std::map<std::string, int> tbl;
     std::map<int, std::string> rev_tbl; // reverse table
 public:
-    SymbolTable() : counter(0) { }
+    SymbolTable();
     
     /**
      * Convert :symbol to ID.

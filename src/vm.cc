@@ -425,8 +425,13 @@ void VM::dump_frame() {
     for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
         for (size_t n=0; n<(*f)->vars.size(); n++) {
-            printf("  %zd\n", n);
-            dump_value((*f)->vars.at(n));
+            printf("  %zd:", n);
+            SharedPtr<Value> val = (*f)->vars.at(n);
+            if (val.get()) {
+                dump_value(val);
+            } else {
+                printf(" (null)\n");
+            }
         }
     }
     printf("---------------\n");

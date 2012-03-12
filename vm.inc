@@ -449,7 +449,7 @@ OP_RETURN {
             SharedPtr<FunctionFrame> fframe = static_cast<FunctionFrame*>(frame);
             pc = fframe->return_address;
             ops = fframe->orig_ops;
-            // printf("RETURN :orig: %d, current: %d\n", fframe->top, stack.size());
+            // printf("RETURN :pc: %d\n", pc);
 
             stack.resize(frame->top - fframe->argcnt);
 
@@ -630,6 +630,8 @@ OP_GETDYNAMIC {
     int no    = get_int_operand() & 0x0000ffff;
     const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value>v = frame->find(no);
+    // dump_frame();
+    //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
     if (v) {
         DBG2("found lexical var\n");
         stack.push_back(v);

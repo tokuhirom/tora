@@ -96,6 +96,7 @@ void Compiler::define_my(SharedPtr<Node> node) {
             std::string &name = ln->at(i)->upcast<StrNode>()->str_value;
             this->define_localvar(name);
             push_op(new OP(OP_PUSH_UNDEF));
+            this->set_variable(name);
             break;
         }
         case NODE_TUPLE: {

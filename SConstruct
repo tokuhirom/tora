@@ -59,7 +59,7 @@ libfiles = [
         symbol_table.cc package_map.cc frame.cc package.cc operator.cc
         builtin.cc
 
-        ops.gen.cc token.gen.cc lexer.gen.cc vm.gen.cc nodes.gen.cc
+        ops.gen.cc token.gen.cc lexer.gen.cc vm.gen.cc nodes.gen.cc symbols.gen.cc
 
         inspector.cc peek.cc disasm.cc
 
@@ -109,6 +109,7 @@ env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl s
 env.Command(['src/token.gen.cc', 'src/token.gen.h'], ['src/token.gen.pl', 'src/parser.h'], 'perl src/token.gen.pl');
 env.Command(['src/lexer.gen.cc'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.cc');
 env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ src/vm.gen.pl > src/vm.gen.cc');
+env.Command(['src/symbols.gen.cc', 'src/symbols.gen.h'], ['src/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ src/symbols.gen.pl');
 t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy');
 Clean(t, 'src/parser.out')
 

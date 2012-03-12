@@ -1,0 +1,19 @@
+use Test::More *;
+
+my $n = 0;
+class Foo {
+    sub new() {
+        self.bless(4649);
+    }
+    sub DESTROY() {
+        $n = ${self};
+    }
+}
+
+{
+    my $foo = Foo.new();
+}
+
+is($n, 4649);
+
+done_testing;
