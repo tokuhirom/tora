@@ -28,6 +28,7 @@
 #include "object/internals.h"
 #include "object/caller.h"
 #include "object/code.h"
+#include "object/dynaloader.h"
 #include "object/symbol.h"
 
 #include "builtin.h"
@@ -51,6 +52,7 @@
 
 #include <boost/random.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <dlfcn.h>
 
 using namespace tora;
 
@@ -346,6 +348,7 @@ void VM::register_standard_methods() {
     Init_Caller(this);
     Init_Code(this);
     Init_Symbol(this);
+    Init_DynaLoader(this);
 
     // OS
     Init_Dir(this);
@@ -568,5 +571,28 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     assert(argcnt == (int)code->code_params->size());
     mark_stack.push_back(stack.size());
     frame_stack->push_back(fframe);
+}
+
+void VM::load_dynamic_library(const std::string &filename, const std::string &endpoint) {
+    void * handle = dlopen(filename.c_str(), RTLD_LOCAL);
+    if (!handle) {
+        std::string errmsg(dlerror());
+        throw new ExceptionValue(errmsg);
+    }
+
+    dlerror(); // clear last error
+
+    dl_callback_t sym = (dl_callback_t)dlsym(handle, endpoint.c_str());
+    const char * err = dlerror();
+    if (err == NULL) {
+        std::string errmsg(err);
+        throw new ExceptionValue(errmsg);
+    }
+    sym(this);
+
+    if (dlclose(handle) != 0) {
+        std::string errmsg(dlerror());
+        throw new ExceptionValue(errmsg);
+    }
 }
 

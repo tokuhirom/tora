@@ -41,7 +41,15 @@
 
 #define TODO() printf("This function is not implemented yet. %s at %d.\n", __FILE__, __LINE__); abort();
 
+namespace tora {
+
+class VM;
+
+typedef void (*dl_callback_t)(VM*);
+
 typedef unsigned int ID;
+
+};
 
 #endif // TORA_H_
 

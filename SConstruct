@@ -9,7 +9,7 @@ from types import DictType, StringTypes
 from glob import glob
 
 env = Environment(
-    LIBS=['re2', 'pthread'],
+    LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
     CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native', '-g'],
@@ -67,6 +67,7 @@ libfiles = [
         value/object.cc value/int.cc value/bool.cc value/exception.cc
 
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
+        object/dynaloader.cc
 
     ''')
 ]

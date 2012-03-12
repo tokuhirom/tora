@@ -154,6 +154,11 @@ public:
      */
     void function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> & self);
 
+    /**
+     * load dynamic library.
+     */
+    void load_dynamic_library(const std::string &filename, const std::string &endpoint);
+
 #include "vm.ops.inc.h"
 
 private:
