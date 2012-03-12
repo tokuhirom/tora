@@ -57,7 +57,6 @@ syntax
  * $array.map(^{ say($_); });
  * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
- * lambda syntax: ^{ }
  * <<'...'
  * "hogehoge $foo"
  * "hogehoge #{ 3+2 }"
@@ -68,7 +67,6 @@ syntax
  * $PROGRAM_NAME($0)
  * dir()
  * file()
- * callee()
  * fiber
  * inheritance
  * overload(+) {
@@ -181,4 +179,5 @@ Array#reverse()
  * x unless foo;
 getcwd()
  * x while y;
+ * callee()
 
