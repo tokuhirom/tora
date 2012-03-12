@@ -45,9 +45,6 @@ String#replace(regexp|str, code)
 String#replace(regexp|str, str)
 String#match(regexp|str, code)
 
-Code#file
-Code#line
-
 syntax
 -------
 
@@ -75,6 +72,7 @@ syntax
  * destructor in pure tora function
  * localize STDOUT
  * local Foo::method = sub { };
+ * $1, $2, $3
 
 lambda
 ------
@@ -180,4 +178,6 @@ Array#reverse()
 getcwd()
  * x while y;
  * callee()
+Code#file
+Code#line
 
