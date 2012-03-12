@@ -548,3 +548,20 @@ void VM::dump_value(const SharedPtr<Value> & v) {
     printf("%s\n", ins.inspect(v).c_str());
 }
 
+void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> &self) {
+    FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
+    fframe->return_address = this->pc;
+    fframe->argcnt = argcnt;
+    fframe->code = code;
+    fframe->self = self;
+
+    pc = -1;
+    this->ops = code->code_opcodes;
+
+    // TODO: vargs support
+    // TODO: kwargs support
+    assert(argcnt == (int)code->code_params->size());
+    mark_stack.push_back(stack.size());
+    frame_stack->push_back(fframe);
+}
+

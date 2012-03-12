@@ -528,9 +528,9 @@ OP_EQ {
     static std::equal_to<double> d;
     static std::equal_to<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
@@ -539,9 +539,9 @@ OP_NE {
     static std::not_equal_to<double> d;
     static std::not_equal_to<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
@@ -550,9 +550,9 @@ OP_GT {
     static std::greater<double> d;
     static std::greater<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
@@ -561,9 +561,9 @@ OP_LT {
     static std::less<double> d;
     static std::less<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
@@ -572,9 +572,9 @@ OP_GE {
     static std::greater_equal<double> d;
     static std::greater_equal<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 
@@ -583,9 +583,9 @@ OP_LE {
     static std::less_equal<double> d;
     static std::less_equal<std::string> s;
 
-    const SharedPtr<Value> lhs(stack.back());
-    stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
+    stack.pop_back();
+    const SharedPtr<Value> lhs(stack.back());
     stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
 }
 

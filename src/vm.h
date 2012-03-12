@@ -22,6 +22,7 @@ class PackageMap;
 class TupleValue;
 class Package;
 class FunctionFrame;
+class CodeValue;
 
 typedef SharedPtr<Value> (*BASIC_CALLBACK)(...);
 
@@ -148,6 +149,10 @@ public:
 
     boost::mt19937 *myrand;
 
+    /**
+     * Call a function.
+     */
+    void function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> & self);
 
 #include "vm.ops.inc.h"
 
