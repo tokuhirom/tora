@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <boost/pool/object_pool.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "shared_ptr.h"
 #include "value.h"
@@ -27,11 +28,12 @@ typedef enum {
 } frame_type_t;
 
 struct DynamicScopeData {
+    PRIM_DECL(DynamicScopeData);
     Package * package_;
     ID moniker_id_;
     SharedPtr<Value> value_;
 public:
-    DynamicScopeData(Package * pkg, ID m, const SharedPtr<Value> & val) :package_(pkg), moniker_id_(m), value_(val) {
+    DynamicScopeData(Package * pkg, ID m, const SharedPtr<Value> & val) :refcnt(0), package_(pkg), moniker_id_(m), value_(val) {
     }
     ID moniker_id() const { return moniker_id_; }
     Package * package() const { return package_; }
@@ -47,7 +49,7 @@ public:
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
-    std::vector<DynamicScopeData*> dynamic_scope_vars;
+    std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
 
     LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
     virtual ~LexicalVarsFrame();

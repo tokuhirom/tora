@@ -12,13 +12,13 @@ LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_
 
 LexicalVarsFrame::~LexicalVarsFrame() {
     for (auto iter = dynamic_scope_vars.begin(); iter != dynamic_scope_vars.end(); ++iter) {
-        DynamicScopeData* dat = *iter;
+        const SharedPtr<DynamicScopeData> & dat = *iter;
         dat->package()->set_variable(dat->moniker_id(), dat->value());
     }
 }
 
 void LexicalVarsFrame::push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target) {
-    DynamicScopeData* v = new DynamicScopeData(pkgid, monikerid, target);
+    SharedPtr<DynamicScopeData> v(new DynamicScopeData(pkgid, monikerid, target));
     this->dynamic_scope_vars.push_back(v);
 }
 
