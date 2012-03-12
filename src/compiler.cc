@@ -358,6 +358,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "exit",
         "dump_stack",
         "caller",
+        "getcwd",
         NULL
     };
     for (int i=0; bs[i]; i++) {

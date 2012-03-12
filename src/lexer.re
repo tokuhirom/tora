@@ -194,7 +194,7 @@ std:
     "next" { return NEXT; }
     "last" { return LAST; }
     "redo" { return REDO; }
-    "," { return COMMA; }
+    "," { divable=false; return COMMA; }
     "=>" { return FAT_COMMA; }
     ".." { return DOTDOT; }
     "..." { return DOTDOTDOT; }

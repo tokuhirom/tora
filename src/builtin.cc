@@ -9,6 +9,9 @@
 #include "value/object.h"
 #include "value/pointer.h"
 #include "value/array.h"
+#include "value/str.h"
+#include "value/exception.h"
+#include "value.h"
 #include "object/dir.h"
 #include "inspector.h"
 
@@ -175,6 +178,22 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
     }
 }
 
+/**
+ * Get a current working directory.
+ */
+static SharedPtr<Value> builtin_getcwd(VM *vm) {
+    // getcwd() is POSIX.1-2001.
+    // bad memory allocation??
+    char * ptr = new char [MAXPATHLEN+1];
+    if (getcwd(ptr, MAXPATHLEN)) {
+        std::string ptr_s(ptr);
+        delete ptr;
+        return new StrValue(ptr_s);
+    } else {
+        throw new ExceptionValue(errno);
+    }
+}
+
 void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
     vm->add_builtin_function("exit", builtin_exit);
@@ -188,5 +207,6 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("opendir",   builtin_opendir);
     vm->add_builtin_function("rand",   builtin_rand);
     vm->add_builtin_function("caller",   builtin_caller);
+    vm->add_builtin_function("getcwd",   builtin_getcwd);
 }
 
