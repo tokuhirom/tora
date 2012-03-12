@@ -103,7 +103,7 @@ public:
     /*
      * stack for lexical variables.
      */
-    std::vector<LexicalVarsFrame*> *frame_stack;
+    std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
     /**
      * mark for first argument in function call.
      */

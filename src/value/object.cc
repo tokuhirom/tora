@@ -2,6 +2,7 @@
 #include "../vm.h"
 #include "../package.h"
 #include "code.h"
+#include "../frame.h"
 
 using namespace tora;
 
@@ -152,27 +153,10 @@ ObjectValue::~ObjectValue() {
 
             // this->vm_->frame_stack->pop_back();
         } else {
-            printf("NOT IMPLEMENTED YET\n");
-            abort();
-       //   {
-       //       SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
-       //       fframe->return_address = pc;
-       //       fframe->orig_ops = ops;
-       //       fframe->top = stack.size() - argcnt;
-       //       fframe->code = code;
-
-       //       pc = -1;
-       //       this->ops = code->code_opcodes;
-
-       //       // TODO: vargs support
-       //       // TODO: kwargs support
-       //       assert(argcnt == (int)code->code_params->size());
-       //       for (int i=0; i<argcnt; i++) {
-       //           SharedPtr<Value> arg = stack.pop();
-       //           fframe->setVar(i, arg);
-       //       }
-       //       frame_stack->push_back(fframe);
-       //   }
+            int argcnt = 0;
+            // TODO: move to package.cc
+            this->vm_->function_call(argcnt, code, this);
+            this->vm_->execute();
         }
     }
 

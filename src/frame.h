@@ -42,6 +42,7 @@ public:
 
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame {
+    PRIM_DECL(LexicalVarsFrame);
 protected:
     VM * vm_;
 public:
@@ -52,6 +53,7 @@ public:
     std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
 
     LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
+    // this 'virtual' is required for memory pool.
     virtual ~LexicalVarsFrame();
     void setVar(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars.capacity());
@@ -66,7 +68,7 @@ public:
 
     template<class Y>
     Y* upcast() {
-        return static_cast<Y*>(&(*(this)));
+        return static_cast<Y*>(this);
     }
 
 };
@@ -89,7 +91,6 @@ public:
         this->type = FRAME_TYPE_FUNCTION;
     }
     FunctionFrame(VM *vm, int vars_cnt, size_t top, const SharedPtr<Value>& self_) : LexicalVarsFrame(vm, vars_cnt, top), self(self_) { }
-    ~FunctionFrame() { }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }
 	void operator delete(void* doomed, size_t) { pool_.free((FunctionFrame*)doomed); }
@@ -106,10 +107,11 @@ public:
 
 
 class PackageFrame : public LexicalVarsFrame {
+    friend class LexicalVarsFrame;
+protected:
     ID orig_package_id_;
 public:
     PackageFrame(VM *vm, size_t top, ID pkgid) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_PACKAGE), orig_package_id_(pkgid) { }
-    ~PackageFrame();
 };
 
 };

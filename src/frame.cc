@@ -7,10 +7,15 @@
 using namespace tora;
 
 
-LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_) : vm_(vm), vars(vars_cnt), top(top), type(type_) {
+LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_) : refcnt(0), vm_(vm), vars(vars_cnt), top(top), type(type_) {
 }
 
 LexicalVarsFrame::~LexicalVarsFrame() {
+    if (this->type == FRAME_TYPE_PACKAGE) {
+        // printf("LEAVE PACKAGE FROM %s. back to %d\n", vm_->package_name().c_str(), orig_package_id_);
+        vm_->package_id(static_cast<PackageFrame*>(this)->orig_package_id_);
+    }
+
     for (auto iter = dynamic_scope_vars.begin(); iter != dynamic_scope_vars.end(); ++iter) {
         const SharedPtr<DynamicScopeData> & dat = *iter;
         dat->package()->set_variable(dat->moniker_id(), dat->value());
@@ -43,9 +48,4 @@ const char *LexicalVarsFrame::type_str() const {
 }
 
 boost::object_pool<FunctionFrame> FunctionFrame::pool_;
-
-PackageFrame::~PackageFrame() {
-    // printf("LEAVE PACKAGE FROM %s. back to %d\n", vm_->package_name().c_str(), orig_package_id_);
-    vm_->package_id(orig_package_id_);
-}
 

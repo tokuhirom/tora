@@ -61,7 +61,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(op
     sp = 0;
     pc = 0;
     this->stack.reserve(INITIAL_STACK_SIZE);
-    this->frame_stack = new std::vector<LexicalVarsFrame*>();
+    this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
     this->package_map = new PackageMap();
@@ -75,10 +75,10 @@ VM::~VM() {
 
     delete this->global_vars;
     // assert(this->frame_stack->size() == 1);
-    while (frame_stack->size()) {
-        delete this->frame_stack->back();
-        frame_stack->pop_back();
-    }
+//  while (frame_stack->size()) {
+//      delete this->frame_stack->back();
+//      frame_stack->pop_back();
+//  }
     delete this->frame_stack;
     delete this->myrand;
 
@@ -178,7 +178,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
 
     // remove frames
     while (orig_frame_size < vm->frame_stack->size()) {
-        delete vm->frame_stack->back();
+//      delete vm->frame_stack->back();
         vm->frame_stack->pop_back();
     }
 
@@ -491,7 +491,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
             exit(1);
         }
 
-        boost::scoped_ptr<LexicalVarsFrame> frame(frame_stack->back());
+       SharedPtr<LexicalVarsFrame> frame(frame_stack->back());
         if (frame->type == FRAME_TYPE_FUNCTION) {
             FunctionFrame* fframe = static_cast<FunctionFrame*>(frame.get());
             pc = fframe->return_address;
@@ -549,7 +549,7 @@ void VM::dump_value(const SharedPtr<Value> & v) {
 }
 
 void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> &self) {
-    FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
+    SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
     fframe->return_address = this->pc;
     fframe->argcnt = argcnt;
     fframe->code = code;
