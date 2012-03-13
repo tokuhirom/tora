@@ -20,7 +20,9 @@ struct ParserState {
     bool failure;
     SharedPtr<tora::Node> root_node;
     int lineno;
-    ParserState() : errors(0), failure(false) { }
+    std::string filename;
+
+    ParserState(const std::string &filename_) : errors(0), failure(false), filename(filename_) { }
     ~ParserState() { }
 };
 

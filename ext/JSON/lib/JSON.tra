@@ -1,0 +1,29 @@
+use XSLoader;
+
+XSLoader.load("JSON");
+
+__END__
+
+NAME
+====
+
+JSON - JSON decode/encode library
+
+SYNOPSIS
+========
+
+    JSON.encode({foo => 'bar'}); # => "{'foo':'bar'}"
+
+METHODS
+=======
+
+JSON.encode(Double|Int|Str|Undef|Bool $var) : Str
+-------------------------------------------------
+
+encode $var to JSON string.
+
+TODO
+====
+
+JSON.tra does not support decoding yet.
+

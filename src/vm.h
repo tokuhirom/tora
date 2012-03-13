@@ -16,6 +16,11 @@
 
 namespace tora {
 
+const int GLOBAL_VAR_ARGV     = 0;
+const int GLOBAL_VAR_ENV      = 1;
+const int GLOBAL_VAR_LIBPATH  = 2;
+const int GLOBAL_VAR_REQUIRED = 3;
+
 class Stack;
 class LexicalVarsFrame;
 class PackageMap;
@@ -158,6 +163,11 @@ public:
      * load dynamic library.
      */
     void load_dynamic_library(const std::string &filename, const std::string &endpoint);
+
+    /**
+     * Add new library path.
+     */
+    void add_library_path(const std::string &dir);
 
 #include "vm.ops.inc.h"
 

@@ -6,7 +6,7 @@
 
 using namespace tora;
 
-static SharedPtr<Value> dynaloader_load(VM *vm, Value *filename_v, Value *endpoint_v) {
+static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v, Value *endpoint_v) {
     SharedPtr<StrValue> filename_s = filename_v->to_s();
     SharedPtr<StrValue> endpoint_s = endpoint_v->to_s();
     vm->load_dynamic_library(filename_s->str_value, endpoint_s->str_value);

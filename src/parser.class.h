@@ -22,7 +22,7 @@ class Parser {
     );
     ParserState state_;
 public:
-    Parser() {
+    Parser(const std::string & filename) :state_(filename) {
         yyp = ParseAlloc(malloc);
     }
     ~Parser() {

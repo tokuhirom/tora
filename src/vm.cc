@@ -21,7 +21,6 @@
 #include "object/dir.h"
 #include "object/stat.h"
 #include "object/env.h"
-#include "object/json.h"
 #include "object/time.h"
 #include "object/file.h"
 #include "object/socket.h"
@@ -133,7 +132,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
 
     Node *yylval = NULL;
     int token_number;
-    tora::Parser parser;
+    tora::Parser parser(fname);
     do {
         token_number = scanner.scan(&yylval);
         parser.set_lineno(scanner.lineno());
@@ -358,9 +357,6 @@ void VM::register_standard_methods() {
     Init_File(this);
     Init_Time(this);
 
-    // Utility
-    Init_JSON(this);
-
     // misc
     Init_Internals(this);
 
@@ -574,7 +570,7 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
 }
 
 void VM::load_dynamic_library(const std::string &filename, const std::string &endpoint) {
-    void * handle = dlopen(filename.c_str(), RTLD_LOCAL);
+    void * handle = dlopen(filename.c_str(), RTLD_LAZY|RTLD_GLOBAL);
     if (!handle) {
         std::string errmsg(dlerror());
         throw new ExceptionValue(errmsg);
@@ -584,15 +580,21 @@ void VM::load_dynamic_library(const std::string &filename, const std::string &en
 
     dl_callback_t sym = (dl_callback_t)dlsym(handle, endpoint.c_str());
     const char * err = dlerror();
-    if (err == NULL) {
+    if (err != NULL) {
         std::string errmsg(err);
         throw new ExceptionValue(errmsg);
     }
     sym(this);
 
-    if (dlclose(handle) != 0) {
-        std::string errmsg(dlerror());
-        throw new ExceptionValue(errmsg);
-    }
+//  if (dlclose(handle) != 0) {
+//      std::string errmsg(dlerror());
+//      throw new ExceptionValue(errmsg);
+//  }
+}
+
+
+void VM::add_library_path(const std::string &dir) {
+    SharedPtr<Value> libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
+    libpath->upcast<ArrayValue>()->push(new StrValue(dir));
 }
 

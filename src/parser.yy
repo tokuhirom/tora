@@ -94,7 +94,7 @@ using namespace tora;
 }
 %syntax_error {
     state->errors++;
-    fprintf(stderr, "Syntax error at line %d(%s).\n", state->lineno, token_id2name[yymajor]);
+    fprintf(stderr, "Syntax error %s at line %d(%s).\n", state->filename.c_str(), state->lineno, token_id2name[yymajor]);
 }
 
 %extra_argument { ParserState *state }

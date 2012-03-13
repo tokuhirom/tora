@@ -1,11 +1,11 @@
 #include "json.h"
 
-#include "../tora.h"
-#include "../vm.h"
-#include "../value/array.h"
-#include "../value/hash.h"
-#include "../package.h"
-#include "../picojson.h"
+#include <tora.h>
+#include <vm.h>
+#include <value/array.h>
+#include <value/hash.h>
+#include <package.h>
+#include "picojson.h"
 
 using namespace tora;
 
@@ -90,8 +90,12 @@ static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* v) {
     TODO();
 }
 
-void tora::Init_JSON(VM* vm) {
+extern "C" {
+
+void Init_JSON(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("JSON");
     pkg->add_method(vm->symbol_table->get_id("encode"), new CallbackFunction(json_encode));
     pkg->add_method(vm->symbol_table->get_id("decode"), new CallbackFunction(json_decode));
+}
+
 }

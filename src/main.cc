@@ -34,8 +34,9 @@ int main(int argc, char **argv) {
     bool compile_only = false;
     bool parse_trace = false;
     bool exec_trace = false;
+    std::vector< std::string > libs;
     char *code = NULL;
-    while ((opt = getopt(argc, argv, "Vyvdtcqe:")) != -1) {
+    while ((opt = getopt(argc, argv, "Vyvdtcqe:I:")) != -1) {
         switch (opt) {
         case 'v':
             printf("tora version %s\n", TORA_VERSION_STR);
@@ -48,6 +49,9 @@ int main(int argc, char **argv) {
             break;
         case 'e':
             code = optarg;
+            break;
+        case 'I':
+            libs.push_back(std::string(optarg));
             break;
         case 'c':
             compile_only = true;
@@ -103,7 +107,7 @@ int main(int argc, char **argv) {
 
     Node *yylval = NULL;
     int token_number;
-    tora::Parser parser;
+    tora::Parser parser(filename);
     do {
         token_number = scanner->scan(&yylval);
         // printf("TOKEn: %s(%d)\n", token_id2name[token_number], token_number);
@@ -145,6 +149,9 @@ int main(int argc, char **argv) {
     tora::VM vm(compiler.ops, symbol_table);
     vm.init_globals(argc-optind, argv+optind);
     vm.register_standard_methods();
+    for (auto iter: libs) {
+        vm.add_library_path(iter);
+    }
     if (dump_ops) {
         Disasm::disasm(compiler.ops);
     }

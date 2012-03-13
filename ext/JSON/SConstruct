@@ -1,0 +1,5 @@
+env = Environment(CCFLAGS=['-I../../src/', '-I../../vendor/boost_1_49_0/', '-std=c++0x', '-march=native','-Wl,-Bsymbolic', '-g', '-DNDEBUG'])
+shlib = env.SharedLibrary("lib/libJSON.so", ['json.cc'])
+Default(shlib)
+
+env.Command('test', shlib, '../../tora -I lib -I ../../lib/ t/json.tra')

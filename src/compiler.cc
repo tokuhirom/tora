@@ -495,6 +495,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
 
         Compiler funccomp(this->symbol_table, filename_);
+        funccomp.init_globals();
         if (funccomp.blocks) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;
@@ -580,6 +581,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
 
         Compiler funccomp(this->symbol_table, filename_);
+        funccomp.init_globals();
         if (funccomp.blocks) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;

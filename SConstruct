@@ -12,7 +12,8 @@ env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-static', '-fstack-protector', '-march=native', '-g'],
+    LINKFLAGS=['-Wl,-E'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g', '-rdynamic', '-Wl,-Bsymbolic'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -66,7 +67,7 @@ libfiles = [
         value/code.cc value/hash.cc value/str.cc value/array.cc value/regexp.cc value/range.cc
         value/object.cc value/int.cc value/bool.cc value/exception.cc
 
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/json.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
         object/dynaloader.cc
 
     ''')

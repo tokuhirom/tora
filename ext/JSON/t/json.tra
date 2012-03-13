@@ -1,4 +1,5 @@
 use Test::More *;
+use JSON;
 
 # see https://github.com/kazuho/picojson/blob/master/picojson.h
 

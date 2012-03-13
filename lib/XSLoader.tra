@@ -1,0 +1,30 @@
+sub load($pkg) {
+    for (my $path in $LIBPATH) {
+        my $fname = $path + "/lib" + $pkg + ".so";
+        if (-e $fname) {
+            DynaLoader.load($fname, 'Init_' + $pkg);
+            return undef;
+        }
+    }
+    die "Cannot load extension library: " + $pkg + ". It's not in \$LIBPATH";
+}
+
+__END__
+
+NAME
+----
+
+XSLoader - Extension module loader
+
+SYNOPSIS
+--------
+
+    use XSLoader;
+
+    XSLoader.load("JSON")
+
+AUTHOR
+------
+
+Tokuhiro Matsuno
+
