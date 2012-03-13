@@ -29,6 +29,7 @@
 #include "object/code.h"
 #include "object/dynaloader.h"
 #include "object/symbol.h"
+#include "object/object.h"
 
 #include "builtin.h"
 
@@ -348,6 +349,7 @@ void VM::register_standard_methods() {
     Init_Code(this);
     Init_Symbol(this);
     Init_DynaLoader(this);
+    Init_Object(this);
 
     // OS
     Init_Dir(this);

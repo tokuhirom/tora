@@ -398,6 +398,12 @@ OP_METHOD_CALL {
                     mark_stack.push_back(stack.size());
                     frame_stack->push_back(fframe);
                 }
+            } else if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("tora")) {
+                SharedPtr<Package> pkg = this->find_package(this->symbol_table->get_id("Object"));
+                auto iter = pkg->find(this->symbol_table->get_id("tora"));
+                assert(*iter);
+                stack.push_back(object);
+                this->call_native_func(iter->second->upcast<CodeValue>()->callback(), 1);
             } else {
                 dump_value(funid);
                 dump_value(object);
