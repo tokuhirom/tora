@@ -16,6 +16,6 @@ my $p = [];
 for (my $e in opendir('t/dat/dir')) {
     $p.push($e);
 }
-is(JSON.encode($p.sort()), '[".","..","x","y","z"]');
+is($p.sort().tora(), '[".","..","x","y","z"]');
 
 done_testing();

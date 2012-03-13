@@ -65,6 +65,8 @@ sub vm_gen_cc {
 #include "value/undef.h"
 #include "value/double.h"
 #include "value/bool.h"
+#include "symbols.gen.h"
+
 #include <unistd.h>
 #include <algorithm>
 #include <functional>

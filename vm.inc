@@ -327,6 +327,9 @@ OP_METHOD_CALL {
     case VALUE_TYPE_CODE:
     case VALUE_TYPE_ARRAY:
     case VALUE_TYPE_FILE:
+    case VALUE_TYPE_INT:
+    case VALUE_TYPE_DOUBLE:
+    case VALUE_TYPE_HASH:
     case VALUE_TYPE_OBJECT:{
         ID pkgid;
         if (object->value_type == VALUE_TYPE_STR) {
@@ -337,6 +340,12 @@ OP_METHOD_CALL {
             pkgid = this->symbol_table->get_id("File");
         } else if (object->value_type == VALUE_TYPE_CODE) {
             pkgid = this->symbol_table->get_id("Code");
+        } else if (object->value_type == VALUE_TYPE_INT) {
+            pkgid = SYMBOL_INT_CLASS;
+        } else if (object->value_type == VALUE_TYPE_DOUBLE) {
+            pkgid = SYMBOL_DOUBLE_CLASS;
+        } else if (object->value_type == VALUE_TYPE_HASH) {
+            pkgid = SYMBOL_HASH_CLASS;
         } else if (object->value_type == VALUE_TYPE_OBJECT) {
             pkgid = object->upcast<ObjectValue>()->package_id();
         } else {

@@ -5,17 +5,17 @@ $a[0] = "hOgE";
 $a[1] = "hOgE1";
 $a[8] = "hOgE8";
 
-say(JSON.encode($a));
+say($a.tora());
 
 my $b=5;
 $b = 4;
 say($b);
 
 my $empty_array = [];
-say(JSON.encode($empty_array));
+say($empty_array.tora());
 
 __END__
 hoge
-["hOgE","hOgE1","haga",null,null,"IYAN",null,null,"hOgE8"]
+["hOgE","hOgE1","haga",undef,undef,"IYAN",undef,undef,"hOgE8"]
 4
 []

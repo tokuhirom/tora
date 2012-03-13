@@ -1,5 +1,5 @@
 my $a = {"A" => 4, "B" => 55, 46 => "OK"};
-say(JSON.encode($a));
+say($a.tora());
 say("---");
 say($a["A"]);
 say($a["B"]);
@@ -7,13 +7,13 @@ $a["X"] = "OK";
 $a["46"] = "WAO";
 say($a["X"]);
 say("---");
-say(JSON.encode($a));
+say($a.tora());
 
 __END__
-{"46":"OK""A":4"B":55}
+{"46" => "OK","A" => 4,"B" => 55}
 ---
 4
 55
 OK
 ---
-{"46":"WAO""A":4"B":55"X":"OK"}
+{"46" => "WAO","A" => 4,"B" => 55,"X" => "OK"}

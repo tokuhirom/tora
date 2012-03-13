@@ -2,11 +2,11 @@ use Test::More *;
 
 my $x=9;
 my $y=3.14;
-is(JSON.encode(-5), "-5");
-is(JSON.encode(-$x), "-9");
-is(JSON.encode($y), "3.140000");
-is(JSON.encode(-$y), "-3.140000");
-is(JSON.encode(-(-$y)), "3.140000");
+is((-5).tora(), "-5");
+is((-$x).tora(), "-9");
+is($y.tora(), "3.14");
+is((-$y).tora(), "-3.14");
+is((-(-$y)).tora(), "3.14");
 
 # &&
 is(false && false, false);
@@ -18,7 +18,7 @@ is(true  &&  true,  true);
 is(false && fail(), false);
 
 # ||
-say("# ||");
+note("# ||");
 is(false || false, false);
 is(false ||  true,  true);
 is(true  || false,  true);

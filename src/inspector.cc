@@ -18,9 +18,14 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
         return "undef";
     case VALUE_TYPE_INT:
     case VALUE_TYPE_BOOL:
-    case VALUE_TYPE_STR:
     case VALUE_TYPE_DOUBLE:
         return v->to_s()->str_value;
+    case VALUE_TYPE_STR: {
+        std::string ret("\"");
+        ret += v->to_s()->str_value;
+        ret += '"';
+        return ret;
+    }
     case VALUE_TYPE_CODE:
         return "sub { \"DUMMY\" }";
     case VALUE_TYPE_ARRAY: {

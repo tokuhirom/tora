@@ -10,6 +10,8 @@ my $dat = [
     ['SYMBOL_DESTROY'      => 'DESTROY'],
     ['SYMBOL_ARRAY_CLASS'  => 'Array'],
     ['SYMBOL_INT_CLASS'    => 'Int'],
+    ['SYMBOL_DOUBLE_CLASS'    => 'Double'],
+    ['SYMBOL_HASH_CLASS'    => 'Hash'],
     ['SYMBOL_CALLER_CLASS' => 'Caller'],
 ];
 
@@ -20,8 +22,9 @@ print $hfh render_mt(<<'...', $dat);
 
 namespace tora {
 
+? my $id = 0;
 ? for (@{$_[0]}) {
-#define <?= $_->[0] ?> <?= $_->[1] ?>
+const int <?= $_->[0] ?> = <?= $id++ ?>;
 ? }
 
 };
