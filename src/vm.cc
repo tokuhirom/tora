@@ -488,7 +488,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
                     fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
                 } else {
-                    TODO();
+                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 }
             } else {
                 fprintf(stderr, "died\n");
