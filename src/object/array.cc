@@ -84,6 +84,25 @@ static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
 }
 
 /**
+ * ['hoge', 'fuga'].join(' ')
+ *
+ * concatenete strings in array.
+ */
+static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
+    assert(self->value_type == VALUE_TYPE_ARRAY);
+    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
+    SharedPtr<StrValue> str = inner->to_s();
+    std::string ret;
+    for (auto iter=src->begin(); iter!=src->end(); ++iter) {
+        ret += (*iter)->to_s()->str_value;
+        if (iter+1 != src->end()) {
+            ret += str.get()->str_value;
+        }
+    }
+    return new StrValue(ret);
+}
+
+/**
  * $array.capacity() : Int
  *
  * returns the number of elements that can be held in currently allocated storage
@@ -115,6 +134,7 @@ void tora::Init_Array(VM* vm) {
     pkg->add_method(vm->symbol_table->get_id("unshift"), new CallbackFunction(av_unshift));
     pkg->add_method(vm->symbol_table->get_id("shift"), new CallbackFunction(av_shift));
     pkg->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
+    pkg->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
     // pkg->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
     // pkg->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
 }

@@ -17,7 +17,6 @@ Array#any()
 Array#shuffle()
 Array#flatten()
 Array#reverse!()
-Array#join()
 
 Enumerable#reduce()
 Enumerable#sort_by()
@@ -183,3 +182,4 @@ Code#line
 
 getpid()
 getppid()
+Array#join()

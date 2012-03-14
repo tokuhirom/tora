@@ -1,0 +1,5 @@
+use Test::More *;
+
+is([1,2,3].join(' '), '1 2 3');
+
+done_testing;
