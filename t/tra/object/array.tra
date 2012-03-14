@@ -1,5 +1,23 @@
 use Test::More *;
 
+# join
 is([1,2,3].join(' '), '1 2 3');
+
+# map
+my $inner = [];
+my $ret = [1,2,3].map(-> $n {
+    $inner.push($n);
+    $n*2;
+});
+is($ret.tora(), '[2,4,6]');
+
+# map, $_
+{
+    my $inner = [];
+    [1,2,3].map(-> {
+        $inner.push($_);
+    });
+    is($inner.tora(), '[1,2,3]');
+}
 
 done_testing;

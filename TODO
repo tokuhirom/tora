@@ -50,8 +50,6 @@ syntax
  * local $FOO[$var];
  * "\u3042"
  * given-when
- * $array.map(^{ say($_); });
- * [1,2,2].map(sub { say($_) });
  * $array.sort({ $_[0] <=> $_[1] }).reverse();
  * <<'...'
  * "hogehoge $foo"
@@ -183,3 +181,4 @@ Code#line
 getpid()
 getppid()
 Array#join()
+ * [1,2,2].map(sub { say($_) });

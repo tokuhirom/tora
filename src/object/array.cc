@@ -1,7 +1,10 @@
 #include "array.h"
 #include "../vm.h"
 #include "../value/array.h"
+#include "../value/code.h"
 #include "../package.h"
+#include "../peek.h"
+#include "../frame.h"
 
 using namespace tora;
 
@@ -103,6 +106,43 @@ static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
 }
 
 /**
+ * [1,2,3].map(-> $n { say($n) })
+ */
+static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
+    assert(self->value_type == VALUE_TYPE_ARRAY);
+    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
+    SharedPtr<ArrayValue> ret = new ArrayValue();
+    if (code_v->value_type != VALUE_TYPE_CODE) {
+        throw new ExceptionValue("Code is not a foo");
+    }
+    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+    for (auto iter=src->begin(); iter!=src->end(); ++iter) {
+        vm->stack.push_back(*iter);
+
+            int argcnt = 1;
+            size_t pc = vm->pc;
+            // TODO: catch exceptions in destroy
+            SharedPtr<OPArray> end_ops = new OPArray();
+            end_ops->push_back(new OP(OP_END), -1);
+            vm->function_call(argcnt, code, UndefValue::instance());
+            vm->frame_stack->back()->upcast<FunctionFrame>()->return_address = -1;
+            SharedPtr<OPArray> orig_ops = vm->frame_stack->back()->upcast<FunctionFrame>()->orig_ops;
+            vm->frame_stack->back()->upcast<FunctionFrame>()->orig_ops = end_ops;
+            vm->pc = 0;
+            vm->execute();
+
+            // restore
+            // TODO: restore variables by RAII
+            vm->pc = pc;
+            vm->ops = orig_ops;
+
+        ret->push(vm->stack.back());
+        vm->stack.pop_back();
+    }
+    return ret;
+}
+
+/**
  * $array.capacity() : Int
  *
  * returns the number of elements that can be held in currently allocated storage
@@ -135,6 +175,7 @@ void tora::Init_Array(VM* vm) {
     pkg->add_method(vm->symbol_table->get_id("shift"), new CallbackFunction(av_shift));
     pkg->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
     pkg->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
+    pkg->add_method(vm->symbol_table->get_id("map"), new CallbackFunction(av_map));
     // pkg->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
     // pkg->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
 }
