@@ -43,7 +43,7 @@ Missing part is following:
 %left L_BRACKET R_BRACKET.
 
 %right LAMBDA.
-%right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN.
+%right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN OROR_ASSIGN.
 %left DOTDOT.
 %left OROR.
 %left ANDAND.
@@ -337,6 +337,9 @@ assignment_expression(A) ::= conditional_expression(B) AND_ASSIGN conditional_ex
 }
 assignment_expression(A) ::= conditional_expression(B) OR_ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_OR_ASSIGN, B, C);
+}
+assignment_expression(A) ::= conditional_expression(B) OROR_ASSIGN conditional_expression(C).  {
+    A = new BinaryNode(NODE_OROR_ASSIGN, B, C);
 }
 assignment_expression(A) ::= conditional_expression(B) XOR_ASSIGN conditional_expression(C).  {
     A = new BinaryNode(NODE_XOR_ASSIGN, B, C);

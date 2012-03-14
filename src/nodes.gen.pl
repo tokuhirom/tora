@@ -99,6 +99,7 @@ my @nodes = qw(
     NODE_OR_ASSIGN
     NODE_XOR_ASSIGN
     NODE_MOD_ASSIGN
+    NODE_OROR_ASSIGN
 );
 
 open my $cc, '>', 'src/nodes.gen.cc';

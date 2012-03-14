@@ -1,0 +1,10 @@
+use Test::More *;
+
+my $n;
+$n ||= 3;
+is($n, 3);
+$n ||= 5;
+is($n, 3); # should not be override
+
+done_testing;
+

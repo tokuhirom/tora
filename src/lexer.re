@@ -87,11 +87,6 @@ std:
     */
 
 /*!re2c
-    "qq{" {
-        tora_open_string_literal();
-        string_close_char = '}';
-        goto single_string_literal;
-    }
     "qq[" {
         tora_open_string_literal();
         string_close_char = ']';
@@ -157,6 +152,7 @@ std:
     "|=" { return OR_ASSIGN; }
     "^=" { return XOR_ASSIGN; }
     "%=" { return MOD_ASSIGN; }
+    "||=" { return OROR_ASSIGN; }
     "+" { return ADD; }
     "!=" { return NE; }
     "-" { return SUB; }

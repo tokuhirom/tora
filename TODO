@@ -42,7 +42,7 @@ String#replace(regexp|str, str)
 String#match(regexp|str, code)
 
 syntax
--------
+------
 
  * local $FOO[$var];
  * "\u3042"
@@ -96,8 +96,6 @@ feature
     * BOOST_SCOPE_EXIT
     * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
     * https://metacpan.org/module/Guard
-  * -x
-  * DynaLoader
 
 benchmarking
 ------------
@@ -179,3 +177,5 @@ Array#join()
  * [1,2,2].map(sub { say($_) });
 Array#map()
  * destructor in pure tora function
+  * -x
+  * DynaLoader
