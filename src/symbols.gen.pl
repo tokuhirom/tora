@@ -17,6 +17,7 @@ my $dat = [
     ['SYMBOL_CODE_CLASS' => 'Code'],
     ['SYMBOL_FILE_CLASS' => 'File'],
     ['SYMBOL_STRING_CLASS' => 'String'],
+    ['SYMBOL_SYMBOL_CLASS' => 'Symbol'],
 ];
 
 open my $hfh, '>', 'src/symbols.gen.h';

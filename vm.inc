@@ -268,61 +268,7 @@ OP_METHOD_CALL {
     assert(funid->value_type == VALUE_TYPE_SYMBOL);
 
     switch (object->value_type) {
-    case VALUE_TYPE_SYMBOL: {
-        // Foo.new();
-        SharedPtr<Package> pkg = this->find_package(object->upcast<SymbolValue>()->id);
-        auto iter = pkg->find(funid->upcast<SymbolValue>()->id);
-        if (iter != pkg->end()) {
-            SharedPtr<Value>code_v = iter->second;
-            assert(code_v->value_type == VALUE_TYPE_CODE);
-            SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-            int argcnt = get_int_operand();
-            if (code->is_native()) {
-                // FunctionFrame* fframe = new FunctionFrame(argcnt, stack.size()-argcnt);
-                // fframe->return_address = pc;
-                // fframe->top = stack.size() - argcnt;
-                // fframe->code = code;
-
-                // frame_stack->push_back(fframe);
-                stack.push_back(object);
-                this->call_native_func(code->callback(), argcnt+1);
-                // delete fframe;
-                // frame_stack->pop_back();
-            } else {
-                {
-                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
-                    fframe->return_address = pc;
-                    fframe->code = code;
-                    fframe->argcnt = argcnt;
-                    fframe->self = object;
-
-                    pc = -1;
-                    this->ops = code->code_opcodes;
-
-                    // TODO: vargs support
-                    // TODO: kwargs support
-                    assert(argcnt == (int)code->code_params->size());
-                    mark_stack.push_back(stack.size());
-                    frame_stack->push_back(fframe);
-                }
-            }
-        } else {
-            if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("new")) {
-                // process parameters
-                SharedPtr<Value> data(new HashValue());
-                stack.push_back(new ObjectValue(this, object->upcast<SymbolValue>()->id, data));
-            } else if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("bless")) {
-                int argcnt = get_int_operand();
-                if (argcnt != 1) {
-                    this->die("argument count must be 1 for blessing.\n");
-                }
-                stack[stack.size()-1].reset(new ObjectValue(this, object->upcast<SymbolValue>()->id, stack.back()));
-            } else {
-                this->die("Unknown method %s for symbol '%s'", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<SymbolValue>()->id).c_str());
-            }
-        }
-        break;
-    }
+    case VALUE_TYPE_SYMBOL:
     case VALUE_TYPE_STR:
     case VALUE_TYPE_CODE:
     case VALUE_TYPE_ARRAY:
@@ -348,6 +294,8 @@ OP_METHOD_CALL {
             pkgid = SYMBOL_HASH_CLASS;
         } else if (object->value_type == VALUE_TYPE_OBJECT) {
             pkgid = object->upcast<ObjectValue>()->package_id();
+        } else if (object->value_type == VALUE_TYPE_SYMBOL) {
+            pkgid = object->upcast<SymbolValue>()->id;
         } else {
             abort();
         }
@@ -413,10 +361,16 @@ OP_METHOD_CALL {
                 assert(*iter);
                 stack.push_back(object);
                 this->call_native_func(iter->second->upcast<CodeValue>()->callback(), 1);
+            } else if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("bless")) {
+                int argcnt = get_int_operand();
+                if (argcnt != 1) {
+                    this->die("argument count must be 1 for blessing.\n");
+                }
+                stack[stack.size()-1].reset(new ObjectValue(this, object->upcast<SymbolValue>()->id, stack.back()));
             } else {
                 dump_value(funid);
                 dump_value(object);
-                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->upcast<ObjectValue>()->package_id()).c_str());
+                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(funid->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(pkgid).c_str());
             }
         }
         break;

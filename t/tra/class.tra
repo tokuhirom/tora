@@ -4,6 +4,7 @@ my $n =0;
 class Foo {
     sub new() {
         $n++;
+        p(self);
         return self.bless(44);
     }
     sub incr() {
