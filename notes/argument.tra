@@ -1,0 +1,10 @@
+sub foo ($x) {
+}
+
+sub foo ($x, $y=4) {
+}
+
+baz(y=5, x=3);
+
+sub foo ($x=2, $y=4) {
+}

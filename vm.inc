@@ -333,13 +333,13 @@ OP_METHOD_CALL {
     case VALUE_TYPE_OBJECT:{
         ID pkgid;
         if (object->value_type == VALUE_TYPE_STR) {
-            pkgid = this->symbol_table->get_id("String");
+            pkgid = SYMBOL_STRING_CLASS;
         } else if (object->value_type == VALUE_TYPE_ARRAY) {
-            pkgid = this->symbol_table->get_id("Array");
+            pkgid = SYMBOL_ARRAY_CLASS;
         } else if (object->value_type == VALUE_TYPE_FILE) {
-            pkgid = this->symbol_table->get_id("File");
+            pkgid = SYMBOL_FILE_CLASS;
         } else if (object->value_type == VALUE_TYPE_CODE) {
-            pkgid = this->symbol_table->get_id("Code");
+            pkgid = SYMBOL_CODE_CLASS;
         } else if (object->value_type == VALUE_TYPE_INT) {
             pkgid = SYMBOL_INT_CLASS;
         } else if (object->value_type == VALUE_TYPE_DOUBLE) {

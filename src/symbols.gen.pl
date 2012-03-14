@@ -8,11 +8,15 @@ use Text::MicroTemplate qw(render_mt);
 
 my $dat = [
     ['SYMBOL_DESTROY'      => 'DESTROY'],
+
     ['SYMBOL_ARRAY_CLASS'  => 'Array'],
     ['SYMBOL_INT_CLASS'    => 'Int'],
     ['SYMBOL_DOUBLE_CLASS'    => 'Double'],
     ['SYMBOL_HASH_CLASS'    => 'Hash'],
     ['SYMBOL_CALLER_CLASS' => 'Caller'],
+    ['SYMBOL_CODE_CLASS' => 'Code'],
+    ['SYMBOL_FILE_CLASS' => 'File'],
+    ['SYMBOL_STRING_CLASS' => 'String'],
 ];
 
 open my $hfh, '>', 'src/symbols.gen.h';
