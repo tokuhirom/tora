@@ -10,9 +10,9 @@ from glob import glob
 
 env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
-    LIBPATH=['./'],
+    LIBPATH=['./', 'vendor/libuv/'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/libuv/include/', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -31,7 +31,7 @@ else:
     re2_env.Replace(CXX='g++')
     env.Replace(CXX='g++')
     env.Append(
-        LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic', '-rdynamic']
+        LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic', '-rdynamic'],
     )
 
 if ARGUMENTS.get('profile', 0):
@@ -72,7 +72,7 @@ libfiles = [
         value/object.cc value/int.cc value/bool.cc value/exception.cc
 
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
-        object/dynaloader.cc object/object.cc
+        object/dynaloader.cc object/object.cc object/uv.cc
 
     ''')
 ]
@@ -125,10 +125,13 @@ with open('src/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
 
+# libuv
+libuv = env.Command(['vendor/libuv/uv.a'], ['vendor/libuv/uv.gyp'], 'cd vendor/libuv/ && make')
+
 tora = env.Program('tora', [
     ['src/main.cc'],
     libfiles,
-    libre2
+    libre2, 'vendor/libuv/uv.a'
 ])
 Default(tora)
 
