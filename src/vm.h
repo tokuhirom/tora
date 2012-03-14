@@ -173,6 +173,8 @@ public:
      */
     void add_library_path(const std::string &dir);
 
+    void call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id);
+
 #include "vm.ops.inc.h"
 
 private:
