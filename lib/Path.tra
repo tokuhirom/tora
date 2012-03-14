@@ -1,0 +1,66 @@
+sub dir($path) {
+    "Path::Dir".bless($path);
+}
+
+sub file($path) {
+}
+
+$Path::SEPCHAR='/';
+
+class Path::Dir::Base {
+    sub stat() {
+        ...
+    }
+    sub to_str() {
+        ${self};
+    }
+    sub basename() {
+        ...
+    }
+    sub parent() {
+        ...
+    }
+}
+
+class Path::Dir {
+    extend('Path::Dir::Base');
+
+    sub new($path) {
+        self.bless($path);
+    }
+    sub file($path) {
+        Path::File.new(${self} + $Path::SEPCHAR + $path);
+    }
+    sub subdir($path) {
+        Path::Dir.new(${self} + $Path::SEPCHAR + $path);
+    }
+    sub children() {
+        ...
+    }
+    sub mkpath() {
+        ...
+    }
+    sub rmtree() {
+        ...
+    }
+
+    # dir(...).recurse(-> $x { say($x) })
+    sub recurse($code) {
+        ...
+    }
+}
+
+class Path::File {
+    extend('Path::Dir::Base');
+
+    sub new($path) {
+        self.bless($path);
+    }
+    sub open($mode) {
+        return ::open(${self}, $mode);
+    }
+    sub read() {
+        self.open('r').read();
+    }
+}
+
