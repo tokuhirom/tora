@@ -12,7 +12,6 @@ env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic'],
     CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
 )
 re2_env = Environment(
@@ -24,12 +23,16 @@ if os.uname()[0]=='Darwin':
     re2_env.Replace(CXX='clang++', CC='clang')
     env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
-    env.Append(CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T'])
-    env.Append(CXXFLAGS=['-Wno-unneeded-internal-declaration'])
+    env.Append(
+        CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T'],
+        CXXFLAGS=['-Wno-unneeded-internal-declaration'],
+    )
 else:
     re2_env.Replace(CXX='g++')
     env.Replace(CXX='g++')
-    env.Append(LINKFLAGS=['-rdynamic'])
+    env.Append(
+        LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic', '-rdynamic']
+    )
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg', '-Dprofile'])

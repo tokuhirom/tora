@@ -22,3 +22,5 @@ libre2.a
 src/config.h
 callgrind.out.*
 *.a
+src/*/*.o-*
+src/*.o-*
