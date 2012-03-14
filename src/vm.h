@@ -158,6 +158,10 @@ public:
      * Call a function.
      */
     void function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> & self);
+    /**
+     * inject code to VM and run it. And... restore VM state!
+     */
+    void function_call_ex(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> & self);
 
     /**
      * load dynamic library.

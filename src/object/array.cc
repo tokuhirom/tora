@@ -119,22 +119,7 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
     for (auto iter=src->begin(); iter!=src->end(); ++iter) {
         vm->stack.push_back(*iter);
 
-            int argcnt = 1;
-            size_t pc = vm->pc;
-            // TODO: catch exceptions in destroy
-            SharedPtr<OPArray> end_ops = new OPArray();
-            end_ops->push_back(new OP(OP_END), -1);
-            vm->function_call(argcnt, code, UndefValue::instance());
-            vm->frame_stack->back()->upcast<FunctionFrame>()->return_address = -1;
-            SharedPtr<OPArray> orig_ops = vm->frame_stack->back()->upcast<FunctionFrame>()->orig_ops;
-            vm->frame_stack->back()->upcast<FunctionFrame>()->orig_ops = end_ops;
-            vm->pc = 0;
-            vm->execute();
-
-            // restore
-            // TODO: restore variables by RAII
-            vm->pc = pc;
-            vm->ops = orig_ops;
+        vm->function_call_ex(1, code, UndefValue::instance());
 
         ret->push(vm->stack.back());
         vm->stack.pop_back();

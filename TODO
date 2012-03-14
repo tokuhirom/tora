@@ -10,12 +10,9 @@ hex()
 builtin objects
 ---------------
 
-Array.new()
 Array#sort!()
-Array#map()
 Array#any()
 Array#shuffle()
-Array#flatten()
 Array#reverse!()
 
 Enumerable#reduce()
@@ -59,21 +56,17 @@ syntax
  * next
  * continue
  * $PROGRAM_NAME($0)
- * dir()
- * file()
  * fiber
  * inheritance
  * overload(+) {
       $a + $b;
    }
- * destructor in pure tora function
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
 
 lambda
 ------
-
 
 
 Pending
@@ -123,6 +116,8 @@ Library
  * HTTP server
  * B::Deparse
  * Test::More
+ * dir()
+ * file()
 
 Finished
 --------
@@ -182,3 +177,5 @@ getpid()
 getppid()
 Array#join()
  * [1,2,2].map(sub { say($_) });
+Array#map()
+ * destructor in pure tora function
