@@ -12,8 +12,8 @@ env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    LINKFLAGS=['-Wl,-E'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g', '-rdynamic', '-Wl,-Bsymbolic'],
+    LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
 )
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -29,6 +29,7 @@ if os.uname()[0]=='Darwin':
 else:
     re2_env.Replace(CXX='g++')
     env.Replace(CXX='g++')
+    env.Append(LINKFLAGS=['-rdynamic'])
 
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg', '-Dprofile'])
