@@ -1,6 +1,7 @@
 #include "peek.h"
 #include "value.h"
 #include "value/symbol.h"
+#include "value/code.h"
 #include "vm.h"
 
 using namespace tora;
@@ -23,10 +24,19 @@ void tora::peek(VM *vm, const Value * v) {
             printf("  INT: %d\n", static_cast<const IntValue*>(v)->int_value);
             break;
         }
+        case VALUE_TYPE_CODE: {
+            if (vm) {
+                printf("  PACKAGE: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->package_id).c_str());
+                printf("  FUNC_NAME: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->func_name_id).c_str());
+            } else {
+                printf("  PACKAGE_ID: %d\n", static_cast<const CodeValue*>(v)->package_id);
+                printf("  FUNC_NAME_ID: %d\n", static_cast<const CodeValue*>(v)->func_name_id);
+            }
+            break;
+        }
         case VALUE_TYPE_UNDEF:
         case VALUE_TYPE_BOOL:
         case VALUE_TYPE_STR:
-        case VALUE_TYPE_CODE:
         case VALUE_TYPE_ARRAY:
         case VALUE_TYPE_DOUBLE:
         case VALUE_TYPE_REGEXP:
