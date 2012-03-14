@@ -627,6 +627,8 @@ void VM::add_library_path(const std::string &dir) {
 
 /**
  * push arguments to stack. and call this method.
+ *
+ * call method. if method is not available, call parent class' method.
  */
 void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id) {
     if (!(stack.size() >= (size_t) get_int_operand())) {
@@ -636,117 +638,92 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     }
     assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
+    ID pkgid;
     switch (object->value_type) {
-    case VALUE_TYPE_SYMBOL:
     case VALUE_TYPE_STR:
+        pkgid = SYMBOL_STRING_CLASS;
+        break;
     case VALUE_TYPE_CODE:
+        pkgid = SYMBOL_CODE_CLASS;
+        break;
     case VALUE_TYPE_ARRAY:
+        pkgid = SYMBOL_ARRAY_CLASS;
+        break;
     case VALUE_TYPE_FILE:
+        pkgid = SYMBOL_FILE_CLASS;
+        break;
     case VALUE_TYPE_INT:
+        pkgid = SYMBOL_INT_CLASS;
+        break;
     case VALUE_TYPE_DOUBLE:
+        pkgid = SYMBOL_DOUBLE_CLASS;
+        break;
     case VALUE_TYPE_HASH:
-    case VALUE_TYPE_OBJECT:{
-        ID pkgid;
-        if (object->value_type == VALUE_TYPE_STR) {
-            pkgid = SYMBOL_STRING_CLASS;
-        } else if (object->value_type == VALUE_TYPE_ARRAY) {
-            pkgid = SYMBOL_ARRAY_CLASS;
-        } else if (object->value_type == VALUE_TYPE_FILE) {
-            pkgid = SYMBOL_FILE_CLASS;
-        } else if (object->value_type == VALUE_TYPE_CODE) {
-            pkgid = SYMBOL_CODE_CLASS;
-        } else if (object->value_type == VALUE_TYPE_INT) {
-            pkgid = SYMBOL_INT_CLASS;
-        } else if (object->value_type == VALUE_TYPE_DOUBLE) {
-            pkgid = SYMBOL_DOUBLE_CLASS;
-        } else if (object->value_type == VALUE_TYPE_HASH) {
-            pkgid = SYMBOL_HASH_CLASS;
-        } else if (object->value_type == VALUE_TYPE_OBJECT) {
-            pkgid = object->upcast<ObjectValue>()->package_id();
-        } else if (object->value_type == VALUE_TYPE_SYMBOL) {
-            pkgid = object->upcast<SymbolValue>()->id;
-        } else {
-            abort();
-        }
-        SharedPtr<Package> pkg = this->find_package(pkgid);
-        auto iter = pkg->find(function_id->upcast<SymbolValue>()->id);
-        if (iter != pkg->end()) {
-            SharedPtr<Value>code_v = iter->second;
-            assert(code_v->value_type == VALUE_TYPE_CODE);
-            SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-            int argcnt = get_int_operand();
-
-            if (code->is_native()) {
-                // FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size()-argcnt);
-                // fframe->return_address = pc;
-                // fframe->code = code;
-
-                // frame_stack->push_back(fframe);
-                stack.push_back(object);
-                this->call_native_func(code->callback(), argcnt+1);
-                // delete fframe;
-                // frame_stack->pop_back();
-            } else {
-                SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
-                fframe->return_address = pc;
-                fframe->argcnt = argcnt;
-                fframe->code = code;
-                fframe->self = object;
-
-                pc = -1;
-                this->ops = code->code_opcodes;
-
-                // TODO: vargs support
-                // TODO: kwargs support
-                assert(argcnt == (int)code->code_params->size());
-                mark_stack.push_back(stack.size());
-                frame_stack->push_back(fframe);
-            }
-        } else {
-            if (function_id->upcast<SymbolValue>()->id == this->symbol_table->get_id("()") && object->value_type == VALUE_TYPE_CODE) {
-                int argcnt = get_int_operand();
-                SharedPtr<CodeValue> code = object->upcast<CodeValue>();
-                if (code->is_native()) {
-                    TODO();
-                } else {
-                    SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
-                    fframe->return_address = pc;
-                    fframe->argcnt = argcnt;
-                    fframe->code = code;
-                    fframe->self = object;
-
-                    pc = -1;
-                    this->ops = code->code_opcodes;
-
-                    // TODO: vargs support
-                    // TODO: kwargs support
-                    assert(argcnt == (int)code->code_params->size());
-                    mark_stack.push_back(stack.size());
-                    frame_stack->push_back(fframe);
-                }
-            } else if (function_id->upcast<SymbolValue>()->id == this->symbol_table->get_id("tora")) {
-                SharedPtr<Package> pkg = this->find_package(this->symbol_table->get_id("Object"));
-                auto iter = pkg->find(this->symbol_table->get_id("tora"));
-                assert(*iter);
-                stack.push_back(object);
-                this->call_native_func(iter->second->upcast<CodeValue>()->callback(), 1);
-            } else if (function_id->upcast<SymbolValue>()->id == this->symbol_table->get_id("bless")) {
-                int argcnt = get_int_operand();
-                if (argcnt != 1) {
-                    this->die("argument count must be 1 for blessing.\n");
-                }
-                stack[stack.size()-1].reset(new ObjectValue(this, object->upcast<SymbolValue>()->id, stack.back()));
-            } else {
-                dump_value(function_id);
-                dump_value(object);
-                this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(pkgid).c_str());
-            }
-        }
+        pkgid = SYMBOL_HASH_CLASS;
+        break;
+    case VALUE_TYPE_SYMBOL:
+        pkgid = object->upcast<SymbolValue>()->id;
+        break;
+    case VALUE_TYPE_OBJECT:
+        pkgid = object->upcast<ObjectValue>()->package_id();
         break;
     }
-    default:
-        this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), object->type_str());
-        break;
+
+    std::set<ID> seen;
+    this->call_method(object, pkgid, function_id, seen);
+}
+
+void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
+    seen.insert(klass_id);
+
+    SharedPtr<Package> pkg = this->find_package(klass_id);
+    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id);
+    if (iter != pkg->end()) {
+        SharedPtr<Value>code_v = iter->second;
+        assert(code_v->value_type == VALUE_TYPE_CODE);
+        SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+        int argcnt = get_int_operand();
+
+        if (code->is_native()) {
+            // FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size()-argcnt);
+            // fframe->return_address = pc;
+            // fframe->code = code;
+
+            // frame_stack->push_back(fframe);
+            stack.push_back(object);
+            this->call_native_func(code->callback(), argcnt+1);
+            // delete fframe;
+            // frame_stack->pop_back();
+        } else {
+            SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
+            fframe->return_address = pc;
+            fframe->argcnt = argcnt;
+            fframe->code = code;
+            fframe->self = object;
+
+            pc = -1;
+            this->ops = code->code_opcodes;
+
+            // TODO: vargs support
+            // TODO: kwargs support
+            assert(argcnt == (int)code->code_params->size());
+            mark_stack.push_back(stack.size());
+            frame_stack->push_back(fframe);
+        }
+    } else {
+        // symbol class
+        if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
+            this->call_method(object, SYMBOL_SYMBOL_CLASS, function_id, seen);
+            return;
+        // object class
+        } else if (klass_id != SYMBOL_OBJECT_CLASS && seen.find(SYMBOL_OBJECT_CLASS)==seen.end()) {
+            this->call_method(object, SYMBOL_OBJECT_CLASS, function_id, seen);
+            return;
+        } else {
+            dump_value(function_id);
+            dump_value(object);
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(klass_id).c_str());
+        }
     }
 }
 

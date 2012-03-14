@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <stdarg.h>
 
 #include "tora.h"
@@ -174,6 +175,7 @@ public:
     void add_library_path(const std::string &dir);
 
     void call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id);
+    void call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
 
 #include "vm.ops.inc.h"
 

@@ -9,6 +9,7 @@ use Text::MicroTemplate qw(render_mt);
 my $dat = [
     ['SYMBOL_DESTROY'      => 'DESTROY'],
 
+    ['SYMBOL_OBJECT_CLASS'  => 'Object'],
     ['SYMBOL_ARRAY_CLASS'  => 'Array'],
     ['SYMBOL_INT_CLASS'    => 'Int'],
     ['SYMBOL_DOUBLE_CLASS'    => 'Double'],
