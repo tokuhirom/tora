@@ -1,6 +1,6 @@
 use Test::More *;
 
-class Foo { }
+class Foo { sub new() { self.bless(1) } }
 
 my $f = Foo.new();
 is(typeof($f), "Foo");

@@ -87,6 +87,11 @@ std:
     */
 
 /*!re2c
+    "qq{" {
+        tora_open_string_literal();
+        string_close_char = '}';
+        goto single_string_literal;
+    }
     "qq[" {
         tora_open_string_literal();
         string_close_char = ']';

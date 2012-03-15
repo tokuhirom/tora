@@ -2,6 +2,7 @@
 #define TORA_SYMBOL_TABLE_H_
 
 #include <map>
+#include <string>
 #include "prim.h"
 #include "tora.h"
 

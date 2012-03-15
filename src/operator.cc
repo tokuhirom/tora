@@ -53,12 +53,24 @@ Value * tora::op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) 
 
 Value * tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
     if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-        return new DoubleValue(lhs->to_double() / rhs->to_double());
+        double rhs_double = rhs->to_double();
+        if (rhs_double == 0) {
+            throw new ZeroDividedExceptionExceptionValue();
+        }
+        return new DoubleValue(lhs->to_double() / rhs_double);
     } else if (lhs->value_type == VALUE_TYPE_INT) {
         if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
-            return new DoubleValue(lhs->to_double() / rhs->to_double());
+            double rhs_double = rhs->to_double();
+            if (rhs_double == 0) {
+                throw new ZeroDividedExceptionExceptionValue();
+            }
+            return new DoubleValue(lhs->to_double() / rhs_double);
         } else {
-            return new IntValue(lhs->upcast<IntValue>()->int_value / rhs->upcast<IntValue>()->int_value);
+            double rhs_int = rhs->to_int();
+            if (rhs_int == 0) {
+                throw new ZeroDividedExceptionExceptionValue();
+            }
+            return new IntValue(lhs->upcast<IntValue>()->int_value / rhs_int);
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());

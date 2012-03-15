@@ -9,7 +9,7 @@ using namespace tora;
 
 #define TOKEN_IS(x) is(scanner.scan(&yylval), x)
 #define LVAL_STR_IS(x) is(yylval->upcast<StrNode>()->str_value, std::string(x));
-#define BEGIN(x) std::stringstream ss(std::string((const char*)(x))); Scanner scanner(&ss, "<eval>"); Node *yylval = NULL;
+#define BEGIN(x) printf("# line %d\n", __LINE__); std::stringstream ss(std::string((const char*)(x))); Scanner scanner(&ss, "<eval>"); Node *yylval = NULL;
 
 int main() {
     {

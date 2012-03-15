@@ -8,6 +8,7 @@ namespace tora {
 typedef enum {
     EXCEPTION_TYPE_UNDEF,
     EXCEPTION_TYPE_STOP_ITERATION,
+    EXCEPTION_TYPE_ZERO_DIVIDED,
     EXCEPTION_TYPE_GENERAL,
     EXCEPTION_TYPE_ERRNO,
 } exception_type_t;
@@ -36,6 +37,13 @@ class StopIterationExceptionValue : public ExceptionValue {
 public:
     StopIterationExceptionValue() : ExceptionValue("") {
         exception_type = EXCEPTION_TYPE_STOP_ITERATION;
+    }
+};
+
+class ZeroDividedExceptionExceptionValue : public ExceptionValue {
+public:
+    ZeroDividedExceptionExceptionValue() : ExceptionValue("floating point exception: divided by zero") {
+        exception_type = EXCEPTION_TYPE_ZERO_DIVIDED;
     }
 };
 

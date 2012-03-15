@@ -6,6 +6,9 @@ use t::Util;
 
 run_is(<<'...', "Hello world!: HOGE\n");
 class Hello {
+    sub new() {
+        self.bless(undef);
+    }
     sub world ($n) {
         say("Hello world!: " +$n);
     }

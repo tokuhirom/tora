@@ -5,6 +5,7 @@
 #include "package_map.h"
 #include "package.h"
 #include "inspector.h"
+#include "symbols.gen.h"
 
 #include "value/hash.h"
 #include "value/code.h"
@@ -488,7 +489,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
                     fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
                 } else {
-                    TODO();
+                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 }
             } else {
                 fprintf(stderr, "died\n");
@@ -622,5 +623,76 @@ void VM::load_dynamic_library(const std::string &filename, const std::string &en
 void VM::add_library_path(const std::string &dir) {
     SharedPtr<Value> libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
     libpath->upcast<ArrayValue>()->push(new StrValue(dir));
+}
+
+/**
+ * push arguments to stack. and call this method.
+ *
+ * call method. if method is not available, call parent class' method.
+ */
+void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id) {
+    if (!(stack.size() >= (size_t) get_int_operand())) {
+        // printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), stack.size());
+        dump_stack();
+        abort();
+    }
+    assert(function_id->value_type == VALUE_TYPE_SYMBOL);
+
+    std::set<ID> seen;
+    this->call_method(object, object->object_package_id(), function_id, seen);
+}
+
+void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
+    seen.insert(klass_id);
+
+    SharedPtr<Package> pkg = this->find_package(klass_id);
+    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id);
+    if (iter != pkg->end()) {
+        SharedPtr<Value>code_v = iter->second;
+        assert(code_v->value_type == VALUE_TYPE_CODE);
+        SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+        int argcnt = get_int_operand();
+
+        if (code->is_native()) {
+            // FunctionFrame* fframe = new FunctionFrame(this, argcnt, stack.size()-argcnt);
+            // fframe->return_address = pc;
+            // fframe->code = code;
+
+            // frame_stack->push_back(fframe);
+            stack.push_back(object);
+            this->call_native_func(code->callback(), argcnt+1);
+            // delete fframe;
+            // frame_stack->pop_back();
+        } else {
+            SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), ops);
+            fframe->return_address = pc;
+            fframe->argcnt = argcnt;
+            fframe->code = code;
+            fframe->self = object;
+
+            pc = -1;
+            this->ops = code->code_opcodes;
+
+            // TODO: vargs support
+            // TODO: kwargs support
+            assert(argcnt == (int)code->code_params->size());
+            mark_stack.push_back(stack.size());
+            frame_stack->push_back(fframe);
+        }
+    } else {
+        // symbol class
+        if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
+            this->call_method(object, SYMBOL_SYMBOL_CLASS, function_id, seen);
+            return;
+        // object class
+        } else if (klass_id != SYMBOL_OBJECT_CLASS && seen.find(SYMBOL_OBJECT_CLASS)==seen.end()) {
+            this->call_method(object, SYMBOL_OBJECT_CLASS, function_id, seen);
+            return;
+        } else {
+            // dump_value(function_id);
+            // dump_value(object);
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
+        }
+    }
 }
 
