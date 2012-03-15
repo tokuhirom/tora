@@ -57,7 +57,7 @@ class Path::File {
         self.bless($path);
     }
     sub open($mode) {
-        return ::open(${self}, $mode);
+        return File.open(${self}, $mode);
     }
     sub read() {
         self.open('r').read();

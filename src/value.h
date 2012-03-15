@@ -82,6 +82,7 @@ public:
     // GET type name in const char*
     const char *type_str() const;
 
+    ID object_package_id();
 
     bool is_exception() const {
         return value_type == VALUE_TYPE_EXCEPTION;

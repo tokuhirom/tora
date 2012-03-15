@@ -5,6 +5,8 @@
 #include "value/bool.h"
 #include "value/double.h"
 #include "value/object.h"
+#include "value/symbol.h"
+#include "symbols.gen.h"
 #include <stdarg.h>
 #include <errno.h>
 
@@ -161,6 +163,29 @@ Value& tora::Value::operator=(const Value&v) {
     }
     default:
         abort();
+    }
+}
+
+ID Value::object_package_id() {
+    switch (value_type) {
+    case VALUE_TYPE_STR:
+        return SYMBOL_STRING_CLASS;
+    case VALUE_TYPE_CODE:
+        return SYMBOL_CODE_CLASS;
+    case VALUE_TYPE_ARRAY:
+        return SYMBOL_ARRAY_CLASS;
+    case VALUE_TYPE_FILE:
+        return SYMBOL_FILE_CLASS;
+    case VALUE_TYPE_INT:
+        return SYMBOL_INT_CLASS;
+    case VALUE_TYPE_DOUBLE:
+        return SYMBOL_DOUBLE_CLASS;
+    case VALUE_TYPE_HASH:
+        return SYMBOL_HASH_CLASS;
+    case VALUE_TYPE_SYMBOL:
+        return this->upcast<SymbolValue>()->id;
+    case VALUE_TYPE_OBJECT:
+        return this->upcast<ObjectValue>()->package_id();
     }
 }
 

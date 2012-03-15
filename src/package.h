@@ -2,6 +2,7 @@
 #define TORA_PACKAGE_H_
 
 #include "tora.h"
+#include "value.h"
 #include "shared_ptr.h"
 #include "prim.h"
 #include <map>
@@ -24,6 +25,7 @@ public:
     void add_function(ID function_name_id, const SharedPtr<Value> &code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
+    void has_method(ID function_name_id, const CallbackFunction* code);
     void set_variable(ID var_name_id, const SharedPtr<Value> & v);
 
     iterator find(ID id) {

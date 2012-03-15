@@ -638,39 +638,8 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     }
     assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
-    ID pkgid;
-    switch (object->value_type) {
-    case VALUE_TYPE_STR:
-        pkgid = SYMBOL_STRING_CLASS;
-        break;
-    case VALUE_TYPE_CODE:
-        pkgid = SYMBOL_CODE_CLASS;
-        break;
-    case VALUE_TYPE_ARRAY:
-        pkgid = SYMBOL_ARRAY_CLASS;
-        break;
-    case VALUE_TYPE_FILE:
-        pkgid = SYMBOL_FILE_CLASS;
-        break;
-    case VALUE_TYPE_INT:
-        pkgid = SYMBOL_INT_CLASS;
-        break;
-    case VALUE_TYPE_DOUBLE:
-        pkgid = SYMBOL_DOUBLE_CLASS;
-        break;
-    case VALUE_TYPE_HASH:
-        pkgid = SYMBOL_HASH_CLASS;
-        break;
-    case VALUE_TYPE_SYMBOL:
-        pkgid = object->upcast<SymbolValue>()->id;
-        break;
-    case VALUE_TYPE_OBJECT:
-        pkgid = object->upcast<ObjectValue>()->package_id();
-        break;
-    }
-
     std::set<ID> seen;
-    this->call_method(object, pkgid, function_id, seen);
+    this->call_method(object, object->object_package_id(), function_id, seen);
 }
 
 void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
@@ -720,9 +689,9 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
             this->call_method(object, SYMBOL_OBJECT_CLASS, function_id, seen);
             return;
         } else {
-            dump_value(function_id);
-            dump_value(object);
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(klass_id).c_str());
+            // dump_value(function_id);
+            // dump_value(object);
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
         }
     }
 }
