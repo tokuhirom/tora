@@ -410,7 +410,7 @@ OP_METHOD_CALL {
             } else if (funid->upcast<SymbolValue>()->id == this->symbol_table->get_id("tora")) {
                 SharedPtr<Package> pkg = this->find_package(this->symbol_table->get_id("Object"));
                 auto iter = pkg->find(this->symbol_table->get_id("tora"));
-                assert(*iter);
+                assert(iter != pkg->end());
                 stack.push_back(object);
                 this->call_native_func(iter->second->upcast<CodeValue>()->callback(), 1);
             } else {
