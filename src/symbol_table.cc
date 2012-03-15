@@ -1,5 +1,6 @@
 #include "symbol_table.h"
 #include <execinfo.h>
+#include <iostream>
 
 
 using namespace tora;
@@ -17,3 +18,10 @@ ID SymbolTable::get_id(const std::string &str) {
     rev_tbl[ret] = str;
     return ret;
 }
+
+void SymbolTable::dump() const {
+    for (auto iter: tbl) {
+        std::cout << iter.first << " " << iter.second << std::endl;
+    }
+}
+

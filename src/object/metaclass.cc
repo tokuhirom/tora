@@ -1,6 +1,7 @@
 #include "metaclass.h"
 #include "../vm.h"
 #include "../value/array.h"
+#include "../value/object.h"
 #include "../value/code.h"
 #include "../package.h"
 #include "../peek.h"
@@ -16,13 +17,33 @@ using namespace tora;
  */
 static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) {
     SharedPtr<StrValue> methname = methname_v->to_s();
-    ID pkgid = self->upcast<ObjectValue>()->data()->package_id();
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
     Package * pkg = vm->find_package(pkgid);
-    return BoolValue::instance(pkg->has_method(methname->str_value));
+    return BoolValue::instance(pkg->has_method(vm->symbol_table->get_id(methname->str_value)));
+}
+
+/**
+ * Get a method list defined in package.
+ */
+static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    Package * pkg = vm->find_package(pkgid);
+    SharedPtr<ArrayValue> av = new ArrayValue();
+    for (auto iter=pkg->begin(); iter!=pkg->end(); ++iter) {
+        av->push(new StrValue(vm->symbol_table->id2name(iter->first)));
+    }
+    return av;
+}
+
+static SharedPtr<Value> mc_name(VM * vm, Value* self) {
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    return new StrValue(vm->symbol_table->id2name(pkgid));
 }
 
 void tora::Init_MetaClass(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("MetaClass");
     pkg->add_method(vm->symbol_table->get_id("has_method"), new CallbackFunction(mc_has_method));
+    pkg->add_method(vm->symbol_table->get_id("get_method_list"), new CallbackFunction(mc_get_method_list));
+    pkg->add_method(vm->symbol_table->get_id("name"), new CallbackFunction(mc_name));
 }
 

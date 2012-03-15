@@ -30,6 +30,7 @@ public:
     std::string &id2name(int id) {
         return rev_tbl[id];
     }
+    void dump() const;
 };
 
 };

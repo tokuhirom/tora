@@ -37,3 +37,10 @@ void Package::set_variable(ID var_name_id, const SharedPtr<Value> & v) {
     this->data[var_name_id] = v;
 }
 
+/**
+ * the package has a method?
+ */
+bool Package::has_method(ID function_name_id) {
+    return this->find(function_name_id) != this->end();
+}
+

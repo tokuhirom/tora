@@ -35,10 +35,16 @@ static SharedPtr<Value> dump_dump(VM *vm, Value *self, Value *obj) {
     return UndefValue::instance();
 }
 
+static SharedPtr<Value> dump_dump_symbol_table(VM *vm, Value *self) {
+    vm->symbol_table->dump();
+    return UndefValue::instance();
+}
+
 void tora::Init_Internals(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("Internals");
     pkg->add_method(vm->symbol_table->get_id("stack_size"), new CallbackFunction(stack_size));
     pkg->add_method(vm->symbol_table->get_id("dump_stack"), new CallbackFunction(dump_stack));
     pkg->add_method(vm->symbol_table->get_id("dump"), new CallbackFunction(dump_dump));
+    pkg->add_method(vm->symbol_table->get_id("dump_symbol_table"), new CallbackFunction(dump_dump_symbol_table));
 }
 

@@ -25,7 +25,7 @@ public:
     void add_function(ID function_name_id, const SharedPtr<Value> &code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
-    void has_method(ID function_name_id, const CallbackFunction* code);
+    bool has_method(ID function_name_id);
     void set_variable(ID var_name_id, const SharedPtr<Value> & v);
 
     iterator find(ID id) {
@@ -35,8 +35,8 @@ public:
     void dump(VM *vm) {
         this->dump(vm, 0);
     }
-    const char *type_str() { return "package"; }
-    ID id() { return name_id; }
+    const char *type_str() const { return "package"; }
+    ID id() const { return name_id; }
     iterator begin() { return data.begin(); }
     iterator end()   { return data.end(); }
 };
