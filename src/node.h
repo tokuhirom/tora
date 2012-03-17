@@ -71,6 +71,7 @@ public:
     const_iterator end()  const { return list->end(); }
     reverse_iterator rbegin() { return list->rbegin(); }
     reverse_iterator rend() { return list->rend(); }
+    void push_back(Node* n) { list->push_back(n); }
 };
 
 class StrNode : public Node {

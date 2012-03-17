@@ -199,7 +199,7 @@ else_clause(A) ::= ELSE maybe_block(B). {
     A = B;
 }
 
-sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN parameter_list(C) R_PAREN maybe_block(D). {
+sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN sub_parameter_list(C) R_PAREN maybe_block(D). {
     A = new FuncdefNode(B, C->upcast<ListNode>(), D);
 }
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
@@ -207,14 +207,37 @@ sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
     A = new FuncdefNode(B, new ListNode(), C);
 }
 
-parameter_list(A) ::= variable(B). {
+lambda_parameter_list(A) ::= variable(B). {
     A = new ListNode();
     A->upcast<ListNode>()->push_back(B);
 }
-parameter_list(A) ::= parameter_list(B) COMMA expression(C). {
+lambda_parameter_list(A) ::= lambda_parameter_list(B) COMMA variable(C). {
     A = B;
     A->upcast<ListNode>()->push_back(C);
 }
+
+/* the arguments in function/lambda definition. */
+sub_parameter_list(A) ::= parameter(B). {
+    A = new ListNode();
+    A->upcast<ListNode>()->push_back(B);
+}
+sub_parameter_list(A) ::= sub_parameter_list(B) COMMA parameter(C). {
+    A = B;
+    A->upcast<ListNode>()->push_back(C);
+}
+parameter(A) ::= variable(B). {
+    Node *n = new Node();
+    n->push_back(B);
+    n->push_back(NULL);
+    A = n;
+}
+parameter(A) ::= variable(B) ASSIGN expression(C). {
+    Node *n = new Node();
+    n->push_back(B);
+    n->push_back(C);
+    A = n;
+}
+
 /* allow [a,b,c,] */
 
 /* array constructor [a, b] */
@@ -456,7 +479,7 @@ unary_expression(A) ::= SUB unary_expression(B). {
 unary_expression(A) ::= TRY maybe_block(B). {
     A = new NodeNode(NODE_TRY, B);
 }
-unary_expression(A) ::= LAMBDA parameter_list(B) maybe_block(C). {
+unary_expression(A) ::= LAMBDA lambda_parameter_list(B) maybe_block(C). {
     A = new FuncdefNode(NULL, B->upcast<ListNode>(), C);
     A->type = NODE_LAMBDA;
 }

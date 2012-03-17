@@ -23,6 +23,7 @@ public:
     ID code_id;
     std::string code_name;
     std::vector<std::string*> *code_params;
+    std::vector<int> *code_defaults;
     std::vector<std::string> *closure_var_names;
     std::vector<SharedPtr<Value>> *closure_vars;
     SharedPtr<OPArray> code_opcodes;

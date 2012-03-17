@@ -32,7 +32,13 @@ OP_PUSH_STRING {
 
 OP_GETARG {
     int no = get_int_operand();
-    stack.push_back(stack.at(mark_stack.back() - no - 1));
+    int index = mark_stack.back() - no - 1;
+#if NDEBUG == 0
+    if (index >= stack.size()) {
+        dump_stack();
+    }
+#endif
+    stack.push_back(stack.at(index));
 }
 
 OP_SETARG {
@@ -228,19 +234,40 @@ OP_FUNCALL {
     auto iter = pkg->find(id);
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
-        // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
+
+
+        // TODO: vargs support
+        // TODO: kwargs support
+        int orig_argcnt = argcnt;
+        for (size_t i=0; i<code->code_params->size(); i++) {
+            if (argcnt <= i) {
+                int def = code->code_defaults->at(i);
+                if (def > 0) {
+                    pc = def;
+                    this->execute();
+                    ++argcnt;
+                    fframe->top++;
+                } else {
+                    throw new ExceptionValue(
+                        "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
+                        this->symbol_table->id2name(pkg->id()).c_str(),
+                        this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(),
+                        code->code_params->size(),
+                        orig_argcnt);
+                }
+            }
+        }
+
         fframe->argcnt = argcnt;
         fframe->code = code;
 
         pc = -1;
         this->ops = code->code_opcodes;
 
-        // TODO: vargs support
-        // TODO: kwargs support
-        assert(argcnt == (int)code->code_params->size());
+        // assert(argcnt == (int)code->code_params->size());
         /**
          *   +------+
          * 0 | arg2 |

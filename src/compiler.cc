@@ -570,15 +570,32 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         auto funcdef_node = node->upcast<FuncdefNode>();
 
+        OP * skip_defvars = new OP(OP_JUMP);
+        push_op(skip_defvars);
+
         // function name
         std::string &funcname = funcdef_node->name()->upcast<StrNode>()->str_value;
 
         this->push_block(BLOCK_TYPE_FUNCDEF);
         auto params = new std::vector<std::string *>();
+        auto defaults = new std::vector<int>();
         for (size_t i=0; i<funcdef_node->params()->size(); i++) {
-            params->push_back(new std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
-            this->define_localvar(std::string(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value));
+            assert(funcdef_node->params()->at(i)->list->size() == 2);
+            const SharedPtr<Node>& param_name = funcdef_node->params()->at(i)->at(0);
+            const SharedPtr<Node>& default_node = funcdef_node->params()->at(i)->at(1);
+
+            params->push_back(new std::string(param_name->upcast<StrNode>()->str_value));
+            if (default_node.get()) {
+                // compile arguments to anonymous function.
+                defaults->push_back(ops->size());
+                this->compile(default_node);
+                push_op(new OP(OP_END));
+            } else {
+                defaults->push_back(-1);
+            }
+            this->define_localvar(std::string(param_name->upcast<StrNode>()->str_value));
         }
+        skip_defvars->operand.int_value = ops->size();
 
         Compiler funccomp(this->symbol_table, filename_);
         funccomp.init_globals();
@@ -606,6 +623,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         );
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
+        code->code_defaults = defaults;
         code->code_opcodes = funccomp.ops;
         code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
 
