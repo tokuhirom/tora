@@ -505,6 +505,10 @@ postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
     A = new MethodCallNode(B, C, new ListNode());
 }
+postfix_expression(A) ::= identifier(B) DOT identifier(C).  {
+    // Foo.bar
+    A = new MethodCallNode(B, C, new ListNode());
+}
 postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN R_PAREN.  {
     // $foo.();
     A = new MethodCallNode(B, NULL, new ListNode());
@@ -517,6 +521,10 @@ postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argume
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
+    A = new MethodCallNode(B, C, new ListNode());
+}
+postfix_expression(A) ::= postfix_expression(B) DOT identifier(C). {
+    // $foo.bar
     A = new MethodCallNode(B, C, new ListNode());
 }
 postfix_expression(A) ::= /* $i-- */ postfix_expression(B) MINUSMINUS. {

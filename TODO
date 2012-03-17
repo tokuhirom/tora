@@ -63,7 +63,6 @@ syntax
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
- * $foo.bar; # ignore parens.
 
 lambda
 ------
@@ -181,3 +180,4 @@ Array#map()
   * DynaLoader
 hex()
 sqrt()
+ * $foo.bar; # ignore parens.
