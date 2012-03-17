@@ -190,7 +190,7 @@ OP_BUILTIN_FUNCALL {
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
     }
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);

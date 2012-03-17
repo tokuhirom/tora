@@ -363,6 +363,8 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "getcwd",
         "getpid",
         "getppid",
+        "abs", "atan2", "cos", "exp", "hex", "int", "log", "oct", "rand",
+        "sin", "sqrt", "srand",
         NULL
     };
     for (int i=0; bs[i]; i++) {

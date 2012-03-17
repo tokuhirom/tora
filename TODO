@@ -5,7 +5,6 @@ builtin functions
 -----------------
 
 stat()
-hex()
 
 builtin objects
 ---------------
@@ -64,6 +63,7 @@ syntax
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
+ * $foo.bar; # ignore parens.
 
 lambda
 ------
@@ -179,3 +179,5 @@ Array#map()
  * destructor in pure tora function
   * -x
   * DynaLoader
+hex()
+sqrt()

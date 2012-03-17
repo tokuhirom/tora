@@ -226,6 +226,86 @@ static SharedPtr<Value> builtin_getppid(VM *vm) {
     return new IntValue(getppid());
 }
 
+static SharedPtr<Value> builtin_abs(VM *vm, Value *v) {
+    if (v->value_type == VALUE_TYPE_INT) {
+        int i = v->to_int();
+        return new IntValue(i < 0 ? -i : i);
+    } else if (v->value_type == VALUE_TYPE_DOUBLE) {
+        double i = v->to_double();
+        return new DoubleValue(i < 0 ? -i : i);
+    } else {
+        throw new ExceptionValue("abs() is not supported in non numeric value.");
+    }
+}
+
+static SharedPtr<Value> builtin_atan2(VM *vm, Value *y, Value *x) {
+    return new DoubleValue(atan2(y->to_double(), x->to_double()));
+}
+
+static SharedPtr<Value> builtin_sqrt(VM *vm, Value *v) {
+    return new DoubleValue(sqrt(v->to_double()));
+}
+
+static SharedPtr<Value> builtin_cos(VM *vm, Value *v) {
+    return new DoubleValue(cos(v->to_double()));
+}
+
+static SharedPtr<Value> builtin_exp(VM *vm, Value *v) {
+    return new DoubleValue(exp(v->to_double()));
+}
+
+/**
+ * hex(Str $v) : Int
+ *
+ * hex('0xAF') # => 175
+ * hex('aF') # => 175
+ */
+static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
+    if (v->value_type != VALUE_TYPE_STR) {
+        throw new ExceptionValue("hex() requires string value.");
+    }
+    const std::string s = v->upcast<StrValue>()->c_str();
+    char *endp;
+    errno = 0;
+    long n = strtol(s.c_str(), &endp, 16);
+    if (errno == ERANGE) {
+        throw new ExceptionValue(errno);
+    }
+    if (endp != s.c_str()+s.size()) {
+        throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
+    }
+    return new IntValue(n);
+}
+
+static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
+    if (v->value_type != VALUE_TYPE_STR) {
+        throw new ExceptionValue("oct() requires string value.");
+    }
+    const std::string s = v->upcast<StrValue>()->c_str();
+    char *endp;
+    errno = 0;
+    long n = strtol(s.c_str(), &endp, 8);
+    if (errno == ERANGE) {
+        throw new ExceptionValue(errno);
+    }
+    if (endp != s.c_str()+s.size()) {
+        throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());
+    }
+    return new IntValue(n);
+}
+
+static SharedPtr<Value> builtin_int(VM *vm, Value *v) {
+    return new IntValue(v->to_int());
+}
+
+static SharedPtr<Value> builtin_log(VM *vm, Value *v) {
+    return new DoubleValue(log(v->to_double()));
+}
+
+static SharedPtr<Value> builtin_sin(VM *vm, Value *v) {
+    return new DoubleValue(sin(v->to_double()));
+}
+
 void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
     vm->add_builtin_function("exit", builtin_exit);
@@ -243,5 +323,19 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("getcwd",   builtin_getcwd);
     vm->add_builtin_function("getpid",   builtin_getpid);
     vm->add_builtin_function("getppid",   builtin_getppid);
+    
+    // numeric functions
+    // "abs", "atan2", "cos", "exp", "hex", "int", "log", "oct", "rand",
+    // "sin", "sqrt", "srand"
+    vm->add_builtin_function("sqrt",   builtin_sqrt);
+    vm->add_builtin_function("abs",   builtin_abs);
+    vm->add_builtin_function("atan2",   builtin_atan2);
+    vm->add_builtin_function("cos",   builtin_cos);
+    vm->add_builtin_function("exp",   builtin_exp);
+    vm->add_builtin_function("hex",   builtin_hex);
+    vm->add_builtin_function("int",   builtin_int);
+    vm->add_builtin_function("log",   builtin_log);
+    vm->add_builtin_function("oct",   builtin_oct);
+    vm->add_builtin_function("sin",   builtin_sin);
 }
 

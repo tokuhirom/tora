@@ -125,7 +125,7 @@ SharedPtr<StrValue> Value::to_s() {
 int Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
         return this->upcast<IntValue>()->int_value;
-    } else if (value_type == VALUE_TYPE_INT) {
+    } else if (value_type == VALUE_TYPE_DOUBLE) {
         return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
         if (this->upcast<TupleValue>()->size() == 1) {
