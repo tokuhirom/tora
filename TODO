@@ -19,8 +19,6 @@ Enumerable#reduce()
 Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
-dir('t').file($fname)
-dir('t').file($fname)
 
 open()
 open($fname, $mode, $encoding)
@@ -182,3 +180,4 @@ Array#map()
 hex()
 sqrt()
  * $foo.bar; # ignore parens.
+dir('t').file($fname)
