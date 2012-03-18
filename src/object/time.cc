@@ -18,8 +18,18 @@ using namespace tora;
  * Create a time object from $epoch time.
  * Timezone set to local.
  */
-static SharedPtr<Value> time_new(VM* vm, Value* klass, Value* t) {
-    time_t i = t->to_int();
+static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &args) {
+    if (!(args.size() == 1 || args.size() == 2)) {
+        throw new ExceptionValue("ArgumentException: Time.new([$epoch]) is valid, but you passed %d arguments.", args.size());
+    }
+    const SharedPtr<Value> & klass = args.at(0);
+    time_t i;
+    if (args.size() == 1) {
+        i = time(NULL);
+    } else {
+        const SharedPtr<Value> & t = args.at(1);
+        i = t->to_int();
+    }
 
     struct tm * buf = new tm;
     struct tm * retlocal = localtime_r(&i, buf);
