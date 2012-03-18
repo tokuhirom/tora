@@ -1,8 +1,9 @@
 sub dir($path) {
-    "Path::Dir".bless($path);
+    Path::Dir.new($path);
 }
 
 sub file($path) {
+    Path::File.new($path);
 }
 
 $Path::SEPCHAR='/';
@@ -22,9 +23,7 @@ class Path::Dir::Base {
     }
 }
 
-class Path::Dir {
-    extend('Path::Dir::Base');
-
+class Path::Dir is Path::Dir::Base {
     sub new($path) {
         self.bless($path);
     }
@@ -50,9 +49,7 @@ class Path::Dir {
     }
 }
 
-class Path::File {
-    extend('Path::Dir::Base');
-
+class Path::File is Path::Dir::Base {
     sub new($path) {
         self.bless($path);
     }

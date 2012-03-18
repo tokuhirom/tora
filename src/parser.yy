@@ -167,6 +167,9 @@ statement(A) ::= class_statement(B). { A = B; }
 class_statement(A) ::= CLASS identifier(B) maybe_block(C). {
     A = new ClassNode(B, NULL, NULL, C);
 }
+class_statement(A) ::= CLASS identifier(B) IS identifier(C) maybe_block(D). {
+    A = new ClassNode(B, C, NULL, D);
+}
 
 jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
     B->type = NODE_RETURN;
@@ -623,6 +626,10 @@ int(A) ::= INT_LITERAL(B). {
 }
 
 identifier(A) ::= IDENTIFIER(B). {
+    B->type = NODE_IDENTIFIER;
+    A = B;
+}
+identifier(A) ::= IS(B). {
     B->type = NODE_IDENTIFIER;
     A = B;
 }

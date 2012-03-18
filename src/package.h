@@ -16,17 +16,25 @@ class Package {
     PRIM_DECL(Package);
 private:
     ID name_id;
+    Package * superclass_;
     std::map<ID, SharedPtr<Value>> data;
 public:
     typedef std::map<ID, SharedPtr<Value>>::iterator iterator;
 
-    Package(ID id) : refcnt(0), name_id(id) { }
+    Package(ID id) : refcnt(0), name_id(id), superclass_(NULL) { }
     ~Package () { }
     void add_function(ID function_name_id, const SharedPtr<Value> &code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
     bool has_method(ID function_name_id);
     void set_variable(ID var_name_id, const SharedPtr<Value> & v);
+
+    void superclass(Package * super) {
+        superclass_ = super;
+    }
+    Package* superclass() const {
+        return superclass_;
+    }
 
     iterator find(ID id) {
         return data.find(id);

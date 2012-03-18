@@ -1,0 +1,35 @@
+use Test::More *;
+
+class Foo {
+    sub new() {
+        self.bless(0);
+    }
+    sub n() {
+        "FOO_N";
+    }
+}
+
+class Bar is Foo {
+    sub new() {
+        self.bless(0);
+    }
+    sub m() {
+        "BAR_M";
+    }
+}
+
+my $bar = Bar.new();
+my $foo = Foo.new();
+
+is($foo.meta.superclass(), undef);
+is($bar.meta.superclass(), 'Foo');
+
+is($foo.isa('Foo'), true);
+is($foo.isa('Bar'), false);
+note('--- bar');
+is($bar.isa('Foo'), true);
+is($bar.isa('Bar'), true);
+is($bar.m, 'BAR_M');
+is($bar.n(), 'FOO_N');
+
+done_testing;

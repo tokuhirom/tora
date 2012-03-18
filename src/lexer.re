@@ -122,6 +122,12 @@ std:
         string_close_char = ']';
         goto single_string_literal;
     }
+    "is" {
+        std::string token(m_token, m_cursor-m_token);
+        *yylval = new StrNode(NODE_IDENTIFIER, token);
+        divable = true;
+        return IS;
+    }
     "q!" {
         tora_open_string_literal();
         string_close_char = '!';

@@ -9,6 +9,12 @@
 
 using namespace tora;
 
+static inline Package *GET_PACKAGE(VM *vm, Value *self) {
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    Package * pkg = vm->find_package(pkgid);
+    return pkg;
+}
+
 /**
  * $meta.has_method('foo');
  *
@@ -40,10 +46,27 @@ static SharedPtr<Value> mc_name(VM * vm, Value* self) {
     return new StrValue(vm->symbol_table->id2name(pkgid));
 }
 
+/**
+ * $meta.superclass() : Str;
+ *
+ * This method returns superclass in string.
+ * If the class does not have a superclass, it returns undef.
+ */
+static SharedPtr<Value> mc_superclass(VM * vm, Value* self) {
+    Package * pkg = GET_PACKAGE(vm, self);
+    Package * super = pkg->superclass();
+    if (super) {
+        return new StrValue(vm->symbol_table->id2name(super->id()));
+    } else {
+        return UndefValue::instance();
+    }
+}
+
 void tora::Init_MetaClass(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("MetaClass");
     pkg->add_method(vm->symbol_table->get_id("has_method"), new CallbackFunction(mc_has_method));
     pkg->add_method(vm->symbol_table->get_id("get_method_list"), new CallbackFunction(mc_get_method_list));
     pkg->add_method(vm->symbol_table->get_id("name"), new CallbackFunction(mc_name));
+    pkg->add_method(vm->symbol_table->get_id("superclass"), new CallbackFunction(mc_superclass));
 }
 

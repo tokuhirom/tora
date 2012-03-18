@@ -684,8 +684,12 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
             frame_stack->push_back(fframe);
         }
     } else {
+        // find in super class.
+        Package * superclass = pkg->superclass();
+        if (superclass) {
+            this->call_method(object, superclass->id(), function_id, seen);
         // symbol class
-        if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
+        } else if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
             this->call_method(object, SYMBOL_SYMBOL_CLASS, function_id, seen);
             return;
         // object class

@@ -885,7 +885,7 @@ OP_PACKAGE_ENTER {
     PackageFrame* pframe = new PackageFrame(this, stack.size(), this->package_id());
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
-    this->package_id_ = package_id;
+    this->package_id(package_id);
 }
 
 OP_PACKAGE_LEAVE {
@@ -956,5 +956,16 @@ OP_LOCAL {
     pkg->set_variable(vid, UndefValue::instance());
 
     stack.pop_back();
+}
+
+OP_SET_PARENT {
+    const SharedPtr<Package> & pkg = this->package();
+    Package * super = this->find_package(get_int_operand());
+    if (super == pkg.get()) {
+        throw new ExceptionValue("You cannot make itself as superclass.");
+    }
+    assert(super);
+    pkg->superclass(super);
+    assert(pkg->superclass());
 }
 

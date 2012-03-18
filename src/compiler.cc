@@ -1378,6 +1378,12 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         pkg->operand.int_value = package_id;
         push_op(pkg);
 
+        if (n->parent()) {
+            OP * op = new OP(OP_SET_PARENT);
+            op->operand.int_value = symbol_table->get_id(n->parent()->upcast<StrNode>()->str_value);
+            push_op(op);
+        }
+
         if (n->block() != NULL) {
             this->compile(n->block());
         }

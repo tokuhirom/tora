@@ -10,7 +10,7 @@ void Package::dump(VM *vm, int indent) {
     Inspector ins(vm);
 
     print_indent(indent);
-    printf("[dump] Package(%s):\n", vm->symbol_table->id2name(name_id).c_str());
+    printf("[dump] Package(%s) super: %s:\n", vm->symbol_table->id2name(name_id).c_str(), superclass_ ? vm->symbol_table->id2name(superclass_->id()).c_str() : "(null)");
     auto iter = data.begin();
     for (; iter!=data.end(); iter++) {
         print_indent(indent+1);
