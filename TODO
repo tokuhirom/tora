@@ -5,6 +5,7 @@ builtin functions
 -----------------
 
 stat()
+alarm()
 
 builtin objects
 ---------------

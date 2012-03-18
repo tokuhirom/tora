@@ -87,13 +87,66 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
     return new StrValue(out);
 }
 
+static struct tm* GET_TM(Value *self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
+    return static_cast<struct tm*>(t->upcast<PointerValue>()->ptr());
+}
+
+/**
+ * Time.year()
+ */
+static SharedPtr<Value> time_year(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_year + 1900);
+}
+
+static SharedPtr<Value> time_month(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_mon + 1);
+}
+
+static SharedPtr<Value> time_day(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_mday);
+}
+
+static SharedPtr<Value> time_hour(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_hour);
+}
+
+static SharedPtr<Value> time_minute(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_min);
+}
+
+static SharedPtr<Value> time_second(VM* vm, Value* self) {
+    return new IntValue(GET_TM(self)->tm_sec);
+}
+
+/**
+ * $time.day_of_week() : Int
+ *
+ * This method returns day of week. It returns 1..7.
+ */
+static SharedPtr<Value> time_wday(VM* vm, Value* self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
+    int ret = static_cast<struct tm*>(t->upcast<PointerValue>()->ptr())->tm_wday;
+    return new IntValue(ret + 1);
+}
+
 void tora::Init_Time(VM *vm) {
-    // TODO: month, year, day, hour, minute, second, day_of_month, day_of_week, tzoffset, strptime
+    // TODO: strptime
     SharedPtr<Package> pkg = vm->find_package("Time");
     pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(time_new));
     pkg->add_method(vm->symbol_table->get_id("now"), new CallbackFunction(time_new));
     pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(time_DESTROY));
     pkg->add_method(vm->symbol_table->get_id("epoch"), new CallbackFunction(time_epoch));
     pkg->add_method(vm->symbol_table->get_id("strftime"), new CallbackFunction(time_strftime));
+    pkg->add_method(vm->symbol_table->get_id("month"), new CallbackFunction(time_month));
+    pkg->add_method(vm->symbol_table->get_id("year"), new CallbackFunction(time_year));
+    pkg->add_method(vm->symbol_table->get_id("day"), new CallbackFunction(time_day));
+    pkg->add_method(vm->symbol_table->get_id("hour"), new CallbackFunction(time_hour));
+    pkg->add_method(vm->symbol_table->get_id("minute"), new CallbackFunction(time_minute));
+    pkg->add_method(vm->symbol_table->get_id("min"), new CallbackFunction(time_minute));
+    pkg->add_method(vm->symbol_table->get_id("second"), new CallbackFunction(time_second));
+    pkg->add_method(vm->symbol_table->get_id("day_of_week"), new CallbackFunction(time_wday));
 }
 
