@@ -1,6 +1,7 @@
 #include "internals.h"
 #include "../vm.h"
 #include "../package.h"
+#include "../package_map.h"
 #include "../peek.h"
 
 using namespace tora;
@@ -40,11 +41,17 @@ static SharedPtr<Value> dump_dump_symbol_table(VM *vm, Value *self) {
     return UndefValue::instance();
 }
 
+static SharedPtr<Value> dump_package_map(VM *vm, Value *self) {
+    vm->package_map->dump(vm);
+    return UndefValue::instance();
+}
+
 void tora::Init_Internals(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("Internals");
     pkg->add_method(vm->symbol_table->get_id("stack_size"), new CallbackFunction(stack_size));
     pkg->add_method(vm->symbol_table->get_id("dump_stack"), new CallbackFunction(dump_stack));
     pkg->add_method(vm->symbol_table->get_id("dump"), new CallbackFunction(dump_dump));
+    pkg->add_method(vm->symbol_table->get_id("dump_package_map"), new CallbackFunction(dump_package_map));
     pkg->add_method(vm->symbol_table->get_id("dump_symbol_table"), new CallbackFunction(dump_dump_symbol_table));
 }
 

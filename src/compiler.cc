@@ -1370,9 +1370,12 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->push_block(BLOCK_TYPE_CLASS);
         std::string klass_name = n->klass()->upcast<StrNode>()->str_value;
         ID package_id = this->symbol_table->get_id(
+            /*
               this->package() == "main"
             ? klass_name
             : this->package() + "::" + klass_name
+            */
+            klass_name
         );
         OP *pkg = new OP(OP_PACKAGE_ENTER);
         pkg->operand.int_value = package_id;

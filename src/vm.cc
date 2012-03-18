@@ -460,8 +460,8 @@ void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
 }
 
 SharedPtr<Value> VM::get_self() {
-    auto iter = this->frame_stack->begin();
-    for (; iter!=this->frame_stack->end(); ++iter) {
+    auto iter = this->frame_stack->rbegin();
+    for (; iter!=this->frame_stack->rend(); ++iter) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             if ((*iter)->upcast<FunctionFrame>()->self) {
                 return (*iter)->upcast<FunctionFrame>()->self;

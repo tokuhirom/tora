@@ -19,7 +19,6 @@ Enumerable#reduce()
 Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
-dir('t').is_dir()
 dir('t').file($fname)
 dir('t').file($fname)
 

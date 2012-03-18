@@ -8,6 +8,10 @@ PackageMap::iterator PackageMap::find(ID id) {
     return data.find(id);
 }
 
+PackageMap::iterator PackageMap::begin() {
+    return data.end();
+}
+
 PackageMap::iterator PackageMap::end() {
     return data.end();
 }
@@ -20,3 +24,11 @@ void PackageMap::set(Package* pkg) {
 void PackageMap::set(SharedPtr<Package> &pkg) {
     this->data[pkg->id()] = pkg;
 }
+
+void PackageMap::dump(VM *vm) {
+    printf("[dump] PackageMap(%zd)\n", data.size());
+    for (auto iter : data) {
+        iter.second->dump(vm, 1);
+    }
+}
+

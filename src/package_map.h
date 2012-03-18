@@ -11,6 +11,7 @@
 namespace tora {
 
 class Package;
+class VM;
 
 class PackageMap {
     PRIM_DECL(PackageMap)
@@ -20,14 +21,12 @@ public:
 
     PackageMap() : refcnt(0) { }
     ~PackageMap() { }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] PackageMap(%zd)\n", data.size());
-    }
+    void dump(VM *vm);
     void set(Package* pkg);
     void set(SharedPtr<Package> &pkg);
 
     iterator find(ID id);
+    iterator begin();
     iterator end();
 };
 
