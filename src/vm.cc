@@ -17,21 +17,6 @@
 #include "value/tuple.h"
 #include "value/object.h"
 
-#include "object/array.h"
-#include "object/str.h"
-#include "object/dir.h"
-#include "object/stat.h"
-#include "object/env.h"
-#include "object/time.h"
-#include "object/file.h"
-#include "object/socket.h"
-#include "object/internals.h"
-#include "object/caller.h"
-#include "object/code.h"
-#include "object/dynaloader.h"
-#include "object/symbol.h"
-#include "object/object.h"
-#include "object/metaclass.h"
 #include "object.h"
 
 #include "builtin.h"
@@ -345,30 +330,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
 
 
 void VM::register_standard_methods() {
-    // language core
-    Init_Array(this);
-    Init_Str(this);
-    Init_Caller(this);
-    Init_Code(this);
-    Init_Symbol(this);
-    Init_Object(this);
-    Init_MetaClass(this);
-    Init_Bytes(this);
-
-    // DynaLoader
-    Init_DynaLoader(this);
-
-    // OS
-    Init_Dir(this);
-    Init_Env(this);
-    Init_Stat(this);
-    Init_Socket(this);
-    Init_File(this);
-    Init_Time(this);
-
-    // misc
-    Init_Internals(this);
-
+    load_builtin_objects(this);
     Init_builtins(this);
 
     this->add_builtin_function("eval", builtin_eval);

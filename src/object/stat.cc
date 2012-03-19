@@ -1,4 +1,4 @@
-#include "stat.h"
+#include "../object.h"
 
 using namespace tora;
 

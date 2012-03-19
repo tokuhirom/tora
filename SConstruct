@@ -63,6 +63,7 @@ libfiles = [
         node.cc op.cc vm.cc util.cc
         symbol_table.cc package_map.cc frame.cc package.cc operator.cc
         builtin.cc
+        object.cc
 
         ops.gen.cc token.gen.cc lexer.gen.cc vm.gen.cc nodes.gen.cc symbols.gen.cc
 

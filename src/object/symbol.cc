@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "symbol.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../package.h"
 #include "../value/object.h"

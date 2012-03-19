@@ -1,4 +1,4 @@
-#include "socket.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../value/object.h"
 #include "../value/array.h"

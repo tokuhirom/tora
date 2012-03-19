@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <errno.h>
 
-#include "time.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../package.h"
 #include "../value/object.h"

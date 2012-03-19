@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "dir.h"
+#include "../object.h"
 #include "../shared_ptr.h"
 #include "../vm.h"
 #include "../package.h"

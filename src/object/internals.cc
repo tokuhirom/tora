@@ -1,4 +1,4 @@
-#include "internals.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../package.h"
 #include "../package_map.h"

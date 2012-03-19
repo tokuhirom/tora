@@ -1,4 +1,4 @@
-#include "metaclass.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../value/array.h"
 #include "../value/object.h"

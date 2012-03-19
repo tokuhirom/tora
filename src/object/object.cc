@@ -1,4 +1,4 @@
-#include "object.h"
+#include "../object.h"
 #include "../shared_ptr.h"
 #include "../inspector.h"
 #include "../value.h"

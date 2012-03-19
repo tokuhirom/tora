@@ -1,4 +1,4 @@
-#include "dynaloader.h"
+#include "../object.h"
 #include "../shared_ptr.h"
 #include "../value.h"
 #include "../vm.h"

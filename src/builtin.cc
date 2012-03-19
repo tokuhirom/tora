@@ -12,7 +12,7 @@
 #include "value/str.h"
 #include "value/exception.h"
 #include "value.h"
-#include "object/dir.h"
+#include "object.h"
 #include "inspector.h"
 
 using namespace tora;
@@ -325,8 +325,6 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("getppid",   builtin_getppid);
     
     // numeric functions
-    // "abs", "atan2", "cos", "exp", "hex", "int", "log", "oct", "rand",
-    // "sin", "sqrt", "srand"
     vm->add_builtin_function("sqrt",   builtin_sqrt);
     vm->add_builtin_function("abs",   builtin_abs);
     vm->add_builtin_function("atan2",   builtin_atan2);

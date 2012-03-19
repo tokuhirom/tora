@@ -1,4 +1,4 @@
-#include "code.h"
+#include "../object.h"
 
 #include "../vm.h"
 #include "../value/code.h"

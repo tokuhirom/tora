@@ -1,4 +1,4 @@
-#include "str.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../value.h"
 #include "../shared_ptr.h"

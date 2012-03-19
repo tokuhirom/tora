@@ -1,4 +1,4 @@
-#include "array.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../value/array.h"
 #include "../value/code.h"

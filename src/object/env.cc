@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "env.h"
+#include "../object.h"
 #include "../vm.h"
 #include "../package.h"
 
