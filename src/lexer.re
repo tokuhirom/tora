@@ -128,6 +128,11 @@ std:
         divable = true;
         return IS;
     }
+    "b'" {
+        tora_open_string_literal();
+        string_close_char = '\'';
+        goto bytes_literal;
+    }
     "q!" {
         tora_open_string_literal();
         string_close_char = '!';
@@ -411,6 +416,32 @@ single_string_literal:
     ANY_CHARACTER {
         tora_add_string_literal(*(m_cursor-1));
         goto single_string_literal;
+    }
+*/
+
+bytes_literal:
+/*!re2c
+    [')!}\]] {
+        if (string_close_char == *(m_cursor-1)) {
+            *yylval = new StrNode(NODE_STRING, string_buffer->str());
+            delete string_buffer; string_buffer = NULL;
+            return BYTES_LITERAL;
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto bytes_literal;
+        }
+    }
+    "\\\\" {
+        tora_add_string_literal('\\');
+        goto bytes_literal;
+    }
+    "\\'" {
+        tora_add_string_literal('\'');
+        goto bytes_literal;
+    }
+    ANY_CHARACTER {
+        tora_add_string_literal(*(m_cursor-1));
+        goto bytes_literal;
     }
 */
 

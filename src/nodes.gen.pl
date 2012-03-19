@@ -13,8 +13,11 @@ my @nodes = qw(
     NODE_UNDEF
     NODE_IDENTIFIER
     NODE_TUPLE
-    NODE_FUNCALL
     NODE_STRING
+    NODE_BYTES
+
+    NODE_FUNCALL
+
     NODE_ADD
     NODE_SUB
     NODE_MUL

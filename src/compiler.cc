@@ -664,6 +664,12 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(tmp);
         break;
     }
+    case NODE_BYTES: {
+        SharedPtr<BytesValue> sv = new BytesValue(node->upcast<StrNode>()->str_value);
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_VALUE, sv);
+        push_op(tmp);
+        break;
+    }
     case NODE_REGEXP: {
         SharedPtr<AbstractRegexpValue> sv = new RE2RegexpValue(node->upcast<RegexpNode>()->regexp_value);
         if (!sv->ok()) {

@@ -54,7 +54,6 @@ syntax
  * continue
  * $PROGRAM_NAME($0)
  * fiber
- * inheritance
  * overload(+) {
       $a + $b;
    }
@@ -181,3 +180,4 @@ hex()
 sqrt()
  * $foo.bar; # ignore parens.
 dir('t').file($fname)
+ * inheritance

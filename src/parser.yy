@@ -565,6 +565,10 @@ primary_expression(A) ::= STRING_LITERAL(B). {
     B->type = NODE_STRING;
     A = B;
 }
+primary_expression(A) ::= BYTES_LITERAL(B). {
+    B->type = NODE_BYTES;
+    A = B;
+}
 primary_expression(A) ::= variable(B). { A = B; }
 primary_expression(A) ::= array_creation(B). { A = B; }
 primary_expression(A) ::= qw_creation(B). { A = B; }

@@ -20,6 +20,7 @@ my $dat = [
     ['SYMBOL_STRING_CLASS' => 'String'],
     ['SYMBOL_SYMBOL_CLASS' => 'Symbol'],
     ['SYMBOL_METACLASS_CLASS' => 'MetaClass'],
+    ['SYMBOL_BYTES_CLASS' => 'Bytes'],
 ];
 
 open my $hfh, '>', 'src/symbols.gen.h';

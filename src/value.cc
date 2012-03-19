@@ -32,6 +32,7 @@ const char * Value::type_str() const {
     case VALUE_TYPE_SYMBOL: return "Symbol";
     case VALUE_TYPE_HASH_ITERATOR: return "Hash::Iterator";
     case VALUE_TYPE_ARRAY_ITERATOR: return "Array::Iterator";
+    case VALUE_TYPE_BYTES: return "Bytes";
     case VALUE_TYPE_OBJECT: {
         return ((const ObjectValue*)this)->type_str();
     }
@@ -74,6 +75,7 @@ double Value::to_double() {
     case VALUE_TYPE_EXCEPTION:
     case VALUE_TYPE_RANGE:
     case VALUE_TYPE_STR:
+    case VALUE_TYPE_BYTES:
         throw new ExceptionValue("%s cannot support to convert double value.", this->type_str());
     }
     abort();
@@ -182,6 +184,8 @@ ID Value::object_package_id() {
         return SYMBOL_DOUBLE_CLASS;
     case VALUE_TYPE_HASH:
         return SYMBOL_HASH_CLASS;
+    case VALUE_TYPE_BYTES:
+        return SYMBOL_BYTES_CLASS;
     case VALUE_TYPE_SYMBOL:
         return this->upcast<SymbolValue>()->id;
     case VALUE_TYPE_OBJECT:

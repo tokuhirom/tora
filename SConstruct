@@ -70,9 +70,11 @@ libfiles = [
 
         value/code.cc value/hash.cc value/str.cc value/array.cc value/regexp.cc value/range.cc
         value/object.cc value/int.cc value/bool.cc value/exception.cc
+        value/bytes.cc
 
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
         object/dynaloader.cc object/object.cc object/metaclass.cc
+        object/bytes.cc
 
     ''')
 ]

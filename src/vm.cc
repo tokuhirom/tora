@@ -32,6 +32,7 @@
 #include "object/symbol.h"
 #include "object/object.h"
 #include "object/metaclass.h"
+#include "object.h"
 
 #include "builtin.h"
 
@@ -352,6 +353,7 @@ void VM::register_standard_methods() {
     Init_Symbol(this);
     Init_Object(this);
     Init_MetaClass(this);
+    Init_Bytes(this);
 
     // DynaLoader
     Init_DynaLoader(this);
