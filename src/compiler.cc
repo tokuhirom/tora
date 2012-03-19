@@ -522,6 +522,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             filename_,
             node->lineno
         );
+        assert(params);
         code->code_params = params;
         code->code_opcodes = funccomp.ops;
         code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
@@ -623,6 +624,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             filename_,
             node->lineno
         );
+        assert(params);
         code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
         code->code_params = params;
         code->code_defaults = defaults;

@@ -285,6 +285,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             stack.push_back(ret);
         }
     } else if (callback->argc==-4) {
+        if (argcnt != 2) {
+            throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 2, argcnt);
+        }
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> v2 = stack.back();

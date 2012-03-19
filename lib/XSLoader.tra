@@ -1,6 +1,8 @@
+my $SOEXT = '.so';
+
 sub load($pkg) {
     for (my $path in $LIBPATH) {
-        my $fname = $path + "/lib" + $pkg + ".so";
+        my $fname = $path + "/lib" + $pkg + $SOEXT;
         if (-e $fname) {
             DynaLoader.load($fname, 'Init_' + $pkg);
             return undef;

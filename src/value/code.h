@@ -33,8 +33,8 @@ public:
     // It's -1 if it's native function
     int lineno;
 
-    bool is_native() { return is_native_; }
-    const CallbackFunction* callback() { return callback_; }
+    bool is_native() const { return is_native_; }
+    const CallbackFunction* callback() const { return callback_; }
 
     // for tora functions
     CodeValue(ID package_id_, ID func_name_id_, const std::string &filename_, int lineno_): Value(VALUE_TYPE_CODE), callback_(NULL), is_native_(false), package_id(package_id_), func_name_id(func_name_id_), filename(filename_), lineno(lineno_) {

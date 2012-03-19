@@ -197,11 +197,6 @@ OP_BUILTIN_FUNCALL {
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
     this->call_native_func(iter->second, argcnt);
-    if (stack.back()->value_type == VALUE_TYPE_EXCEPTION) {
-        SharedPtr<Value> v = stack.back();
-        stack.pop_back();
-        this->die(v);
-    }
 }
 
 OP_NEXTSTATE {
@@ -238,44 +233,48 @@ OP_FUNCALL {
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
 
-
-        // TODO: vargs support
-        // TODO: kwargs support
-        int orig_argcnt = argcnt;
-        for (size_t i=0; i<code->code_params->size(); i++) {
-            if (argcnt <= i) {
-                int def = code->code_defaults->at(i);
-                if (def > 0) {
-                    pc = def;
-                    this->execute();
-                    ++argcnt;
-                    fframe->top++;
-                } else {
-                    throw new ExceptionValue(
-                        "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
-                        this->symbol_table->id2name(pkg->id()).c_str(),
-                        this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(),
-                        code->code_params->size(),
-                        orig_argcnt);
+        if (code->is_native()) {
+            assert(code->callback());
+            this->call_native_func(code->callback(), argcnt);
+        } else {
+            // TODO: vargs support
+            // TODO: kwargs support
+            int orig_argcnt = argcnt;
+            for (size_t i=0; i<code->code_params->size(); i++) {
+                if (argcnt <= i) {
+                    int def = code->code_defaults->at(i);
+                    if (def > 0) {
+                        pc = def;
+                        this->execute();
+                        ++argcnt;
+                        fframe->top++;
+                    } else {
+                        throw new ExceptionValue(
+                            "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
+                            this->symbol_table->id2name(pkg->id()).c_str(),
+                            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(),
+                            code->code_params->size(),
+                            orig_argcnt);
+                    }
                 }
             }
+
+            fframe->argcnt = argcnt;
+            fframe->code = code;
+
+            pc = -1;
+            this->ops = code->code_opcodes;
+
+            // assert(argcnt == (int)code->code_params->size());
+            /**
+            *   +------+
+            * 0 | arg2 |
+            *   | arg1 | <- mark, frame->top
+            *   +------+
+            */
+            mark_stack.push_back(stack.size());
+            frame_stack->push_back(fframe);
         }
-
-        fframe->argcnt = argcnt;
-        fframe->code = code;
-
-        pc = -1;
-        this->ops = code->code_opcodes;
-
-        // assert(argcnt == (int)code->code_params->size());
-        /**
-         *   +------+
-         * 0 | arg2 |
-         *   | arg1 | <- mark, frame->top
-         *   +------+
-         */
-        mark_stack.push_back(stack.size());
-        frame_stack->push_back(fframe);
     } else {
         this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
         // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
