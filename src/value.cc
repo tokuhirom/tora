@@ -84,7 +84,7 @@ double Value::to_double() {
 SharedPtr<StrValue> Value::to_s() {
     switch (value_type) {
     case VALUE_TYPE_STR:
-        return this->upcast<StrValue>();
+        return static_cast<StrValue*>(this);
     case VALUE_TYPE_INT: {
         SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;

@@ -57,25 +57,7 @@ static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>>
     if (args.size() != 1 && args.size() != 2) {
         return new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
     }
-
-    SharedPtr<Value> filename(args.at(0));
-    std::string mode;
-    if (args.size() == 2) {
-        mode = args.at(1)->upcast<StrValue>()->str_value.c_str();
-    } else {
-        mode = "rb";
-    }
-
-    // TODO: check \0
-    SharedPtr<FileValue> file = new FileValue();
-    if (file->open(
-        filename->upcast<StrValue>()->str_value,
-        mode
-    )) {
-        return file;
-    } else {
-        return new ExceptionValue("Cannot open file: %s: %s", filename->upcast<StrValue>()->str_value.c_str(), strerror(errno));
-    }
+    return File_open(vm, args.at(0).get(), args.size() == 2 ? args.at(1).get() : NULL);
 }
 
 static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>> & args) {

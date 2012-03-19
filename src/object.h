@@ -2,6 +2,7 @@
 #define TORA_OBJECT_H_
 
 #include "shared_ptr.h"
+#include <vector>
 
 namespace tora {
 
@@ -29,6 +30,7 @@ void Init_Bytes(VM *vm);
 
 SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
 ObjectValue* Dir_new(VM *vm, StrValue *dirname);
+SharedPtr<Value> File_open(VM *vm, Value *fname, Value *mode);
 
 void load_builtin_objects(VM *vm);
 

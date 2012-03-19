@@ -1,12 +1,19 @@
 use Test::More *;
 
-my $fh = open("t/dat/file/f1");
-ok($fh);
-is($fh.slurp(), "Hello, John.\n");
-is(typeof($fh.fileno()), "Int");
-ok($fh.fileno() > 2);
+{
+    my $fh = open("t/dat/file/f1");
+    ok($fh);
+    is($fh.slurp(), "Hello, John.\n");
+    is(typeof($fh.fileno()), "Int");
+    ok($fh.fileno() > 2);
 
-$fh.close();
+    $fh.close();
+}
+
+{
+    my $fh = File.open('t/dat/file/f1');
+    is($fh.slurp(), "Hello, John.\n");
+}
 
 done_testing();
 
