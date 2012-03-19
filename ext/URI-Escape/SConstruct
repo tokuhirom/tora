@@ -1,0 +1,41 @@
+import os
+
+env = Environment(
+    CCFLAGS=[
+        '-I../../src/',
+        '-I../../vendor/boost_1_49_0/',
+        '-g',
+        '-DNDEBUG'
+    ],
+    LINKFLAGS=[
+    ],
+    CXXFLAGS=[
+        '-std=c++0x'
+    ]
+)
+
+if os.uname()[0]=='Darwin':
+    env.Replace(CXX='clang++', CC='clang')
+    env.Append(
+        CCFLAGS=[
+            '-Wno-unused-function',
+            '-DBOOST_NO_CHAR16_T',
+            '-DBOOST_NO_CHAR32_T'
+        ],
+    )
+else:
+    env.Append(
+        CCFLAGS=['-march=native'],
+        LINKFLAGS=['-Wl,-Bsymbolic'],
+    )
+
+if ARGUMENTS.get('ndebug', 1) != '0':
+    env.Append(CCFLAGS=['-DNDEBUG'])
+    env.Append(CCFLAGS=['-O2'])
+
+# shlib = env.SharedLibrary("URI_Escape.so", ['URI-Escape.cc'], SHLIBPREFIX='')
+shlib = env.SharedLibrary("lib/libURI_Escape.so", ['URI-Escape.cc'])
+Default(shlib)
+
+env.Command('test', [shlib], '../../tora -I lib -I ../../lib/ t/01-uri.tra')
+
