@@ -7,6 +7,8 @@ use autodie;
 use Text::MicroTemplate qw(render_mt);
 
 my $dat = [
+    ['SYMBOL_RESERVED_FOO'      => '\0\0\0\0\0\0\0RESERVED\0\0\0\0\0'],
+
     ['SYMBOL_DESTROY'      => 'DESTROY'],
 
     ['SYMBOL_OBJECT_CLASS'  => 'Object'],

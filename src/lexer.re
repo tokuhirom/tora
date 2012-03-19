@@ -505,7 +505,7 @@ regexp_literal:
 
 qw_literal:
 /*!re2c
-    [)!}\]] {
+    [)!}\]][xmsi]* {
         char open_char;
         switch (*(m_cursor-1)) {
         case ')': open_char='('; break;

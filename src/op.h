@@ -21,6 +21,9 @@ public:
     OP(op_type_t type, int i) :refcnt(0), op_type(type)  {
         operand.int_value = i;
     }
+    OP(op_type_t type, int high, int low) :refcnt(0), op_type(type)  {
+        operand.int_value = (((high)&0x0000ffff) << 16) | (low&0x0000ffff);
+    }
     // This is not a virtual destructor. Do not define destructor in child class.
     ~OP() { }
 

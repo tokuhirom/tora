@@ -60,6 +60,11 @@ syntax
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
+ * /xxx/i
+ * /xxx/g
+ * /xxx/x
+ * /xxx/s
+ * /xxx/m
  * super()
 
 lambda

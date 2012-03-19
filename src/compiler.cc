@@ -10,6 +10,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/foreach.hpp>
 #include <iostream>
+#include <glog/logging.h>
 
 using namespace tora;
 
@@ -577,7 +578,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(skip_defvars);
 
         // function name
-        std::string &funcname = funcdef_node->name()->upcast<StrNode>()->str_value;
+        std::string &name = funcdef_node->name()->upcast<StrNode>()->str_value;
 
         this->push_block(BLOCK_TYPE_FUNCDEF);
         auto params = new std::vector<std::string *>();
@@ -600,13 +601,17 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
         skip_defvars->operand.int_value = ops->size();
 
+        std::string package(this->package());
+        std::string funcname(name);
+        bool splitted = tora::split_package_funname(name, package, funcname);
+
         Compiler funccomp(this->symbol_table, filename_);
         funccomp.init_globals();
         if (funccomp.blocks) {
             delete funccomp.blocks;
             funccomp.blocks = NULL;
         }
-        funccomp.package(this->package());
+        funccomp.package(package);
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
         funccomp.compile(funcdef_node->block());
         this->pop_block();
@@ -619,13 +624,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
         SharedPtr<CodeValue> code = new CodeValue(
-            this->symbol_table->get_id(this->package()), // package id
+            this->symbol_table->get_id(package), // package id
             this->symbol_table->get_id(funcname),        // func name id
             filename_,
             node->lineno
         );
         assert(params);
-        code->code_id = this->symbol_table->get_id(this->package() + "::" + funcname);
+        code->package_id = splitted ? symbol_table->get_id(package) : 0;
+        code->code_id = this->symbol_table->get_id(package + "::" + funcname);
         code->code_params = params;
         code->code_defaults = defaults;
         code->code_opcodes = funccomp.ops;
@@ -755,13 +761,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                 ? this->package() + "::" + funcname
                 : funcname;
             */
-            std::string funcname2 = funcname;
+            std::string funcname2(funcname);
+            std::string pkgname;
+            bool splitted = tora::split_package_funname(funcname, pkgname, funcname2);
             ID id = this->symbol_table->get_id(funcname2);
             SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
             push_op(o);
-            SharedPtr<OP> tmp = new OP;
-            tmp->op_type = OP_FUNCALL;
-            tmp->operand.int_value = args_len; // the number of args
+            SharedPtr<OP> tmp = new OP(OP_FUNCALL, args_len, splitted ? symbol_table->get_id(pkgname) : 0);
             push_op(tmp);
         }
         break;

@@ -359,8 +359,9 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     return UndefValue::instance();
 }
 
-void VM::add_function(ID id, SharedPtr<Value> code) {
-    this->find_package(this->package_id())->add_function(id, code);
+void VM::add_function(ID pkgid, ID id, SharedPtr<Value> code) {
+    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id).c_str());
+    this->find_package(pkgid)->add_function(id, code);
 }
 
 Package* VM::find_package(const char * name) {

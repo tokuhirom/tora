@@ -128,9 +128,9 @@ public:
     void dump_frame();
     void dump_stack();
     SharedPtr<Value> require(Value *v);
-    void add_function(ID id, SharedPtr<Value> code);
-    void add_function(std::string &name, SharedPtr<Value> code) {
-        this->add_function(this->symbol_table->get_id(name), code);
+    void add_function(ID pkgid, ID id, SharedPtr<Value> code);
+    void add_function(ID pkgid, std::string &name, SharedPtr<Value> code) {
+        this->add_function(pkgid, this->symbol_table->get_id(name), code);
     }
     void die(const SharedPtr<Value> & exception);
     void die(const char *format, ...);
@@ -139,6 +139,12 @@ public:
 
     int get_int_operand() const {
         return ops->at(pc)->operand.int_value;
+    }
+    int get_int_operand_high() const {
+        return (get_int_operand() >> 16) & 0x0000FFFF;
+    }
+    int get_int_operand_low() const {
+        return get_int_operand() & 0x0000ffff;
     }
     double get_double_operand() const {
         return ops->at(pc)->operand.double_value;

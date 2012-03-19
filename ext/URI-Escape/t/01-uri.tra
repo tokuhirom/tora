@@ -1,9 +1,10 @@
 use Test::More *;
 use URI::Escape *;
 
-uri_escape('ほげ');
-
 is(uri_escape('ほげ'), "%e3%81%bb%e3%81%92");
+
+is(URI::Escape::uri_escape('ほげ'), "%e3%81%bb%e3%81%92");
+
 is(uri_unescape('%E3%81%BB%E3%81%92'), 'ほげ');
 
 done_testing;

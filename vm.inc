@@ -71,19 +71,33 @@ OP_FUNCDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+    int pkgid = code->upcast<CodeValue>()->package_id;
+    if (!pkgid) {
+        pkgid = this->package_id();
+        code->upcast<CodeValue>()->package_id = pkgid;
+    }
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
 }
 
 OP_CLOSUREDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);
-    for (int i=0; i<get_int_operand(); i++) {
+
+    int closure_vars_cnt = get_int_operand();
+
+    for (int i=0; i<closure_vars_cnt; i++) {
         SharedPtr<Value> v = stack.back(); stack.pop_back();
         code->upcast<CodeValue>()->closure_vars->push_back(v);
     }
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+
+    int pkgid = code->upcast<CodeValue>()->package_id;
+    if (!pkgid) {
+        pkgid = this->package_id();
+        code->upcast<CodeValue>()->package_id = pkgid;
+    }
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
 }
 
 OP_GETCLOSURE {
@@ -208,7 +222,7 @@ OP_FUNCALL {
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();
 
-    int argcnt = get_int_operand();
+    int argcnt = get_int_operand_high();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.back()->upcast<TupleValue>();
         stack.pop_back();
@@ -225,7 +239,12 @@ OP_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-    const SharedPtr<Package>& pkg = this->package();
+    // TODO split this part to other op code for performance?
+    SharedPtr<Package> pkg = this->package();
+    int pkgid = get_int_operand_low();
+    if (pkgid != 0) {
+        pkg = this->find_package(pkgid);
+    }
     auto iter = pkg->find(id);
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
@@ -942,7 +961,7 @@ OP_LOCAL {
 
     std::string package;
     std::string moniker;
-    split_package(snode->upcast<StrValue>()->str_value, package, moniker);
+    split_package_varname(snode->upcast<StrValue>()->str_value, package, moniker);
 
     ID pkgid = symbol_table->get_id(package);
     ID vid = symbol_table->get_id(std::string("$") + moniker);

@@ -8,7 +8,19 @@ void tora::print_indent(int indent) {
     }
 }
 
-bool tora::split_package(const std::string & varname, std::string & pkgname, std::string &detail) {
+bool tora::split_package_funname(const std::string & varname, std::string & pkgname, std::string &detail) {
+    auto pos = varname.rfind("::");
+    if (pos != std::string::npos) {
+        // package variable Foo::Bar.
+        pkgname = varname.substr(0, pos);
+        detail = varname.substr(pos+2);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool tora::split_package_varname(const std::string & varname, std::string & pkgname, std::string &detail) {
     auto pos = varname.rfind("::");
     if (pos != std::string::npos) {
         // package variable $Foo::Bar.
