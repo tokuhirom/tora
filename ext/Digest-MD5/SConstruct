@@ -1,0 +1,36 @@
+import os
+
+env = Environment(
+    CCFLAGS=[
+        '-I../../tora/',
+        '-I../../vendor/boost_1_49_0/',
+        '-g',
+        '-DNDEBUG'
+    ],
+    LINKFLAGS=[
+    ],
+    CXXFLAGS=[
+        '-std=c++0x'
+    ]
+)
+
+if os.uname()[0]=='Darwin':
+    env.Replace(CXX='clang++', CC='clang')
+    env.Append(
+        CCFLAGS=[
+            '-Wno-unused-function',
+            '-DBOOST_NO_CHAR16_T',
+            '-DBOOST_NO_CHAR32_T'
+        ],
+    )
+else:
+    env.Append(
+        CCFLAGS=['-march=native'],
+        LINKFLAGS=['-Wl,-Bsymbolic'],
+    )
+
+shlib = env.SharedLibrary("lib/Digest/MD5.so", ['Digest-MD5.cc', 'md5.c'], SHLIBPREFIX='')
+Default(shlib)
+
+env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/test.tra')
+

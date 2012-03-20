@@ -13,6 +13,6 @@ int main() {
     is(hexchar2int('f'), 15);
     is(hexchar2int('A'), 10);
     is(hexchar2int('F'), 15);
-    done_testing;
+    done_testing();
 }
 
