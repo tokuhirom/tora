@@ -163,8 +163,6 @@ lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
 # instalation
 installs = []
 installs += [env.Install(env['PREFIX']+'/bin/', 'tora')];
-for lib in glob('lib/*.tra')+glob('lib/*/*.tra')+glob('lib/*/*/*.tra'):
-    lib = lib.lstrip('lib/')
-    installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
+installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
 env.Alias('install', [env['PREFIX']+'/bin/', installs])
 
