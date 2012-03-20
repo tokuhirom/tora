@@ -2,7 +2,7 @@ Tora.output
 Tora.tab.cc
 Tora.tab.hh
 lex.yy.cc
-tora
+bin/tora
 .sconsign.dblite
 hoge.tra
 nodes.gen.cc
