@@ -8,12 +8,26 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
 
+TORA_VERSION_STR='0.0.3'
+
+AddOption('--prefix',
+    dest='prefix',
+    nargs=1,
+    type='string',
+    action='store',
+    metavar='DIR',
+    default='/usr/local/',
+    help='installation prefix'
+)
+
 env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
     CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
+    PREFIX=GetOption('prefix')
 )
+print 'PREFIX: ' + env['PREFIX']
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
     LIBS=['pthread'],
@@ -130,7 +144,8 @@ libre2 = re2_env.Library('re2', re2files)
 with open('src/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
-
+    f.write('#define TORA_PREFIX  "' + env.get('PREFIX') + "\"\n")
+    f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
 
 tora = env.Program('bin/tora', [
     ['src/main.cc'],
@@ -146,6 +161,10 @@ lemon_env.Append(CCFLAGS=['-O2'])
 lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
 
 # instalation
-env.Install('/usr/local/bin/', 'tora');
-env.Alias('install', '/usr/local/bin/')
+installs = []
+installs += [env.Install(env['PREFIX']+'/bin/', 'tora')];
+for lib in glob('lib/*.tra')+glob('lib/*/*.tra')+glob('lib/*/*/*.tra'):
+    lib = lib.lstrip('lib/')
+    installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
+env.Alias('install', [env['PREFIX']+'/bin/', installs])
 
