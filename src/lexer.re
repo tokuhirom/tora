@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "nodes.gen.h"
 #include "parser.h"
+#include "value/regexp.h"
 
 using namespace tora;
 
@@ -255,12 +256,12 @@ std:
     "unless" { return UNLESS; }
     "undef" { return UNDEF; }
     "in" { return IN; }
-    "class" { return CLASS; }
-    "<" { return GT; }
-    ">" { return LT; }
-    "<=" { return GE; }
-    ">=" { return LE; }
-    "==" { return EQ; }
+    "class" { divable = false; return CLASS; }
+    "<" { divable = false; return GT; }
+    ">" { divable = false; return LT; }
+    "<=" { divable = false; return GE; }
+    ">=" { divable = false; return LE; }
+    "==" { divable = false; return EQ; }
     "++" { return PLUSPLUS; }
     "--" { return MINUSMINUS; }
     "-f" { *yylval = new IntNode(NODE_INT, 'f'); return FILE_TEST; }
@@ -286,9 +287,9 @@ std:
     "|" { return BITOR; }
     "&" { return BITAND; }
     "^" { return BITXOR; }
-    "<<" { return BITLSHIFT; }
-    ">>" { return BITRSHIFT; }
-    "=" { return ASSIGN; }
+    "<<" { divable = false; return BITLSHIFT; }
+    ">>" { divable = false; return BITRSHIFT; }
+    "=" { divable = false; return ASSIGN; }
     "my" { return MY; }
     "local" { return LOCAL; }
     "true" { return TRUE; }
@@ -490,10 +491,15 @@ string_literal:
 
 regexp_literal:
 /*!re2c
-    "/" {
+    "/" [xmsi]* {
+        // m_cursor is next char.
         // # <REGEXP>"\\/" tora_add_string_literal('/');
-        // TODO: options like /xsmi
-        *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str());
+        int flag = 0;
+        for (char * ptr=m_cursor-1; *ptr!='/'; --ptr) {
+            flag |= tora::regexp_flag(*ptr);
+        }
+
+        *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str(), flag);
         delete string_buffer; string_buffer = NULL;
         return REGEXP_LITERAL;
     }
@@ -505,7 +511,7 @@ regexp_literal:
 
 qw_literal:
 /*!re2c
-    [)!}\]][xmsi]* {
+    [)!}\]] {
         char open_char;
         switch (*(m_cursor-1)) {
         case ')': open_char='('; break;

@@ -12,6 +12,7 @@ void tora::load_builtin_objects(VM *vm) {
     Init_Object(vm);
     Init_MetaClass(vm);
     Init_Bytes(vm);
+    Init_Regexp(vm);
 
     // DynaLoader
     Init_DynaLoader(vm);

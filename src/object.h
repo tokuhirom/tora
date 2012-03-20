@@ -27,6 +27,7 @@ void Init_Str(VM *vm);
 void Init_Symbol(VM *vm);
 void Init_Time(VM *vm);
 void Init_Bytes(VM *vm);
+void Init_Regexp(VM *vm);
 
 SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
 ObjectValue* Dir_new(VM *vm, StrValue *dirname);

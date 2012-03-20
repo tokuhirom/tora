@@ -1,0 +1,8 @@
+use Test::More *;
+
+my $re = /foo/x;
+is(typeof($re), 'Regexp');
+is($re.flags, 8);
+is($re.flags, Regexp.EXPANDED);
+
+done_testing;

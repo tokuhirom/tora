@@ -25,7 +25,7 @@ const char * Value::type_str() const {
     case VALUE_TYPE_CODE: return "Code";
     case VALUE_TYPE_TUPLE: return "Tuple";
     case VALUE_TYPE_POINTER: return "Pointer";
-    case VALUE_TYPE_REGEXP: return "AbstractRegexp";
+    case VALUE_TYPE_REGEXP: return "Regexp";
     case VALUE_TYPE_RANGE_ITERATOR: return "Range::Iterator";
     case VALUE_TYPE_ARRAY: return "Array";
     case VALUE_TYPE_UNDEF: return "Undef";
@@ -186,6 +186,8 @@ ID Value::object_package_id() {
         return SYMBOL_HASH_CLASS;
     case VALUE_TYPE_BYTES:
         return SYMBOL_BYTES_CLASS;
+    case VALUE_TYPE_REGEXP:
+        return SYMBOL_REGEXP_CLASS;
     case VALUE_TYPE_SYMBOL:
         return this->upcast<SymbolValue>()->id;
     case VALUE_TYPE_OBJECT:

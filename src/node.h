@@ -85,9 +85,8 @@ public:
 class RegexpNode : public Node {
 public:
     std::string regexp_value;
-    RegexpNode(node_type_t type_, const std::string &str) {
-        this->type = type_;
-        this->regexp_value = str;
+    int flags;
+    RegexpNode(node_type_t type_, const std::string &str, int flags_) :Node(type_), regexp_value(str), flags(flags_) {
     }
     void dump(int indent);
 };
