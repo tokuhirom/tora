@@ -75,7 +75,7 @@ re2files = [
     'vendor/re2/util/stringpiece.cc',
 ]
 libfiles = [
-    "src/" + x for x in Split('''
+    "tora/" + x for x in Split('''
         parser.cc value.cc compiler.cc
         node.cc op.cc vm.cc util.cc
         symbol_table.cc package_map.cc frame.cc package.cc operator.cc
@@ -131,24 +131,24 @@ if 'op' in COMMAND_LINE_TARGETS:
 
 ########
 # main programs
-env.Command(['src/nodes.gen.h', 'src/nodes.gen.cc'], 'src/nodes.gen.pl', 'perl src/nodes.gen.pl > src/nodes.gen.h');
-env.Command(['src/token.gen.cc', 'src/token.gen.h'], ['src/token.gen.pl', 'src/parser.h'], 'perl src/token.gen.pl');
-env.Command(['src/lexer.gen.cc'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.cc');
-env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ src/vm.gen.pl > src/vm.gen.cc');
-env.Command(['src/symbols.gen.cc', 'src/symbols.gen.h'], ['src/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ src/symbols.gen.pl');
-t = env.Command(['src/parser.h', 'src/parser.cc'], ['tools/lemon/lemon', 'src/parser.yy', 'src/lempar.c'], './tools/lemon/lemon src/parser.yy');
-Clean(t, 'src/parser.out')
+env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h');
+env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl');
+env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc');
+env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl > tora/vm.gen.cc');
+env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl');
+t = env.Command(['tora/parser.h', 'tora/parser.cc'], ['tools/lemon/lemon', 'tora/parser.yy', 'tora/lempar.c'], './tools/lemon/lemon tora/parser.yy');
+Clean(t, 'tora/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
 # config.h
-with open('src/config.h', 'w') as f:
+with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
     f.write('#define TORA_PREFIX  "' + env.get('PREFIX') + "\"\n")
     f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
 
 tora = env.Program('bin/tora', [
-    ['src/main.cc'],
+    ['tora/main.cc'],
     libfiles,
     libre2
 ])

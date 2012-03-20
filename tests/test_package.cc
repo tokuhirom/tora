@@ -1,7 +1,7 @@
 #include "nanotap.h"
-#include "../src/package.h"
-#include "../src/vm.h"
-#include "../src/symbol_table.h"
+#include "../tora/package.h"
+#include "../tora/vm.h"
+#include "../tora/symbol_table.h"
 
 using namespace tora;
 

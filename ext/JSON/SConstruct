@@ -2,7 +2,7 @@ import os
 
 env = Environment(
     CCFLAGS=[
-        '-I../../src/',
+        '-I../../tora/',
         '-I../../vendor/boost_1_49_0/',
         '-g',
         '-DNDEBUG'
@@ -29,7 +29,7 @@ else:
         LINKFLAGS=['-Wl,-Bsymbolic'],
     )
 
-shlib = env.SharedLibrary("lib/libJSON.so", ['json.cc'])
+shlib = env.SharedLibrary("lib/JSON.so", ['json.cc'], SHLIBPREFIX='')
 Default(shlib)
 
-env.Command('test', shlib, '../../tora -I lib -I ../../lib/ t/json.tra')
+env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/json.tra && ../../bin/tora -I lib -I ../../lib/ t/decode.tra')

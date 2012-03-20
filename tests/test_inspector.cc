@@ -1,10 +1,10 @@
 #include "nanotap.h"
-#include "../src/value.h"
-#include "../src/value/array.h"
-#include "../src/value/hash.h"
-#include "../src/value/range.h"
-#include "../src/vm.h"
-#include "../src/inspector.h"
+#include "../tora/value.h"
+#include "../tora/value/array.h"
+#include "../tora/value/hash.h"
+#include "../tora/value/range.h"
+#include "../tora/vm.h"
+#include "../tora/inspector.h"
 
 using namespace tora;
 

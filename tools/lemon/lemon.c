@@ -3062,7 +3062,7 @@ PRIVATE void tplt_xfer(char *name, FILE *in, FILE *out, int *lineno)
 ** a pointer to the opened file. */
 PRIVATE FILE *tplt_open(struct lemon *lemp)
 {
-  static char templatename[] = "src/lempar.c";
+  static char templatename[] = "tora/lempar.c";
   char buf[1000];
   FILE *in;
   char *tpltname;
