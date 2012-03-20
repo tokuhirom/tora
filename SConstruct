@@ -87,7 +87,7 @@ libfiles = [
 ########
 # tests.
 
-programs = ['tora']
+programs = ['bin/tora']
 for src in glob("tests/test_*.cc"):
     programs.append(env.Program(src.rstrip(".cc") + '.t', [
         libfiles,
@@ -107,13 +107,13 @@ if 'test' in COMMAND_LINE_TARGETS:
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
 
-env.Command('test.valgrind', ['tora'], 'perl misc/valgrind.pl');
+env.Command('test.valgrind', ['bin/tora'], 'perl misc/valgrind.pl');
 
 if 'bench' in COMMAND_LINE_TARGETS:
-    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./tora -V && time ./tora benchmark/fib/fib.tra 39')
+    env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./bin/tora -V && time ./bin/tora benchmark/fib/fib.tra 39')
 
 if 'op' in COMMAND_LINE_TARGETS:
-    env.Command('op', [], 'git log --oneline | head -1 && scons && ./tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
+    env.Command('op', [], 'git log --oneline | head -1 && scons && ./bin/tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./bin/tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
 
 ########
 # main programs
@@ -122,7 +122,7 @@ env.Command(['src/token.gen.cc', 'src/token.gen.h'], ['src/token.gen.pl', 'src/p
 env.Command(['src/lexer.gen.cc'], 'src/lexer.re', 're2c src/lexer.re > src/lexer.gen.cc');
 env.Command(['src/vm.gen.cc', 'src/ops.gen.h', 'src/ops.gen.cc'], ['src/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ src/vm.gen.pl > src/vm.gen.cc');
 env.Command(['src/symbols.gen.cc', 'src/symbols.gen.h'], ['src/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ src/symbols.gen.pl');
-t = env.Command(['src/parser.h', 'src/parser.cc'], ['lemon', 'src/parser.yy', 'src/lempar.c'], './lemon src/parser.yy');
+t = env.Command(['src/parser.h', 'src/parser.cc'], ['tools/lemon/lemon', 'src/parser.yy', 'src/lempar.c'], './tools/lemon/lemon src/parser.yy');
 Clean(t, 'src/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
@@ -132,7 +132,7 @@ with open('src/config.h', 'w') as f:
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
 
 
-tora = env.Program('tora', [
+tora = env.Program('bin/tora', [
     ['src/main.cc'],
     libfiles,
     libre2
@@ -143,7 +143,7 @@ Default(tora)
 # lemon
 lemon_env = Environment()
 lemon_env.Append(CCFLAGS=['-O2'])
-lemon_env.Program('lemon', ['tools/lemon/lemon.c']);
+lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
 
 # instalation
 env.Install('/usr/local/bin/', 'tora');
