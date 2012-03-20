@@ -9,6 +9,9 @@
 #include <memory>
 
 #include <boost/scoped_ptr.hpp>
+#ifdef ENABLE_GLOG
+#include <glog/logging.h>
+#endif
 
 #include "tora.h"
 #include "vm.h"
@@ -103,6 +106,9 @@ int main(int argc, char **argv) {
     if (parse_trace) {
         fprintf(stderr, "Parsing trace is not supported on -DNDEBUG\n");
     }
+#endif
+
+#ifdef ENABLE_GLOG
 #endif
 
     Node *yylval = NULL;

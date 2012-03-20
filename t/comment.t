@@ -1,7 +1,6 @@
 use t::Util;
 
 run_is(<<'...', "Hello, world\n");
-// comment
 say("Hello, world");
 ...
 

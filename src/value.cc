@@ -192,6 +192,9 @@ ID Value::object_package_id() {
         return this->upcast<SymbolValue>()->id;
     case VALUE_TYPE_OBJECT:
         return this->upcast<ObjectValue>()->package_id();
+    case VALUE_TYPE_UNDEF:
+        throw new ExceptionValue("Cannot get package name from undefined value.");
     }
+    abort();
 }
 

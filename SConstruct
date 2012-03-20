@@ -34,6 +34,9 @@ else:
         LINKFLAGS=['-Wl,-E', '-Wl,-Bsymbolic', '-rdynamic'],
     )
 
+if ARGUMENTS.get('glog', 0):
+    env.Append(LIBS=['glog'], CCFLAGS=['-DENABLE_GLOG'])
+
 if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg', '-Dprofile'])
     env.Append(LINKFLAGS=['-pg'])

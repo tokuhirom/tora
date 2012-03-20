@@ -34,7 +34,15 @@ private:
     RE2 *re_value;
 public:
     RE2RegexpValue(std::string &str, int flags) : AbstractRegexpValue(flags) {
-        re_value = new RE2(str);
+        RE2::Options opt;
+        // allow Perl's \d \s \w \D \S \W
+        opt.set_perl_classes(true);
+        // allow Perl's \b \B (word boundary and not)
+        opt.set_word_boundary(true);
+        if (flags & REGEXP_IGNORECASE) {
+            opt.set_case_sensitive(false);
+        }
+        re_value = new RE2(str, opt);
     }
     ~RE2RegexpValue() {
         delete re_value;
@@ -49,15 +57,15 @@ public:
         return this->re_value->error();
     }
     bool match(const std::string &str) const {
-        return RE2::PartialMatch(str, this->re_value->pattern().c_str());
+        return RE2::PartialMatch(str, *(this->re_value));
     }
     std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const {
         // optimizable
         std::string buf(str);
         if (this->flags() & REGEXP_GLOBAL) {
-            replacements = RE2::GlobalReplace(&buf, this->re_value->pattern().c_str(), rewrite);
+            replacements = RE2::GlobalReplace(&buf, *(this->re_value), rewrite);
         } else {
-            replacements = RE2::Replace(&buf, this->re_value->pattern().c_str(), rewrite);
+            replacements = RE2::Replace(&buf, *(this->re_value), rewrite);
         }
         return buf;
     }

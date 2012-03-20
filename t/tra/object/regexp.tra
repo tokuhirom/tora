@@ -4,10 +4,24 @@ my $re = /foo/x;
 is(typeof($re), 'Regexp');
 is($re.flags, 8);
 is($re.flags, Regexp.EXPANDED);
+is(//i.flags, Regexp.IGNORECASE);
 
 # global
 is("Foo::Bar::Baz".replace(/::/g, '/'), 'Foo/Bar/Baz');
 # non-global
 is("Foo::Bar::Baz".replace(/::/, '/'),  'Foo/Bar::Baz');
+
+# ignorecse flag
+is("foo".replace(/OO/, '/'),   'foo');
+is("foo".replace(/OO/i, '/'),  'f/');
+is("foo".match(/OO/i), true);
+is("foo".match(/OO/), false);
+
+# replace with string
+is("foo".replace('oo', 'pp'), 'fpp');
+
+# match with string
+is("foo".match('oo'), true);
+is("foo".match('OO'), false);
 
 done_testing;

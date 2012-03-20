@@ -184,9 +184,6 @@ std:
             goto regexp_literal;
         }
     }
-    "//" {
-        goto cc_comment;
-    }
     "\n" {
         increment_line_number();
         if (heredoc_queue.size() > 0) {

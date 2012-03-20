@@ -36,7 +36,17 @@ String#substr(n)
 String#substr(n, m)
 String#replace(regexp|str, code)
 String#replace(regexp|str, str)
-String#match(regexp|str, code)
+
+Regexp.quotemeta
+
+ErrnoException?
+
+generate document
+
+use POSIX::Glob *;
+glob('src/object/*.cc')
+
+XSLoader()
 
 syntax
 ------
@@ -186,3 +196,4 @@ sqrt()
  * $foo.bar; # ignore parens.
 dir('t').file($fname)
  * inheritance
+String#match(regexp|str, code)
