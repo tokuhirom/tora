@@ -24,4 +24,6 @@ is("foo".replace('oo', 'pp'), 'fpp');
 is("foo".match('oo'), true);
 is("foo".match('OO'), false);
 
+is(Regexp.quotemeta("f.o"), 'f\\.o');
+
 done_testing;

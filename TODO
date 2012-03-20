@@ -38,16 +38,12 @@ String#substr(n, m)
 String#replace(regexp|str, code)
 String#replace(regexp|str, str)
 
-Regexp.quotemeta
-
 ErrnoException?
 
 generate document
 
 use POSIX::Glob *;
 glob('src/object/*.cc')
-
-XSLoader()
 
 syntax
 ------
@@ -71,12 +67,11 @@ syntax
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
- * /xxx/i
- * /xxx/g
  * /xxx/x
  * /xxx/s
  * /xxx/m
  * super()
+ * signal handler
 
 lambda
 ------
@@ -198,3 +193,8 @@ sqrt()
 dir('t').file($fname)
  * inheritance
 String#match(regexp|str, code)
+XSLoader()
+Regexp.quotemeta
+ * /xxx/i
+ * /xxx/g
+
