@@ -33,8 +33,7 @@ if ARGUMENTS.get('ndebug', 1) != '0':
     env.Append(CCFLAGS=['-DNDEBUG'])
     env.Append(CCFLAGS=['-O2'])
 
-# shlib = env.SharedLibrary("URI_Escape.so", ['URI-Escape.cc'], SHLIBPREFIX='')
-shlib = env.SharedLibrary("lib/libURI_Escape.so", ['URI-Escape.cc'])
+shlib = env.SharedLibrary("lib/URI/Escape.so", ['URI-Escape.cc'], SHLIBPREFIX='')
 Default(shlib)
 
 env.Command('test', [shlib], '../../tora -I lib -I ../../lib/ t/01-uri.tra')

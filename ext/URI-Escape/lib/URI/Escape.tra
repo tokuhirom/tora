@@ -1,6 +1,6 @@
 use XSLoader;
 
-XSLoader.load('URI_Escape');
+XSLoader.load('URI::Escape');
 
 __END__
 
