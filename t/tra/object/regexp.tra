@@ -5,4 +5,9 @@ is(typeof($re), 'Regexp');
 is($re.flags, 8);
 is($re.flags, Regexp.EXPANDED);
 
+# global
+is("Foo::Bar::Baz".replace(/::/g, '/'), 'Foo/Bar/Baz');
+# non-global
+is("Foo::Bar::Baz".replace(/::/, '/'),  'Foo/Bar::Baz');
+
 done_testing;

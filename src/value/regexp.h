@@ -22,8 +22,9 @@ public:
     virtual bool ok() = 0;
     virtual const std::string& error() = 0;
     virtual const std::string& pattern() = 0;
-    virtual bool match(std::string &str) = 0;
-    virtual int flags() {
+    virtual bool match(const std::string &str) const = 0;
+    virtual std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const = 0;
+    virtual int flags() const {
         return flags_;
     }
 };
@@ -47,8 +48,18 @@ public:
     const std::string& error() {
         return this->re_value->error();
     }
-    bool match(std::string &str) {
+    bool match(const std::string &str) const {
         return RE2::PartialMatch(str, this->re_value->pattern().c_str());
+    }
+    std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const {
+        // optimizable
+        std::string buf(str);
+        if (this->flags() & REGEXP_GLOBAL) {
+            replacements = RE2::GlobalReplace(&buf, this->re_value->pattern().c_str(), rewrite);
+        } else {
+            replacements = RE2::Replace(&buf, this->re_value->pattern().c_str(), rewrite);
+        }
+        return buf;
     }
     void dump(int indent) {
         print_indent(indent);

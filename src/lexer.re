@@ -491,7 +491,7 @@ string_literal:
 
 regexp_literal:
 /*!re2c
-    "/" [xmsi]* {
+    "/" [xmsig]* {
         // m_cursor is next char.
         // # <REGEXP>"\\/" tora_add_string_literal('/');
         int flag = 0;

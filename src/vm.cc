@@ -610,6 +610,10 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     }
     assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
+    if (object->value_type == VALUE_TYPE_UNDEF) {
+        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str());
+    }
+
     std::set<ID> seen;
     this->call_method(object, object->object_package_id(), function_id, seen);
 }
