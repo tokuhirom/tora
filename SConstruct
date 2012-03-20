@@ -8,12 +8,25 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
 
+
+AddOption('--prefix',
+    dest='prefix',
+    nargs=1,
+    type='string',
+    action='store',
+    metavar='DIR',
+    default='/usr/local/',
+    help='installation prefix'
+)
+
 env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
     CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
+    PREFIX=GetOption('prefix')
 )
+print 'PREFIX: ' + env['PREFIX']
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
     LIBS=['pthread'],
@@ -130,6 +143,7 @@ libre2 = re2_env.Library('re2', re2files)
 with open('src/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
+    f.write('#define TORA_PREFIX  "' + env.get('PREFIX') + "\"\n")
 
 
 tora = env.Program('tora', [

@@ -28,6 +28,7 @@ using namespace tora;
 void show_configuration() {
     printf("Tora %s\n", TORA_VERSION_STR);
     printf("Build configuration: %s\n", TORA_CCFLAGS);
+    printf("Install prefix: %s\n", TORA_PREFIX);
 }
 
 int main(int argc, char **argv) {
@@ -158,6 +159,7 @@ int main(int argc, char **argv) {
     for (auto iter: libs) {
         vm.add_library_path(iter);
     }
+    vm.add_library_path(std::string(TORA_PREFIX) + "/lib/tora-" + TORA_VERSION_STR);
     if (dump_ops) {
         Disasm::disasm(compiler.ops);
     }
