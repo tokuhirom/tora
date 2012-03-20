@@ -188,6 +188,8 @@ ID Value::object_package_id() {
         return SYMBOL_BYTES_CLASS;
     case VALUE_TYPE_REGEXP:
         return SYMBOL_REGEXP_CLASS;
+    case VALUE_TYPE_BOOL:
+        return SYMBOL_BOOLEAN_CLASS;
     case VALUE_TYPE_SYMBOL:
         return this->upcast<SymbolValue>()->id;
     case VALUE_TYPE_OBJECT:
