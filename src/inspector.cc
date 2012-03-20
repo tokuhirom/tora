@@ -64,6 +64,9 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
         return "#<Exception>";
     case VALUE_TYPE_SYMBOL:
         return "#<Symbol>";
+    case VALUE_TYPE_BYTES:
+        // TODO: support better inspeciton
+        return "#<Bytes>";
     case VALUE_TYPE_HASH: {
         std::string ret("{");
         SharedPtr<HashValue> hv = v->upcast<HashValue>();

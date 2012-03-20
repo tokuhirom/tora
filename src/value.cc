@@ -190,6 +190,12 @@ ID Value::object_package_id() {
         return SYMBOL_REGEXP_CLASS;
     case VALUE_TYPE_BOOL:
         return SYMBOL_BOOLEAN_CLASS;
+    case VALUE_TYPE_RANGE:
+        return SYMBOL_RANGE_CLASS;
+    case VALUE_TYPE_POINTER:
+        return SYMBOL_POINTER_CLASS;
+    case VALUE_TYPE_EXCEPTION:
+        return SYMBOL_EXCEPTION_CLASS;
     case VALUE_TYPE_SYMBOL:
         return this->upcast<SymbolValue>()->id;
     case VALUE_TYPE_OBJECT:

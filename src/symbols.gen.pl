@@ -24,6 +24,10 @@ my $dat = [
     ['SYMBOL_METACLASS_CLASS' => 'MetaClass'],
     ['SYMBOL_BYTES_CLASS' => 'Bytes'],
     ['SYMBOL_REGEXP_CLASS' => 'Regexp'],
+    ['SYMBOL_BOOLEAN_CLASS' => 'Boolean'],
+    ['SYMBOL_RANGE_CLASS' => 'Range'],
+    ['SYMBOL_POINTER_CLASS' => 'Pointer'],
+    ['SYMBOL_EXCEPTION_CLASS' => 'Exception'],
 ];
 
 open my $hfh, '>', 'src/symbols.gen.h';
