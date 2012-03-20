@@ -50,6 +50,7 @@ void tora::peek(VM *vm, const Value * v) {
         case VALUE_TYPE_HASH_ITERATOR:
         case VALUE_TYPE_OBJECT:
         case VALUE_TYPE_POINTER:
+        case VALUE_TYPE_BYTES:
             // nop.
             break;
         }

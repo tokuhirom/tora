@@ -1,8 +1,8 @@
 #ifndef TORA_H_
 #define TORA_H_
-#define TORA_VERSION_STR "0.0.3"
 
 #include <vector>
+#include "config.h"
 
 // Debug Macro
 #ifdef DEBUG

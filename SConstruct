@@ -8,6 +8,7 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
 
+TORA_VERSION_STR='0.0.3'
 
 AddOption('--prefix',
     dest='prefix',
@@ -144,7 +145,7 @@ with open('src/config.h', 'w') as f:
     f.write("#pragma once\n")
     f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
     f.write('#define TORA_PREFIX  "' + env.get('PREFIX') + "\"\n")
-
+    f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
 
 tora = env.Program('tora', [
     ['src/main.cc'],
@@ -160,6 +161,10 @@ lemon_env.Append(CCFLAGS=['-O2'])
 lemon_env.Program('lemon', ['tools/lemon/lemon.c']);
 
 # instalation
-env.Install('/usr/local/bin/', 'tora');
-env.Alias('install', '/usr/local/bin/')
+installs = []
+installs += [env.Install(env['PREFIX']+'/bin/', 'tora')];
+for lib in glob('lib/*.tra')+glob('lib/*/*.tra')+glob('lib/*/*/*.tra'):
+    lib = lib.lstrip('lib/')
+    installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
+env.Alias('install', [env['PREFIX']+'/bin/', installs])
 
