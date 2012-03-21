@@ -69,6 +69,7 @@ struct CallbackFunction {
 class VM {
     ID package_id_;
     SharedPtr<Package> package_; // cached
+    bool dump_ops_;
 public:
     int sp; // stack pointer
     int pc; // program counter
@@ -88,6 +89,8 @@ public:
         // will be deprecate
         package_id_ = symbol_table->get_id(s);
     }
+
+    bool dump_ops() const { return dump_ops_; }
 
     const SharedPtr<Package> & package() {
         return package_;
@@ -116,7 +119,7 @@ public:
     std::vector<int> mark_stack;
     std::vector<int> stack_base;
 
-    VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_);
+    VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dump_ops);
     ~VM();
     void execute();
     void execute_normal();

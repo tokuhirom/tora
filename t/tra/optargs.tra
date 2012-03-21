@@ -1,0 +1,14 @@
+$LIBPATH.push('t/lib/');
+
+use Foo *;
+use Test::More *;
+
+note("foo");
+is(foo().tora(), [4649, undef].tora());
+is(foo('hoge').tora(), [4649, 'hoge'].tora());
+
+note("bar");
+is(bar('hoge').tora(), [5963, 'hoge', undef].tora());
+is(bar('hoge', 'fuga').tora(), [5963, 'hoge', 'fuga'].tora());
+
+done_testing;

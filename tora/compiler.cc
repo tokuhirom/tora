@@ -84,6 +84,8 @@ Compiler::~Compiler() {
 }
 
 void Compiler::push_op(OP * op) {
+    assert(op);
+    assert(this->current_node);
     this->ops->push_back(op, this->current_node->lineno);
 }
 
@@ -191,9 +193,7 @@ void tora::Compiler::set_variable(std::string &varname) {
         }
     } else {
         if (is_arg) {
-            SharedPtr<OP> tmp = new OP;
-            tmp->op_type = OP_SETARG;
-            tmp->operand.int_value = no;
+            SharedPtr<OP> tmp = new OP(OP_SETARG, no);
             push_op(tmp);
         } else if (level == 0) {
             DBG2("LOCAL\n");
@@ -573,32 +573,20 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         auto funcdef_node = node->upcast<FuncdefNode>();
 
-        OP * skip_defvars = new OP(OP_JUMP);
-        push_op(skip_defvars);
-
         // function name
         std::string &name = funcdef_node->name()->upcast<StrNode>()->str_value;
 
         this->push_block(BLOCK_TYPE_FUNCDEF);
+
+        // setup parameters
         auto params = new std::vector<std::string *>();
-        auto defaults = new std::vector<int>();
         for (size_t i=0; i<funcdef_node->params()->size(); i++) {
             assert(funcdef_node->params()->at(i)->list->size() == 2);
             const SharedPtr<Node>& param_name = funcdef_node->params()->at(i)->at(0);
-            const SharedPtr<Node>& default_node = funcdef_node->params()->at(i)->at(1);
 
             params->push_back(new std::string(param_name->upcast<StrNode>()->str_value));
-            if (default_node.get()) {
-                // compile arguments to anonymous function.
-                defaults->push_back(ops->size());
-                this->compile(default_node);
-                push_op(new OP(OP_END));
-            } else {
-                defaults->push_back(-1);
-            }
             this->define_localvar(std::string(param_name->upcast<StrNode>()->str_value));
         }
-        skip_defvars->operand.int_value = ops->size();
 
         std::string package(this->package());
         std::string funcname(name);
@@ -612,6 +600,29 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         }
         funccomp.package(package);
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
+
+        auto defaults = new std::vector<int>();
+        {
+            // process default values.
+            funccomp.current_node.reset(node.get());
+            OP * skip_defvars = new OP(OP_JUMP);
+            funccomp.push_op(skip_defvars);
+            for (size_t i=0; i<funcdef_node->params()->size(); i++) {
+                assert(funcdef_node->params()->at(i)->list->size() == 2);
+                const SharedPtr<Node>& default_node = funcdef_node->params()->at(i)->at(1);
+                if (default_node.get()) {
+                    // printf("FOUND DEFAULT VALUE: %zd\n", i);
+                    // compile arguments to anonymous function.
+                    defaults->push_back(funccomp.ops->size());
+                    funccomp.compile(default_node);
+                    funccomp.push_op(new OP(OP_END));
+                } else {
+                    defaults->push_back(-1);
+                }
+            }
+            skip_defvars->operand.int_value = funccomp.ops->size();
+        }
+
         funccomp.compile(funcdef_node->block());
         this->pop_block();
 
@@ -968,9 +979,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                 push_op(tmp);
             } else {
                 if (is_arg) {
-                    SharedPtr<OP> tmp = new OP;
-                    tmp->op_type = OP_GETARG;
-                    tmp->operand.int_value = no;
+                    SharedPtr<OP> tmp = new OP(OP_GETARG, no);
                     push_op(tmp);
                 } else if (level == 0) {
                     DBG2("LOCAL\n");

@@ -12,7 +12,7 @@ void tora::peek(VM *vm, const SharedPtr<Value>& v) {
 
 void tora::peek(VM *vm, const Value * v) {
     if (v) {
-        printf("Value: %s\n", v->type_str());
+        printf("Value: %s(%X)\n", v->type_str(), v);
         printf("  REFCNT: %d\n", v->refcnt);
         switch (v->value_type) {
         case VALUE_TYPE_SYMBOL: {

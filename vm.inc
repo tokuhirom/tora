@@ -33,13 +33,15 @@ OP_PUSH_STRING {
 OP_GETARG {
     int no = get_int_operand();
     int index = mark_stack.back() - no - 1;
-#if NDEBUG == 0
+#ifndef NDEBUG
     if (index >= stack.size()) {
         dump_stack();
+        abort();
     }
 #endif
     stack.push_back(stack.at(index));
 }
+
 
 OP_SETARG {
     int no = get_int_operand();
@@ -132,6 +134,7 @@ OP_SETCLOSURE {
     int i = get_int_operand();
     SharedPtr<Value> v = stack.back();
     SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars))[i];
+    dump_value(dst);
     *dst = *v;
 }
 
@@ -239,6 +242,7 @@ OP_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
+// printf("CALLING------ \n");
     // TODO split this part to other op code for performance?
     SharedPtr<Package> pkg = this->package();
     int pkgid = get_int_operand_low();
@@ -249,6 +253,7 @@ OP_FUNCALL {
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
 
+// Disasm::disasm(this->ops);
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
 
@@ -259,14 +264,33 @@ OP_FUNCALL {
             // TODO: vargs support
             // TODO: kwargs support
             int orig_argcnt = argcnt;
+            int start_stack_size = stack.size() - argcnt;
+            this->ops = code->code_opcodes;
+
+// printf("PARAM count: %zd\n", code->code_params->size());
             for (size_t i=0; i<code->code_params->size(); i++) {
+// printf("PARAMS: %zd\n", i);
                 if (argcnt <= i) {
                     int def = code->code_defaults->at(i);
-                    if (def > 0) {
+// printf("default! %d\n", def);
+                    if (def >= 0) {
                         pc = def;
+// printf("execute! %zd, %d\n", i, pc);
+// printf("stack size: %d\n", stack.size());
+// Disasm::disasm(this->ops);
                         this->execute();
+
+                        // Note. This is a very bad for performance.
+                        // But it works.
+                        // We must rewrite argument processing later.
+                        SharedPtr<Value> val = stack.back();
+                        stack.pop_back();
+                        stack.insert(stack.begin() + start_stack_size, val);
+
+// printf("finished stack size: %d\n", stack.size());
                         ++argcnt;
                         fframe->top++;
+// printf("execute finished\n", i);
                     } else {
                         throw new ExceptionValue(
                             "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
@@ -282,7 +306,6 @@ OP_FUNCALL {
             fframe->code = code;
 
             pc = -1;
-            this->ops = code->code_opcodes;
 
             // assert(argcnt == (int)code->code_params->size());
             /**

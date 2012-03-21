@@ -47,7 +47,7 @@ using namespace tora;
 const int INITIAL_STACK_SIZE = 1024;
 const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dump_ops) : dump_ops_(dump_ops), ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
     sp = 0;
     pc = 0;
     this->stack.reserve(INITIAL_STACK_SIZE);
@@ -140,6 +140,10 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
     compiler.init_globals();
     compiler.package(package);
     compiler.compile(parser.root_node());
+    if (vm->dump_ops()) {
+        printf("Dumping %s\n", fname.c_str());
+        Disasm::disasm(compiler.ops);
+    }
     if (compiler.error) {
         throw new ExceptionValue("Compilation failed.");
     }

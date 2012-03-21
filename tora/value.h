@@ -38,6 +38,7 @@ typedef enum {
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
     VALUE_TYPE_BYTES,
+    VALUE_TYPE_REFERENCE,
 } value_type_t;
 
 class IntValue;
