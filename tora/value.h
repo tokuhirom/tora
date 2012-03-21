@@ -44,6 +44,7 @@ typedef enum {
     VALUE_TYPE_REFERENCE,
 } value_type_t;
 
+class Value;
 class IntValue;
 class DoubleValue;
 class StrValue;
@@ -57,6 +58,21 @@ protected:
     SharedPtr<IntValue> right_;
     RangeImpl(IntValue* l, IntValue *r) : left_(l), right_(r) {
     }
+};
+
+class ObjectImpl {
+    friend class ObjectValue;
+protected:
+    VM * vm_;
+    ID package_id_;
+    bool destroyed_;
+    SharedPtr<Value> data_;
+    ObjectImpl(VM *vm, ID pkgid, const SharedPtr<Value>& d)
+        : vm_(vm)
+        , package_id_(pkgid)
+        , destroyed_(false)
+        , data_(d)
+        { }
 };
 
 // TODO: remove virtual from this class for performance.
@@ -79,14 +95,11 @@ public:
 protected:
     typedef std::deque<SharedPtr<Value>> ArrayImpl;
     typedef std::map<std::string, SharedPtr<Value> > HashImpl;
-
-    Value(value_type_t t) : refcnt(0), value_type(t) { }
-    virtual ~Value() { }
-    Value(const Value&) = delete;
-    boost::variant<
+    typedef boost::variant<
         int,
         double,
         bool,
+        ID,
         std::string,
         RangeImpl,
         ArrayImpl,
@@ -94,8 +107,16 @@ protected:
         void*,
         Value*,
         FILE *,
+        ObjectImpl,
         boost::blank
-    > value_;
+    > any_t;
+
+    Value(value_type_t t) : refcnt(0), value_type(t) { }
+    Value(value_type_t t, any_t dat) : refcnt(0), value_(dat), value_type(t) { }
+    virtual ~Value() { }
+    Value(const Value&) = delete;
+
+    any_t value_;
 public:
     value_type_t value_type;
     Value& operator=(const Value&v);

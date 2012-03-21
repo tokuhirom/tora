@@ -14,7 +14,7 @@ using namespace tora;
  * Create a new object from $symbol and $data.
  */
 SharedPtr<Value> tora::Symbol_bless(VM * vm, Value* klass, Value *data) {
-    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id, data);
+    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id(), data);
 }
 
 void tora::Init_Symbol(VM *vm) {

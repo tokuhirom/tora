@@ -195,7 +195,7 @@ ID Value::object_package_id() {
     case VALUE_TYPE_EXCEPTION:
         return SYMBOL_EXCEPTION_CLASS;
     case VALUE_TYPE_SYMBOL:
-        return this->upcast<SymbolValue>()->id;
+        return this->upcast<SymbolValue>()->id();
     case VALUE_TYPE_OBJECT:
         return this->upcast<ObjectValue>()->package_id();
     case VALUE_TYPE_UNDEF:

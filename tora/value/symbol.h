@@ -8,13 +8,11 @@ namespace tora {
 
 class SymbolValue: public Value {
 public:
-    ID id;
-    SymbolValue(ID i): Value(VALUE_TYPE_SYMBOL), id(i) {
+    SymbolValue(ID i): Value(VALUE_TYPE_SYMBOL, i) {
     }
     ~SymbolValue() { }
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Symbol: %d\n", id);
+    ID id() const {
+        return boost::get<ID>(value_);
     }
 };
 

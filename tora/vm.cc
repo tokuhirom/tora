@@ -213,7 +213,7 @@ SharedPtr<Value> VM::require(Value * v) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
-    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id);
+    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id());
     std::string package = s;
     {
         auto iter = s.find("::");
@@ -615,7 +615,7 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
     if (object->value_type == VALUE_TYPE_UNDEF) {
-        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str());
+        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str());
     }
 
     std::set<ID> seen;
@@ -626,7 +626,7 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
     seen.insert(klass_id);
 
     SharedPtr<Package> pkg = this->find_package(klass_id);
-    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id);
+    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id());
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
@@ -675,7 +675,7 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
         } else {
             // dump_value(function_id);
             // dump_value(object);
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
         }
     }
 }

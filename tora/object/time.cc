@@ -37,7 +37,7 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
         delete buf;
         throw new ExceptionValue("Error in localtime_r: %s", strerror(errno));
     }
-    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id, new PointerValue(buf));
+    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id(), new PointerValue(buf));
 }
 
 static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {

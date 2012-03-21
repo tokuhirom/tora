@@ -9,8 +9,8 @@ using namespace tora;
 void ObjectValue::release() {
     --refcnt;
     if (refcnt == 0) {
-        if (!destroyed) {
-            destroyed = true;
+        if (!VAL().destroyed_) {
+            VAL().destroyed_ = true;
             this->call_destroy();
             assert(this->refcnt == 0);
             delete this;
@@ -19,39 +19,39 @@ void ObjectValue::release() {
 }
 
 const char *ObjectValue::type_str() const {
-    return vm_->symbol_table->id2name(package_id_).c_str();
+    return VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str();
 }
 
 void ObjectValue::dump(int indent) {
     print_indent(indent);
-    printf("[dump] Object: %s(refcnt: %d)\n", vm_->symbol_table->id2name(package_id_).c_str(), this->refcnt);
+    printf("[dump] Object: %s(refcnt: %d)\n", VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str(), this->refcnt);
 }
 
 SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
-    SharedPtr<Package> pkg = this->vm_->find_package(package_id_);
-    auto iter = pkg->find(this->vm_->symbol_table->get_id("__setitem__"));
+    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("__setitem__"));
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
         SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
         if (code->is_native()) {
             // TODO: use function frame
-            // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, this->vm_->frame_stack->back());
-            // this->vm_->frame_stack->push_back(fframe);
+            // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, this->VAL().vm_->frame_stack->back());
+            // this->VAL().vm_->frame_stack->push_back(fframe);
 
             if (code->callback()->argc == 2) {
                 // code->callback()->func2(this, index.get());
                 abort(); // not tested yet.
             } else if (code->callback()->argc == -5) {
-                SharedPtr<Value> ret = code->callback()->func_vm3(vm_, this, index.get(), v.get());
+                SharedPtr<Value> ret = code->callback()->func_vm3(VAL().vm_, this, index.get(), v.get());
                 return ret;
             } else {
                 // this is just a warnings?
-                fprintf(stderr, "%s::__setitem__ method requires 2 arguments. This is not allowed.\n", this->vm_->symbol_table->id2name(package_id_).c_str());
+                fprintf(stderr, "%s::__setitem__ method requires 2 arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
                 return new ExceptionValue("HMM");
             }
 
-            // this->vm_->frame_stack->pop_back();
+            // this->VAL().vm_->frame_stack->pop_back();
         } else {
             printf("NOT IMPLEMENTED YET\n");
             abort();
@@ -83,30 +83,30 @@ SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v)
 }
 
 SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
-    SharedPtr<Package> pkg = this->vm_->find_package(package_id_);
-    auto iter = pkg->find(this->vm_->symbol_table->get_id("__getitem__"));
+    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("__getitem__"));
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
         SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
         if (code->is_native()) {
             // TODO: use function frame
-            // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, this->vm_->frame_stack->back());
-            // this->vm_->frame_stack->push_back(fframe);
+            // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, this->VAL().vm_->frame_stack->back());
+            // this->VAL().vm_->frame_stack->push_back(fframe);
 
             if (code->callback()->argc == 2) {
                 // code->callback()->func2(this, index.get());
                 abort(); // not tested yet.
             } else if (code->callback()->argc == -4) {
-                SharedPtr<Value> ret = code->callback()->func_vm2(vm_, this, index.get());
+                SharedPtr<Value> ret = code->callback()->func_vm2(VAL().vm_, this, index.get());
                 return ret;
             } else {
                 // this is just a warnings?
-                fprintf(stderr, "%s::DESTROY method requires arguments. This is not allowed.\n", this->vm_->symbol_table->id2name(package_id_).c_str());
+                fprintf(stderr, "%s::DESTROY method requires arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
                 return new ExceptionValue("HMM");
             }
 
-            // this->vm_->frame_stack->pop_back();
+            // this->VAL().vm_->frame_stack->pop_back();
         } else {
             printf("NOT IMPLEMENTED YET\n");
             abort();
@@ -142,8 +142,8 @@ ObjectValue::~ObjectValue() {
 
 // call DESTROY method if it's available.
 void ObjectValue::call_destroy() {
-    SharedPtr<Package> pkg = this->vm_->find_package(package_id_);
-    auto iter = pkg->find(this->vm_->symbol_table->get_id("DESTROY"));
+    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("DESTROY"));
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
@@ -151,14 +151,14 @@ void ObjectValue::call_destroy() {
         if (code->is_native()) {
             if (code->callback()->argc == -3) {
                 // TODO: catch exception
-                SharedPtr<Value> ret = code->callback()->func_vm1(vm_, this);
+                SharedPtr<Value> ret = code->callback()->func_vm1(VAL().vm_, this);
             } else {
                 // this is just a warnings?
-                throw new ExceptionValue("%s::DESTROY method requires arguments. This is not allowed.\n", this->vm_->symbol_table->id2name(package_id_).c_str());
+                throw new ExceptionValue("%s::DESTROY method requires arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
             }
-            // this->vm_->frame_stack->pop_back();
+            // this->VAL().vm_->frame_stack->pop_back();
         } else {
-            this->vm_->function_call_ex(0, code, this);
+            this->VAL().vm_->function_call_ex(0, code, this);
         }
     }
 

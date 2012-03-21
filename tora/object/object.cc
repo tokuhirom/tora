@@ -27,7 +27,7 @@ static SharedPtr<Value> object_tora(VM *vm, Value *self) {
 static SharedPtr<Value> object_meta(VM *vm, Value *self) {
     ID pkgid;
     if (self->value_type == VALUE_TYPE_SYMBOL) {
-        pkgid = self->upcast<SymbolValue>()->id;
+        pkgid = self->upcast<SymbolValue>()->id();
     } else if (self->value_type == VALUE_TYPE_OBJECT) {
         pkgid = self->upcast<ObjectValue>()->package_id();
     } else {

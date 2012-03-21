@@ -17,7 +17,6 @@ class SymbolTable;
 class CodeValue: public Value {
     const CallbackFunction * callback_;
     bool is_native_;
-public:
     ID package_id;
     ID func_name_id;
     ID code_id;
@@ -28,6 +27,7 @@ public:
     std::vector<SharedPtr<Value>> *closure_vars;
     SharedPtr<OPArray> code_opcodes;
     std::string filename;
+public:
 
     // line number.
     // It's -1 if it's native function
