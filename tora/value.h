@@ -80,6 +80,7 @@ public:
     }
 protected:
     typedef std::deque<SharedPtr<Value>> ArrayImpl;
+    typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 
     Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
@@ -90,6 +91,7 @@ protected:
         std::string,
         RangeImpl,
         ArrayImpl,
+        HashImpl,
         boost::blank
     > value_;
 public:
