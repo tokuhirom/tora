@@ -69,6 +69,7 @@ protected:
     Value(const Value&) = delete;
     union {
         int int_value_;
+        double double_value_;
     };
 public:
     value_type_t value_type;

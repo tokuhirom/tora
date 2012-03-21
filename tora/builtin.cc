@@ -95,7 +95,7 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
     } else if (args.size() == 1) {
         SharedPtr<Value> v = args.at(0);
         if (v->value_type == VALUE_TYPE_DOUBLE) {
-            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value);
+            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value());
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
             boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value());

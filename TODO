@@ -8,6 +8,7 @@ stat()
 alarm()
 system()
 printf()
+sprintf()
 
 builtin objects
 ---------------

@@ -56,7 +56,7 @@ double Value::to_double() {
     case VALUE_TYPE_INT:
         return static_cast<double>(static_cast<IntValue*>(this)->int_value());
     case VALUE_TYPE_DOUBLE:
-        return static_cast<double>(static_cast<DoubleValue*>(this)->double_value);
+        return static_cast<double>(static_cast<DoubleValue*>(this)->double_value());
     case VALUE_TYPE_OBJECT:
         TODO();
     case VALUE_TYPE_BOOL:
@@ -95,7 +95,7 @@ SharedPtr<StrValue> Value::to_s() {
     case VALUE_TYPE_DOUBLE: {
         SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<DoubleValue>()->double_value;
+        os << this->upcast<DoubleValue>()->double_value();
         v->set_str(os.str());
         return v;
     }

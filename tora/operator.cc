@@ -178,7 +178,7 @@ Value* tora::op_unary_negative(const SharedPtr<Value> & v) {
     case VALUE_TYPE_INT:
         return new IntValue(-(v->upcast<IntValue>()->int_value()));
     case VALUE_TYPE_DOUBLE:
-        return new DoubleValue(-(v->upcast<DoubleValue>()->double_value));
+        return new DoubleValue(-(v->upcast<DoubleValue>()->double_value()));
     case VALUE_TYPE_OBJECT:
         TODO();
     default:
@@ -214,10 +214,10 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
     case VALUE_TYPE_DOUBLE: {
         switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value, (double)rhs->upcast<IntValue>()->int_value()));
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value(), (double)rhs->upcast<IntValue>()->int_value()));
         }
         case VALUE_TYPE_DOUBLE: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value, rhs->upcast<DoubleValue>()->double_value));
+            return (operation_d(lhs->upcast<DoubleValue>()->double_value(), rhs->upcast<DoubleValue>()->double_value()));
         }
         default: {
             TODO(); // throw exception
