@@ -803,12 +803,12 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= riter->parent->right->int_value) {
+        if (riter->counter <= riter->parent->right->int_value()) {
             const SharedPtr<Value> & cur = fframe->current_value;
             if (cur.get() && cur->refcnt == 2) {
                 // value is not copied.
                 assert(cur->value_type == VALUE_TYPE_INT);
-                cur->upcast<IntValue>()->int_value = riter->counter;
+                cur->upcast<IntValue>()->int_value(riter->counter);
                 stack.push_back(cur);
             } else {
                 IntValue * iv = new IntValue(riter->counter);
@@ -904,7 +904,7 @@ OP_USE {
     if (ret->is_exception()) {
         this->die(ret);
     } else {
-        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value == 1) {
+        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1) {
             SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id, this->package_id());
             if (v->is_exception()) {
                 this->die(ret);

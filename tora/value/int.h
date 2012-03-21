@@ -9,19 +9,24 @@ namespace tora {
 
 class IntValue: public Value {
 public:
-    int  int_value;
     IntValue(int i): Value(VALUE_TYPE_INT) {
-        this->int_value = i;
+        this->int_value_ = i;
     }
     ~IntValue() { }
     void tora__decr__() {
-        this->int_value--;
+        this->int_value_--;
     }
     void tora__incr__() {
-        this->int_value++;
+        this->int_value_++;
     }
-    SharedPtr<IntValue> clone() {
-        return new IntValue(this->int_value);
+    SharedPtr<IntValue> clone() const {
+        return new IntValue(this->int_value_);
+    }
+    int int_value() const {
+        return this->int_value_;
+    }
+    void int_value(int n) {
+        this->int_value_ = n;
     }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }

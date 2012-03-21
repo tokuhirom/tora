@@ -95,6 +95,7 @@ Pending
 feature
 -------
 
+  * switch to picostring
   * use Test::More qw(is);
   * <DATA>
   * -n option

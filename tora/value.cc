@@ -54,7 +54,7 @@ bool Value::to_bool() {
 double Value::to_double() {
     switch (value_type) {
     case VALUE_TYPE_INT:
-        return static_cast<double>(static_cast<IntValue*>(this)->int_value);
+        return static_cast<double>(static_cast<IntValue*>(this)->int_value());
     case VALUE_TYPE_DOUBLE:
         return static_cast<double>(static_cast<DoubleValue*>(this)->double_value);
     case VALUE_TYPE_OBJECT:
@@ -88,7 +88,7 @@ SharedPtr<StrValue> Value::to_s() {
     case VALUE_TYPE_INT: {
         SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<IntValue>()->int_value;
+        os << this->upcast<IntValue>()->int_value();
         v->set_str(os.str());
         return v;
     }
@@ -112,9 +112,9 @@ SharedPtr<StrValue> Value::to_s() {
     case VALUE_TYPE_RANGE: {
         SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<RangeValue>()->left->int_value;
+        os << this->upcast<RangeValue>()->left->int_value();
         os << "..";
-        os << this->upcast<RangeValue>()->right->int_value;
+        os << this->upcast<RangeValue>()->right->int_value();
         v->set_str(os.str());
         return v;
     }
@@ -126,7 +126,7 @@ SharedPtr<StrValue> Value::to_s() {
 
 int Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
-        return this->upcast<IntValue>()->int_value;
+        return this->upcast<IntValue>()->int_value();
     } else if (value_type == VALUE_TYPE_DOUBLE) {
         return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
@@ -160,7 +160,7 @@ Value& tora::Value::operator=(const Value&v) {
     switch (v.value_type) {
     case VALUE_TYPE_INT: {
         const IntValue *vp = static_cast<const IntValue*>(&v);
-        this->upcast<IntValue>()->int_value = vp->int_value;
+        this->upcast<IntValue>()->int_value(vp->int_value());
         return *this;
     }
     default:

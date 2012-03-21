@@ -25,7 +25,7 @@ using namespace tora;
 const int GETFD(VM *vm, Value * self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> fd = self->upcast<ObjectValue>()->data();
-    return fd->value_type == VALUE_TYPE_INT ? fd->upcast<IntValue>()->int_value : -1;
+    return fd->value_type == VALUE_TYPE_INT ? fd->upcast<IntValue>()->int_value() : -1;
 }
 
 /**
@@ -222,7 +222,7 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
     socklen_t optlen;
     int n;
     if (optval_v->value_type == VALUE_TYPE_INT) {
-        n = optval_v->upcast<IntValue>()->int_value;
+        n = optval_v->upcast<IntValue>()->int_value();
         optval = &n;
         optlen = sizeof(n);
     } else {

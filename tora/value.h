@@ -67,6 +67,9 @@ protected:
     Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
+    union {
+        int int_value_;
+    };
 public:
     value_type_t value_type;
     Value& operator=(const Value&v);
