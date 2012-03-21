@@ -41,7 +41,7 @@ public:
             return new StrValue(s);
         } else {
             // err?
-            throw new ExceptionValue(errno);
+            throw new ErrnoExceptionValue(errno);
         }
     }
 };

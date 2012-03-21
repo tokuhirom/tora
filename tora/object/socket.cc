@@ -45,7 +45,7 @@ static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Valu
 
     int sock = socket(domain, type, protocol);
     if (sock == -1) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     } else {
         return new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(sock));
     }
@@ -67,7 +67,7 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -142,7 +142,7 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
     int fd = GETFD(vm, self);
     int ret = write(fd, s.c_str(), s.size());
     if (ret == -1) {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     } else {
         return new IntValue(ret);
     }
@@ -168,7 +168,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             } else if (ret == 0) { // EOF
                 return new StrValue(bbuf);
             } else {
-                return new ExceptionValue(errno);
+                return new ErrnoExceptionValue(errno);
             }
         }
     } else if (args.size() == 2) {
@@ -182,7 +182,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             SharedPtr<Value> s = new StrValue(std::string(buf.get(), ret));
             return s;
         } else {
-            return new ExceptionValue(errno);
+            return new ErrnoExceptionValue(errno);
         }
     } else {
         return new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
@@ -198,7 +198,7 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -209,7 +209,7 @@ static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -236,7 +236,7 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -245,7 +245,7 @@ static SharedPtr<Value> sock_sock_close(VM * vm, Value* self) {
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -264,7 +264,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
         t->push(new_sock);
         return t;
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 

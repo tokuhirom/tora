@@ -146,7 +146,7 @@ int Value::to_int() {
             // try to the bigint?
             TODO();
         } else {
-            throw new ExceptionValue(errno);
+            throw new ErrnoExceptionValue(errno);
         }
     }
 

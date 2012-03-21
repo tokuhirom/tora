@@ -463,7 +463,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
+                    fprintf(stderr, "%s\n", strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()));
                 } else {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 }

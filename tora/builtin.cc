@@ -188,7 +188,7 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
         delete ptr;
         return new StrValue(ptr_s);
     } else {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
 }
 
@@ -251,7 +251,7 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     errno = 0;
     long n = strtol(s.c_str(), &endp, 16);
     if (errno == ERANGE) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
@@ -268,7 +268,7 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     errno = 0;
     long n = strtol(s.c_str(), &endp, 8);
     if (errno == ERANGE) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());

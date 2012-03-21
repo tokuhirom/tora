@@ -15,25 +15,29 @@ typedef enum {
 } exception_type_t;
 
 class ExceptionValue : public Value {
+private:
 protected:
-    std::string message_;
-    int errno_;
-protected:
-    ExceptionValue(exception_type_t type=EXCEPTION_TYPE_GENERAL) : Value(VALUE_TYPE_EXCEPTION), errno_(0), exception_type(type) {
+    ExceptionValue(exception_type_t type=EXCEPTION_TYPE_GENERAL) : Value(VALUE_TYPE_EXCEPTION), exception_type(type) {
     }
 public:
     exception_type_t exception_type;
     ExceptionValue(const char *format, ...);
-    ExceptionValue(const std::string &msg, exception_type_t type=EXCEPTION_TYPE_GENERAL) : Value(VALUE_TYPE_EXCEPTION), message_(msg), errno_(0), exception_type(type) {
+    ExceptionValue(const std::string &msg, exception_type_t type=EXCEPTION_TYPE_GENERAL) : Value(VALUE_TYPE_EXCEPTION), exception_type(type) {
+        value_ = msg;
     }
-    ExceptionValue(int err) : Value(VALUE_TYPE_EXCEPTION), errno_(err), exception_type(EXCEPTION_TYPE_ERRNO) { }
-    int get_errno() { return this->errno_; }
-    std::string message() {
-        if (errno_) {
-            return std::string(strerror(this->errno_));
-        } else {
-            return message_;
-        }
+    virtual std::string message() {
+        return boost::get<std::string>(value_);
+    }
+};
+
+class ErrnoExceptionValue : public ExceptionValue {
+public:
+    ErrnoExceptionValue(int err) : ExceptionValue(EXCEPTION_TYPE_ERRNO){
+        value_ = err;
+    }
+    int get_errno() const { return boost::get<int>(value_); }
+    std::string message() const {
+        return std::string(strerror(get_errno()));
     }
 };
 
