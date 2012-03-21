@@ -10,23 +10,23 @@ namespace tora {
 class IntValue: public Value {
 public:
     IntValue(int i): Value(VALUE_TYPE_INT) {
-        this->int_value_ = i;
+        this->value_ = i;
     }
     ~IntValue() { }
     void tora__decr__() {
-        this->int_value_--;
+        boost::get<int>(this->value_)--;
     }
     void tora__incr__() {
-        this->int_value_++;
+        boost::get<int>(this->value_)++;
     }
     SharedPtr<IntValue> clone() const {
-        return new IntValue(this->int_value_);
+        return new IntValue(boost::get<int>(this->value_));
     }
     int int_value() const {
-        return this->int_value_;
+        return boost::get<int>(this->value_);
     }
     void int_value(int n) {
-        this->int_value_ = n;
+        boost::get<int>(this->value_) = n;
     }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }

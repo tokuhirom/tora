@@ -26,19 +26,19 @@ public:
 
     SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();
-        this->set(s->str_value, v);
+        this->set(s->str_value(), v);
         return UndefValue::instance();
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
         SharedPtr<StrValue> s = index->to_s();
-        return this->data[s->str_value];
+        return this->data[s->str_value()];
     }
     size_t size() {
         return data.size();
     }
     bool has_key(SharedPtr<Value> key) {
         SharedPtr<StrValue> k = key->to_s();
-        return this->has_key(k->str_value);
+        return this->has_key(k->str_value());
     }
     bool has_key(const std::string & key) {
         return this->data.find(key) != this->data.end();

@@ -191,7 +191,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
-    std::stringstream ss(v->upcast<StrValue>()->str_value + ";");
+    std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
     return eval_foo(vm, &ss, vm->package_name(), "<eval>");
 }
 
@@ -201,11 +201,11 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
 static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
     SharedPtr<StrValue> fname = v->to_s();
-    std::ifstream ifs(fname->str_value.c_str(), std::ios::in);
+    std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
     if (ifs.is_open()) {
-        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value);
+        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value());
     } else {
-        return new ExceptionValue(v->upcast<StrValue>()->str_value + " : " + strerror(errno));
+        throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + strerror(errno));
     }
 }
 
@@ -236,7 +236,7 @@ SharedPtr<Value> VM::require(Value * v) {
     // load
     for (int i=0; i<libpath->size(); i++) {
         std::string realfilename;
-        realfilename = libpath->at(i)->to_s()->str_value;
+        realfilename = libpath->at(i)->to_s()->str_value();
         realfilename += "/";
         realfilename += s;
         struct stat stt;
@@ -257,7 +257,7 @@ SharedPtr<Value> VM::require(Value * v) {
     // not found...
     std::string message = std::string("Cannot find ") + s + " in $LIBPATH\n";
     for (int i=0; i<libpath->size(); i++) {
-        message += "  " + libpath->at(i)->to_s()->str_value;
+        message += "  " + libpath->at(i)->to_s()->str_value();
     }
     return new ExceptionValue(message);
 }
@@ -458,7 +458,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
     while (1) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value.c_str(), lineno);
+                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());

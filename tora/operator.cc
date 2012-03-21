@@ -22,13 +22,14 @@ Value * tora::op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         // TODO: support null terminated string
         SharedPtr<Value> s(rhs->to_s());
-        return new StrValue(lhs->upcast<StrValue>()->str_value + s->upcast<StrValue>()->str_value);
+        return new StrValue(lhs->upcast<StrValue>()->str_value() + s->upcast<StrValue>()->str_value());
     } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
         return new DoubleValue(lhs->to_double() + rhs->to_double());
     } else {
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not numeric or string.\n", s->upcast<StrValue>()->str_value().c_str());
     }
+    abort();
 }
 
 /**
@@ -46,7 +47,7 @@ Value * tora::op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) 
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric. You cannot subtract.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not numeric. You cannot subtract.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -74,7 +75,7 @@ Value * tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric. You cannot divide.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not numeric. You cannot divide.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -90,7 +91,7 @@ Value * tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -106,7 +107,7 @@ Value * tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not numeric. You cannot pow.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not numeric. You cannot pow.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -116,7 +117,7 @@ Value * tora::op_bitand(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs
         return new IntValue(lhs->to_int() & rhs->to_int());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot and.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot and.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -126,7 +127,7 @@ Value * tora::op_bitor(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs)
         return new IntValue(lhs->to_int() | rhs->to_int());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot bit or.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot bit or.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -136,7 +137,7 @@ Value * tora::op_bitxor(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs
         return new IntValue(lhs->to_int() ^ rhs->to_int());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot xor.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot xor.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -146,7 +147,7 @@ Value * tora::op_bitlshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &
         return new IntValue(lhs->to_int() << rhs->to_int());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot <<.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot <<.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -156,7 +157,7 @@ Value * tora::op_bitrshift(const SharedPtr<Value> &lhs, const SharedPtr<Value> &
         return new IntValue(lhs->to_int() >> rhs->to_int());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -168,7 +169,7 @@ Value * tora::op_modulo(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs
         return new IntValue(x-y*floor(x/y));
     } else { 
         SharedPtr<Value> s(lhs->to_s());
-        throw new ExceptionValue("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value.c_str());
+        throw new ExceptionValue("'%s' is not integer. You cannot >>.", s->upcast<StrValue>()->str_value().c_str());
     }
     abort();
 }
@@ -209,7 +210,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
     }
     case VALUE_TYPE_STR: {
         SharedPtr<Value> s2(rhs->to_s());
-        return (operation_s(lhs->upcast<StrValue>()->str_value, s2->upcast<StrValue>()->str_value));
+        return (operation_s(lhs->upcast<StrValue>()->str_value(), s2->upcast<StrValue>()->str_value()));
     }
     case VALUE_TYPE_DOUBLE: {
         switch (rhs->value_type) {

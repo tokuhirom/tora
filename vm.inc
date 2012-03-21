@@ -613,7 +613,7 @@ OP_MAKE_HASH {
         SharedPtr<StrValue> k = stack.back()->to_s();
         stack.pop_back();
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        h->set(k->str_value, v);
+        h->set(k->str_value(), v);
     }
     stack.push_back(h);
 }
@@ -803,7 +803,7 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= riter->parent->right->int_value()) {
+        if (riter->counter <= riter->parent->right()->int_value()) {
             const SharedPtr<Value> & cur = fframe->current_value;
             if (cur.get() && cur->refcnt == 2) {
                 // value is not copied.
@@ -984,7 +984,7 @@ OP_LOCAL {
 
     std::string package;
     std::string moniker;
-    split_package_varname(snode->upcast<StrValue>()->str_value, package, moniker);
+    split_package_varname(snode->upcast<StrValue>()->str_value(), package, moniker);
 
     ID pkgid = symbol_table->get_id(package);
     ID vid = symbol_table->get_id(std::string("$") + moniker);

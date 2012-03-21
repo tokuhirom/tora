@@ -53,7 +53,7 @@ void Disasm::disasm(const SharedPtr<OPArray>& ops) {
             printf("\t%d", op->operand.int_value);
             break;
         case OP_PUSH_STRING:
-            printf("\t'%s'", static_cast<const ValueOP*>(op)->value->upcast<StrValue>()->str_value.c_str());
+            printf("\t'%s'", static_cast<const ValueOP*>(op)->value->upcast<StrValue>()->str_value().c_str());
             break;
         default:
             // nop.

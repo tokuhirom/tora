@@ -23,7 +23,7 @@ static SharedPtr<Value> Regexp_flags(VM * vm, Value* self) {
  * quote meta character in $val and return escaped string.
  */
 static SharedPtr<Value> Regexp_quotemeta(VM * vm, Value* self, Value *val) {
-    return new StrValue(RE2RegexpValue::quotemeta(val->to_s()->str_value));
+    return new StrValue(RE2RegexpValue::quotemeta(val->to_s()->str_value()));
 }
 
 /**

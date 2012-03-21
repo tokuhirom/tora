@@ -62,7 +62,7 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
     SharedPtr<Value> addr = addr_v->to_s();
     if (addr->is_exception()) { return addr; }
 
-    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value;
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = connect(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
         return UndefValue::instance();
@@ -82,7 +82,7 @@ static SharedPtr<Value> sock_sockaddr_in(VM * vm, Value*klass, Value* port, Valu
 
     SharedPtr<Value> host_s = host->to_s();
     if (host_s->is_exception()) { return host_s; }
-    const std::string &ip = host_s->upcast<StrValue>()->str_value;
+    const std::string &ip = host_s->upcast<StrValue>()->str_value();
 
     struct in_addr addr;
     if (ip.size() == sizeof(addr) || ip.size() == 4) {
@@ -118,7 +118,7 @@ static SharedPtr<Value> sock_inet_aton(VM * vm, Value*klass, Value* host_v) {
     SharedPtr<Value> host = host_v->to_s();
     if (host->is_exception()) { return host; }
 
-    const std::string & host_s = host->upcast<StrValue>()->str_value;
+    const std::string & host_s = host->upcast<StrValue>()->str_value();
     if ((host_s.at(0) != '\0') && inet_aton(host_s.c_str(), &ip_address)) {
         std::string ret((const char*)&ip_address, sizeof(ip_address));
         return new StrValue(ret);
@@ -138,7 +138,7 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
     SharedPtr<Value> src = src_v->to_s();
     if (src->is_exception()) { return src; }
 
-    const std::string &s = src->upcast<StrValue>()->str_value;
+    const std::string &s = src->upcast<StrValue>()->str_value();
     int fd = GETFD(vm, self);
     int ret = write(fd, s.c_str(), s.size());
     if (ret == -1) {
@@ -193,7 +193,7 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     SharedPtr<Value> addr = addr_v->to_s();
     if (addr->is_exception()) { return addr; }
 
-    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value;
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = bind(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
         return UndefValue::instance();
@@ -228,8 +228,8 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
     } else {
         SharedPtr<Value> optval_s = optval_v->to_s();
         if (optval_s->is_exception()) { return optval_s; }
-        optval = optval_s->upcast<StrValue>()->str_value.c_str();
-        optlen = optval_s->upcast<StrValue>()->str_value.size();
+        optval = optval_s->upcast<StrValue>()->str_value().c_str();
+        optlen = optval_s->upcast<StrValue>()->str_value().size();
     }
 
     int ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);

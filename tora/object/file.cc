@@ -19,7 +19,7 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
     std::string mode;
     if (mode_v) {
         SharedPtr<StrValue> mode_s =  mode_v->to_s();
-        mode = mode_s->str_value.c_str();
+        mode = mode_s->str_value().c_str();
     } else {
         mode = "rb";
     }
@@ -27,12 +27,12 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
     // TODO: check \0
     SharedPtr<FileValue> file = new FileValue();
     if (file->open(
-        fname->to_s()->str_value,
+        fname->to_s()->str_value(),
         mode
     )) {
         return file;
     } else {
-        return new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value.c_str(), strerror(errno));
+        return new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), strerror(errno));
     }
 }
 

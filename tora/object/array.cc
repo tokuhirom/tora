@@ -58,7 +58,7 @@ static SharedPtr<Value> av_pop(VM * vm, Value* self) {
  * push $v to front.
  */
 static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
-    self->upcast<ArrayValue>()->values->push_front(
+    self->upcast<ArrayValue>()->push_front(
         v
     );
     return UndefValue::instance();
@@ -71,8 +71,8 @@ static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
  */
 static SharedPtr<Value> av_shift(VM * vm, Value* self) {
     if (self->upcast<ArrayValue>()->size() > 0) {
-        SharedPtr<Value> ret = self->upcast<ArrayValue>()->values->at(0);
-        self->upcast<ArrayValue>()->values->pop_front();
+        SharedPtr<Value> ret = self->upcast<ArrayValue>()->at(0);
+        self->upcast<ArrayValue>()->pop_front();
         return ret;
     } else {
         return UndefValue::instance();
@@ -82,7 +82,7 @@ static SharedPtr<Value> av_shift(VM * vm, Value* self) {
 static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
     ArrayValue * src = self->upcast<ArrayValue>();
     SharedPtr<ArrayValue> nav = new ArrayValue(*src);
-    std::reverse(nav->values->begin(), nav->values->end());
+    std::reverse(nav->begin(), nav->end());
     return nav.get();
 }
 
@@ -97,9 +97,9 @@ static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
     SharedPtr<StrValue> str = inner->to_s();
     std::string ret;
     for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-        ret += (*iter)->to_s()->str_value;
+        ret += (*iter)->to_s()->str_value();
         if (iter+1 != src->end()) {
-            ret += str.get()->str_value;
+            ret += str.get()->str_value();
         }
     }
     return new StrValue(ret);

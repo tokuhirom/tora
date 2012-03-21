@@ -110,13 +110,11 @@ SharedPtr<StrValue> Value::to_s() {
         return new StrValue(e->message());
     }
     case VALUE_TYPE_RANGE: {
-        SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<RangeValue>()->left->int_value();
+        os << this->upcast<RangeValue>()->left()->int_value();
         os << "..";
-        os << this->upcast<RangeValue>()->right->int_value();
-        v->set_str(os.str());
-        return v;
+        os << this->upcast<RangeValue>()->right()->int_value();
+        return new StrValue(os.str());
     }
     default: {
         throw new ExceptionValue("%s don't support stringification.\n", this->type_str());
@@ -138,12 +136,12 @@ int Value::to_int() {
     } else if (value_type == VALUE_TYPE_STR) {
         StrValue *s = this->upcast<StrValue>();
         errno = 0;
-        char *endptr = (char*)(s->str_value.c_str()+s->str_value.size());
-        long ret = strtol(s->str_value.c_str(), &endptr, 10);
+        char *endptr = (char*)(s->str_value().c_str()+s->str_value().size());
+        long ret = strtol(s->str_value().c_str(), &endptr, 10);
         if (errno == 0) {
             return ret;
         } else if (errno == EINVAL) {
-            throw new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
+            throw new ExceptionValue("String contains non numeric character: %s", s->str_value().c_str());
         } else if (errno == ERANGE) {
             // try to the bigint?
             TODO();

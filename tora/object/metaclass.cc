@@ -25,7 +25,7 @@ static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) 
     SharedPtr<StrValue> methname = methname_v->to_s();
     ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     Package * pkg = vm->find_package(pkgid);
-    return BoolValue::instance(pkg->has_method(vm->symbol_table->get_id(methname->str_value)));
+    return BoolValue::instance(pkg->has_method(vm->symbol_table->get_id(methname->str_value())));
 }
 
 /**

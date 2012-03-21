@@ -9,6 +9,9 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <deque>
+
+#include <boost/variant.hpp>
 
 #include "tora.h"
 #include "shared_ptr.h"
@@ -45,6 +48,18 @@ class IntValue;
 class DoubleValue;
 class StrValue;
 class BoolValue;
+class RangeValue;
+
+class RangeImpl {
+    friend class RangeValue;
+protected:
+    SharedPtr<IntValue> left_;
+    SharedPtr<IntValue> right_;
+    RangeImpl(IntValue* l, IntValue *r) : left_(l), right_(r) {
+    }
+};
+
+
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -64,13 +79,19 @@ public:
         ++refcnt;
     }
 protected:
+    typedef std::deque<SharedPtr<Value>> ArrayImpl;
+
     Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
-    union {
-        int int_value_;
-        double double_value_;
-    };
+    boost::variant<
+        int,
+        double,
+        std::string,
+        RangeImpl,
+        ArrayImpl,
+        boost::blank
+    > value_;
 public:
     value_type_t value_type;
     Value& operator=(const Value&v);

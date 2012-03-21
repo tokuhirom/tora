@@ -34,8 +34,8 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
         SharedPtr<Value> s(v->to_s());
-        // printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
-        fwrite(s->upcast<StrValue>()->str_value.c_str(), sizeof(char), s->upcast<StrValue>()->str_value.size(), stdout);
+        // printf("%s\n", s->upcast<StrValue>()->str_value().c_str());
+        fwrite(s->upcast<StrValue>()->str_value().c_str(), sizeof(char), s->upcast<StrValue>()->str_value().size(), stdout);
         fputc('\n', stdout);
     }
     return UndefValue::instance();
@@ -65,7 +65,7 @@ static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
         SharedPtr<Value> s(v->to_s());
-        printf("%s", s->upcast<StrValue>()->str_value.c_str());
+        printf("%s", s->upcast<StrValue>()->str_value().c_str());
     }
     return UndefValue::instance();
 }
