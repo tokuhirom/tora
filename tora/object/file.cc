@@ -7,7 +7,7 @@ using namespace tora;
 
 inline static FILE *FP(Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
-    return self->upcast<FileValue>()->fp;
+    return self->upcast<FileValue>()->fp();
 }
 
 /*

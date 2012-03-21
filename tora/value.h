@@ -92,6 +92,8 @@ protected:
         ArrayImpl,
         HashImpl,
         void*,
+        Value*,
+        FILE *,
         boost::blank
     > value_;
 public:

@@ -6,8 +6,6 @@
 namespace tora {
 
 class ReferenceValue: public Value {
-private:
-    Value* value_;
 public:
     ReferenceValue(Value * v): Value(VALUE_TYPE_REFERENCE) {
         v->retain();
@@ -17,7 +15,7 @@ public:
         this->value_->release();
         this->value_ = NULL;
     }
-    Value *value() const { return value_; }
+    Value *value() const { return boost::get<Value*>(value_); }
 };
 
 };
