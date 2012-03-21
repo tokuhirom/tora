@@ -45,7 +45,7 @@ bool Value::to_bool() {
     case VALUE_TYPE_UNDEF:
         return false;
     case VALUE_TYPE_BOOL:
-        return static_cast<BoolValue*>(this)->bool_value;
+        return static_cast<BoolValue*>(this)->bool_value();
     default:
         return true;
     }
@@ -100,7 +100,7 @@ SharedPtr<StrValue> Value::to_s() {
         return v;
     }
     case VALUE_TYPE_BOOL: {
-        return new StrValue(this->upcast<BoolValue>()->bool_value ? "true" : "false");
+        return new StrValue(this->upcast<BoolValue>()->bool_value() ? "true" : "false");
     }
     case VALUE_TYPE_UNDEF: {
         return new StrValue("undef");

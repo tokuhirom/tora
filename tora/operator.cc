@@ -228,7 +228,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
         break;
     }
     case VALUE_TYPE_BOOL: {
-        return lhs->upcast<BoolValue>()->bool_value == rhs->to_bool();
+        return lhs->upcast<BoolValue>()->bool_value() == rhs->to_bool();
     }
     case VALUE_TYPE_UNDEF: {
         return rhs->value_type == VALUE_TYPE_UNDEF;

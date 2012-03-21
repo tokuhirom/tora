@@ -59,8 +59,6 @@ protected:
     }
 };
 
-
-
 // TODO: remove virtual from this class for performance.
 /**
  * The value class
@@ -88,10 +86,12 @@ protected:
     boost::variant<
         int,
         double,
+        bool,
         std::string,
         RangeImpl,
         ArrayImpl,
         HashImpl,
+        void*,
         boost::blank
     > value_;
 public:

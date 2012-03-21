@@ -2,6 +2,7 @@
 #define TORA_REGEXP_H_
 
 #include "../value.h"
+
 #include <re2/re2.h>
 
 namespace tora {
@@ -31,7 +32,9 @@ public:
 
 class RE2RegexpValue : public AbstractRegexpValue {
 private:
-    RE2 *re_value;
+    RE2* VAL() const {
+        return static_cast<RE2*>(boost::get<void*>(this->value_));
+    }
 public:
     RE2RegexpValue(std::string &str, int flags) : AbstractRegexpValue(flags) {
         RE2::Options opt;
@@ -42,22 +45,22 @@ public:
         if (flags & REGEXP_IGNORECASE) {
             opt.set_case_sensitive(false);
         }
-        re_value = new RE2(str, opt);
+        value_ = (void*)new RE2(str, opt);
     }
     ~RE2RegexpValue() {
-        delete re_value;
+        delete VAL();
     }
     bool ok() {
-        return this->re_value->ok();
+        return VAL()->ok();
     }
     const std::string& pattern() {
-        return this->re_value->pattern();
+        return VAL()->pattern();
     }
     const std::string& error() {
-        return this->re_value->error();
+        return VAL()->error();
     }
     bool match(const std::string &str) const {
-        return RE2::PartialMatch(str, *(this->re_value));
+        return RE2::PartialMatch(str, *(VAL()));
     }
     static std::string quotemeta(const std::string &str) {
         return RE2::QuoteMeta(str);
@@ -66,15 +69,15 @@ public:
         // optimizable
         std::string buf(str);
         if (this->flags() & REGEXP_GLOBAL) {
-            replacements = RE2::GlobalReplace(&buf, *(this->re_value), rewrite);
+            replacements = RE2::GlobalReplace(&buf, *(VAL()), rewrite);
         } else {
-            replacements = RE2::Replace(&buf, *(this->re_value), rewrite);
+            replacements = RE2::Replace(&buf, *(VAL()), rewrite);
         }
         return buf;
     }
     void dump(int indent) {
         print_indent(indent);
-        printf("/%s/", re_value->pattern().c_str());
+        printf("/%s/", VAL()->pattern().c_str());
     }
 };
 
