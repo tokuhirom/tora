@@ -19,7 +19,7 @@ sub import {
 
         my ($in, $out, $err);
         $err = gensym;
-        my $pid = open3($in, $out, $err, './tora');
+        my $pid = open3($in, $out, $err, './bin/tora');
         print $in $code;
         close $in;
         my $ret = join('', <$out>);

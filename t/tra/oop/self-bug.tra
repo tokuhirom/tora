@@ -1,0 +1,14 @@
+$LIBPATH.push('t/lib/');
+use Basic;
+use Test::More *;
+
+is(typeof(Basic.new()), 'Basic');
+
+sub x() {
+    return Basic.new();
+}
+
+is(typeof(x()), 'Basic');
+
+done_testing;
+

@@ -1,7 +1,7 @@
 #include "nanotap.h"
-#include "../src/lexer.h"
-#include "../src/nodes.gen.h"
-#include "../src/parser.h"
+#include "../tora/lexer.h"
+#include "../tora/nodes.gen.h"
+#include "../tora/parser.h"
 #include <boost/scoped_ptr.hpp>
 #include <stdarg.h>
 
@@ -121,6 +121,13 @@ int main() {
             TOKEN_IS(SEMICOLON);
             TOKEN_IS(0);
         }
+    }
+    {
+        BEGIN("\"\\x23\";");
+        TOKEN_IS(STRING_LITERAL);
+        LVAL_STR_IS("#");
+        TOKEN_IS(SEMICOLON);
+        TOKEN_IS(0);
     }
     {
         BEGIN("\'{}\';");

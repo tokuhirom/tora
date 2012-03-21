@@ -32,7 +32,13 @@ OP_PUSH_STRING {
 
 OP_GETARG {
     int no = get_int_operand();
-    stack.push_back(stack.at(mark_stack.back() - no - 1));
+    int index = mark_stack.back() - no - 1;
+#if NDEBUG == 0
+    if (index >= stack.size()) {
+        dump_stack();
+    }
+#endif
+    stack.push_back(stack.at(index));
 }
 
 OP_SETARG {
@@ -65,19 +71,33 @@ OP_FUNCDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+    int pkgid = code->upcast<CodeValue>()->package_id;
+    if (!pkgid) {
+        pkgid = this->package_id();
+        code->upcast<CodeValue>()->package_id = pkgid;
+    }
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
 }
 
 OP_CLOSUREDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);
-    for (int i=0; i<get_int_operand(); i++) {
+
+    int closure_vars_cnt = get_int_operand();
+
+    for (int i=0; i<closure_vars_cnt; i++) {
         SharedPtr<Value> v = stack.back(); stack.pop_back();
         code->upcast<CodeValue>()->closure_vars->push_back(v);
     }
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    this->add_function(code->upcast<CodeValue>()->func_name_id, code);
+
+    int pkgid = code->upcast<CodeValue>()->package_id;
+    if (!pkgid) {
+        pkgid = this->package_id();
+        code->upcast<CodeValue>()->package_id = pkgid;
+    }
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
 }
 
 OP_GETCLOSURE {
@@ -184,18 +204,13 @@ OP_BUILTIN_FUNCALL {
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
     }
     ID id = funname->upcast<SymbolValue>()->id;
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
     this->call_native_func(iter->second, argcnt);
-    if (stack.back()->value_type == VALUE_TYPE_EXCEPTION) {
-        SharedPtr<Value> v = stack.back();
-        stack.pop_back();
-        this->die(v);
-    }
 }
 
 OP_NEXTSTATE {
@@ -207,7 +222,7 @@ OP_FUNCALL {
     SharedPtr<Value> funname(stack.back());
     stack.pop_back();
 
-    int argcnt = get_int_operand();
+    int argcnt = get_int_operand_high();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
         SharedPtr<TupleValue> t = stack.back()->upcast<TupleValue>();
         stack.pop_back();
@@ -224,31 +239,61 @@ OP_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-    const SharedPtr<Package>& pkg = this->package();
+    // TODO split this part to other op code for performance?
+    SharedPtr<Package> pkg = this->package();
+    int pkgid = get_int_operand_low();
+    if (pkgid != 0) {
+        pkg = this->find_package(pkgid);
+    }
     auto iter = pkg->find(id);
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
-        // printf("calling %s\n", funname->upcast<StrValue>()->str_value.c_str());
 
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
-        fframe->argcnt = argcnt;
-        fframe->code = code;
 
-        pc = -1;
-        this->ops = code->code_opcodes;
+        if (code->is_native()) {
+            assert(code->callback());
+            this->call_native_func(code->callback(), argcnt);
+        } else {
+            // TODO: vargs support
+            // TODO: kwargs support
+            int orig_argcnt = argcnt;
+            for (size_t i=0; i<code->code_params->size(); i++) {
+                if (argcnt <= i) {
+                    int def = code->code_defaults->at(i);
+                    if (def > 0) {
+                        pc = def;
+                        this->execute();
+                        ++argcnt;
+                        fframe->top++;
+                    } else {
+                        throw new ExceptionValue(
+                            "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
+                            this->symbol_table->id2name(pkg->id()).c_str(),
+                            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(),
+                            code->code_params->size(),
+                            orig_argcnt);
+                    }
+                }
+            }
 
-        // TODO: vargs support
-        // TODO: kwargs support
-        assert(argcnt == (int)code->code_params->size());
-        /**
-         *   +------+
-         * 0 | arg2 |
-         *   | arg1 | <- mark, frame->top
-         *   +------+
-         */
-        mark_stack.push_back(stack.size());
-        frame_stack->push_back(fframe);
+            fframe->argcnt = argcnt;
+            fframe->code = code;
+
+            pc = -1;
+            this->ops = code->code_opcodes;
+
+            // assert(argcnt == (int)code->code_params->size());
+            /**
+            *   +------+
+            * 0 | arg2 |
+            *   | arg1 | <- mark, frame->top
+            *   +------+
+            */
+            mark_stack.push_back(stack.size());
+            frame_stack->push_back(fframe);
+        }
     } else {
         this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
         // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
@@ -858,7 +903,7 @@ OP_PACKAGE_ENTER {
     PackageFrame* pframe = new PackageFrame(this, stack.size(), this->package_id());
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
-    this->package_id_ = package_id;
+    this->package_id(package_id);
 }
 
 OP_PACKAGE_LEAVE {
@@ -916,7 +961,7 @@ OP_LOCAL {
 
     std::string package;
     std::string moniker;
-    split_package(snode->upcast<StrValue>()->str_value, package, moniker);
+    split_package_varname(snode->upcast<StrValue>()->str_value, package, moniker);
 
     ID pkgid = symbol_table->get_id(package);
     ID vid = symbol_table->get_id(std::string("$") + moniker);
@@ -929,5 +974,16 @@ OP_LOCAL {
     pkg->set_variable(vid, UndefValue::instance());
 
     stack.pop_back();
+}
+
+OP_SET_PARENT {
+    const SharedPtr<Package> & pkg = this->package();
+    Package * super = this->find_package(get_int_operand());
+    if (super == pkg.get()) {
+        throw new ExceptionValue("You cannot make itself as superclass.");
+    }
+    assert(super);
+    pkg->superclass(super);
+    assert(pkg->superclass());
 }
 

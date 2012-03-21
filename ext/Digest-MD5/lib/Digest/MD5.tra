@@ -1,0 +1,36 @@
+use XSLoader;
+
+XSLoader.load("Digest::MD5");
+
+__END__
+
+NAME
+----
+
+Digest::MD5
+
+SYNOPSIS
+--------
+
+    use Digest::MD5;
+
+    md5_hex("hoge"); # => ea703e7aa1efda0064eaa507d9e8ab7e
+
+TODO
+----
+
+OOP interface
+
+    my $md5 = Digest::MD5.new();
+    $md5->append("hoge");
+    my $bytes = $md5->finish();
+
+md5() function.
+
+AUTHORS
+-------
+
+Copyright (C) 2012 Tokuhiro Matsuno.
+
+This library was licensed by http://tokuhirom.mit-license.org/.
+

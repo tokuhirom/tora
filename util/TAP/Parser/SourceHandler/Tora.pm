@@ -50,7 +50,7 @@ sub make_iterator {
     push @command, @{ $source->test_args || [] };
  
     return $class->iterator_class->new(
-        {   command => ['./tora', @command],
+        {   command => ['./bin/tora', @command],
             merge   => $source->merge
         }
     );

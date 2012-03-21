@@ -1,0 +1,14 @@
+Regexp matching.
+
+if "abracadabra".match(/ab/) -> $n {
+}
+
+if (my $matched = "abracadabra".match(/ab/)) {
+}
+
+if "abracadabra" ~~ /(ab)/ -> $n {
+}
+
+"abracadabra".match(/(ab/), -> $n {
+})
+

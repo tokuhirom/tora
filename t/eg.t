@@ -5,7 +5,7 @@ use Test::More;
 
 for my $fname (glob('eg/t/*.tra')) {
     my $src = slurp($fname);
-    my $result = `./tora $fname`;
+    my $result = `./bin/tora $fname`;
     if (my ($expected) = ($src =~ /\n__END__\n(.+)/s)) {
         is($result, $expected, $fname);
     } else {

@@ -2,5 +2,16 @@ use Test::More *;
 
 is(Time.new(1330493590).strftime("%Y-%m-%d(%a) %T %zZ"), '2012-02-29(Wed) 14:33:10 +0900Z');
 
+is(typeof(Time.now()), 'Time');
+my $t = Time.new(1330493590);
+is($t.year, 2012);
+is($t.month, 2);
+is($t.day, 29);
+is($t.day_of_week, 4);
+is($t.hour, 14);
+is($t.minute, 33);
+is($t.min, 33);
+is($t.second, 10);
+
 done_testing();
 

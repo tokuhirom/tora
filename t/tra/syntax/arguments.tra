@@ -1,0 +1,24 @@
+use Test::More *;
+
+my $__a=4649;
+my $__b=5963;
+
+sub foo($a, $b) {
+    is($a, 1);
+    is($b, 2);
+}
+
+sub bar($a, $b=4) {
+    $__a = $a;
+    $__b = $b;
+}
+
+foo(1,2);
+
+{
+    bar(3);
+    is($__a, 3);
+    is($__b, 4);
+}
+
+done_testing;

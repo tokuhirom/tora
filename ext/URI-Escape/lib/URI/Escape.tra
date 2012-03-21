@@ -1,0 +1,19 @@
+use XSLoader;
+
+XSLoader.load('URI::Escape');
+
+__END__
+
+NAME
+====
+
+URI::Escape - URI escape/unescape library for tora.
+
+SYNOPSIS
+========
+
+    use URI::Escape *;
+
+    uri_escape('ほげ'); # => "%E3%81%BB%E3%81%92"
+    uri_unescape('%E3%81%BB%E3%81%92'); # => ほげ
+

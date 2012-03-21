@@ -1,5 +1,5 @@
 #include "nanotap.h"
-#include "../src/value.h"
+#include "../tora/value.h"
 
 using namespace tora;
 

@@ -5,7 +5,8 @@ builtin functions
 -----------------
 
 stat()
-hex()
+alarm()
+system()
 
 builtin objects
 ---------------
@@ -19,9 +20,6 @@ Enumerable#reduce()
 Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
-dir('t').is_dir()
-dir('t').file($fname)
-dir('t').file($fname)
 
 open()
 open($fname, $mode, $encoding)
@@ -39,7 +37,13 @@ String#substr(n)
 String#substr(n, m)
 String#replace(regexp|str, code)
 String#replace(regexp|str, str)
-String#match(regexp|str, code)
+
+ErrnoException?
+
+generate document
+
+use POSIX::Glob *;
+glob('src/object/*.cc')
 
 syntax
 ------
@@ -57,13 +61,17 @@ syntax
  * continue
  * $PROGRAM_NAME($0)
  * fiber
- * inheritance
  * overload(+) {
       $a + $b;
    }
  * localize STDOUT
  * local Foo::method = sub { };
  * $1, $2, $3
+ * /xxx/x
+ * /xxx/s
+ * /xxx/m
+ * super()
+ * signal handler
 
 lambda
 ------
@@ -180,3 +188,14 @@ Array#map()
  * destructor in pure tora function
   * -x
   * DynaLoader
+hex()
+sqrt()
+ * $foo.bar; # ignore parens.
+dir('t').file($fname)
+ * inheritance
+String#match(regexp|str, code)
+XSLoader()
+Regexp.quotemeta
+ * /xxx/i
+ * /xxx/g
+

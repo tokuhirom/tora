@@ -1,0 +1,28 @@
+use Test::More *;
+
+is(sqrt(4.0), 2);
+# "abs", "atan2", "cos", "exp", "hex", "int", "log", "oct", "rand",
+# "sin", "sqrt", "srand",
+
+# abs
+is(abs(-3.14), 3.14);
+is(abs(3.14), 3.14);
+
+is(atan2(0, 0), 0);
+
+is(cos(0), 1);
+is(exp(0), 1);
+
+is(hex('0xAF'), 175);
+is(hex('aF'), 175);
+
+is(typeof(int('53')), 'Int');
+is(int('53'), 53);
+
+is(log(1), 0);
+
+is(oct('777'), 511);
+
+is(sin(0), 0);
+
+done_testing;
