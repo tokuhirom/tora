@@ -6,6 +6,7 @@
 #include "package.h"
 #include "inspector.h"
 #include "symbols.gen.h"
+#include "callback.h"
 
 #include "value/hash.h"
 #include "value/code.h"
@@ -354,7 +355,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
             // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
-            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
+            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id(), v);
         } else {
             // copy non-code value to other package?
         }
@@ -364,7 +365,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
 }
 
 void VM::add_function(ID pkgid, ID id, SharedPtr<Value> code) {
-    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id).c_str());
+    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id()).c_str());
     this->find_package(pkgid)->add_function(id, code);
 }
 
@@ -539,11 +540,11 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     fframe->self = self;
 
     pc = -1;
-    this->ops = code->code_opcodes;
+    this->ops = code->code_opcodes();
 
     // TODO: vargs support
     // TODO: kwargs support
-    assert(argcnt == (int)code->code_params->size());
+    assert(argcnt == (int)code->code_params()->size());
     mark_stack.push_back(stack.size());
     frame_stack->push_back(fframe);
 }
@@ -651,11 +652,11 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
             fframe->self = object;
 
             pc = -1;
-            this->ops = code->code_opcodes;
+            this->ops = code->code_opcodes();
 
             // TODO: vargs support
             // TODO: kwargs support
-            assert(argcnt == (int)code->code_params->size());
+            assert(argcnt == (int)code->code_params()->size());
             mark_stack.push_back(stack.size());
             frame_stack->push_back(fframe);
         }

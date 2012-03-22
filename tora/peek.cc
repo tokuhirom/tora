@@ -30,11 +30,11 @@ void tora::peek(VM *vm, const Value * v) {
         }
         case VALUE_TYPE_CODE: {
             if (vm) {
-                printf("  PACKAGE: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->package_id).c_str());
-                printf("  FUNC_NAME: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->func_name_id).c_str());
+                printf("  PACKAGE: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->package_id()).c_str());
+                printf("  FUNC_NAME: %s\n", vm->symbol_table->id2name(static_cast<const CodeValue*>(v)->func_name_id()).c_str());
             } else {
-                printf("  PACKAGE_ID: %d\n", static_cast<const CodeValue*>(v)->package_id);
-                printf("  FUNC_NAME_ID: %d\n", static_cast<const CodeValue*>(v)->func_name_id);
+                printf("  PACKAGE_ID: %d\n", static_cast<const CodeValue*>(v)->package_id());
+                printf("  FUNC_NAME_ID: %d\n", static_cast<const CodeValue*>(v)->func_name_id());
             }
             break;
         }

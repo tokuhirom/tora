@@ -2,12 +2,14 @@
 #define TORA_OP_H_
 
 #include "ops.gen.h"
-#include "value.h"
 #include "shared_ptr.h"
+#include "prim.h"
 
 namespace tora {
 
-class OP : public Prim {
+class Value;
+
+class OP {
     PRIM_DECL(OP);
 public:
     op_type_t op_type;

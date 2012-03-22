@@ -73,12 +73,12 @@ OP_FUNCDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    int pkgid = code->upcast<CodeValue>()->package_id;
+    int pkgid = code->upcast<CodeValue>()->package_id();
     if (!pkgid) {
         pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id = pkgid;
+        code->upcast<CodeValue>()->package_id(pkgid);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_CLOSUREDEF {
@@ -90,16 +90,16 @@ OP_CLOSUREDEF {
 
     for (int i=0; i<closure_vars_cnt; i++) {
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        code->upcast<CodeValue>()->closure_vars->push_back(v);
+        code->upcast<CodeValue>()->closure_vars()->push_back(v);
     }
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
-    int pkgid = code->upcast<CodeValue>()->package_id;
+    int pkgid = code->upcast<CodeValue>()->package_id();
     if (!pkgid) {
         pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id = pkgid;
+        code->upcast<CodeValue>()->package_id(pkgid);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_GETCLOSURE {
@@ -115,9 +115,9 @@ OP_GETCLOSURE {
     assert(frame.get());
     int i = get_int_operand();
     assert(frame->code);
-    assert(frame->code->func_name_id);
-    assert(i < frame->code->upcast<CodeValue>()->closure_vars->size());
-    SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars->at(i);
+    assert(frame->code->func_name_id());
+    assert(i < frame->code->upcast<CodeValue>()->closure_vars()->size());
+    SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars()->at(i);
     stack.push_back(v);
 }
 
@@ -133,7 +133,7 @@ OP_SETCLOSURE {
     assert(frame.get());
     int i = get_int_operand();
     SharedPtr<Value> v = stack.back();
-    SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars))[i];
+    SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars()))[i];
     dump_value(dst);
     *dst = *v;
 }
@@ -265,13 +265,13 @@ OP_FUNCALL {
             // TODO: kwargs support
             int orig_argcnt = argcnt;
             int start_stack_size = stack.size() - argcnt;
-            this->ops = code->code_opcodes;
+            this->ops = code->code_opcodes();
 
 // printf("PARAM count: %zd\n", code->code_params->size());
-            for (size_t i=0; i<code->code_params->size(); i++) {
+            for (size_t i=0; i<code->code_params()->size(); i++) {
 // printf("PARAMS: %zd\n", i);
                 if (argcnt <= i) {
-                    int def = code->code_defaults->at(i);
+                    int def = code->code_defaults()->at(i);
 // printf("default! %d\n", def);
                     if (def >= 0) {
                         pc = def;
@@ -296,7 +296,7 @@ OP_FUNCALL {
                             "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
                             this->symbol_table->id2name(pkg->id()).c_str(),
                             this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
-                            code->code_params->size(),
+                            code->code_params()->size(),
                             orig_argcnt);
                     }
                 }

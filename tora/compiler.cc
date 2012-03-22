@@ -523,9 +523,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             node->lineno
         );
         assert(params);
-        code->code_params = params;
-        code->code_opcodes = funccomp.ops;
-        code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
+        code->code_params(params);
+        code->code_opcodes(funccomp.ops);
+        code->closure_var_names(new std::vector<std::string>(*funccomp.closure_vars));
 
         // if (funccomp.closure_vars->size() > 0) {
             // create closure
@@ -640,12 +640,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             node->lineno
         );
         assert(params);
-        code->package_id = splitted ? symbol_table->get_id(package) : 0;
-        code->code_id = this->symbol_table->get_id(package + "::" + funcname);
-        code->code_params = params;
-        code->code_defaults = defaults;
-        code->code_opcodes = funccomp.ops;
-        code->closure_var_names = new std::vector<std::string>(*funccomp.closure_vars);
+        // code->code_id = this->symbol_table->get_id(package + "::" + funcname);
+        code->code_params(params);
+        code->code_defaults(defaults);
+        code->code_opcodes(funccomp.ops);
+        code->closure_var_names(new std::vector<std::string>(*funccomp.closure_vars));
 
         SharedPtr<StrValue> funcname_value = new StrValue(funcname);
         if (funccomp.closure_vars->size() > 0) {
@@ -1392,6 +1391,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         this->push_block(BLOCK_TYPE_CLASS);
         std::string klass_name = n->klass()->upcast<StrNode>()->str_value;
+        std::string orig_pkgname(this->package_);
+        this->package_ = klass_name;
         ID package_id = this->symbol_table->get_id(
             /*
               this->package() == "main"
@@ -1416,6 +1417,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         push_op(new OP(OP_PACKAGE_LEAVE));
         this->pop_block();
+
+        this->package_ = orig_pkgname;
 
         this->in_class_context = false;
 

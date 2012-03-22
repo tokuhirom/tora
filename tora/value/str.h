@@ -8,7 +8,7 @@ namespace tora {
 class StrValue: public Value {
 public:
     StrValue(): Value(VALUE_TYPE_STR) {
-        value_ = "";
+        value_ = std::string("");
     }
     StrValue(const char *str): Value(VALUE_TYPE_STR) {
         value_ = std::string(str);

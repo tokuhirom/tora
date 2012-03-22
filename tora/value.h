@@ -17,6 +17,7 @@
 #include "shared_ptr.h"
 #include "prim.h"
 #include "util.h"
+#include "op_array.h"
 
 namespace tora {
 
@@ -50,6 +51,9 @@ class DoubleValue;
 class StrValue;
 class BoolValue;
 class RangeValue;
+
+class CallbackFunction;
+class OPArray;
 
 class RangeImpl {
     friend class RangeValue;
@@ -107,8 +111,7 @@ protected:
         void*,
         Value*,
         FILE *,
-        ObjectImpl,
-        boost::blank
+        ObjectImpl
     > any_t;
 
     Value(value_type_t t) : refcnt(0), value_type(t) { }

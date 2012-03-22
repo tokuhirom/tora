@@ -4,6 +4,7 @@
 #include "../value/code.h"
 #include "../package.h"
 #include "../frame.h"
+#include "../callback.h"
 
 using namespace tora;
 
@@ -14,27 +15,27 @@ using namespace tora;
  */
 static SharedPtr<Value> code_package(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->package_id));
+    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->package_id()));
 }
 
 static SharedPtr<Value> code_name(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->func_name_id));
+    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->func_name_id()));
 }
 
 static SharedPtr<Value> code_line(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new IntValue(self->upcast<CodeValue>()->lineno);
+    return new IntValue(self->upcast<CodeValue>()->lineno());
 }
 
 static SharedPtr<Value> code_filename(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(self->upcast<CodeValue>()->filename);
+    return new StrValue(self->upcast<CodeValue>()->filename());
 }
 
 static SharedPtr<Value> code_is_closure(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new BoolValue(self->upcast<CodeValue>()->closure_var_names->size() > 0);
+    return new BoolValue(self->upcast<CodeValue>()->closure_var_names()->size() > 0);
 }
 
 /**

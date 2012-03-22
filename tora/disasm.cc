@@ -1,6 +1,7 @@
 #include "disasm.h"
 #include "shared_ptr.h"
 #include "op.h"
+#include "value.h"
 
 using namespace tora;
 
