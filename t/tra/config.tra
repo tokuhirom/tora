@@ -1,0 +1,6 @@
+use Test::More *;
+use Config *;
+
+p(tora_config());
+
+done_testing;
