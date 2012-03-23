@@ -5,11 +5,11 @@ KNOWN BUGS LIST
 
 * { say("HELLO") } should works.
 * for (my $i in [1]) { ... } should works
-* 3/0.5 segv
-* zero divided error
+* zero divided error handling on tora level.
 * close directory at destructor
 * my $i=4; my $a = -> { $i+=4; }; $a.(undef); p($i)
 * (-> { 3 }).();
+* possibly memory leaks in global destruction.
 
 __END__
 use Test::More *;

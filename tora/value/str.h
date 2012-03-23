@@ -13,6 +13,9 @@ public:
     StrValue(const char *str): Value(VALUE_TYPE_STR) {
         value_ = std::string(str);
     }
+    StrValue(const char *str, size_t t): Value(VALUE_TYPE_STR) {
+        value_ = std::string(str, t);
+    }
     StrValue(const std::string str): Value(VALUE_TYPE_STR) {
         value_ = str;
     }

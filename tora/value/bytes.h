@@ -27,6 +27,9 @@ public:
         value_ = s;
     }
     int length();
+    size_t size() {
+        return VAL().size();
+    }
     void set_str(const std::string & s) {
         value_ = s;
     }

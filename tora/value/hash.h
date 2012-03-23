@@ -22,6 +22,9 @@ public:
     HashValue() : Value(VALUE_TYPE_HASH) {
         this->value_ = HashImpl();
     }
+    void clear() {
+        VAL().clear();
+    }
     SharedPtr<Value> get(const std::string &key) {
         return VAL()[key];
     }
@@ -32,10 +35,9 @@ public:
     iter begin() { return VAL().begin(); }
     iter end()   { return VAL().end(); }
 
-    SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();
         this->set(s->str_value(), v);
-        return UndefValue::instance();
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
         SharedPtr<StrValue> s = index->to_s();
