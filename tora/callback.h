@@ -13,6 +13,7 @@ struct CallbackFunction {
         type_vm2 = -4,
         type_vm3 = -5,
         type_vm4 = -6,
+        type_const_int = 1,
     } callback_type_t;
     typedef SharedPtr<Value> (*func_vmv_t)(VM *, const std::vector<SharedPtr<Value>>&);
     typedef SharedPtr<Value> (*func_vm0_t)(VM *);
@@ -27,6 +28,7 @@ struct CallbackFunction {
         func_vm2_t func_vm2;
         func_vm3_t func_vm3;
         func_vm4_t func_vm4;
+        int const_int;
     };
     int argc;
     CallbackFunction(func_vmv_t func_) : argc(type_vmv) { func_vmv = func_; }
@@ -35,6 +37,7 @@ struct CallbackFunction {
     CallbackFunction(func_vm2_t func_) : argc(type_vm2) { func_vm2 = func_; }
     CallbackFunction(func_vm3_t func_) : argc(type_vm3) { func_vm3 = func_; }
     CallbackFunction(func_vm4_t func_) : argc(type_vm4) { func_vm4 = func_; }
+    CallbackFunction(int n)            : argc(type_const_int) { const_int = n; }
 };
 
 };

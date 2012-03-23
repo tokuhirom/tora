@@ -27,8 +27,11 @@ public:
     void add_function(ID function_name_id, const SharedPtr<Value> &code);
 
     void add_method(ID function_name_id, const CallbackFunction* code);
+    void add_method(const std::string& function_name_id, const CallbackFunction* code);
     bool has_method(ID function_name_id);
     void set_variable(ID var_name_id, const SharedPtr<Value> & v);
+    void add_constant(const std::string &, int n);
+    void add_constant(ID function_name_id, int n);
 
     void superclass(Package * super) {
         superclass_ = super;

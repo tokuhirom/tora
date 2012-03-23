@@ -39,6 +39,9 @@ void Package::add_function(ID function_name_id, const SharedPtr<Value>& code) {
 }
 
 // native
+void Package::add_method(const std::string& function_name_id, const CallbackFunction* code) {
+    this->add_method(vm_->symbol_table->get_id(function_name_id), code);
+}
 void Package::add_method(ID function_name_id, const CallbackFunction* code) {
     SharedPtr<CodeValue> cv = new CodeValue(this->name_id, function_name_id, code);
     // printf("package!! %d::%d\n", name_id, function_name_id);
@@ -55,5 +58,16 @@ void Package::set_variable(ID var_name_id, const SharedPtr<Value> & v) {
  */
 bool Package::has_method(ID function_name_id) {
     return this->find(function_name_id) != this->end();
+}
+
+/**
+ * register constant variable.
+ */
+void Package::add_constant(const std::string& function_name_id, int n) {
+    this->add_constant(vm_->symbol_table->get_id(function_name_id), n);
+}
+
+void Package::add_constant(ID id, int n) {
+    this->add_method(id, new CallbackFunction(n));
 }
 
