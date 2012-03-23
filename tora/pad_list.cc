@@ -9,10 +9,12 @@ using namespace tora;
 
 PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
 // printf("VARS: %d\n", vars_cnt);
+   /*
     for (int i=0; i<vars_cnt; i++) {
         SharedPtr<Value> v = UndefValue::instance();
         pad_.push_back(v);
     }
+    */
 }
 
 void PadList::dump(VM *vm) {
@@ -28,7 +30,15 @@ void PadList::dump(VM *vm) {
 
 void PadList::set(int index, const SharedPtr<Value> & val) {
     assert(val.get());
-    val->retain();
+
+    // This retain is required?????????????????????????
+    //
+    // val->retain();
+    //
+    //
+    //
+    //
+
     pad_.set_item(index, val);
     assert(pad_.at(index)->value_type == val->value_type);
 }

@@ -6,7 +6,6 @@ class Foo {
         self.bless(4649);
     }
     sub DESTROY() {
-    say("DESTROY");
         $n = ${self};
     }
 }

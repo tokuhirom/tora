@@ -541,7 +541,7 @@ OP_LE {
 }
 
 OP_SETLOCAL {
-    SharedPtr<Value> rvalue = stack.back();
+    const SharedPtr<Value> &rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         frame_stack->back()->set_variable(
             get_int_operand(),
@@ -589,28 +589,13 @@ OP_GETDYNAMIC {
 
     // dump_frame();
     //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
-    if (v) {
-        DBG2("found lexical var\n");
-        stack.push_back(v);
-    } else { // TODO: remove this and use 'my' keyword?
-        DBG2("There is no variable...\n");
-        v = UndefValue::instance();
-        frame_stack->back()->set_variable_dynamic(level, no, v);
-        stack.push_back(v);
-    }
+    stack.push_back(v);
 }
 
 OP_GETLOCAL {
     // lexical vars
     SharedPtr<Value>v = frame_stack->back()->get_variable(get_int_operand());
-    if (v.get()) {
-        // printf("found lexical var\n");
-        stack.push_back(v);
-    } else { // TODO: remove this and use 'my' keyword?
-        v = UndefValue::instance();
-        frame_stack->back()->set_variable(get_int_operand(), v);
-        stack.push_back(v);
-    }
+    stack.push_back(v);
 }
 
 OP_GET_ITEM {
