@@ -27,7 +27,7 @@ public:
         operand.int_value = (((high)&0x0000ffff) << 16) | (low&0x0000ffff);
     }
     // This is not a virtual destructor. Do not define destructor in child class.
-    ~OP() { }
+    virtual ~OP() { }
 
     template<class Y>
     Y* upcast() {
@@ -49,7 +49,6 @@ public:
         : OP(type)
         , value(v) {
     }
-    ~ValueOP() { }
 };
 
 };

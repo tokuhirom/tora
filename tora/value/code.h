@@ -29,7 +29,7 @@ private:
     // std::string code_name_;
     boost::shared_ptr<std::vector<std::string>> code_params_;
     boost::shared_ptr<std::vector<int>> code_defaults_;
-    std::vector<std::string> *closure_var_names_;
+    boost::shared_ptr<std::vector<std::string>> closure_var_names_;
     // std::vector<SharedPtr<Value>> *closure_vars_;
     SharedPtr<PadList> pad_list_;
     SharedPtr<OPArray> code_opcodes_;
@@ -48,7 +48,7 @@ public:
         , package_id_(package_id)
         , func_name_id_(func_name_id)
         , code_params_(code_params)
-        , closure_var_names_(NULL)
+        // , closure_var_names_(NULL)
         , filename_(filename)
         , lineno_(lineno)
         {
@@ -62,7 +62,7 @@ public:
         , package_id_(package_id)
         , func_name_id_(func_name_id)
         // , code_params_(NULL)
-        , closure_var_names_(NULL)
+        // , closure_var_names_(NULL)
         , lineno_(-1) {
     }
     ~CodeValue();
@@ -79,10 +79,10 @@ public:
     const SharedPtr<OPArray>& code_opcodes() const {
         return code_opcodes_;
     }
-    void closure_var_names(std::vector<std::string> *closure_var_names_) {
-        closure_var_names_ = closure_var_names_;
+    void closure_var_names(const boost::shared_ptr<std::vector<std::string>> &closure_var_names__) {
+        closure_var_names_ = closure_var_names__;
     }
-    std::vector<std::string>*closure_var_names() const {
+    boost::shared_ptr<std::vector<std::string>> closure_var_names() const {
         return closure_var_names_;
     }
     void code_defaults(const boost::shared_ptr<std::vector<int>> &c) {

@@ -75,13 +75,12 @@ Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_, const std::strin
     symbol_table = symbol_table_;
     dump_ops = false;
     package_ = "main";
-    closure_vars = new std::vector<std::string>();
+    closure_vars.reset(new std::vector<std::string>());
     in_loop_context = false;
 }
 Compiler::~Compiler() {
     delete global_vars;
     delete blocks;
-    delete closure_vars;
 }
 
 void Compiler::push_op(OP * op) {
@@ -529,7 +528,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         );
         assert(params);
         code->code_opcodes(funccomp.ops);
-        code->closure_var_names(new std::vector<std::string>(*funccomp.closure_vars));
+        code->closure_var_names(funccomp.closure_vars);
 
         // if (funccomp.closure_vars->size() > 0) {
             // create closure
@@ -636,19 +635,19 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
-        SharedPtr<CodeValue> code = new CodeValue(
+        SharedPtr<CodeValue> code(new CodeValue(
             this->symbol_table->get_id(package), // package id
             this->symbol_table->get_id(funcname),        // func name id
             filename_,
             node->lineno,
             params
-        );
+        ));
         assert(params);
         // code->code_id = this->symbol_table->get_id(package + "::" + funcname);
         code->code_params(params);
         code->code_defaults(defaults);
         code->code_opcodes(funccomp.ops);
-        code->closure_var_names(new std::vector<std::string>(*funccomp.closure_vars));
+        code->closure_var_names(funccomp.closure_vars);
 
         SharedPtr<StrValue> funcname_value = new StrValue(funcname);
         if (1 && funccomp.closure_vars->size() > 0) {
@@ -673,7 +672,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             push_op(define_method);
         }
 
-        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
+        push_op(new ValueOP(OP_PUSH_VALUE, code));
 
         break;
     }

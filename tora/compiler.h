@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace tora {
 
@@ -44,7 +45,7 @@ public:
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Block>> *blocks;
     std::vector<std::string> *global_vars;
-    std::vector<std::string> *closure_vars;
+    boost::shared_ptr<std::vector<std::string>> closure_vars;
     SharedPtr<SymbolTable> symbol_table;
     int error;
     bool in_try_block;

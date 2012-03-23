@@ -5,7 +5,6 @@
 using namespace tora;
 
 CodeValue::~CodeValue() {
-// printf("REMOVED CODEVALUE\n");
     /*
     if (code_params_) {
         auto iter = code_params_->begin();
@@ -22,9 +21,10 @@ CodeValue::~CodeValue() {
         callback_ = NULL;
     }
 
+    /*
     delete closure_var_names_;
     closure_var_names_ = NULL;
-    /*
+
     if (closure_vars_) {
         delete closure_vars_;
         closure_vars_ = NULL;

@@ -12,7 +12,7 @@ void tora::peek(VM *vm, const SharedPtr<Value>& v) {
 
 void tora::peek(VM *vm, const Value * v) {
     if (v) {
-        printf("Value: %s(%P)\n", v->type_str(), v);
+        printf("Value: %s(%p)\n", v->type_str(), v);
         printf("  CODE SIZE: %zd\n", sizeof(CodeValue));
         printf("  STR SIZE: %zd\n", sizeof(StrValue));
         printf("  VALUE SIZE: %zd\n", sizeof(Value));
