@@ -28,11 +28,8 @@ void PadList::dump(VM *vm) {
 
 void PadList::set(int index, const SharedPtr<Value> & val) {
     assert(val.get());
-    if (pad_.size() <= index) {
-        pad_.resize(index+1);
-    }
-    // val->retain();
-    pad_.set(index, val);
+    val->retain();
+    pad_.set_item(index, val);
     assert(pad_.at(index)->value_type == val->value_type);
 }
 

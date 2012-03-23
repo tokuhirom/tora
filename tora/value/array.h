@@ -61,10 +61,6 @@ public:
     void resize(size_t n) {
         VAL().resize(n);
     }
-    void set(int i, const SharedPtr<Value> & val) {
-        ArrayImpl & a = VAL();
-        a[i] = val;
-    }
     // release after pop by your hand
     SharedPtr<Value> pop() {
         SharedPtr<Value> v = VAL().back();
@@ -78,7 +74,10 @@ public:
         return VAL()[i];
     }
     SharedPtr<Value> get_item(const SharedPtr<Value> &index);
-    Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
+    void set_item(int i, const SharedPtr<Value> &v);
+    void set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
+        this->set_item(index->to_int(), v);
+    }
 
     class iterator : public Value {
     public:

@@ -392,9 +392,10 @@ SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr
     case VALUE_TYPE_HASH:
         return container->upcast<HashValue>()->set_item(index, rvalue);
     case VALUE_TYPE_ARRAY:
-        return container->upcast<ArrayValue>()->set_item(index, rvalue);
+        container->upcast<ArrayValue>()->set_item(index, rvalue);
+        return UndefValue::instance();
     default:
-        return new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
+        throw new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
     }
 }
 

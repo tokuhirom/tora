@@ -37,8 +37,7 @@ SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
     }
 }
 
-Value* ArrayValue::set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
-    int i = index->to_int();
+void ArrayValue::set_item(int i, const SharedPtr<Value> &v) {
     if ((int)VAL().size()-1 < i) {
         for (int j=VAL().size()-1; j<i-1; j++) {
             this->push_back(UndefValue::instance());
@@ -47,6 +46,5 @@ Value* ArrayValue::set_item(const SharedPtr<Value>& index, const SharedPtr<Value
         VAL().erase(VAL().begin()+i);
     }
     VAL().insert(VAL().begin()+i, v);
-    return UndefValue::instance();
 }
 
