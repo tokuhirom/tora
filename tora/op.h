@@ -41,9 +41,13 @@ public:
 class ValueOP : public OP {
 public:
     SharedPtr<Value> value;
-    ValueOP(op_type_t type, SharedPtr<Value> v) {
-        this->op_type = type;
-        this->value = v;
+    ValueOP(op_type_t type, const SharedPtr<Value>& v)
+        : OP(type)
+        , value(v) {
+    }
+    ValueOP(op_type_t type, Value* v)
+        : OP(type)
+        , value(v) {
     }
     ~ValueOP() { }
 };

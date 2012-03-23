@@ -82,16 +82,20 @@ OP_FUNCDEF {
 }
 
 OP_CLOSUREDEF {
-    SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
+    SharedPtr<Value> code = stack.back();
+    stack.pop_back();
+
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);
 
-    int closure_vars_cnt = get_int_operand();
+    // int closure_vars_cnt = get_int_operand();
+    code->upcast<CodeValue>()->pad_list(this->frame_stack->back()->pad_list);
 
-    for (int i=0; i<closure_vars_cnt; i++) {
-        SharedPtr<Value> v = stack.back(); stack.pop_back();
-        code->upcast<CodeValue>()->closure_vars()->push_back(v);
-    }
+// printf("CLOSUREDEF --\n");
+//  for (int i=0; i<closure_vars_cnt; i++) {
+//      SharedPtr<Value> v = stack.back(); stack.pop_back();
+//      code->upcast<CodeValue>()->closure_vars()->push_back(v);
+//  }
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
     int pkgid = code->upcast<CodeValue>()->package_id();
@@ -113,12 +117,26 @@ OP_GETCLOSURE {
         }
     }
     assert(frame.get());
-    int i = get_int_operand();
+    int level = get_int_operand_high();
+    int no    = get_int_operand_low();
     assert(frame->code);
     assert(frame->code->func_name_id());
-    assert(i < frame->code->upcast<CodeValue>()->closure_vars()->size());
-    SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars()->at(i);
-    stack.push_back(v);
+    assert(frame->code->upcast<CodeValue>()->pad_list().get());
+    // assert(i < frame->code->upcast<CodeValue>()->closure_vars()->size());
+// printf("GETCLOSURE: %d, %d, %s\n", level, no, symbol_table->id2name(frame->code->func_name_id()).c_str());
+// dump_value(frame->code);
+// frame->code->upcast<CodeValue>()->pad_list()->dump(this);
+    if (level == 1) {
+        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get(
+            no
+        );
+        stack.push_back(v);
+    } else {
+        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get_dynamic(
+            level-1, no
+        );
+        stack.push_back(v);
+    }
 }
 
 OP_SETCLOSURE {
@@ -131,11 +149,24 @@ OP_SETCLOSURE {
         }
     }
     assert(frame.get());
-    int i = get_int_operand();
+    int level = get_int_operand_high();
+    int no    = get_int_operand_low();
     SharedPtr<Value> v = stack.back();
-    SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars()))[i];
-    dump_value(dst);
-    *dst = *v;
+    // SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars()))[i];
+    if (level == 1) {
+        frame->code->upcast<CodeValue>()->pad_list()->set(
+            no,
+            v
+        );
+    } else {
+        frame->code->upcast<CodeValue>()->pad_list()->set_dynamic(
+            level-1,
+            no,
+            v
+        );
+    }
+    // dump_value(dst);
+    // *dst = *v;
 }
 
 OP_ADD {
@@ -512,12 +543,12 @@ OP_LE {
 OP_SETLOCAL {
     SharedPtr<Value> rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
-        frame_stack->back()->setVar(
+        frame_stack->back()->set_variable(
             get_int_operand(),
             rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
         );
     } else {
-        frame_stack->back()->setVar(
+        frame_stack->back()->set_variable(
             get_int_operand(),
             rvalue
         );
@@ -529,15 +560,17 @@ OP_SETDYNAMIC {
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
-    const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
-    SharedPtr<Value> rvalue = stack.back();
+    // const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
+    const SharedPtr<Value> & rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
-        frame->setVar(
+        frame_stack->back()->set_variable_dynamic(
+            level,
             no,
             rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
         );
     } else {
-        frame->setVar(
+        frame_stack->back()->set_variable_dynamic(
+            level,
             no,
             rvalue
         );
@@ -548,8 +581,12 @@ OP_GETDYNAMIC {
     // lexical vars
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
+    /*
     const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
-    SharedPtr<Value>v = frame->find(no);
+    SharedPtr<Value>v = frame->get_variable(no);
+    */
+    SharedPtr<Value> v = frame_stack->back()->get_variable_dynamic(level, no);
+
     // dump_frame();
     //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
     if (v) {
@@ -558,20 +595,20 @@ OP_GETDYNAMIC {
     } else { // TODO: remove this and use 'my' keyword?
         DBG2("There is no variable...\n");
         v = UndefValue::instance();
-        frame->setVar(get_int_operand(), v);
+        frame_stack->back()->set_variable_dynamic(level, no, v);
         stack.push_back(v);
     }
 }
 
 OP_GETLOCAL {
     // lexical vars
-    SharedPtr<Value>v = frame_stack->back()->find(get_int_operand());
-    if (v) {
+    SharedPtr<Value>v = frame_stack->back()->get_variable(get_int_operand());
+    if (v.get()) {
         // printf("found lexical var\n");
         stack.push_back(v);
     } else { // TODO: remove this and use 'my' keyword?
         v = UndefValue::instance();
-        frame_stack->back()->setVar(get_int_operand(), v);
+        frame_stack->back()->set_variable(get_int_operand(), v);
         stack.push_back(v);
     }
 }

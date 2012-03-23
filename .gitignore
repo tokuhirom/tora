@@ -25,3 +25,5 @@ callgrind.out.*
 src/*/*.o-*
 src/*.o-*
 hoge.pl
+hoge.cc
+a.out

@@ -3,11 +3,15 @@
 #include "peek.h"
 #include "package.h"
 #include "value/code.h"
+#include "pad_list.h"
 
 using namespace tora;
 
-
 LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_) : refcnt(0), vm_(vm), vars(vars_cnt), top(top), type(type_) {
+    this->pad_list = new PadList(
+        vars_cnt,
+        (vm->frame_stack->size() > 0) ? vm->frame_stack->back()->pad_list.get() : NULL
+    );
 }
 
 LexicalVarsFrame::~LexicalVarsFrame() {
@@ -20,6 +24,15 @@ LexicalVarsFrame::~LexicalVarsFrame() {
         const SharedPtr<DynamicScopeData> & dat = *iter;
         dat->package()->set_variable(dat->moniker_id(), dat->value());
     }
+}
+
+void LexicalVarsFrame::set_variable_dynamic(int level, int no, const SharedPtr<Value>& v) {
+    this->pad_list->set_dynamic(level, no, v);
+    assert(this->pad_list->get_dynamic(level, no).get() == v.get());
+}
+
+SharedPtr<Value> LexicalVarsFrame::get_variable_dynamic(int level, int no) const {
+    return pad_list->get_dynamic(level, no).get();
 }
 
 void LexicalVarsFrame::push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target) {

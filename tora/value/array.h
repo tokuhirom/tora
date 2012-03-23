@@ -16,6 +16,7 @@ private:
     }
 public:
     typedef ArrayImpl::iterator iterator2;
+    typedef ArrayImpl::const_iterator const_iterator;
 
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
         this->value_ = std::deque<SharedPtr<Value>>();
@@ -27,6 +28,8 @@ public:
 
     iterator2 begin() { return VAL().begin(); }
     iterator2 end()   { return VAL().end();   }
+    const_iterator begin() const { return VAL().begin(); }
+    const_iterator end()   const { return VAL().end();   }
 
     // retain before push
     void push(Value *v) {
@@ -52,8 +55,15 @@ public:
     void pop_front() {
         VAL().pop_front();
     }
-    size_t size() {
+    size_t size() const {
         return VAL().size();
+    }
+    void resize(size_t n) {
+        VAL().resize(n);
+    }
+    void set(int i, const SharedPtr<Value> & val) {
+        ArrayImpl & a = VAL();
+        a[i] = val;
     }
     // release after pop by your hand
     SharedPtr<Value> pop() {
@@ -63,6 +73,9 @@ public:
     }
     SharedPtr<Value>at(int i) const {
         return VAL().at(i);
+    }
+    SharedPtr<Value> operator[](int i) const {
+        return VAL()[i];
     }
     SharedPtr<Value> get_item(const SharedPtr<Value> &index);
     Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);

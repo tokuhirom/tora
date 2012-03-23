@@ -6,6 +6,19 @@
 
 using namespace tora;
 
+Package::~Package () {
+#ifndef NDEBUG
+/*
+printf("BYE! PACKAGE!: %s\n", vm_->symbol_table->id2name(name_id).c_str());
+*/
+    for (auto iter: data) {
+        if (iter.second->refcnt > 2) {
+            // printf("# Possibly memory leak: %s\n", vm_->symbol_table->id2name(iter.first).c_str());
+        }
+    }
+#endif
+}
+
 void Package::dump(VM *vm, int indent) {
     Inspector ins(vm);
 

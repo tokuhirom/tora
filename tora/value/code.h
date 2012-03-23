@@ -8,6 +8,9 @@
 #include "../op.h"
 #include "../shared_ptr.h"
 #include "../op_array.h"
+#include "../pad_list.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace tora {
 
@@ -24,10 +27,11 @@ private:
     ID func_name_id_;
     // ID code_id_;
     // std::string code_name_;
-    std::vector<std::string*> *code_params_;
-    std::vector<int> *code_defaults_;
+    boost::shared_ptr<std::vector<std::string>> code_params_;
+    boost::shared_ptr<std::vector<int>> code_defaults_;
     std::vector<std::string> *closure_var_names_;
-    std::vector<SharedPtr<Value>> *closure_vars_;
+    // std::vector<SharedPtr<Value>> *closure_vars_;
+    SharedPtr<PadList> pad_list_;
     SharedPtr<OPArray> code_opcodes_;
     std::string filename_;
     int lineno_;
@@ -37,18 +41,17 @@ public:
     const CallbackFunction* callback() const { return callback_; }
 
     // for tora functions
-    explicit CodeValue(ID package_id, ID func_name_id, const std::string &filename, int lineno)
+    explicit CodeValue(ID package_id, ID func_name_id, const std::string &filename, int lineno, const boost::shared_ptr<std::vector<std::string>> & code_params)
         : Value(VALUE_TYPE_CODE)
         , callback_(NULL)
         , is_native_(false)
         , package_id_(package_id)
         , func_name_id_(func_name_id)
-        , code_params_(NULL)
+        , code_params_(code_params)
         , closure_var_names_(NULL)
         , filename_(filename)
         , lineno_(lineno)
         {
-        this->closure_vars_ = new std::vector<SharedPtr<Value>>();
     }
 
     // for C++ functions
@@ -58,17 +61,16 @@ public:
         , is_native_(true)
         , package_id_(package_id)
         , func_name_id_(func_name_id)
-        , code_params_(NULL)
+        // , code_params_(NULL)
         , closure_var_names_(NULL)
         , lineno_(-1) {
-        this->closure_vars_ = new std::vector<SharedPtr<Value>>();
     }
     ~CodeValue();
 
-    void code_params(std::vector<std::string*> *v) {
+    void code_params(const boost::shared_ptr<std::vector<std::string>> & v) {
         code_params_ = v;
     }
-    std::vector<std::string*>* code_params() const {
+    boost::shared_ptr<std::vector<std::string>> code_params() const {
         return code_params_;
     }
     void code_opcodes(const SharedPtr<OPArray>&v) {
@@ -80,19 +82,13 @@ public:
     void closure_var_names(std::vector<std::string> *closure_var_names_) {
         closure_var_names_ = closure_var_names_;
     }
-    std::vector<SharedPtr<Value>> *closure_vars() const {
-        return closure_vars_;
-    }
-    void closure_vars(std::vector<SharedPtr<Value>> *closure_vars) {
-        closure_vars_ = closure_vars;
-    }
     std::vector<std::string>*closure_var_names() const {
         return closure_var_names_;
     }
-    void code_defaults(std::vector<int> *c) {
+    void code_defaults(const boost::shared_ptr<std::vector<int>> &c) {
         code_defaults_ = c;
     }
-    std::vector<int> *code_defaults() const {
+    boost::shared_ptr<std::vector<int>> code_defaults() const {
         return code_defaults_;
     }
     ID package_id() const { return package_id_; }
@@ -103,6 +99,13 @@ public:
 
     int lineno() const { return lineno_; }
     const std::string & filename() { return filename_; }
+
+    void pad_list(const SharedPtr<PadList> & p) {
+        pad_list_.reset(p.get());
+    }
+    const SharedPtr<PadList>& pad_list() const {
+        return pad_list_;
+    }
 
     /*
     void dump(SharedPtr<SymbolTable> & symbol_table, int indent);

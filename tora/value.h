@@ -125,9 +125,9 @@ public:
     Value& operator=(const Value&v);
 
     SharedPtr<StrValue> to_s();
-    int to_int();
-    double to_double();
-    bool to_bool();
+    int to_int() const;
+    double to_double() const;
+    bool to_bool() const;
 
     template<class Y>
     Y* upcast() {
@@ -137,7 +137,7 @@ public:
     // GET type name in const char*
     const char *type_str() const;
 
-    ID object_package_id();
+    ID object_package_id() const;
 
     bool is_exception() const {
         return value_type == VALUE_TYPE_EXCEPTION;

@@ -378,7 +378,7 @@ Package* VM::find_package(ID id) {
     if (iter != this->package_map->end()) {
         return iter->second.get();
     } else {
-        Package* pkg =  new Package(id);
+        Package* pkg =  new Package(this, id);
         this->package_map->set(pkg);
         return pkg;
     }
@@ -403,6 +403,7 @@ void VM::dump_frame() {
     int i = 0;
     for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
+        /*
         for (size_t n=0; n<(*f)->vars.size(); n++) {
             printf("  %zd:", n);
             SharedPtr<Value> val = (*f)->vars.at(n);
@@ -412,6 +413,7 @@ void VM::dump_frame() {
                 printf(" (null)\n");
             }
         }
+        */
     }
     printf("---------------\n");
 }
@@ -544,6 +546,7 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
 
     // TODO: vargs support
     // TODO: kwargs support
+    // printf("%d, %zd\n", argcnt, code->code_params()->size());
     assert(argcnt == (int)code->code_params()->size());
     mark_stack.push_back(stack.size());
     frame_stack->push_back(fframe);

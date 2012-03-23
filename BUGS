@@ -8,6 +8,8 @@ KNOWN BUGS LIST
 * 3/0.5 segv
 * zero divided error
 * close directory at destructor
+* my $i=4; my $a = -> { $i+=4; }; $a.(undef); p($i)
+* (-> { 3 }).();
 
 __END__
 use Test::More *;
@@ -29,3 +31,4 @@ class Foo {
 is($Foo::Bar, 4649);
 
 done_testing;
+

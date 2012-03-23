@@ -55,6 +55,8 @@ glob('src/object/*.cc')
 Test::LongString
 Test::Fatal
 
+File::which
+
 syntax
 ------
 

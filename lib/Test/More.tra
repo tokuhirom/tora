@@ -51,7 +51,7 @@ sub done_testing() {
         say('# No tests run!');
     }
     if ($failed > 0) {
-        printf("# Looks like you failed %d test of %d.", $failed, $counter);
+        # printf("# Looks like you failed %d test of %d.", $failed, $counter);
     }
 }
 

@@ -12,7 +12,7 @@ Inspector::Inspector(VM *vm) : vm_(vm) {
     assert(vm);
 }
 
-std::string Inspector::inspect(const SharedPtr<Value> & v) {
+std::string Inspector::inspect(Value* v) const {
     switch (v->value_type) {
     case VALUE_TYPE_UNDEF:
         return "undef";
@@ -30,7 +30,7 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
         return "sub { \"DUMMY\" }";
     case VALUE_TYPE_ARRAY: {
         std::string ret("[");
-        SharedPtr<ArrayValue> av = v->upcast<ArrayValue>();
+        const ArrayValue* av = static_cast<const ArrayValue*>(v);
         bool first = true;
         for (auto iter = av->begin(); iter!=av->end(); ++iter) {
             if (!first) {
@@ -97,6 +97,8 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
     }
     case VALUE_TYPE_POINTER:
         return "#<Pointer>"; // TODO
+    case VALUE_TYPE_REFERENCE:
+        return "#<Reference>"; // TODO
     }
     printf("[BUG] unknown value type");
     abort();

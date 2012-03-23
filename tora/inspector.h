@@ -20,8 +20,10 @@ private:
 public:
     Inspector(VM *vm);
 
-    std::string inspect(const SharedPtr<Value> & v, int indent);
-    std::string inspect(const SharedPtr<Value> & v);
+    std::string inspect(const SharedPtr<Value> & v) const {
+        return inspect(v.get());
+    }
+    std::string inspect(Value * v) const;
 };
 
 };
