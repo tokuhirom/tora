@@ -4,6 +4,7 @@ import subprocess
 import platform
 import re
 import sys
+
 from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
@@ -140,12 +141,31 @@ t = env.Command(['tora/parser.h', 'tora/parser.cc'], ['tools/lemon/lemon', 'tora
 Clean(t, 'tora/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
+
+TORA_PREFIX   = env.get('PREFIX')
+TORA_CC       = env.get('CC')
+TORA_CXX      = env.get('CXX')
+TORA_CCFLAGS  = ' '.join(env.get('CCFLAGS'))
+TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS'))
 # config.h
 with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
-    f.write('#define TORA_CCFLAGS "' + ' '.join(env.get('CCFLAGS')) + "\"\n")
-    f.write('#define TORA_PREFIX  "' + env.get('PREFIX') + "\"\n")
+    f.write('#define TORA_CCFLAGS "' + TORA_CCFLAGS + "\"\n")
+    f.write('#define TORA_PREFIX  "' + TORA_PREFIX + "\"\n")
     f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
+
+with open('lib/Config.tra', 'w') as f:
+    f.write("my $Config = {\n")
+    f.write("  TORA_PREFIX      => '" + TORA_PREFIX      + "',\n")
+    f.write("  TORA_CC          => '" + TORA_CC          + "',\n")
+    f.write("  TORA_CXX         => '" + TORA_CXX         + "',\n")
+    f.write("  TORA_CCFLAGS     => '" + TORA_CCFLAGS     + "',\n")
+    f.write("  TORA_CXXFLAGS    => '" + TORA_CXXFLAGS    + "',\n")
+    f.write("  TORA_VERSION_STR => '" + TORA_VERSION_STR + "',\n")
+    f.write("};\n")
+    f.write("sub tora_config() {\n")
+    f.write("    $Config;\n")
+    f.write("}\n")
 
 tora = env.Program('bin/tora', [
     ['tora/main.cc'],
@@ -162,7 +182,7 @@ lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
 
 # instalation
 installs = []
-installs += [env.Install(env['PREFIX']+'/bin/', 'tora')];
+installs += [env.Install(env['PREFIX']+'/bin/', 'bin/tora')];
 installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
 env.Alias('install', [env['PREFIX']+'/bin/', installs])
 

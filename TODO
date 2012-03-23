@@ -138,6 +138,7 @@ Library
  * Test::More
  * dir()
  * file()
+ * Text::MicroTemplate
 
 Finished
 --------
