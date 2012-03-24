@@ -4,8 +4,7 @@
 using namespace tora;
 
 int BytesValue::length() {
-    return this->bytes_value.size();
+    return VAL().size();
 }
 
-BytesValue::~BytesValue() { }
 

@@ -1,16 +1,19 @@
 my $counter = 0;
+my $failed  = 0;
 
-sub ok($b) {
+sub ok($b, $msg=undef) {
     ++$counter;
     if ($b) {
         say("ok " + $counter);
     } else {
         say("not ok " + $counter);
+        ++$failed;
     }
 }
 
 sub fail() {
     say("not ok " + ++$counter);
+    ++$failed;
 }
 
 sub is($a, $b) {
@@ -21,6 +24,7 @@ sub is($a, $b) {
         say("not ok " + $counter);
         say(" # got:      " + $a);
         say(" # expected: " + $b);
+        ++$failed;
     }
 }
 
@@ -32,6 +36,7 @@ sub like($a, $b) {
         say("not ok " + $counter);
         say(" # got:      " + $a);
         say(" # expected: " + $b);
+        ++$failed;
     }
 }
 
@@ -42,5 +47,11 @@ sub note($msg) {
 
 sub done_testing() {
     say("1.." + $counter);
+    if ($counter == 0) {
+        say('# No tests run!');
+    }
+    if ($failed > 0) {
+        # printf("# Looks like you failed %d test of %d.", $failed, $counter);
+    }
 }
 

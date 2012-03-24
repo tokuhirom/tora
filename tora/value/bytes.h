@@ -6,26 +6,32 @@
 namespace tora {
 
 class BytesValue: public Value {
+private:
+    const std::string & VAL() const {
+        return boost::get<std::string>(this->value_);
+    }
 public:
-    std::string bytes_value;
     BytesValue(): Value(VALUE_TYPE_BYTES) {
     }
     BytesValue(const char *str): Value(VALUE_TYPE_BYTES) {
-        this->bytes_value = str;
+        this->value_ = std::string(str);
     }
     BytesValue(const std::string str): Value(VALUE_TYPE_BYTES) {
-        this->bytes_value = str;
+        this->value_ = str;
     }
-    ~BytesValue();
+    ~BytesValue() { }
     const char * c_str() {
-        return this->bytes_value.c_str();
+        return VAL().c_str();
     }
     void set_str(const char*s) {
-        bytes_value = s;
+        value_ = s;
     }
     int length();
+    size_t size() {
+        return VAL().size();
+    }
     void set_str(const std::string & s) {
-        bytes_value = s;
+        value_ = s;
     }
 };
 

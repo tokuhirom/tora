@@ -10,7 +10,7 @@
 using namespace tora;
 
 static inline Package *GET_PACKAGE(VM *vm, Value *self) {
-    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     Package * pkg = vm->find_package(pkgid);
     return pkg;
 }
@@ -23,16 +23,16 @@ static inline Package *GET_PACKAGE(VM *vm, Value *self) {
  */
 static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) {
     SharedPtr<StrValue> methname = methname_v->to_s();
-    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     Package * pkg = vm->find_package(pkgid);
-    return BoolValue::instance(pkg->has_method(vm->symbol_table->get_id(methname->str_value)));
+    return BoolValue::instance(pkg->has_method(vm->symbol_table->get_id(methname->str_value())));
 }
 
 /**
  * Get a method list defined in package.
  */
 static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
-    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     Package * pkg = vm->find_package(pkgid);
     SharedPtr<ArrayValue> av = new ArrayValue();
     for (auto iter=pkg->begin(); iter!=pkg->end(); ++iter) {
@@ -42,7 +42,7 @@ static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
 }
 
 static SharedPtr<Value> mc_name(VM * vm, Value* self) {
-    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value;
+    ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     return new StrValue(vm->symbol_table->id2name(pkgid));
 }
 

@@ -9,11 +9,15 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <deque>
+
+#include <boost/variant.hpp>
 
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
 #include "util.h"
+#include "op_array.h"
 
 namespace tora {
 
@@ -38,12 +42,42 @@ typedef enum {
     VALUE_TYPE_OBJECT,
     VALUE_TYPE_POINTER,
     VALUE_TYPE_BYTES,
+    VALUE_TYPE_REFERENCE,
 } value_type_t;
 
+class Value;
 class IntValue;
 class DoubleValue;
 class StrValue;
 class BoolValue;
+class RangeValue;
+
+class CallbackFunction;
+class OPArray;
+
+class RangeImpl {
+    friend class RangeValue;
+protected:
+    SharedPtr<IntValue> left_;
+    SharedPtr<IntValue> right_;
+    RangeImpl(IntValue* l, IntValue *r) : left_(l), right_(r) {
+    }
+};
+
+class ObjectImpl {
+    friend class ObjectValue;
+protected:
+    VM * vm_;
+    ID package_id_;
+    bool destroyed_;
+    SharedPtr<Value> data_;
+    ObjectImpl(VM *vm, ID pkgid, const SharedPtr<Value>& d)
+        : vm_(vm)
+        , package_id_(pkgid)
+        , destroyed_(false)
+        , data_(d)
+        { }
+};
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -63,17 +97,37 @@ public:
         ++refcnt;
     }
 protected:
+    typedef std::deque<SharedPtr<Value>> ArrayImpl;
+    typedef std::map<std::string, SharedPtr<Value> > HashImpl;
+    typedef boost::variant<
+        int,
+        double,
+        bool,
+        ID,
+        std::string,
+        RangeImpl,
+        ArrayImpl,
+        HashImpl,
+        void*,
+        Value*,
+        FILE *,
+        ObjectImpl
+    > any_t;
+
     Value(value_type_t t) : refcnt(0), value_type(t) { }
+    Value(value_type_t t, any_t dat) : refcnt(0), value_(dat), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
+
+    any_t value_;
 public:
     value_type_t value_type;
     Value& operator=(const Value&v);
 
     SharedPtr<StrValue> to_s();
-    int to_int();
-    double to_double();
-    bool to_bool();
+    int to_int() const;
+    double to_double() const;
+    bool to_bool() const;
 
     template<class Y>
     Y* upcast() {
@@ -83,7 +137,7 @@ public:
     // GET type name in const char*
     const char *type_str() const;
 
-    ID object_package_id();
+    ID object_package_id() const;
 
     bool is_exception() const {
         return value_type == VALUE_TYPE_EXCEPTION;

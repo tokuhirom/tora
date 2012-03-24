@@ -34,8 +34,8 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
         SharedPtr<Value> s(v->to_s());
-        // printf("%s\n", s->upcast<StrValue>()->str_value.c_str());
-        fwrite(s->upcast<StrValue>()->str_value.c_str(), sizeof(char), s->upcast<StrValue>()->str_value.size(), stdout);
+        // printf("%s\n", s->upcast<StrValue>()->str_value().c_str());
+        fwrite(s->upcast<StrValue>()->str_value().c_str(), sizeof(char), s->upcast<StrValue>()->str_value().size(), stdout);
         fputc('\n', stdout);
     }
     return UndefValue::instance();
@@ -65,7 +65,7 @@ static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
         SharedPtr<Value> s(v->to_s());
-        printf("%s", s->upcast<StrValue>()->str_value.c_str());
+        printf("%s", s->upcast<StrValue>()->str_value().c_str());
     }
     return UndefValue::instance();
 }
@@ -95,10 +95,10 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
     } else if (args.size() == 1) {
         SharedPtr<Value> v = args.at(0);
         if (v->value_type == VALUE_TYPE_DOUBLE) {
-            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value);
+            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value());
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
-            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value);
+            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value());
             return new IntValue(dist(*(vm->myrand)));
         } else {
             // support to_int?
@@ -188,7 +188,7 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
         delete ptr;
         return new StrValue(ptr_s);
     } else {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
 }
 
@@ -251,7 +251,7 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     errno = 0;
     long n = strtol(s.c_str(), &endp, 16);
     if (errno == ERANGE) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
@@ -268,7 +268,7 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     errno = 0;
     long n = strtol(s.c_str(), &endp, 8);
     if (errno == ERANGE) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());

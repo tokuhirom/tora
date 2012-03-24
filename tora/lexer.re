@@ -133,7 +133,12 @@ std:
     "b'" {
         tora_open_string_literal();
         string_close_char = '\'';
-        goto bytes_literal;
+        goto single_bytes_literal;
+    }
+    'b"' {
+        tora_open_string_literal();
+        string_close_char = '"';
+        goto double_bytes_literal;
     }
     "q!" {
         tora_open_string_literal();
@@ -418,7 +423,7 @@ single_string_literal:
     }
 */
 
-bytes_literal:
+single_bytes_literal:
 /*!re2c
     [')!}\]] {
         if (string_close_char == *(m_cursor-1)) {
@@ -427,20 +432,79 @@ bytes_literal:
             return BYTES_LITERAL;
         } else {
             tora_add_string_literal(*(m_cursor-1));
-            goto bytes_literal;
+            goto single_bytes_literal;
         }
     }
     "\\\\" {
         tora_add_string_literal('\\');
-        goto bytes_literal;
+        goto single_bytes_literal;
     }
     "\\'" {
         tora_add_string_literal('\'');
-        goto bytes_literal;
+        goto single_bytes_literal;
     }
     ANY_CHARACTER {
         tora_add_string_literal(*(m_cursor-1));
-        goto bytes_literal;
+        goto single_bytes_literal;
+    }
+*/
+
+double_bytes_literal:
+/*!re2c
+    ["')!}\]] {
+        if (string_close_char == *(m_cursor-1)) {
+            *yylval = new StrNode(NODE_STRING, string_buffer->str());
+            delete string_buffer; string_buffer = NULL;
+            return BYTES_LITERAL;
+        } else {
+            tora_add_string_literal(*(m_cursor-1));
+            goto double_bytes_literal;
+        }
+    }
+    "\\\\" {
+        tora_add_string_literal('\\');
+        goto double_bytes_literal;
+    }
+    "\\'" {
+        tora_add_string_literal('\'');
+        goto double_bytes_literal;
+    }
+    "\\r" {
+        tora_add_string_literal('\r');
+        goto double_bytes_literal;
+    }
+    LF {
+        tora_add_string_literal('\n');
+        goto double_bytes_literal;
+    }
+    "\\\"" {
+        tora_add_string_literal('"');
+        goto double_bytes_literal;
+    }
+    "\\0" {
+        tora_add_string_literal('\0');
+        goto double_bytes_literal;
+    }
+    "\\t" {
+        tora_add_string_literal('\t');
+        goto double_bytes_literal;
+    }
+    "\\b" {
+        tora_add_string_literal('\b');
+        goto double_bytes_literal;
+    }
+    "\\f" {
+        tora_add_string_literal('\f');
+        goto double_bytes_literal;
+    }
+    "\\x" [a-fA-F0-9]{2} {
+        char ret = hexchar2int(*(m_cursor-2)) * 16 + hexchar2int(*(m_cursor-1));
+        tora_add_string_literal(static_cast<char>(ret));
+        goto double_bytes_literal;
+    }
+    ANY_CHARACTER {
+        tora_add_string_literal(*(m_cursor-1));
+        goto double_bytes_literal;
     }
 */
 

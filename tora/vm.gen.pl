@@ -33,6 +33,8 @@ sub parse {
             $start = $lineno;
         } elsif (/^\}/) {
             push @ret, [$current_op, $code, $start];
+        } elsif (m{^//}) {
+            # nop
         } else {
             $code .= $_;
         }
@@ -52,6 +54,7 @@ sub vm_gen_cc {
 #include "package_map.h"
 #include "package.h"
 #include "operator.h"
+#include "disasm.h"
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/tuple.h"

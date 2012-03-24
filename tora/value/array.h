@@ -7,43 +7,77 @@
 namespace tora {
 
 class ArrayValue: public Value {
+private:
+    inline ArrayImpl& VAL() {
+        return boost::get<ArrayImpl>(this->value_);
+    }
+    inline const ArrayImpl& VAL() const {
+        return boost::get<ArrayImpl>(this->value_);
+    }
 public:
-    typedef std::deque<SharedPtr<Value>>::iterator iterator2;
+    typedef ArrayImpl::iterator iterator2;
+    typedef ArrayImpl::const_iterator const_iterator;
 
-    std::deque<SharedPtr<Value>> *values;
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
-        this->values = new std::deque<SharedPtr<Value>>;
+        this->value_ = std::deque<SharedPtr<Value>>();
     }
     ArrayValue(const ArrayValue & a);
     ~ArrayValue() {
-        delete values;
     }
     void sort();
 
-    iterator2 begin() { return values->begin(); }
-    iterator2 end()   { return values->end();   }
+    iterator2 begin() { return VAL().begin(); }
+    iterator2 end()   { return VAL().end();   }
+    const_iterator begin() const { return VAL().begin(); }
+    const_iterator end()   const { return VAL().end();   }
 
     // retain before push
     void push(Value *v) {
-        this->values->push_back(v);
+        // TODO: remove this method.
+        this->push_back(v);
     }
     void push(const SharedPtr<Value> &v) {
-        this->values->push_back(v);
+        // TODO: remove this method.
+        this->push_back(v);
     }
-    size_t size() {
-        return this->values->size();
+    void push_back(Value *v) {
+        VAL().push_back(v);
+    }
+    void push_back(const SharedPtr<Value> &v) {
+        VAL().push_back(v);
+    }
+    void push_front(Value *v) {
+        VAL().push_front(v);
+    }
+    void push_front(const SharedPtr<Value> &v) {
+        VAL().push_front(v);
+    }
+    void pop_front() {
+        VAL().pop_front();
+    }
+    size_t size() const {
+        return VAL().size();
+    }
+    void resize(size_t n) {
+        VAL().resize(n);
     }
     // release after pop by your hand
     SharedPtr<Value> pop() {
-        SharedPtr<Value> v = this->values->back();
-        this->values->pop_back();
+        SharedPtr<Value> v = VAL().back();
+        VAL().pop_back();
         return v;
     }
-    SharedPtr<Value>at(int i) {
-        return this->values->at(i);
+    SharedPtr<Value>at(int i) const {
+        return VAL().at(i);
+    }
+    SharedPtr<Value> operator[](int i) const {
+        return VAL()[i];
     }
     SharedPtr<Value> get_item(const SharedPtr<Value> &index);
-    Value* set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v);
+    void set_item(int i, const SharedPtr<Value> &v);
+    void set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
+        this->set_item(index->to_int(), v);
+    }
 
     class iterator : public Value {
     public:

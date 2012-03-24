@@ -1,25 +1,38 @@
 #include "code.h"
 #include "../vm.h"
+#include "../callback.h"
 
 using namespace tora;
 
 CodeValue::~CodeValue() {
-    if (code_params) {
-        auto iter = code_params->begin();
-        for (; iter!=code_params->end(); iter++) {
+    /*
+    if (code_params_) {
+        auto iter = code_params_->begin();
+        for (; iter!=code_params_->end(); iter++) {
             delete *iter;
         }
-        delete code_params;
+        delete code_params_;
+        code_params_ = NULL;
     }
+    */
 
-    if (is_native_) {
+    if (is_native_ && callback_) {
         delete callback_;
+        callback_ = NULL;
     }
 
-    delete closure_var_names;
-    delete closure_vars;
+    /*
+    delete closure_var_names_;
+    closure_var_names_ = NULL;
+
+    if (closure_vars_) {
+        delete closure_vars_;
+        closure_vars_ = NULL;
+    }
+    */
 }
 
+/*
 void CodeValue::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
     print_indent(indent);
     printf("[dump] code: name: %s::%s\n", symbol_table->id2name(this->package_id).c_str(), symbol_table->id2name(this->func_name_id).c_str());
@@ -29,4 +42,5 @@ void CodeValue::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
     }
     printf("----------------\n");
 }
+*/
 

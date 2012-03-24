@@ -1,0 +1,17 @@
+use Test::More *;
+use HTTP::Parser *;
+
+{
+    my $env = {};
+    my $ret = parse_http_request(b'HOGE', $env);
+    is($ret, -2);
+}
+
+{
+    my $env = {};
+    my $ret = parse_http_request(b"GET / HTTP/1.0\r\n\r\n", $env);
+    is($ret, 18);
+    is($env.tora(), {"PATH_INFO" => "/","QUERY_STRING" => "","REQUEST_METHOD" => "GET","REQUEST_URI" => "/","SCRIPT_NAME" => "","SERVER_PROTOCOL" => "HTTP/1.0"}.tora());
+}
+
+done_testing;

@@ -12,17 +12,17 @@ Inspector::Inspector(VM *vm) : vm_(vm) {
     assert(vm);
 }
 
-std::string Inspector::inspect(const SharedPtr<Value> & v) {
+std::string Inspector::inspect(Value* v) const {
     switch (v->value_type) {
     case VALUE_TYPE_UNDEF:
         return "undef";
     case VALUE_TYPE_INT:
     case VALUE_TYPE_BOOL:
     case VALUE_TYPE_DOUBLE:
-        return v->to_s()->str_value;
+        return v->to_s()->str_value();
     case VALUE_TYPE_STR: {
         std::string ret("\"");
-        ret += v->to_s()->str_value;
+        ret += v->to_s()->str_value();
         ret += '"';
         return ret;
     }
@@ -30,7 +30,7 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
         return "sub { \"DUMMY\" }";
     case VALUE_TYPE_ARRAY: {
         std::string ret("[");
-        SharedPtr<ArrayValue> av = v->upcast<ArrayValue>();
+        const ArrayValue* av = static_cast<const ArrayValue*>(v);
         bool first = true;
         for (auto iter = av->begin(); iter!=av->end(); ++iter) {
             if (!first) {
@@ -51,7 +51,7 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
     case VALUE_TYPE_RANGE: {
         SharedPtr<RangeValue> rv = v->upcast<RangeValue>();
         std::ostringstream os;
-        os << rv->left->to_int() << ".." << rv->right->to_int();
+        os << rv->left()->to_int() << ".." << rv->right()->to_int();
         return os.str();
     }
     case VALUE_TYPE_ARRAY_ITERATOR:
@@ -97,6 +97,8 @@ std::string Inspector::inspect(const SharedPtr<Value> & v) {
     }
     case VALUE_TYPE_POINTER:
         return "#<Pointer>"; // TODO
+    case VALUE_TYPE_REFERENCE:
+        return "#<Reference>"; // TODO
     }
     printf("[BUG] unknown value type");
     abort();

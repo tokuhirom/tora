@@ -2,12 +2,14 @@
 #define TORA_OP_H_
 
 #include "ops.gen.h"
-#include "value.h"
 #include "shared_ptr.h"
+#include "prim.h"
 
 namespace tora {
 
-class OP : public Prim {
+class Value;
+
+class OP {
     PRIM_DECL(OP);
 public:
     op_type_t op_type;
@@ -25,7 +27,7 @@ public:
         operand.int_value = (((high)&0x0000ffff) << 16) | (low&0x0000ffff);
     }
     // This is not a virtual destructor. Do not define destructor in child class.
-    ~OP() { }
+    virtual ~OP() { }
 
     template<class Y>
     Y* upcast() {
@@ -39,11 +41,14 @@ public:
 class ValueOP : public OP {
 public:
     SharedPtr<Value> value;
-    ValueOP(op_type_t type, SharedPtr<Value> v) {
-        this->op_type = type;
-        this->value = v;
+    ValueOP(op_type_t type, const SharedPtr<Value>& v)
+        : OP(type)
+        , value(v) {
     }
-    ~ValueOP() { }
+    ValueOP(op_type_t type, Value* v)
+        : OP(type)
+        , value(v) {
+    }
 };
 
 };

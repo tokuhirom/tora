@@ -7,8 +7,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include "shared_ptr.h"
+#include "inspector.h"
 #include "value.h"
 #include "value/code.h"
+#include "value/array.h"
+#include "pad_list.h"
 
 namespace tora {
 
@@ -16,6 +19,8 @@ class OPArray;
 class VM;
 class CodeValue;
 class Package;
+class ArrayValue;
+class PadList;
 
 typedef enum {
     FRAME_TYPE_LEXICAL = 1,
@@ -40,31 +45,35 @@ public:
     SharedPtr<Value> value() const { return value_; }
 };
 
+
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame {
     PRIM_DECL(LexicalVarsFrame);
 protected:
     VM * vm_;
-public:
     std::vector<SharedPtr<Value>> vars;
+public:
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
     std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
+    SharedPtr<PadList> pad_list;
 
     LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
     // this 'virtual' is required for memory pool.
     virtual ~LexicalVarsFrame();
-    void setVar(int id, const SharedPtr<Value>& v) {
+    void set_variable_dynamic(int level, int id, const SharedPtr<Value>& v);
+    void set_variable(int id, const SharedPtr<Value>& v) {
         assert(id < this->vars.capacity());
-        this->vars[id] = v.get();
+        this->pad_list->set(id, v);
     }
-    SharedPtr<Value> find(int id) const {
+    SharedPtr<Value> get_variable(int id) const {
         assert(id < this->vars.capacity());
-        return this->vars[id];
+        return this->pad_list->get(id);
     }
     void push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target);
     const char *type_str() const;
+    SharedPtr<Value> get_variable_dynamic(int level, int no) const;
 
     template<class Y>
     Y* upcast() {

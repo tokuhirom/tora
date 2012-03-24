@@ -25,7 +25,7 @@ using namespace tora;
 const int GETFD(VM *vm, Value * self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> fd = self->upcast<ObjectValue>()->data();
-    return fd->value_type == VALUE_TYPE_INT ? fd->upcast<IntValue>()->int_value : -1;
+    return fd->value_type == VALUE_TYPE_INT ? fd->upcast<IntValue>()->int_value() : -1;
 }
 
 /**
@@ -45,7 +45,7 @@ static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Valu
 
     int sock = socket(domain, type, protocol);
     if (sock == -1) {
-        throw new ExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     } else {
         return new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(sock));
     }
@@ -62,12 +62,12 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
     SharedPtr<Value> addr = addr_v->to_s();
     if (addr->is_exception()) { return addr; }
 
-    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value;
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = connect(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -82,7 +82,7 @@ static SharedPtr<Value> sock_sockaddr_in(VM * vm, Value*klass, Value* port, Valu
 
     SharedPtr<Value> host_s = host->to_s();
     if (host_s->is_exception()) { return host_s; }
-    const std::string &ip = host_s->upcast<StrValue>()->str_value;
+    const std::string &ip = host_s->upcast<StrValue>()->str_value();
 
     struct in_addr addr;
     if (ip.size() == sizeof(addr) || ip.size() == 4) {
@@ -118,7 +118,7 @@ static SharedPtr<Value> sock_inet_aton(VM * vm, Value*klass, Value* host_v) {
     SharedPtr<Value> host = host_v->to_s();
     if (host->is_exception()) { return host; }
 
-    const std::string & host_s = host->upcast<StrValue>()->str_value;
+    const std::string & host_s = host->upcast<StrValue>()->str_value();
     if ((host_s.at(0) != '\0') && inet_aton(host_s.c_str(), &ip_address)) {
         std::string ret((const char*)&ip_address, sizeof(ip_address));
         return new StrValue(ret);
@@ -138,11 +138,11 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
     SharedPtr<Value> src = src_v->to_s();
     if (src->is_exception()) { return src; }
 
-    const std::string &s = src->upcast<StrValue>()->str_value;
+    const std::string &s = src->upcast<StrValue>()->str_value();
     int fd = GETFD(vm, self);
     int ret = write(fd, s.c_str(), s.size());
     if (ret == -1) {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     } else {
         return new IntValue(ret);
     }
@@ -168,7 +168,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             } else if (ret == 0) { // EOF
                 return new StrValue(bbuf);
             } else {
-                return new ExceptionValue(errno);
+                return new ErrnoExceptionValue(errno);
             }
         }
     } else if (args.size() == 2) {
@@ -182,7 +182,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             SharedPtr<Value> s = new StrValue(std::string(buf.get(), ret));
             return s;
         } else {
-            return new ExceptionValue(errno);
+            return new ErrnoExceptionValue(errno);
         }
     } else {
         return new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
@@ -193,12 +193,12 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     SharedPtr<Value> addr = addr_v->to_s();
     if (addr->is_exception()) { return addr; }
 
-    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value;
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = bind(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -209,7 +209,7 @@ static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -222,21 +222,21 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
     socklen_t optlen;
     int n;
     if (optval_v->value_type == VALUE_TYPE_INT) {
-        n = optval_v->upcast<IntValue>()->int_value;
+        n = optval_v->upcast<IntValue>()->int_value();
         optval = &n;
         optlen = sizeof(n);
     } else {
         SharedPtr<Value> optval_s = optval_v->to_s();
         if (optval_s->is_exception()) { return optval_s; }
-        optval = optval_s->upcast<StrValue>()->str_value.c_str();
-        optlen = optval_s->upcast<StrValue>()->str_value.size();
+        optval = optval_s->upcast<StrValue>()->str_value().c_str();
+        optlen = optval_s->upcast<StrValue>()->str_value().size();
     }
 
     int ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -245,7 +245,7 @@ static SharedPtr<Value> sock_sock_close(VM * vm, Value* self) {
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 
@@ -264,7 +264,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
         t->push(new_sock);
         return t;
     } else {
-        return new ExceptionValue(errno);
+        return new ErrnoExceptionValue(errno);
     }
 }
 

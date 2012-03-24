@@ -1,7 +1,7 @@
 use Test::More *;
 
-my $__a=4649;
-my $__b=5963;
+my $first=4649;
+my $second=5963;
 
 sub foo($a, $b) {
     is($a, 1);
@@ -9,16 +9,25 @@ sub foo($a, $b) {
 }
 
 sub bar($a, $b=4) {
-    $__a = $a;
-    $__b = $b;
+    $first = $a;
+    $second = $b;
+Internals.dump($foo);
 }
 
 foo(1,2);
 
 {
+    $first = undef;
+    $second = undef;
     bar(3);
-    is($__a, 3);
-    is($__b, 4);
+    is($first, 3);
+    is($second, 4);
+}
+
+{
+    bar(3);
+    is($first, 3);
+    is($second, 4);
 }
 
 done_testing;

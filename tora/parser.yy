@@ -289,7 +289,7 @@ maybe_block(A) ::= block(B). {
     A = B;
 }
 maybe_block(A) ::= L_BRACE R_BRACE. {
-    A = new ListNode(NODE_VOID);
+    A = new Node(NODE_VOID);
 }
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
     A = new NodeNode(NODE_BLOCK, B);

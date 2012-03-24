@@ -1,0 +1,7 @@
+use XSLoader;
+
+XSLoader.load('HTTP::Parser');
+
+__END__
+
+

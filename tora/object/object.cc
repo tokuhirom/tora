@@ -27,7 +27,7 @@ static SharedPtr<Value> object_tora(VM *vm, Value *self) {
 static SharedPtr<Value> object_meta(VM *vm, Value *self) {
     ID pkgid;
     if (self->value_type == VALUE_TYPE_SYMBOL) {
-        pkgid = self->upcast<SymbolValue>()->id;
+        pkgid = self->upcast<SymbolValue>()->id();
     } else if (self->value_type == VALUE_TYPE_OBJECT) {
         pkgid = self->upcast<ObjectValue>()->package_id();
     } else {
@@ -52,7 +52,7 @@ static bool check_isa(VM *vm, ID pkgid, ID target_id) {
 static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
     ID pkgid = vm->symbol_table->get_id(self->type_str());
     SharedPtr<StrValue> target = target_v->to_s();
-    ID target_id = vm->symbol_table->get_id(target->str_value);
+    ID target_id = vm->symbol_table->get_id(target->str_value());
     return BoolValue::instance(check_isa(vm, pkgid, target_id));
 }
 

@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 
     // run it
 
-    tora::VM vm(compiler.ops, symbol_table);
+    tora::VM vm(compiler.ops, symbol_table, dump_ops);
     vm.init_globals(argc-optind, argv+optind);
     vm.register_standard_methods();
     for (auto iter: libs) {

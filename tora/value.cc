@@ -33,6 +33,7 @@ const char * Value::type_str() const {
     case VALUE_TYPE_HASH_ITERATOR: return "Hash::Iterator";
     case VALUE_TYPE_ARRAY_ITERATOR: return "Array::Iterator";
     case VALUE_TYPE_BYTES: return "Bytes";
+    case VALUE_TYPE_REFERENCE: return "Reference";
     case VALUE_TYPE_OBJECT: {
         return ((const ObjectValue*)this)->type_str();
     }
@@ -40,23 +41,23 @@ const char * Value::type_str() const {
     abort();
 }
 
-bool Value::to_bool() {
+bool Value::to_bool() const {
     switch (value_type) {
     case VALUE_TYPE_UNDEF:
         return false;
     case VALUE_TYPE_BOOL:
-        return static_cast<BoolValue*>(this)->bool_value;
+        return static_cast<const BoolValue*>(this)->bool_value();
     default:
         return true;
     }
 }
 
-double Value::to_double() {
+double Value::to_double() const {
     switch (value_type) {
     case VALUE_TYPE_INT:
-        return static_cast<double>(static_cast<IntValue*>(this)->int_value);
+        return static_cast<double>(static_cast<const IntValue*>(this)->int_value());
     case VALUE_TYPE_DOUBLE:
-        return static_cast<double>(static_cast<DoubleValue*>(this)->double_value);
+        return static_cast<double>(static_cast<const DoubleValue*>(this)->double_value());
     case VALUE_TYPE_OBJECT:
         TODO();
     case VALUE_TYPE_BOOL:
@@ -76,6 +77,7 @@ double Value::to_double() {
     case VALUE_TYPE_RANGE:
     case VALUE_TYPE_STR:
     case VALUE_TYPE_BYTES:
+    case VALUE_TYPE_REFERENCE:
         throw new ExceptionValue("%s cannot support to convert double value.", this->type_str());
     }
     abort();
@@ -86,21 +88,17 @@ SharedPtr<StrValue> Value::to_s() {
     case VALUE_TYPE_STR:
         return static_cast<StrValue*>(this);
     case VALUE_TYPE_INT: {
-        SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<IntValue>()->int_value;
-        v->set_str(os.str());
-        return v;
+        os << this->upcast<IntValue>()->int_value();
+        return new StrValue(os.str());
     }
     case VALUE_TYPE_DOUBLE: {
-        SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<DoubleValue>()->double_value;
-        v->set_str(os.str());
-        return v;
+        os << this->upcast<DoubleValue>()->double_value();
+        return new StrValue(os.str());
     }
     case VALUE_TYPE_BOOL: {
-        return new StrValue(this->upcast<BoolValue>()->bool_value ? "true" : "false");
+        return new StrValue(this->upcast<BoolValue>()->bool_value() ? "true" : "false");
     }
     case VALUE_TYPE_UNDEF: {
         return new StrValue("undef");
@@ -110,13 +108,11 @@ SharedPtr<StrValue> Value::to_s() {
         return new StrValue(e->message());
     }
     case VALUE_TYPE_RANGE: {
-        SharedPtr<StrValue> v = new StrValue();
         std::ostringstream os;
-        os << this->upcast<RangeValue>()->left->int_value;
+        os << this->upcast<RangeValue>()->left()->int_value();
         os << "..";
-        os << this->upcast<RangeValue>()->right->int_value;
-        v->set_str(os.str());
-        return v;
+        os << this->upcast<RangeValue>()->right()->int_value();
+        return new StrValue(os.str());
     }
     default: {
         throw new ExceptionValue("%s don't support stringification.\n", this->type_str());
@@ -124,31 +120,31 @@ SharedPtr<StrValue> Value::to_s() {
     }
 }
 
-int Value::to_int() {
+int Value::to_int() const {
     if (value_type == VALUE_TYPE_INT) {
-        return this->upcast<IntValue>()->int_value;
+        return static_cast<const IntValue*>(this)->int_value();
     } else if (value_type == VALUE_TYPE_DOUBLE) {
         return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
-        if (this->upcast<TupleValue>()->size() == 1) {
-            return this->upcast<TupleValue>()->at(0)->to_int();
+        if (static_cast<const TupleValue*>(this)->size() == 1) {
+            return static_cast<const TupleValue*>(this)->at(0)->to_int();
         } else {
             throw new ExceptionValue("Cannot coerce tuple to integer");
         }
     } else if (value_type == VALUE_TYPE_STR) {
-        StrValue *s = this->upcast<StrValue>();
+        const StrValue *s = static_cast<const StrValue*>(this);
         errno = 0;
-        char *endptr = (char*)(s->str_value.c_str()+s->str_value.size());
-        long ret = strtol(s->str_value.c_str(), &endptr, 10);
+        char *endptr = (char*)(s->str_value().c_str()+s->str_value().size());
+        long ret = strtol(s->str_value().c_str(), &endptr, 10);
         if (errno == 0) {
             return ret;
         } else if (errno == EINVAL) {
-            throw new ExceptionValue("String contains non numeric character: %s", s->str_value.c_str());
+            throw new ExceptionValue("String contains non numeric character: %s", s->str_value().c_str());
         } else if (errno == ERANGE) {
             // try to the bigint?
             TODO();
         } else {
-            throw new ExceptionValue(errno);
+            throw new ErrnoExceptionValue(errno);
         }
     }
 
@@ -160,7 +156,7 @@ Value& tora::Value::operator=(const Value&v) {
     switch (v.value_type) {
     case VALUE_TYPE_INT: {
         const IntValue *vp = static_cast<const IntValue*>(&v);
-        this->upcast<IntValue>()->int_value = vp->int_value;
+        this->upcast<IntValue>()->int_value(vp->int_value());
         return *this;
     }
     default:
@@ -168,7 +164,7 @@ Value& tora::Value::operator=(const Value&v) {
     }
 }
 
-ID Value::object_package_id() {
+ID Value::object_package_id() const {
     switch (value_type) {
     case VALUE_TYPE_STR:
         return SYMBOL_STRING_CLASS;
@@ -197,9 +193,9 @@ ID Value::object_package_id() {
     case VALUE_TYPE_EXCEPTION:
         return SYMBOL_EXCEPTION_CLASS;
     case VALUE_TYPE_SYMBOL:
-        return this->upcast<SymbolValue>()->id;
+        return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:
-        return this->upcast<ObjectValue>()->package_id();
+        return static_cast<const ObjectValue*>(this)->package_id();
     case VALUE_TYPE_UNDEF:
         throw new ExceptionValue("Cannot get package name from undefined value.");
     }

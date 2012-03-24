@@ -8,19 +8,23 @@ namespace tora {
 class VM;
 
 class ObjectValue : public Value {
-    VM * vm_;
-    ID package_id_;
-    bool destroyed;
-    SharedPtr<Value> data_;
+private:
+    const ObjectImpl & VAL() const {
+        return boost::get<ObjectImpl>(value_);
+    }
+    ObjectImpl & VAL() {
+        return boost::get<ObjectImpl>(value_);
+    }
 public:
-    ObjectValue(VM *v, ID p, const SharedPtr<Value>& d) : Value(VALUE_TYPE_OBJECT), vm_(v), package_id_(p), destroyed(false), data_(d) {
+    ObjectValue(VM *v, ID p, const SharedPtr<Value>& d) : Value(VALUE_TYPE_OBJECT) {
+        value_ = ObjectImpl(v, p, d);
     }
     ~ObjectValue();
-    const SharedPtr<Value> data() { return data_; }
+    const SharedPtr<Value> data() const { return VAL().data_; }
     void release();
     void call_destroy();
 
-    ID package_id() { return package_id_; }
+    ID package_id() const { return VAL().package_id_; }
 
     void dump(int indent);
     const char *type_str() const;

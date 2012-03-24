@@ -9,39 +9,49 @@
 namespace tora {
 
 class HashValue: public Value {
-protected:
-    std::map<std::string, SharedPtr<Value> > data;
+private:
+    inline HashImpl& VAL() {
+        return boost::get<HashImpl>(this->value_);
+    }
+    inline const HashImpl& VAL() const {
+        return boost::get<HashImpl>(this->value_);
+    }
 public:
-    typedef std::map<std::string, SharedPtr<Value> >::iterator iter;
-    HashValue() : Value(VALUE_TYPE_HASH) { }
+    typedef HashImpl::iterator iter;
+
+    HashValue() : Value(VALUE_TYPE_HASH) {
+        this->value_ = HashImpl();
+    }
+    void clear() {
+        VAL().clear();
+    }
     SharedPtr<Value> get(const std::string &key) {
-        return data[key];
+        return VAL()[key];
     }
     void set(const std::string & key , const SharedPtr<Value>&val) {
-        data[key] = val;
+        VAL()[key] = val;
     }
 
-    iter begin() { return data.begin(); }
-    iter end()   { return data.end(); }
+    iter begin() { return VAL().begin(); }
+    iter end()   { return VAL().end(); }
 
-    SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
+    void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
         SharedPtr<StrValue> s = index->to_s();
-        this->set(s->str_value, v);
-        return UndefValue::instance();
+        this->set(s->str_value(), v);
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
         SharedPtr<StrValue> s = index->to_s();
-        return this->data[s->str_value];
+        return this->VAL()[s->str_value()];
     }
     size_t size() {
-        return data.size();
+        return VAL().size();
     }
     bool has_key(SharedPtr<Value> key) {
         SharedPtr<StrValue> k = key->to_s();
-        return this->has_key(k->str_value);
+        return this->has_key(k->str_value());
     }
     bool has_key(const std::string & key) {
-        return this->data.find(key) != this->data.end();
+        return this->VAL().find(key) != this->VAL().end();
     }
 
     class iterator : public Value {
@@ -50,10 +60,10 @@ public:
     public:
         iterator(const SharedPtr<HashValue> & parent_) : Value(VALUE_TYPE_HASH_ITERATOR) {
             parent = parent_;
-            iter = parent->data.begin();
+            iter = parent->VAL().begin();
         }
         bool finished() {
-            return iter == parent->data.end();
+            return iter == parent->VAL().end();
         }
         SharedPtr<Value> getkey() {
             return new StrValue(iter->first);

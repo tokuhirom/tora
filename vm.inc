@@ -33,13 +33,15 @@ OP_PUSH_STRING {
 OP_GETARG {
     int no = get_int_operand();
     int index = mark_stack.back() - no - 1;
-#if NDEBUG == 0
+#ifndef NDEBUG
     if (index >= stack.size()) {
         dump_stack();
+        abort();
     }
 #endif
     stack.push_back(stack.at(index));
 }
+
 
 OP_SETARG {
     int no = get_int_operand();
@@ -71,33 +73,37 @@ OP_FUNCDEF {
     SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    int pkgid = code->upcast<CodeValue>()->package_id;
+    int pkgid = code->upcast<CodeValue>()->package_id();
     if (!pkgid) {
         pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id = pkgid;
+        code->upcast<CodeValue>()->package_id(pkgid);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_CLOSUREDEF {
-    SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
+    SharedPtr<Value> code = stack.back();
+    stack.pop_back();
+
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);
 
-    int closure_vars_cnt = get_int_operand();
+    // int closure_vars_cnt = get_int_operand();
+    code->upcast<CodeValue>()->pad_list(this->frame_stack->back()->pad_list);
 
-    for (int i=0; i<closure_vars_cnt; i++) {
-        SharedPtr<Value> v = stack.back(); stack.pop_back();
-        code->upcast<CodeValue>()->closure_vars->push_back(v);
-    }
+// printf("CLOSUREDEF --\n");
+//  for (int i=0; i<closure_vars_cnt; i++) {
+//      SharedPtr<Value> v = stack.back(); stack.pop_back();
+//      code->upcast<CodeValue>()->closure_vars()->push_back(v);
+//  }
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
-    int pkgid = code->upcast<CodeValue>()->package_id;
+    int pkgid = code->upcast<CodeValue>()->package_id();
     if (!pkgid) {
         pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id = pkgid;
+        code->upcast<CodeValue>()->package_id(pkgid);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id, code);
+    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_GETCLOSURE {
@@ -111,12 +117,26 @@ OP_GETCLOSURE {
         }
     }
     assert(frame.get());
-    int i = get_int_operand();
+    int level = get_int_operand_high();
+    int no    = get_int_operand_low();
     assert(frame->code);
-    assert(frame->code->func_name_id);
-    assert(i < frame->code->upcast<CodeValue>()->closure_vars->size());
-    SharedPtr<Value> v = frame->code->upcast<CodeValue>()->closure_vars->at(i);
-    stack.push_back(v);
+    assert(frame->code->func_name_id());
+    assert(frame->code->upcast<CodeValue>()->pad_list().get());
+    // assert(i < frame->code->upcast<CodeValue>()->closure_vars()->size());
+// printf("GETCLOSURE: %d, %d, %s\n", level, no, symbol_table->id2name(frame->code->func_name_id()).c_str());
+// dump_value(frame->code);
+// frame->code->upcast<CodeValue>()->pad_list()->dump(this);
+    if (level == 1) {
+        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get(
+            no
+        );
+        stack.push_back(v);
+    } else {
+        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get_dynamic(
+            level-1, no
+        );
+        stack.push_back(v);
+    }
 }
 
 OP_SETCLOSURE {
@@ -129,10 +149,24 @@ OP_SETCLOSURE {
         }
     }
     assert(frame.get());
-    int i = get_int_operand();
+    int level = get_int_operand_high();
+    int no    = get_int_operand_low();
     SharedPtr<Value> v = stack.back();
-    SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars))[i];
-    *dst = *v;
+    // SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars()))[i];
+    if (level == 1) {
+        frame->code->upcast<CodeValue>()->pad_list()->set(
+            no,
+            v
+        );
+    } else {
+        frame->code->upcast<CodeValue>()->pad_list()->set_dynamic(
+            level-1,
+            no,
+            v
+        );
+    }
+    // dump_value(dst);
+    // *dst = *v;
 }
 
 OP_ADD {
@@ -204,9 +238,9 @@ OP_BUILTIN_FUNCALL {
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, stack.size());
     }
-    ID id = funname->upcast<SymbolValue>()->id;
+    ID id = funname->upcast<SymbolValue>()->id();
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions.find(id);
     assert(iter != this->builtin_functions.end());
@@ -232,13 +266,14 @@ OP_FUNCALL {
 #ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, stack.size());
     }
 #endif
-    ID id = funname->upcast<SymbolValue>()->id;
+    ID id = funname->upcast<SymbolValue>()->id();
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
+// printf("CALLING------ \n");
     // TODO split this part to other op code for performance?
     SharedPtr<Package> pkg = this->package();
     int pkgid = get_int_operand_low();
@@ -249,6 +284,7 @@ OP_FUNCALL {
     if (iter != pkg->end()) {
         CodeValue* code = iter->second->upcast<CodeValue>();
 
+// Disasm::disasm(this->ops);
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
 
@@ -259,20 +295,39 @@ OP_FUNCALL {
             // TODO: vargs support
             // TODO: kwargs support
             int orig_argcnt = argcnt;
-            for (size_t i=0; i<code->code_params->size(); i++) {
+            int start_stack_size = stack.size() - argcnt;
+            this->ops = code->code_opcodes();
+
+// printf("PARAM count: %zd\n", code->code_params->size());
+            for (size_t i=0; i<code->code_params()->size(); i++) {
+// printf("PARAMS: %zd\n", i);
                 if (argcnt <= i) {
-                    int def = code->code_defaults->at(i);
-                    if (def > 0) {
+                    int def = code->code_defaults()->at(i);
+// printf("default! %d\n", def);
+                    if (def >= 0) {
                         pc = def;
+// printf("execute! %zd, %d\n", i, pc);
+// printf("stack size: %d\n", stack.size());
+// Disasm::disasm(this->ops);
                         this->execute();
+
+                        // Note. This is a very bad for performance.
+                        // But it works.
+                        // We must rewrite argument processing later.
+                        SharedPtr<Value> val = stack.back();
+                        stack.pop_back();
+                        stack.insert(stack.begin() + start_stack_size, val);
+
+// printf("finished stack size: %d\n", stack.size());
                         ++argcnt;
                         fframe->top++;
+// printf("execute finished\n", i);
                     } else {
                         throw new ExceptionValue(
                             "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
                             this->symbol_table->id2name(pkg->id()).c_str(),
-                            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(),
-                            code->code_params->size(),
+                            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
+                            code->code_params()->size(),
                             orig_argcnt);
                     }
                 }
@@ -282,7 +337,6 @@ OP_FUNCALL {
             fframe->code = code;
 
             pc = -1;
-            this->ops = code->code_opcodes;
 
             // assert(argcnt == (int)code->code_params->size());
             /**
@@ -295,7 +349,7 @@ OP_FUNCALL {
             frame_stack->push_back(fframe);
         }
     } else {
-        this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str());
+        this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str());
         // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
     }
 }
@@ -487,14 +541,14 @@ OP_LE {
 }
 
 OP_SETLOCAL {
-    SharedPtr<Value> rvalue = stack.back();
+    const SharedPtr<Value> &rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
-        frame_stack->back()->setVar(
+        frame_stack->back()->set_variable(
             get_int_operand(),
             rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
         );
     } else {
-        frame_stack->back()->setVar(
+        frame_stack->back()->set_variable(
             get_int_operand(),
             rvalue
         );
@@ -506,15 +560,17 @@ OP_SETDYNAMIC {
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
-    const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
-    SharedPtr<Value> rvalue = stack.back();
+    // const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
+    const SharedPtr<Value> & rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
-        frame->setVar(
+        frame_stack->back()->set_variable_dynamic(
+            level,
             no,
             rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
         );
     } else {
-        frame->setVar(
+        frame_stack->back()->set_variable_dynamic(
+            level,
             no,
             rvalue
         );
@@ -525,32 +581,21 @@ OP_GETDYNAMIC {
     // lexical vars
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
+    /*
     const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
-    SharedPtr<Value>v = frame->find(no);
+    SharedPtr<Value>v = frame->get_variable(no);
+    */
+    SharedPtr<Value> v = frame_stack->back()->get_variable_dynamic(level, no);
+
     // dump_frame();
     //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
-    if (v) {
-        DBG2("found lexical var\n");
-        stack.push_back(v);
-    } else { // TODO: remove this and use 'my' keyword?
-        DBG2("There is no variable...\n");
-        v = UndefValue::instance();
-        frame->setVar(get_int_operand(), v);
-        stack.push_back(v);
-    }
+    stack.push_back(v);
 }
 
 OP_GETLOCAL {
     // lexical vars
-    SharedPtr<Value>v = frame_stack->back()->find(get_int_operand());
-    if (v) {
-        // printf("found lexical var\n");
-        stack.push_back(v);
-    } else { // TODO: remove this and use 'my' keyword?
-        v = UndefValue::instance();
-        frame_stack->back()->setVar(get_int_operand(), v);
-        stack.push_back(v);
-    }
+    SharedPtr<Value>v = frame_stack->back()->get_variable(get_int_operand());
+    stack.push_back(v);
 }
 
 OP_GET_ITEM {
@@ -590,7 +635,7 @@ OP_MAKE_HASH {
         SharedPtr<StrValue> k = stack.back()->to_s();
         stack.pop_back();
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        h->set(k->str_value, v);
+        h->set(k->str_value(), v);
     }
     stack.push_back(h);
 }
@@ -780,12 +825,12 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= riter->parent->right->int_value) {
+        if (riter->counter <= riter->parent->right()->int_value()) {
             const SharedPtr<Value> & cur = fframe->current_value;
             if (cur.get() && cur->refcnt == 2) {
                 // value is not copied.
                 assert(cur->value_type == VALUE_TYPE_INT);
-                cur->upcast<IntValue>()->int_value = riter->counter;
+                cur->upcast<IntValue>()->int_value(riter->counter);
                 stack.push_back(cur);
             } else {
                 IntValue * iv = new IntValue(riter->counter);
@@ -881,8 +926,8 @@ OP_USE {
     if (ret->is_exception()) {
         this->die(ret);
     } else {
-        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value == 1) {
-            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id, this->package_id());
+        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1) {
+            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id(), this->package_id());
             if (v->is_exception()) {
                 this->die(ret);
             }
@@ -930,7 +975,7 @@ OP_SET_PACKAGE_VARIABLE {
     stack.pop_back();
 
     int vid = get_int_operand();
-    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id);
+    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id());
     pkg->set_variable(vid, rval);
 
     stack.push_back(rval);
@@ -942,7 +987,7 @@ OP_GET_PACKAGE_VARIABLE {
     stack.pop_back();
 
     int vid = get_int_operand();
-    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id);
+    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id());
     auto iter = pkg->find(vid);
     SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
     stack.push_back(ret);
@@ -961,7 +1006,7 @@ OP_LOCAL {
 
     std::string package;
     std::string moniker;
-    split_package_varname(snode->upcast<StrValue>()->str_value, package, moniker);
+    split_package_varname(snode->upcast<StrValue>()->str_value(), package, moniker);
 
     ID pkgid = symbol_table->get_id(package);
     ID vid = symbol_table->get_id(std::string("$") + moniker);

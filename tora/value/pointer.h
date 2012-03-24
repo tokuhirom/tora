@@ -6,22 +6,14 @@
 namespace tora {
 
 class PointerValue : public Value {
-    void * ptr_;
 public:
-    PointerValue(void * p) : Value(VALUE_TYPE_POINTER), ptr_(p) {
+    PointerValue(void * p) : Value(VALUE_TYPE_POINTER, p) {
     }
     ~PointerValue() { }
 
     void *ptr() {
-        assert(ptr_);
-        return ptr_;
+        return boost::get<void*>(value_);
     }
-
-    void dump(int indent) {
-        print_indent(indent);
-        printf("[dump] Pointer: %p\n", ptr_);
-    }
-
 };
 
 };

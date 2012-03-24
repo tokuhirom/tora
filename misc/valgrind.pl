@@ -14,7 +14,7 @@ for my $src (glob('./t/tra/*.tra')) {
     subtest $src => sub {
         my ($in, $out, $err);
         $err = gensym;
-        my $pid = open3($in, $out, $err, "valgrind ./tora $src");
+        my $pid = open3($in, $out, $err, "valgrind ./bin/tora $src");
         close $in;
         my $ret = join('', <$out>);
         my $err_ret = join('', <$err>);

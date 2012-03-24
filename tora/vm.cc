@@ -6,6 +6,7 @@
 #include "package.h"
 #include "inspector.h"
 #include "symbols.gen.h"
+#include "callback.h"
 
 #include "value/hash.h"
 #include "value/code.h"
@@ -47,7 +48,7 @@ using namespace tora;
 const int INITIAL_STACK_SIZE = 1024;
 const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_) : ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
+VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dump_ops) : dump_ops_(dump_ops), ops(ops_), symbol_table(symbol_table_), stack(), exec_trace(false) {
     sp = 0;
     pc = 0;
     this->stack.reserve(INITIAL_STACK_SIZE);
@@ -140,6 +141,10 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
     compiler.init_globals();
     compiler.package(package);
     compiler.compile(parser.root_node());
+    if (vm->dump_ops()) {
+        printf("Dumping %s\n", fname.c_str());
+        Disasm::disasm(compiler.ops);
+    }
     if (compiler.error) {
         throw new ExceptionValue("Compilation failed.");
     }
@@ -187,7 +192,7 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
 static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
-    std::stringstream ss(v->upcast<StrValue>()->str_value + ";");
+    std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
     return eval_foo(vm, &ss, vm->package_name(), "<eval>");
 }
 
@@ -197,11 +202,11 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
 static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
     SharedPtr<StrValue> fname = v->to_s();
-    std::ifstream ifs(fname->str_value.c_str(), std::ios::in);
+    std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
     if (ifs.is_open()) {
-        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value);
+        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value());
     } else {
-        return new ExceptionValue(v->upcast<StrValue>()->str_value + " : " + strerror(errno));
+        throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + strerror(errno));
     }
 }
 
@@ -209,7 +214,7 @@ SharedPtr<Value> VM::require(Value * v) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
-    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id);
+    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id());
     std::string package = s;
     {
         auto iter = s.find("::");
@@ -232,7 +237,7 @@ SharedPtr<Value> VM::require(Value * v) {
     // load
     for (int i=0; i<libpath->size(); i++) {
         std::string realfilename;
-        realfilename = libpath->at(i)->to_s()->str_value;
+        realfilename = libpath->at(i)->to_s()->str_value();
         realfilename += "/";
         realfilename += s;
         struct stat stt;
@@ -253,7 +258,7 @@ SharedPtr<Value> VM::require(Value * v) {
     // not found...
     std::string message = std::string("Cannot find ") + s + " in $LIBPATH\n";
     for (int i=0; i<libpath->size(); i++) {
-        message += "  " + libpath->at(i)->to_s()->str_value;
+        message += "  " + libpath->at(i)->to_s()->str_value();
     }
     return new ExceptionValue(message);
 }
@@ -326,7 +331,10 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         } else {
             stack.push_back(ret);
         }
+    } else if (callback->argc == CallbackFunction::type_const_int) {
+        stack.push_back(new IntValue(callback->const_int));
     } else {
+        fprintf(stderr, "Unknown callback type: %d\n", callback->argc);
         abort();
     }
 }
@@ -350,7 +358,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
             // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
-            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id, v);
+            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id(), v);
         } else {
             // copy non-code value to other package?
         }
@@ -360,7 +368,7 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
 }
 
 void VM::add_function(ID pkgid, ID id, SharedPtr<Value> code) {
-    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id).c_str());
+    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id()).c_str());
     this->find_package(pkgid)->add_function(id, code);
 }
 
@@ -373,7 +381,7 @@ Package* VM::find_package(ID id) {
     if (iter != this->package_map->end()) {
         return iter->second.get();
     } else {
-        Package* pkg =  new Package(id);
+        Package* pkg =  new Package(this, id);
         this->package_map->set(pkg);
         return pkg;
     }
@@ -385,11 +393,13 @@ SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr
     case VALUE_TYPE_OBJECT:
         return container->upcast<ObjectValue>()->set_item(index, rvalue);
     case VALUE_TYPE_HASH:
-        return container->upcast<HashValue>()->set_item(index, rvalue);
+        container->upcast<HashValue>()->set_item(index, rvalue);
+        return UndefValue::instance();
     case VALUE_TYPE_ARRAY:
-        return container->upcast<ArrayValue>()->set_item(index, rvalue);
+        container->upcast<ArrayValue>()->set_item(index, rvalue);
+        return UndefValue::instance();
     default:
-        return new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
+        throw new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
     }
 }
 
@@ -398,6 +408,7 @@ void VM::dump_frame() {
     int i = 0;
     for (auto f = frame_stack->begin(); f != frame_stack->end(); f++) {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
+        /*
         for (size_t n=0; n<(*f)->vars.size(); n++) {
             printf("  %zd:", n);
             SharedPtr<Value> val = (*f)->vars.at(n);
@@ -407,6 +418,7 @@ void VM::dump_frame() {
                 printf(" (null)\n");
             }
         }
+        */
     }
     printf("---------------\n");
 }
@@ -454,12 +466,12 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
     while (1) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value.c_str(), lineno);
+                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", strerror(exception->upcast<ExceptionValue>()->get_errno()));
+                    fprintf(stderr, "%s\n", strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()));
                 } else {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 }
@@ -535,11 +547,12 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     fframe->self = self;
 
     pc = -1;
-    this->ops = code->code_opcodes;
+    this->ops = code->code_opcodes();
 
     // TODO: vargs support
     // TODO: kwargs support
-    assert(argcnt == (int)code->code_params->size());
+    // printf("%d, %zd\n", argcnt, code->code_params()->size());
+    assert(argcnt == (int)code->code_params()->size());
     mark_stack.push_back(stack.size());
     frame_stack->push_back(fframe);
 }
@@ -611,7 +624,7 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
     if (object->value_type == VALUE_TYPE_UNDEF) {
-        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str());
+        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str());
     }
 
     std::set<ID> seen;
@@ -622,7 +635,7 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
     seen.insert(klass_id);
 
     SharedPtr<Package> pkg = this->find_package(klass_id);
-    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id);
+    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id());
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
@@ -647,11 +660,11 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
             fframe->self = object;
 
             pc = -1;
-            this->ops = code->code_opcodes;
+            this->ops = code->code_opcodes();
 
             // TODO: vargs support
             // TODO: kwargs support
-            assert(argcnt == (int)code->code_params->size());
+            assert(argcnt == (int)code->code_params()->size());
             mark_stack.push_back(stack.size());
             frame_stack->push_back(fframe);
         }
@@ -671,7 +684,7 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
         } else {
             // dump_value(function_id);
             // dump_value(object);
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
+            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
         }
     }
 }

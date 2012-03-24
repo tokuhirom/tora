@@ -7,9 +7,14 @@ namespace tora {
 
 class DoubleValue: public Value {
 public:
-    double  double_value;
     DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
-        this->double_value = d;
+        this->value_ = d;
+    }
+    double double_value() const {
+        return boost::get<double>(this->value_);
+    }
+    void double_value(double n) {
+        boost::get<double>(this->value_) = n;
     }
 };
 

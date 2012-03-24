@@ -10,9 +10,8 @@ namespace tora {
 class BoolValue: public Value {
 public:
     BoolValue(bool b): Value(VALUE_TYPE_BOOL) {
-        this->bool_value = b;
+        this->value_ = b;
     }
-    bool bool_value;
     static BoolValue* true_instance() {
         return new BoolValue(true);
     }
@@ -22,6 +21,7 @@ public:
     static BoolValue* instance(bool b) {
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
+    bool bool_value() const { return boost::get<bool>(this->value_); }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }
 	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }

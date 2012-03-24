@@ -1,0 +1,7 @@
+my $cnt = 4649;
+sub foo($x=undef) {
+    [4649, $x];
+}
+sub bar($b, $x=undef) {
+    [5963, $b, $x];
+}

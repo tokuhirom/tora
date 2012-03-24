@@ -25,3 +25,7 @@ callgrind.out.*
 *.a
 src/*/*.o-*
 src/*.o-*
+hoge.pl
+hoge.cc
+a.out
+lib/Config.tra

@@ -1,0 +1,13 @@
+use Curl *;
+use Curl::Easy *;
+
+my $buf = '';
+my $curl = Curl::Easy.new();
+$curl.setopt(CURLOPT_URL, "http://www.example.com/");
+$curl.setopt(CURL_WRITEFUNCTION, -> $curl, $dat {
+    $buf += $dat;
+});
+my $ret = $curl.perform();
+p($ret);
+p($buf);
+

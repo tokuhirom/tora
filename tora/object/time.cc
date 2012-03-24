@@ -37,7 +37,7 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
         delete buf;
         throw new ExceptionValue("Error in localtime_r: %s", strerror(errno));
     }
-    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id, new PointerValue(buf));
+    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id(), new PointerValue(buf));
 }
 
 static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
@@ -78,7 +78,7 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
     char out[256];
 
     void * tm = t->upcast<PointerValue>()->ptr();
-    size_t r = strftime(out, sizeof(out), format_s->upcast<StrValue>()->str_value.c_str(), static_cast<const struct tm*>(tm));
+    size_t r = strftime(out, sizeof(out), format_s->upcast<StrValue>()->str_value().c_str(), static_cast<const struct tm*>(tm));
     if (r == sizeof(out)) {
         // should be retry?
         return new ExceptionValue("strftime overflow: %d", sizeof(r));

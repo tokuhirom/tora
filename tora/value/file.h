@@ -8,18 +8,25 @@ namespace tora {
 
 class FileValue : public Value {
 private:
+    FILE *VAL() const {
+        return boost::get<FILE*>(this->value_);
+    }
 public:
-    FILE *fp;
-    FileValue() : Value(VALUE_TYPE_FILE), fp(NULL) { }
+    FileValue() : Value(VALUE_TYPE_FILE) {
+        this->value_ = (FILE*)NULL;
+    }
     ~FileValue() {
-        if (fp) { this->close(); }
+        if (VAL()) { this->close(); }
     }
     void close() {
-        if (fp) { fclose(this->fp); fp = NULL; }
+        if (VAL()) { fclose(this->VAL()); this->value_ = (FILE*)NULL; }
     }
     bool open(std::string &fname, std::string &mode) {
-        this->fp = fopen(fname.c_str(), mode.c_str());
-        return !!this->fp;
+        this->value_ = fopen(fname.c_str(), mode.c_str());
+        return !!VAL();
+    }
+    FILE *fp() {
+        return VAL();
     }
     SharedPtr<StrValue> read() {
         // slurp
@@ -27,15 +34,14 @@ public:
         const int bufsiz = 4096;
         char buffer[bufsiz];
         size_t n;
-        while ((n = fread(buffer, sizeof(char), bufsiz, this->fp)) != 0) {
+        while ((n = fread(buffer, sizeof(char), bufsiz, VAL())) != 0) {
             s.append(buffer, n);
         }
-        if (feof(this->fp)) {
+        if (feof(VAL())) {
             return new StrValue(s);
         } else {
             // err?
-            // TODO exception
-            abort();
+            throw new ErrnoExceptionValue(errno);
         }
     }
 };
