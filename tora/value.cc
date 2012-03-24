@@ -87,6 +87,9 @@ SharedPtr<StrValue> Value::to_s() {
     switch (value_type) {
     case VALUE_TYPE_STR:
         return static_cast<StrValue*>(this);
+    case VALUE_TYPE_BYTES:
+        // TODO: utf8 validation?
+        return new StrValue(static_cast<BytesValue*>(this)->str_value());
     case VALUE_TYPE_INT: {
         std::ostringstream os;
         os << this->upcast<IntValue>()->int_value();
@@ -115,7 +118,7 @@ SharedPtr<StrValue> Value::to_s() {
         return new StrValue(os.str());
     }
     default: {
-        throw new ExceptionValue("%s don't support stringification.\n", this->type_str());
+        throw new ExceptionValue("%s don't support stringification.", this->type_str());
     }
     }
 }

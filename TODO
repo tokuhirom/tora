@@ -9,6 +9,8 @@ alarm()
 system()
 printf()
 sprintf()
+pack()
+unpack()
 
 builtin objects
 ---------------

@@ -1,0 +1,12 @@
+use Test::More *;
+use HTTP::Parser *;
+
+my ($ret, $minor_version, $status, $message, $headers) = parse_http_response(b"HTTP/1.1 200 OK\r\nHost: example.com\r\n\r\nhogehoge", HEADERS_AS_ARRAYREF, undef);
+is($ret, 38);
+is($minor_version, 1);
+is($status, 200);
+is($message, b"OK");
+is($headers[0], b'host');
+is($headers[1], b'example.com');
+
+done_testing;

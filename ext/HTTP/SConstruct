@@ -5,7 +5,8 @@ env = Environment(
         '-I../../tora/',
         '-I../../vendor/boost_1_49_0/',
         '-g',
-        '-DNDEBUG'
+        '-DNDEBUG',
+        '-Wall'
     ],
     LINKFLAGS=[
     ],
@@ -32,4 +33,4 @@ else:
 shlib = env.SharedLibrary("lib/HTTP/Parser.so", ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='')
 Default(shlib)
 
-env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/http.tra')
+env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I lib -I ../../lib/" t/*.tra')

@@ -16,10 +16,16 @@ public:
     BytesValue(const char *str): Value(VALUE_TYPE_BYTES) {
         this->value_ = std::string(str);
     }
+    BytesValue(const char *str, size_t len): Value(VALUE_TYPE_BYTES) {
+        this->value_ = std::string(str, len);
+    }
     BytesValue(const std::string str): Value(VALUE_TYPE_BYTES) {
         this->value_ = str;
     }
     ~BytesValue() { }
+    std::string str_value() {
+        return VAL();
+    }
     const char * c_str() {
         return VAL().c_str();
     }

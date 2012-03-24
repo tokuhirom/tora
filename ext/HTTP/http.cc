@@ -5,6 +5,7 @@
 #include <vm.h>
 #include <value/array.h>
 #include <value/hash.h>
+#include <value/tuple.h>
 #include <package.h>
 #include <shared_ptr.h>
 
@@ -12,6 +13,12 @@
 #define MAX_HEADERS         128
 
 using namespace tora;
+
+enum {
+    HEADERS_NONE = 0,       // don't parse headers. It's fastest. if you want only special headers, also fastest.
+    HEADERS_AS_HASHREF = 1,    // HTTP::Headers compatible HashRef, { header_name => "header_value" or ["val1", "val2"] }
+    HEADERS_AS_ARRAYREF = 2,    // Ordered ArrayRef : [ name, value, name2, value2 ... ]
+};
 
 //////////////////////////////////////////////////////////////////////////////////
 // utils.
@@ -29,6 +36,22 @@ static inline char tol(char const ch)
   return ('A' <= ch && ch <= 'Z')
     ? ch - ('A' - 'a')
     : ch;
+}
+
+/* copy src to dest with normalization.
+   dest must have enough size for src */
+static inline void normalize_response_header_name(
+        char* const dest,
+        const char* const src, size_t const len) {
+    size_t i;
+    for(i = 0; i < len; i++) {
+        dest[i] = tol(src[i]);
+    }
+}
+
+static inline void concat_multiline_header(BytesValue * val, const char * const cont, size_t const cont_len) {
+    val->str_value() += "\n"; // XXX: is it collect?
+    val->str_value() += std::string(cont, cont_len);
 }
 
 static
@@ -179,7 +202,7 @@ static SharedPtr<Value> HTTP_Parser_parse_http_request(VM *vm, Value *str, Value
     sprintf(tmp, "HTTP/1.%d", minor_version);
     hash->set("SERVER_PROTOCOL", new StrValue(tmp));
 
-    for (int i = 0; i < num_headers; ++i) {
+    for (size_t i = 0; i < num_headers; ++i) {
         if (headers[i].name != NULL) {
             const char* name;
             size_t name_len;
@@ -228,11 +251,73 @@ done:
     return new IntValue(ret);
 }
 
+static SharedPtr<Value> HTTP_Parser_parse_http_response(VM *vm, Value *bytes_v, Value *opt, Value *special_headers) {
+    if (bytes_v->value_type != VALUE_TYPE_BYTES) {
+        throw new ExceptionValue("You must pass bytes value for this function.");
+    }
+
+    int minor_version, status;
+    const char* msg;
+    size_t msg_len;
+    struct phr_header headers[MAX_HEADERS];
+    size_t num_headers = MAX_HEADERS;
+    size_t last_len = 0;
+    int const ret             = phr_parse_response(
+        static_cast<BytesValue*>(bytes_v)->c_str(), static_cast<BytesValue*>(bytes_v)->size(),
+        &minor_version, &status, &msg, &msg_len, headers, &num_headers, last_len);
+
+    SharedPtr<Value> res_headers;
+    switch (opt->to_int()) {
+    case HEADERS_AS_ARRAYREF:
+        res_headers.reset(new ArrayValue());
+        break;
+        // av_extend((AV*)res_headers, (num_headers * 2) - 1);
+    default:
+        throw new ExceptionValue("Currently supported only HEADERS_AS_ARRAYREF: %d", opt->to_int());
+    }
+
+    char name[MAX_HEADER_NAME_LEN]; /* temp buffer for normalized names */
+    BytesValue *last_element_value_sv = NULL;
+    for (size_t i = 0; i < num_headers; i++) {
+        struct phr_header const h = headers[i];
+        if (h.name != NULL) {
+            if(h.name_len > sizeof(name)) {
+                /* skip if name_len is too long */
+                continue;
+            }
+            normalize_response_header_name(
+                name, h.name, h.name_len);
+            SharedPtr<BytesValue> namesv  = new BytesValue(name, h.name_len);
+            SharedPtr<BytesValue> valuesv = new BytesValue(
+                h.value, h.value_len);
+            res_headers->upcast<ArrayValue>()->push(namesv);
+            res_headers->upcast<ArrayValue>()->push(valuesv);
+            last_element_value_sv = valuesv.get();
+        } else {
+            if (last_element_value_sv) {
+                concat_multiline_header(last_element_value_sv, h.value, h.value_len);
+            }
+        }
+    }
+    // my ($ret, $minor_version, $status, $message, $headers) = parse_http_response(b"HTTP/1.1 200 OK\r\nHost: example.com\r\n\r\nhogehoge", HEADERS_AS_ARRAYREF, undef);
+    SharedPtr<TupleValue> tuple = new TupleValue();
+    tuple->push_front(new IntValue(ret));
+    tuple->push_front(new IntValue(minor_version));
+    tuple->push_front(new IntValue(status));
+    tuple->push_front(new BytesValue(msg, msg_len));
+    tuple->push_front(res_headers);
+    return tuple;
+}
+
 extern "C" {
 
 void Init_HTTP_Parser(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("HTTP::Parser");
-    pkg->add_method(vm->symbol_table->get_id("parse_http_request"), new CallbackFunction(HTTP_Parser_parse_http_request));
+    pkg->add_method("parse_http_request", new CallbackFunction(HTTP_Parser_parse_http_request));
+    pkg->add_method("parse_http_response", new CallbackFunction(HTTP_Parser_parse_http_response));
+    pkg->add_constant("HEADERS_NONE", HEADERS_NONE);
+    pkg->add_constant("HEADERS_AS_HASHREF", HEADERS_AS_HASHREF);
+    pkg->add_constant("HEADERS_AS_ARRAYREF", HEADERS_AS_ARRAYREF);
 }
 
 }
