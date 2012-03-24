@@ -212,6 +212,13 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
         SharedPtr<Value> s2(rhs->to_s());
         return (operation_s(lhs->upcast<StrValue>()->str_value(), s2->upcast<StrValue>()->str_value()));
     }
+    case VALUE_TYPE_BYTES: {
+        if (rhs->value_type == VALUE_TYPE_BYTES) {
+            return (operation_s(lhs->upcast<BytesValue>()->str_value(), rhs->upcast<BytesValue>()->str_value()));
+        } else {
+            return false;
+        }
+    }
     case VALUE_TYPE_DOUBLE: {
         switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
