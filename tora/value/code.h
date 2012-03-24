@@ -14,7 +14,7 @@
 
 namespace tora {
 
-struct CallbackFunction;
+class CallbackFunction;
 class SymbolTable;
 
 class CodeValue: public Value {

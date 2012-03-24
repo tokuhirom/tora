@@ -25,7 +25,7 @@ public:
     ExceptionValue(const std::string &msg, exception_type_t type=EXCEPTION_TYPE_GENERAL) : Value(VALUE_TYPE_EXCEPTION), exception_type(type) {
         value_ = msg;
     }
-    virtual std::string message() {
+    virtual std::string message() const {
         return boost::get<std::string>(value_);
     }
 };

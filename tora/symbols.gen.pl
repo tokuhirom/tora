@@ -28,6 +28,11 @@ my $dat = [
     ['SYMBOL_RANGE_CLASS' => 'Range'],
     ['SYMBOL_POINTER_CLASS' => 'Pointer'],
     ['SYMBOL_EXCEPTION_CLASS' => 'Exception'],
+    ['SYMBOL_ARRAY_ITERATOR_CLASS' => 'Array::Iterator'],
+    ['SYMBOL_RANGE_ITERATOR_CLASS' => 'Range::Iterator'],
+    ['SYMBOL_HASH_ITERATOR_CLASS' => 'Hash::Iterator'],
+    ['SYMBOL_REFERENCE_CLASS' => 'Reference'],
+    ['SYMBOL_REGEXP_MATCHED_CLASS' => 'Regexp::Matched'],
 ];
 
 open my $hfh, '>', 'tora/symbols.gen.h';

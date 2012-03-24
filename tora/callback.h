@@ -5,7 +5,8 @@
 
 namespace tora {
 
-struct CallbackFunction {
+class CallbackFunction {
+public:
     typedef enum {
         type_vmv = -1,
         type_vm0 = -2,

@@ -195,6 +195,14 @@ ID Value::object_package_id() const {
         return SYMBOL_POINTER_CLASS;
     case VALUE_TYPE_EXCEPTION:
         return SYMBOL_EXCEPTION_CLASS;
+    case VALUE_TYPE_ARRAY_ITERATOR:
+        return SYMBOL_ARRAY_ITERATOR_CLASS;
+    case VALUE_TYPE_HASH_ITERATOR:
+        return SYMBOL_HASH_ITERATOR_CLASS;
+    case VALUE_TYPE_RANGE_ITERATOR:
+        return SYMBOL_RANGE_ITERATOR_CLASS;
+    case VALUE_TYPE_REFERENCE:
+        return SYMBOL_REFERENCE_CLASS;
     case VALUE_TYPE_SYMBOL:
         return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:

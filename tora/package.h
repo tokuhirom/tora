@@ -9,7 +9,7 @@
 
 namespace tora {
 
-struct CallbackFunction;
+class CallbackFunction;
 class VM;
 
 class Package {

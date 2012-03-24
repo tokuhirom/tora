@@ -1,6 +1,8 @@
 #ifndef TORA_OP_ARRAY_H_
 #define TORA_OP_ARRAY_H_
 
+#include <vector>
+
 #include "op.h"
 
 namespace tora {
