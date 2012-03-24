@@ -23,7 +23,7 @@ public:
     virtual bool ok() = 0;
     virtual const std::string& error() = 0;
     virtual const std::string& pattern() = 0;
-    virtual bool match(const std::string &str) const = 0;
+    virtual SharedPtr<Value> match(VM *vm, const std::string &str) = 0;
     virtual std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const = 0;
     virtual int flags() const {
         return flags_;
@@ -59,9 +59,7 @@ public:
     const std::string& error() {
         return VAL()->error();
     }
-    bool match(const std::string &str) const {
-        return RE2::PartialMatch(str, *(VAL()));
-    }
+    SharedPtr<Value> match(VM *vm, const std::string &str);
     static std::string quotemeta(const std::string &str) {
         return RE2::QuoteMeta(str);
     }
@@ -78,6 +76,9 @@ public:
     void dump(int indent) {
         print_indent(indent);
         printf("/%s/", VAL()->pattern().c_str());
+    }
+    int number_of_capturing_groups() const {
+        return VAL()->NumberOfCapturingGroups();
     }
 };
 

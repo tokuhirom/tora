@@ -40,9 +40,6 @@ String.uc()
 String#substr(n)
 String#substr(n, m)
 String#replace(regexp|str, code)
-String#replace(regexp|str, str)
-
-ErrnoException?
 
 generate document
 
@@ -214,4 +211,6 @@ XSLoader()
 Regexp.quotemeta
  * /xxx/i
  * /xxx/g
+String#replace(regexp|str, str)
+ErrnoException?
 

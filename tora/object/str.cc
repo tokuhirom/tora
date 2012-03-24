@@ -4,6 +4,7 @@
 #include "../shared_ptr.h"
 #include "../value/regexp.h"
 #include "../package.h"
+#include "../symbols.gen.h"
 #include <re2/re2.h>
 
 using namespace tora;
@@ -25,7 +26,7 @@ static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
         return new BoolValue(self_sv->str_value().find(pattern->str_value()) != std::string::npos);
     } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
-        return new BoolValue(regex->match(static_cast<StrValue*>(self_v)->str_value()));
+        return regex->match(vm, static_cast<StrValue*>(self_v)->str_value());
     } else {
         throw new ArgumentExceptionValue("String.match() requires string or regexp object for first argument, but you passed '%s'.", arg1->type_str());
     }
@@ -56,7 +57,7 @@ static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rew
 }
 
 void tora::Init_Str(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("String");
+    SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
     pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
     pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
     pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));

@@ -24,6 +24,17 @@ is("foo".replace('oo', 'pp'), 'fpp');
 is("foo".match('oo'), true);
 is("foo".match('OO'), false);
 
+{
+    my $m = "ablacadabla".match(/(da)bla/);
+    is($m[0], 'dabla');
+    is($m[1], 'da');
+    is($m[2], undef);
+}
+{
+    my $m = "ablacadabla".match(/(da)/);
+    is($m[5096], undef);
+}
+
 is(Regexp.quotemeta("f.o"), 'f\\.o');
 
 done_testing;

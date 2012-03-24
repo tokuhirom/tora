@@ -3,6 +3,7 @@
 #include "../package.h"
 #include "code.h"
 #include "../frame.h"
+#include "../symbols.gen.h"
 
 using namespace tora;
 
@@ -84,7 +85,7 @@ SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v)
 
 SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
     SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
-    auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("__getitem__"));
+    auto iter = pkg->find(SYMBOL___GET_ITEM__);
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
@@ -108,8 +109,7 @@ SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
 
             // this->VAL().vm_->frame_stack->pop_back();
         } else {
-            printf("NOT IMPLEMENTED YET\n");
-            abort();
+            TODO();
        //   {
        //       SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt, frame_stack->back());
        //       fframe->return_address = pc;
