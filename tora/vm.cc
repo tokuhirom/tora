@@ -284,7 +284,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type != EXCEPTION_TYPE_STOP_ITERATION) {
+        if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type() != EXCEPTION_TYPE_STOP_ITERATION) {
             this->die(ret);
         } else {
             stack.push_back(ret);
@@ -468,9 +468,9 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
             if (exception->value_type == VALUE_TYPE_STR) {
                 fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
-                if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_GENERAL) {
+                if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
-                } else if (exception->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_ERRNO) {
+                } else if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_ERRNO) {
                     fprintf(stderr, "%s\n", strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()));
                 } else {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());

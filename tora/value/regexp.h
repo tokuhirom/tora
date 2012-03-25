@@ -33,7 +33,7 @@ public:
 class RE2RegexpValue : public AbstractRegexpValue {
 private:
     RE2* VAL() const {
-        return static_cast<RE2*>(boost::get<void*>(this->value_));
+        return static_cast<RE2*>(this->ptr_value_);
     }
 public:
     RE2RegexpValue(std::string &str, int flags) : AbstractRegexpValue(flags) {
@@ -45,7 +45,7 @@ public:
         if (flags & REGEXP_IGNORECASE) {
             opt.set_case_sensitive(false);
         }
-        value_ = (void*)new RE2(str, opt);
+        ptr_value_ = (void*)new RE2(str, opt);
     }
     ~RE2RegexpValue() {
         delete VAL();

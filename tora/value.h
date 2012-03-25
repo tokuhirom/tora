@@ -11,13 +11,12 @@
 #include <memory>
 #include <deque>
 
-#include <boost/variant.hpp>
-
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
 #include "util.h"
 #include "op_array.h"
+#include "exception.h"
 
 namespace tora {
 
@@ -79,6 +78,26 @@ protected:
         { }
 };
 
+class ExceptionImpl {
+    friend class ExceptionValue;
+    friend class ErrnoExceptionValue;
+    friend class ArgumentExceptionValue;
+protected:
+    exception_type_t type_;
+    int errno_;
+    std::string message_;
+    explicit ExceptionImpl(exception_type_t type) :type_(type) {
+    }
+    explicit ExceptionImpl(int err, exception_type_t type=EXCEPTION_TYPE_ERRNO) :type_(type), errno_(err) {
+    }
+    ExceptionImpl(const std::string &msg, exception_type_t type) :type_(type), message_(msg) {
+    }
+};
+
+typedef std::deque<SharedPtr<Value>> ArrayImpl;
+typedef std::map<std::string, SharedPtr<Value> > HashImpl;
+typedef std::string StringImpl;
+
 // TODO: remove virtual from this class for performance.
 /**
  * The value class
@@ -97,29 +116,26 @@ public:
         ++refcnt;
     }
 protected:
-    typedef std::deque<SharedPtr<Value>> ArrayImpl;
-    typedef std::map<std::string, SharedPtr<Value> > HashImpl;
-    typedef boost::variant<
-        int,
-        double,
-        bool,
-        ID,
-        std::string,
-        RangeImpl,
-        ArrayImpl,
-        HashImpl,
-        void*,
-        Value*,
-        FILE *,
-        ObjectImpl
-    > any_t;
+    union {
+        int int_value_;
+        double double_value_;
+        bool bool_value_;
+        ID id_value_;
+
+        void * ptr_value_;
+        StringImpl* str_value_;
+        RangeImpl* range_value_;
+        ArrayImpl* array_value_;
+        HashImpl*hash_value_;
+        Value * value_value_;
+        FILE *file_value_;
+        ObjectImpl* object_value_;
+        ExceptionImpl* exception_value_;
+    };
 
     Value(value_type_t t) : refcnt(0), value_type(t) { }
-    Value(value_type_t t, any_t dat) : refcnt(0), value_(dat), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
-
-    any_t value_;
 public:
     value_type_t value_type;
     Value& operator=(const Value&v);

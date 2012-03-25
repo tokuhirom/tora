@@ -8,33 +8,27 @@ namespace tora {
 class StrValue: public Value {
 public:
     StrValue(): Value(VALUE_TYPE_STR) {
-        value_ = std::string("");
+        str_value_ = new std::string("");
     }
     StrValue(const char *str): Value(VALUE_TYPE_STR) {
-        value_ = std::string(str);
+        str_value_ = new std::string(str);
     }
     StrValue(const char *str, size_t t): Value(VALUE_TYPE_STR) {
-        value_ = std::string(str, t);
+        str_value_ = new std::string(str, t);
     }
     StrValue(const std::string str): Value(VALUE_TYPE_STR) {
-        value_ = str;
+        str_value_ = new std::string(str);
     }
-    ~StrValue() { }
+    ~StrValue() { delete str_value_; }
     const char * c_str() {
-        return boost::get<std::string>(this->value_).c_str();
-    }
-    void set_str(const char*s) {
-        value_ = s;
+        return this->str_value_->c_str();
     }
     int length();
     void set_str(const std::string & s) {
-        value_ = s;
+        *str_value_ = s;
     }
-    const std::string & str_value() const {
-        return boost::get<std::string>(value_);
-    }
-    std::string & str_value() {
-        return boost::get<std::string>(value_);
+    std::string str_value() const {
+        return *str_value_;
     }
 };
 

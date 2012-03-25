@@ -3,5 +3,10 @@
 using namespace tora;
 
 RangeValue::RangeValue(const SharedPtr<IntValue> &l, const SharedPtr<IntValue>& r) : Value(VALUE_TYPE_RANGE) {
-    value_ = RangeImpl(l.get(), r.get());
+    range_value_ = new RangeImpl(l.get(), r.get());
 }
+
+RangeValue::~RangeValue() {
+    delete range_value_;
+}
+

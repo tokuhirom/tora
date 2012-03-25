@@ -9,20 +9,21 @@ namespace tora {
 class ArrayValue: public Value {
 private:
     inline ArrayImpl& VAL() {
-        return boost::get<ArrayImpl>(this->value_);
+        return *(this->array_value_);
     }
     inline const ArrayImpl& VAL() const {
-        return boost::get<ArrayImpl>(this->value_);
+        return *(this->array_value_);
     }
 public:
     typedef ArrayImpl::iterator iterator2;
     typedef ArrayImpl::const_iterator const_iterator;
 
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
-        this->value_ = std::deque<SharedPtr<Value>>();
+        this->array_value_ = new std::deque<SharedPtr<Value>>();
     }
     ArrayValue(const ArrayValue & a);
     ~ArrayValue() {
+        delete this->array_value_;
     }
     void sort();
 

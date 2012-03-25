@@ -9,20 +9,20 @@ namespace tora {
 class FileValue : public Value {
 private:
     FILE *VAL() const {
-        return boost::get<FILE*>(this->value_);
+        return (this->file_value_);
     }
 public:
     FileValue() : Value(VALUE_TYPE_FILE) {
-        this->value_ = (FILE*)NULL;
+        this->file_value_ = (FILE*)NULL;
     }
     ~FileValue() {
         if (VAL()) { this->close(); }
     }
     void close() {
-        if (VAL()) { fclose(this->VAL()); this->value_ = (FILE*)NULL; }
+        if (VAL()) { fclose(this->VAL()); this->file_value_ = (FILE*)NULL; }
     }
-    bool open(std::string &fname, std::string &mode) {
-        this->value_ = fopen(fname.c_str(), mode.c_str());
+    bool open(const std::string &fname, const std::string &mode) {
+        this->file_value_ = fopen(fname.c_str(), mode.c_str());
         return !!VAL();
     }
     FILE *fp() {

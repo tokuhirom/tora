@@ -17,7 +17,7 @@ public:
 };
 
 ArrayValue::ArrayValue(const ArrayValue & a) : Value(VALUE_TYPE_ARRAY) {
-    this->value_ = std::deque<SharedPtr<Value>>();
+    this->array_value_ = new ArrayImpl();
     // this->values->reserve(a.values->size());
     std::copy(a.VAL().begin(), a.VAL().end(), std::back_inserter(this->VAL()));
 }

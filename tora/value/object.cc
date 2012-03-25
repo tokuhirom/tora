@@ -7,6 +7,10 @@
 
 using namespace tora;
 
+ObjectValue::~ObjectValue() {
+    delete object_value_;
+}
+
 void ObjectValue::release() {
     --refcnt;
     if (refcnt == 0) {
@@ -135,9 +139,6 @@ SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
         printf("This is not a container type: %s\n", this->type_str());
         abort();
     }
-}
-
-ObjectValue::~ObjectValue() {
 }
 
 // call DESTROY method if it's available.

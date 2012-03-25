@@ -8,11 +8,12 @@ namespace tora {
 
 class SymbolValue: public Value {
 public:
-    SymbolValue(ID i): Value(VALUE_TYPE_SYMBOL, i) {
+    SymbolValue(ID id): Value(VALUE_TYPE_SYMBOL) {
+        id_value_ = id;
     }
     ~SymbolValue() { }
     ID id() const {
-        return boost::get<ID>(value_);
+        return id_value_;
     }
 };
 

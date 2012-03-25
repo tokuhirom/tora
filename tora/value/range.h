@@ -10,12 +10,13 @@ namespace tora {
 class RangeValue: public Value {
 public:
     explicit RangeValue(const SharedPtr<IntValue> &l, const SharedPtr<IntValue> &r);
+    ~RangeValue();
 
-    const SharedPtr<IntValue> &left() {
-        return boost::get<RangeImpl>(value_).left_;
+    const SharedPtr<IntValue> &left() const {
+        return range_value_->left_;
     }
     const SharedPtr<IntValue> &right() {
-        return boost::get<RangeImpl>(value_).right_;
+        return range_value_->right_;
     }
 
     class Iterator : public Value {

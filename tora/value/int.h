@@ -8,25 +8,34 @@
 namespace tora {
 
 class IntValue: public Value {
+private:
+    const int &VAL() const {
+        return this->int_value_;
+    }
+    int &VAL() {
+        return this->int_value_;
+    }
 public:
     IntValue(int i): Value(VALUE_TYPE_INT) {
-        this->value_ = i;
+        this->int_value_ = i;
     }
     ~IntValue() { }
+    // remove?
     void tora__decr__() {
-        boost::get<int>(this->value_)--;
-    }
-    void tora__incr__() {
-        boost::get<int>(this->value_)++;
+        VAL()--;
     }
     SharedPtr<IntValue> clone() const {
-        return new IntValue(boost::get<int>(this->value_));
+        return new IntValue(VAL());
+    }
+    // remove?
+    void tora__incr__() {
+        VAL()++;
     }
     int int_value() const {
-        return boost::get<int>(this->value_);
+        return VAL();
     }
     void int_value(int n) {
-        boost::get<int>(this->value_) = n;
+        VAL() = n;
     }
 public:
 	void* operator new(size_t size) { return pool_.malloc(); }

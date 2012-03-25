@@ -871,7 +871,7 @@ OP_FOR_ITER {
                SharedPtr<Value> val = stack.back();
                stack.pop_back();
                if (val->value_type == VALUE_TYPE_EXCEPTION) {
-                    if (val->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
+                    if (val->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_STOP_ITERATION) {
                         stack.push_back(val);
                     } else {
                         this->die(val);
@@ -894,7 +894,7 @@ OP_FOR_ITER {
 
 OP_JUMP_IF_STOP_EXCEPTION {
     const SharedPtr<Value> &top = stack.back();
-    if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type == EXCEPTION_TYPE_STOP_ITERATION) {
+    if (top->value_type == VALUE_TYPE_EXCEPTION && top->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_STOP_ITERATION) {
         pc = get_int_operand()-1;
     }
 }

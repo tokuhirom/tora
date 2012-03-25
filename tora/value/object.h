@@ -10,14 +10,14 @@ class VM;
 class ObjectValue : public Value {
 private:
     const ObjectImpl & VAL() const {
-        return boost::get<ObjectImpl>(value_);
+        return *object_value_;
     }
     ObjectImpl & VAL() {
-        return boost::get<ObjectImpl>(value_);
+        return *object_value_;
     }
 public:
     ObjectValue(VM *v, ID p, const SharedPtr<Value>& d) : Value(VALUE_TYPE_OBJECT) {
-        value_ = ObjectImpl(v, p, d);
+        object_value_ = new ObjectImpl(v, p, d);
     }
     ~ObjectValue();
     const SharedPtr<Value> data() const { return VAL().data_; }

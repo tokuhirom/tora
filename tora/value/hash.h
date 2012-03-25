@@ -11,16 +11,19 @@ namespace tora {
 class HashValue: public Value {
 private:
     inline HashImpl& VAL() {
-        return boost::get<HashImpl>(this->value_);
+        return *(this->hash_value_);
     }
     inline const HashImpl& VAL() const {
-        return boost::get<HashImpl>(this->value_);
+        return *(this->hash_value_);
     }
 public:
     typedef HashImpl::iterator iter;
 
     HashValue() : Value(VALUE_TYPE_HASH) {
-        this->value_ = HashImpl();
+        this->hash_value_ = new HashImpl();
+    }
+    ~HashValue() {
+        delete this->hash_value_;
     }
     void clear() {
         VAL().clear();

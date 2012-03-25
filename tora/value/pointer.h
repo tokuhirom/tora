@@ -7,12 +7,13 @@ namespace tora {
 
 class PointerValue : public Value {
 public:
-    PointerValue(void * p) : Value(VALUE_TYPE_POINTER, p) {
+    PointerValue(void * p) : Value(VALUE_TYPE_POINTER) {
+        ptr_value_ = p;
     }
     ~PointerValue() { }
 
     void *ptr() {
-        return boost::get<void*>(value_);
+        return ptr_value_;
     }
 };
 
