@@ -17,12 +17,11 @@ PackageMap::iterator PackageMap::end() {
 }
 
 void PackageMap::set(Package* pkg) {
-    ID id = pkg->id();
-    this->data[id] = pkg;
+    this->data.insert(std::make_pair(pkg->id(), pkg));
 }
 
 void PackageMap::set(SharedPtr<Package> &pkg) {
-    this->data[pkg->id()] = pkg;
+    this->data.insert(std::make_pair(pkg->id(), pkg));
 }
 
 void PackageMap::dump(VM *vm) {
