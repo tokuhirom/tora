@@ -25,7 +25,7 @@ env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g'],
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g', '-DPERLISH_CLOSURE'],
     PREFIX=GetOption('prefix')
 )
 print 'PREFIX: ' + env['PREFIX']

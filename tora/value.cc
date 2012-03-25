@@ -154,17 +154,43 @@ int Value::to_int() const {
     throw new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
 }
 
-Value& tora::Value::operator=(const Value&v) {
-    assert(this->value_type == v.value_type);
-    switch (v.value_type) {
-    case VALUE_TYPE_INT: {
-        const IntValue *vp = static_cast<const IntValue*>(&v);
-        this->upcast<IntValue>()->int_value(vp->int_value());
-        return *this;
-    }
+Value& tora::Value::operator=(const Value&lhs) {
+    switch (this->value_type) {
+    case VALUE_TYPE_INT:
+    case VALUE_TYPE_DOUBLE:
+    case VALUE_TYPE_UNDEF:
+        // primitive value does not needs deletion
+        break;
+    case VALUE_TYPE_STR:
+        delete this->str_value_;
+        this->str_value_ = NULL;
+        break;
     default:
         abort();
     }
+
+    switch (lhs.value_type) {
+    case VALUE_TYPE_INT: {
+        const IntValue *vp = static_cast<const IntValue*>(&lhs);
+        this->value_type = VALUE_TYPE_INT;
+        this->upcast<IntValue>()->int_value(vp->int_value());
+        return *this;
+    }
+    case VALUE_TYPE_UNDEF: {
+        this->value_type = VALUE_TYPE_UNDEF;
+        return *this;
+    }
+    case VALUE_TYPE_STR: {
+        this->value_type = lhs.value_type;
+        this->str_value_ = lhs.str_value_;
+        return *this;
+    }
+    default: {
+        printf("OOPS %s=%s\n", this->type_str(), lhs.type_str());
+        abort();
+    }
+    }
+    abort();
 }
 
 ID Value::object_package_id() const {

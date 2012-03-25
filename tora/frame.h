@@ -63,10 +63,7 @@ public:
     // this 'virtual' is required for memory pool.
     virtual ~LexicalVarsFrame();
     void set_variable_dynamic(int level, int id, const SharedPtr<Value>& v);
-    void set_variable(int id, const SharedPtr<Value>& v) {
-        assert(id < this->vars.capacity());
-        this->pad_list->set(id, v);
-    }
+    void set_variable(int id, const SharedPtr<Value>& v);
     SharedPtr<Value> get_variable(int id) const {
         assert(id < this->vars.capacity());
         return this->pad_list->get(id);

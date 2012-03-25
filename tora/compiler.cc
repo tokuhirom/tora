@@ -179,24 +179,24 @@ void tora::Compiler::set_variable(std::string &varname) {
 
     if (1 && need_closure) {
         DBG2("LOCAL\n");
-        push_op(new OP(OP_SETCLOSURE, level-funcdef_level, no));
-        /*
-        SharedPtr<OP> tmp = new OP;
-        tmp->op_type = OP_SETCLOSURE;
-        tmp->operand.int_value = -1;
+#ifdef PERLISH_CLOSURE
+        int pos = -1;
         auto iter = closure_vars->begin();
         for (; iter!=closure_vars->end(); iter++) {
             if (*iter == varname) {
-                tmp->operand.int_value = no;
+                pos = no;
                 break;
             }
         }
-        if (tmp->operand.int_value == -1) {
+        if (pos == -1) {
             closure_vars->push_back(varname);
-            tmp->operand.int_value = closure_vars->size()-1;
+            pos = closure_vars->size()-1;
         }
-        */
+        push_op(new OP(OP_SETCLOSURE, pos));
+#else
+        push_op(new OP(OP_SETCLOSURE, level-funcdef_level, no));
         closure_vars->push_back(varname);
+#endif
     } else {
         if (is_arg) {
             // SharedPtr<OP> tmp = new OP(OP_SETARG, no);
@@ -542,8 +542,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             push_op(putval);
 
             // define method.
-            SharedPtr<OP> op = new OP(OP_CLOSUREDEF, funccomp.closure_vars->size());
-            push_op(op);
+            push_op(new OP(OP_CLOSUREDEF, funccomp.closure_vars->size()));
         // } else {
             /*
             SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
@@ -653,8 +652,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (1 && funccomp.closure_vars->size() > 0) {
             // create closure
             // push variables  to stack.
-            auto iter = funccomp.closure_vars->begin();
-            for (; iter!=funccomp.closure_vars->end(); iter++) {
+            auto iter = funccomp.closure_vars->rbegin();
+            for (; iter!=funccomp.closure_vars->rend(); iter++) {
                 this->compile(new StrNode(NODE_GETVARIABLE, *iter));
             }
 
@@ -964,24 +963,27 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             }
 
             if (1 && need_closure) {
-                /*
-                SharedPtr<OP> tmp = new OP(OP_GETCLOSURE, -1);
-                tmp->op_type = OP_GETCLOSURE;
-                // tmp->operand.int_value = -1;
+#ifdef PERLISH_CLOSURE
+                int pos = -1;
+                // find from closure_vars.
                 auto iter = closure_vars->begin();
                 for (; iter!=closure_vars->end(); iter++) {
                     if (*iter == varname) {
-                        tmp->operand.int_value = no;
+                        pos = no;
                         break;
                     }
                 }
-                if (tmp->operand.int_value == -1) {
+                if (pos == -1) {
+                    // the variable is not registered for closure_vars yet.
+                    // register it.
                     closure_vars->push_back(varname);
-                    tmp->operand.int_value = closure_vars->size()-1;
+                    pos = closure_vars->size()-1;
                 }
-                */
+                push_op(new OP(OP_GETCLOSURE, pos));
+#else
                 closure_vars->push_back(varname);
                 push_op(new OP(OP_GETCLOSURE, level-funcdef_level, no));
+#endif
             } else {
                 if (is_arg) {
                     SharedPtr<OP> tmp = new OP(OP_GETARG, no);

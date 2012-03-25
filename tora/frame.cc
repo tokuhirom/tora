@@ -31,6 +31,11 @@ void LexicalVarsFrame::set_variable_dynamic(int level, int no, const SharedPtr<V
     assert(this->pad_list->get_dynamic(level, no).get() == v.get());
 }
 
+void LexicalVarsFrame::set_variable(int id, const SharedPtr<Value>& v) {
+    assert(id < this->vars.capacity());
+    this->pad_list->set(id, v);
+}
+
 SharedPtr<Value> LexicalVarsFrame::get_variable_dynamic(int level, int no) const {
     return pad_list->get_dynamic(level, no).get();
 }

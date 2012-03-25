@@ -88,14 +88,19 @@ OP_CLOSUREDEF {
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);
 
-    // int closure_vars_cnt = get_int_operand();
-    code->upcast<CodeValue>()->pad_list(this->frame_stack->back()->pad_list);
-
 // printf("CLOSUREDEF --\n");
-//  for (int i=0; i<closure_vars_cnt; i++) {
-//      SharedPtr<Value> v = stack.back(); stack.pop_back();
-//      code->upcast<CodeValue>()->closure_vars()->push_back(v);
-//  }
+#ifdef PERLISH_CLOSURE
+    int closure_vars_cnt = get_int_operand();
+    // printf("# CLOSUREDEF!! %s: %d\n", symbol_table->id2name(code->upcast<CodeValue>()->func_name_id()).c_str(), closure_vars_cnt);
+
+    for (int i=0; i<closure_vars_cnt; i++) {
+        SharedPtr<Value> v = stack.back();
+        stack.pop_back();
+        code->upcast<CodeValue>()->closure_vars().push_back(v);
+    }
+#else
+    code->upcast<CodeValue>()->pad_list(this->frame_stack->back()->pad_list);
+#endif
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
     int pkgid = code->upcast<CodeValue>()->package_id();
@@ -117,15 +122,21 @@ OP_GETCLOSURE {
         }
     }
     assert(frame.get());
-    int level = get_int_operand_high();
-    int no    = get_int_operand_low();
     assert(frame->code);
     assert(frame->code->func_name_id());
-    assert(frame->code->upcast<CodeValue>()->pad_list().get());
-    // assert(i < frame->code->upcast<CodeValue>()->closure_vars()->size());
 // printf("GETCLOSURE: %d, %d, %s\n", level, no, symbol_table->id2name(frame->code->func_name_id()).c_str());
 // dump_value(frame->code);
 // frame->code->upcast<CodeValue>()->pad_list()->dump(this);
+#ifdef PERLISH_CLOSURE
+    int i = get_int_operand();
+    assert(i < frame->code->upcast<CodeValue>()->closure_vars().size());
+    const SharedPtr<Value>& v = frame->code->upcast<CodeValue>()->closure_vars().at(i);
+    // printf("# GETCLOSURE: %d, %s\n", i, symbol_table->id2name(frame->code->func_name_id()).c_str());
+    stack.push_back(v);
+#else
+    int level = get_int_operand_high();
+    int no    = get_int_operand_low();
+    assert(frame->code->upcast<CodeValue>()->pad_list().get());
     if (level == 1) {
         SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get(
             no
@@ -137,6 +148,7 @@ OP_GETCLOSURE {
         );
         stack.push_back(v);
     }
+#endif
 }
 
 OP_SETCLOSURE {
@@ -149,10 +161,14 @@ OP_SETCLOSURE {
         }
     }
     assert(frame.get());
+    SharedPtr<Value> v = stack.back();
+#ifdef PERLISH_CLOSURE
+    int i = get_int_operand();
+    const SharedPtr<Value> &dst = frame->code->upcast<CodeValue>()->closure_vars()[i];
+    *dst = *v;
+#else
     int level = get_int_operand_high();
     int no    = get_int_operand_low();
-    SharedPtr<Value> v = stack.back();
-    // SharedPtr<Value> dst = (*(frame->code->upcast<CodeValue>()->closure_vars()))[i];
     if (level == 1) {
         frame->code->upcast<CodeValue>()->pad_list()->set(
             no,
@@ -165,8 +181,7 @@ OP_SETCLOSURE {
             v
         );
     }
-    // dump_value(dst);
-    // *dst = *v;
+#endif
 }
 
 OP_ADD {

@@ -42,9 +42,9 @@ void ArrayValue::set_item(int i, const SharedPtr<Value> &v) {
         for (int j=VAL().size()-1; j<i-1; j++) {
             this->push_back(UndefValue::instance());
         }
+        VAL().insert(VAL().begin()+i, v);
     } else {
-        VAL().erase(VAL().begin()+i);
+        *(VAL()[i]) = *v;
     }
-    VAL().insert(VAL().begin()+i, v);
 }
 

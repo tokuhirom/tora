@@ -30,7 +30,7 @@ private:
     boost::shared_ptr<std::vector<std::string>> code_params_;
     boost::shared_ptr<std::vector<int>> code_defaults_;
     boost::shared_ptr<std::vector<std::string>> closure_var_names_;
-    // std::vector<SharedPtr<Value>> *closure_vars_;
+    std::vector<SharedPtr<Value>> closure_vars_;
     SharedPtr<PadList> pad_list_;
     SharedPtr<OPArray> code_opcodes_;
     std::string filename_;
@@ -105,6 +105,9 @@ public:
     }
     const SharedPtr<PadList>& pad_list() const {
         return pad_list_;
+    }
+    std::vector<SharedPtr<Value>> &closure_vars() {
+        return closure_vars_;
     }
 
     /*
