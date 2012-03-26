@@ -34,7 +34,9 @@ public:
     const_iterator begin() const { return VAL()->begin(); }
     const_iterator end()   const { return VAL()->end();   }
 
-    // retain before push
+    void pop_back() {
+        VAL()->pop_back();
+    }
     void push_back(Value *v) {
         VAL()->push_back(v);
     }
@@ -56,12 +58,8 @@ public:
     void resize(size_t n) {
         VAL()->resize(n);
     }
-    // release after pop by your hand
-    SharedPtr<Value> pop() {
-        fprintf(stderr, "# Obsolete function: ArrayValue::pop() was called at XS level\n");
-        SharedPtr<Value> v = VAL()->back();
-        VAL()->pop_back();
-        return v;
+    const SharedPtr<Value>& back() const {
+        return VAL()->back();
     }
     SharedPtr<Value>at(int i) const {
         return VAL()->at(i);

@@ -39,8 +39,8 @@ static SharedPtr<Value> av_sort(VM* vm, Value* self) {
  * Perl5: push(@array, $elem);
  */
 static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
-    Inspector ins(vm);
-    printf("# ARRY PUSH: %p\n", v);
+    // Inspector ins(vm);
+    // printf("# ARRY PUSH: %p\n", v);
     self->upcast<ArrayValue>()->set_item(self->upcast<ArrayValue>()->size()-1+1, v);
     // self->upcast<ArrayValue>()->push_back(v);
     return self;
@@ -52,7 +52,9 @@ static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
  * Pop a object from array.
  */
 static SharedPtr<Value> av_pop(VM * vm, Value* self) {
-    return self->upcast<ArrayValue>()->pop();
+    SharedPtr<Value> v = self->upcast<ArrayValue>()->back();
+    self->upcast<ArrayValue>()->pop_back();
+    return v;
 }
 
 /**
