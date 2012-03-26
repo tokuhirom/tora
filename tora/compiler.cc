@@ -784,8 +784,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             SharedPtr<Value> v = new SymbolValue(id);
             push_op(new ValueOP(OP_PUSH_VALUE, v));
 
-            SharedPtr<OP> tmp = new OP(OP_FUNCALL, args_len, splitted ? symbol_table->get_id(pkgname) : 0);
-            push_op(tmp);
+            push_op(new OP(
+                OP_FUNCALL,
+                args_len,
+                splitted ? symbol_table->get_id(pkgname) : symbol_table->get_id(this->package_)
+            ));
         }
         break;
     }

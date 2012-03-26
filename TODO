@@ -35,10 +35,10 @@ File#seek()
 File#rewind()
 File#tell()
 
+Bytes#decode()
+
 String.lc()
 String.uc()
-String#substr(n)
-String#substr(n, m)
 String#replace(regexp|str, code)
 
 generate document
@@ -110,9 +110,9 @@ feature
   * bignum support using ttmath?
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
   * use ICU for converting encoding.
-  * Bytes class.
   * local $n
   * check deep recursion
+  * traits
   * scope_guard { ... }
     * BOOST_SCOPE_EXIT
     * http://www.kmonos.net/alang/d/2.0/statement.html#ScopeGuardStatement
@@ -213,4 +213,7 @@ Regexp.quotemeta
  * /xxx/g
 String#replace(regexp|str, str)
 ErrnoException?
+String#substr(n)
+String#substr(n, m)
+  * Bytes class.
 

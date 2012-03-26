@@ -352,12 +352,12 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);
 
-    // printf("Copying %d to %d\n", srcid, dstid);
+    // printf("Copying %s to %s\n", symbol_table->id2name(srcid).c_str(), symbol_table->id2name(dstid).c_str());
     auto iter = srcpkg->begin();
     for (; iter!=srcpkg->end(); iter++) {
         SharedPtr<Value> v = iter->second;
         if (v->value_type == VALUE_TYPE_CODE) {
-            // printf("Copying %d method\n", v->upcast<CodeValue>()->func_name_id);
+            // printf("  Copying %s method\n", symbol_table->id2name( v->upcast<CodeValue>()->func_name_id() ).c_str());
             dstpkg->add_function(v->upcast<CodeValue>()->func_name_id(), v);
         } else {
             // copy non-code value to other package?

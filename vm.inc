@@ -289,9 +289,14 @@ OP_FUNCALL {
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-// printf("CALLING------ \n");
+// printf("CALLING------ %s\n", symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str());
     // TODO split this part to other op code for performance?
     SharedPtr<Package> pkg = this->package();
+    /*
+    printf("in package '%s'\n",
+        this->symbol_table->id2name(pkg->id()).c_str()
+    );
+    */
     int pkgid = get_int_operand_low();
     if (pkgid != 0) {
         pkg = this->find_package(pkgid);
@@ -370,7 +375,10 @@ OP_FUNCALL {
             frame_stack->push_back(fframe);
         }
     } else {
-        this->die("Unknown function: %s", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str());
+        this->die("Unknown function '%s' in package '%s'",
+            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
+            this->symbol_table->id2name(pkg->id()).c_str()
+        );
         // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
     }
 }

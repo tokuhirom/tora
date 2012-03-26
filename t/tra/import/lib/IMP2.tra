@@ -1,0 +1,6 @@
+use IMP1 *;
+
+sub bar() {
+    F();
+}
+
