@@ -30,8 +30,7 @@ class HTTP::Client {
             my $src = $sock.read();
             my ($ret, $minor_version, $status, $message, $headers)
                 = parse_http_response($src, HEADERS_AS_ARRAYREF, {});
-            # my $content = $src.substr($ret);
-            my $content = $src;
+            my $content = $src.substr($ret);
             return HTTP::Response.new($minor_version, $status, $message, $headers, $content);
         } else {
             die "Invalid uri: $uri";
