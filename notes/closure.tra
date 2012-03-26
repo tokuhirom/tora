@@ -7,8 +7,6 @@ note('dir.tra');
     $ary.push($e);
     $e=2;
     $ary.push($e);
-    Internals.dump($ary[0]);
-    Internals.dump($ary[1]);
     is($ary.tora(), [1,2].tora());
 }
 
