@@ -9,5 +9,6 @@ class HTTP::Response {
         });
     }
     sub status() { ${self}['status'] }
+    sub content() { ${self}['content'] }
 }
 

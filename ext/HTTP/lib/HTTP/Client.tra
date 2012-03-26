@@ -26,7 +26,7 @@ class HTTP::Client {
 
             my $sock = Socket.socket(AF_INET, SOCK_STREAM, 0);
             $sock.connect(Socket.sockaddr_in($port, Socket.inet_aton($host)));
-            $sock.write("GET " + $path_query + " HTTP/1.0\r\n\r\n");
+            $sock.write("GET " + $path_query + " HTTP/1.0\r\nHost: " + $host + "\r\n\r\n");
             my $src = $sock.read();
             my ($ret, $minor_version, $status, $message, $headers)
                 = parse_http_response($src, HEADERS_AS_ARRAYREF, {});
@@ -38,4 +38,15 @@ class HTTP::Client {
         }
     }
 }
+
+__END__
+
+SYNOPSIS
+--------
+
+    use HTTP::Client;
+
+    my $client = HTTP::Client.new();
+    my $res = $client.get('http://example.com'); # HTTP::Response
+    print($res.content);
 
