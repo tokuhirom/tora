@@ -209,6 +209,9 @@ sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
     /* sub foo() { } */
     A = new FuncdefNode(B, new ListNode(), C);
 }
+sub_stmt(A) ::= FUNCSUB identifier(B) maybe_block(C). {
+    A = new FuncdefNode(B, NULL, C);
+}
 
 lambda_parameter_list(A) ::= variable(B). {
     A = new ListNode();

@@ -1,0 +1,19 @@
+use Test::More *;
+
+sub f0 {
+    is($_.tora(), [].tora());
+}
+
+sub f1 {
+    is($_.tora(), [4].tora());
+}
+
+sub f3 {
+    is($_.tora(), [1,2,3].tora());
+}
+
+f0();
+f1(4);
+f3(1,2,3);
+
+done_testing;

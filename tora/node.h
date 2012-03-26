@@ -28,7 +28,8 @@ class StrNode;
 class ListNode;
 class TryNode;
 
-class Node : public Prim {
+class Node {
+    PRIM_DECL(Node);
 public:
     node_type_t type;
     std::vector<SharedPtr<Node>> *list;
@@ -37,7 +38,7 @@ public:
     typedef std::vector<SharedPtr<Node>>::reverse_iterator reverse_iterator;
     int lineno;
 
-    Node(node_type_t n=NODE_UNKNOWN) {
+    Node(node_type_t n=NODE_UNKNOWN) :refcnt(0) {
         type = n;
         list = new std::vector<SharedPtr<Node>>();
     }
@@ -127,6 +128,9 @@ public:
 class FuncdefNode: public Node {
 public:
     SharedPtr<Node>name() { return this->list->at(0); }
+    bool have_params() {
+        return this->list->at(1).get() != NULL;
+    }
     SharedPtr<ListNode> params() { return this->list->at(1)->upcast<ListNode>(); }
     SharedPtr<Node>block() { return this->list->at(2); }
     FuncdefNode(SharedPtr<Node> n, SharedPtr<ListNode> p, SharedPtr<Node> b):Node() {

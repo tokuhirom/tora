@@ -580,13 +580,21 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->push_block(BLOCK_TYPE_FUNCDEF);
 
         // setup parameters
-        boost::shared_ptr<std::vector<std::string>> params(new std::vector<std::string>());
-        for (size_t i=0; i<funcdef_node->params()->size(); i++) {
-            assert(funcdef_node->params()->at(i)->list->size() == 2);
-            const SharedPtr<Node>& param_name = funcdef_node->params()->at(i)->at(0);
+        boost::shared_ptr<std::vector<std::string>> params;
+        if (funcdef_node->have_params()) {
+            // 'sub foo () { }' form.
+            params.reset(new std::vector<std::string>());
+            for (size_t i=0; i<funcdef_node->params()->size(); i++) {
+                assert(funcdef_node->params()->at(i)->list->size() == 2);
+                const SharedPtr<Node>& param_name = funcdef_node->params()->at(i)->at(0);
 
-            params->push_back(param_name->upcast<StrNode>()->str_value);
-            this->define_localvar(std::string(param_name->upcast<StrNode>()->str_value));
+                params->push_back(param_name->upcast<StrNode>()->str_value);
+                this->define_localvar(std::string(param_name->upcast<StrNode>()->str_value));
+            }
+        } else {
+            // 'sub foo { }' form.
+            // params->push_back(std::string("$_"));
+            this->define_localvar(std::string("$_"));
         }
 
         std::string package(this->package());
@@ -603,7 +611,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
 
         boost::shared_ptr<std::vector<int>> defaults(new std::vector<int>());
-        {
+        if (funcdef_node->have_params()) {
             // process default values.
             funccomp.current_node.reset(node.get());
             OP * skip_defvars = new OP(OP_JUMP);
@@ -641,9 +649,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             node->lineno,
             params
         ));
-        assert(params);
         // code->code_id = this->symbol_table->get_id(package + "::" + funcname);
-        code->code_params(params);
         code->code_defaults(defaults);
         code->code_opcodes(funccomp.ops);
         code->closure_var_names(funccomp.closure_vars);

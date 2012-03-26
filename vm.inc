@@ -35,6 +35,7 @@ OP_GETARG {
     int index = mark_stack.back() - no - 1;
 #ifndef NDEBUG
     if (index >= stack.size()) {
+        fprintf(stderr, "[BUG] Invalid index in OP_GETARG. mark_stack.back(): %d, no: %d, stack.size(): %zd\n", mark_stack.back(), no, stack.size());
         dump_stack();
         abort();
     }
@@ -314,38 +315,43 @@ OP_FUNCALL {
             this->ops = code->code_opcodes();
 
 // printf("PARAM count: %zd\n", code->code_params->size());
-            for (size_t i=0; i<code->code_params()->size(); i++) {
-// printf("PARAMS: %zd\n", i);
-                if (argcnt <= i) {
-                    int def = code->code_defaults()->at(i);
-// printf("default! %d\n", def);
-                    if (def >= 0) {
-                        pc = def;
-// printf("execute! %zd, %d\n", i, pc);
-// printf("stack size: %d\n", stack.size());
-// Disasm::disasm(this->ops);
-                        this->execute();
+            if (code->code_params().get()) {
+                for (size_t i=0; i<code->code_params()->size(); i++) {
+                    if (argcnt <= i) {
+                        int def = code->code_defaults()->at(i);
+                        if (def >= 0) {
+                            pc = def;
+                            this->execute();
 
-                        // Note. This is a very bad for performance.
-                        // But it works.
-                        // We must rewrite argument processing later.
-                        SharedPtr<Value> val = stack.back();
-                        stack.pop_back();
-                        stack.insert(stack.begin() + start_stack_size, val);
+                            // Note. This is a very bad for performance.
+                            // But it works.
+                            // We must rewrite argument processing later.
+                            SharedPtr<Value> val = stack.back();
+                            stack.pop_back();
+                            stack.insert(stack.begin() + start_stack_size, val);
 
-// printf("finished stack size: %d\n", stack.size());
-                        ++argcnt;
-                        fframe->top++;
-// printf("execute finished\n", i);
-                    } else {
-                        throw new ExceptionValue(
-                            "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
-                            this->symbol_table->id2name(pkg->id()).c_str(),
-                            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
-                            code->code_params()->size(),
-                            orig_argcnt);
+                            ++argcnt;
+                            fframe->top++;
+                        } else {
+                            throw new ExceptionValue(
+                                "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
+                                this->symbol_table->id2name(pkg->id()).c_str(),
+                                this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
+                                code->code_params()->size(),
+                                orig_argcnt);
+                        }
                     }
                 }
+            } else {
+                // Perl5 like 'sub foo { }' form.
+                SharedPtr<ArrayValue> av = new ArrayValue();
+                for (size_t i=0; i<argcnt; i++) {
+                    av->push_back(stack.back());
+                    stack.pop_back();
+                }
+                argcnt = 1;
+                stack.push_back(av); // and put it to $_.
+                fframe->top = stack.size();
             }
 
             fframe->argcnt = argcnt;
