@@ -21,8 +21,8 @@ public:
     AbstractRegexpValue(int flags) : Value(VALUE_TYPE_REGEXP), flags_(flags) { }
     virtual ~AbstractRegexpValue() { }
     virtual bool ok() = 0;
-    virtual const std::string& error() = 0;
-    virtual const std::string& pattern() = 0;
+    virtual const std::string& error() const = 0;
+    virtual const std::string& pattern() const = 0;
     virtual SharedPtr<Value> match(VM *vm, const std::string &str) = 0;
     virtual std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const = 0;
     virtual int flags() const {
@@ -53,10 +53,10 @@ public:
     bool ok() {
         return VAL()->ok();
     }
-    const std::string& pattern() {
+    const std::string& pattern() const {
         return VAL()->pattern();
     }
-    const std::string& error() {
+    const std::string& error() const {
         return VAL()->error();
     }
     SharedPtr<Value> match(VM *vm, const std::string &str);

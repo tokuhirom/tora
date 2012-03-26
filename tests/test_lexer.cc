@@ -2,6 +2,7 @@
 #include "../tora/lexer.h"
 #include "../tora/nodes.gen.h"
 #include "../tora/parser.h"
+#include "../tora/value/regexp.h"
 #include <boost/scoped_ptr.hpp>
 #include <stdarg.h>
 
@@ -9,6 +10,7 @@ using namespace tora;
 
 #define TOKEN_IS(x) is(scanner.scan(&yylval), x)
 #define LVAL_STR_IS(x) is(yylval->upcast<StrNode>()->str_value, std::string(x));
+#define LVAL_REGFLAG_IS(x) is(yylval->upcast<RegexpNode>()->flags, x);
 #define BEGIN(x) printf("# line %d\n", __LINE__); std::stringstream ss(std::string((const char*)(x))); Scanner scanner(&ss, "<eval>"); Node *yylval = NULL;
 
 int main() {
@@ -140,6 +142,43 @@ int main() {
         BEGIN("\"{}\";");
         TOKEN_IS(STRING_LITERAL);
         LVAL_STR_IS("{}");
+        TOKEN_IS(SEMICOLON);
+        TOKEN_IS(0);
+    }
+    {
+        const char *xx[] = {
+            "/abc/;",
+            "qr{abc}ig;",
+            "qr{abc};",
+            /*
+            "qr(abc);",
+            "qr[abc];",
+            "qr!abc!;",
+            */
+            NULL
+        };
+        for (int i=0; xx[i]; i++) {
+            BEGIN(xx[i]);
+            printf("# source: %s\n", xx[i]);
+            TOKEN_IS(REGEXP_LITERAL);
+            LVAL_STR_IS("abc");
+            TOKEN_IS(SEMICOLON);
+            TOKEN_IS(0);
+        }
+    }
+    {
+        BEGIN("qr{abc}ig;");
+        TOKEN_IS(REGEXP_LITERAL);
+        LVAL_REGFLAG_IS(regexp_flag('i') | regexp_flag('g'));
+        LVAL_STR_IS("abc");
+        TOKEN_IS(SEMICOLON);
+        TOKEN_IS(0);
+    }
+    {
+        BEGIN("/hoge}xm/i;");
+        TOKEN_IS(REGEXP_LITERAL);
+        LVAL_REGFLAG_IS(regexp_flag('i'));
+        LVAL_STR_IS("hoge}xm");
         TOKEN_IS(SEMICOLON);
         TOKEN_IS(0);
     }

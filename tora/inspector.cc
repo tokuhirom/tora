@@ -5,6 +5,7 @@
 #include "value/hash.h"
 #include "value/range.h"
 #include "value/object.h"
+#include "value/regexp.h"
 
 using namespace tora;
 
@@ -42,8 +43,14 @@ std::string Inspector::inspect(Value* v) const {
         ret += "]";
         return ret;
     }
-    case VALUE_TYPE_REGEXP:
-        return "#<Regexp>"; // TODO
+    case VALUE_TYPE_REGEXP: {
+        // TODO: escape '/' character
+        std::string ret("/");
+        const AbstractRegexpValue* rv = static_cast<const AbstractRegexpValue*>(v);
+        ret += rv->pattern();
+        ret += "/";
+        return ret;
+    }
     case VALUE_TYPE_TUPLE:
         return "#<Tuple>"; // TODO
     case VALUE_TYPE_FILE:

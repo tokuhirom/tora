@@ -58,7 +58,7 @@ std:
         return n;
     }
 
-    char string_close_char = '\0';
+    char close_char = '\0';
 
     if (qw_mode) {
         goto qw_literal;
@@ -91,37 +91,37 @@ std:
 /*!re2c
     "qq{" {
         tora_open_string_literal();
-        string_close_char = '}';
+        close_char = '}';
         goto single_string_literal;
     }
     "qq[" {
         tora_open_string_literal();
-        string_close_char = ']';
+        close_char = ']';
         goto single_string_literal;
     }
     "qq(" {
         tora_open_string_literal();
-        string_close_char = ')';
+        close_char = ')';
         goto single_string_literal;
     }
     "qq!" {
         tora_open_string_literal();
-        string_close_char = '!';
+        close_char = '!';
         goto single_string_literal;
     }
     "q{" {
         tora_open_string_literal();
-        string_close_char = '}';
+        close_char = '}';
         goto single_string_literal;
     }
     "q(" {
         tora_open_string_literal();
-        string_close_char = ')';
+        close_char = ')';
         goto single_string_literal;
     }
     "q[" {
         tora_open_string_literal();
-        string_close_char = ']';
+        close_char = ']';
         goto single_string_literal;
     }
     "is" {
@@ -132,17 +132,17 @@ std:
     }
     "b'" {
         tora_open_string_literal();
-        string_close_char = '\'';
+        close_char = '\'';
         goto single_bytes_literal;
     }
     'b"' {
         tora_open_string_literal();
-        string_close_char = '"';
+        close_char = '"';
         goto double_bytes_literal;
     }
     "q!" {
         tora_open_string_literal();
-        string_close_char = '!';
+        close_char = '!';
         goto single_string_literal;
     }
     "self" {
@@ -182,10 +182,36 @@ std:
     "**" { return POW; }
     "*" { return MUL; }
     "%" { return MOD; }
+    "qr{" {
+        close_char = '}';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
+    "qr[" {
+        close_char = ']';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
+    "qr!" {
+        close_char = '!';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
+    "qr(" {
+        close_char = ')';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
+    "qr," {
+        close_char = ',';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
     "/" {
         if (divable) {
             return DIV;
         } else {
+            close_char = '/';
             tora_open_string_literal();
             goto regexp_literal;
         }
@@ -349,12 +375,12 @@ std:
     }
     "\"" {
         tora_open_string_literal();
-        string_close_char = '"';
+        close_char = '"';
         goto string_literal;
     }
     "'" {
         tora_open_string_literal();
-        string_close_char = '\'';
+        close_char = '\'';
         goto single_string_literal;
     }
     "/*" {
@@ -400,7 +426,7 @@ end:
 single_string_literal:
 /*!re2c
     [')!}\]] {
-        if (string_close_char == *(m_cursor-1)) {
+        if (close_char == *(m_cursor-1)) {
             *yylval = new StrNode(NODE_STRING, string_buffer->str());
             delete string_buffer; string_buffer = NULL;
             return STRING_LITERAL;
@@ -426,7 +452,7 @@ single_string_literal:
 single_bytes_literal:
 /*!re2c
     [')!}\]] {
-        if (string_close_char == *(m_cursor-1)) {
+        if (close_char == *(m_cursor-1)) {
             *yylval = new StrNode(NODE_STRING, string_buffer->str());
             delete string_buffer; string_buffer = NULL;
             return BYTES_LITERAL;
@@ -452,7 +478,7 @@ single_bytes_literal:
 double_bytes_literal:
 /*!re2c
     ["')!}\]] {
-        if (string_close_char == *(m_cursor-1)) {
+        if (close_char == *(m_cursor-1)) {
             *yylval = new StrNode(NODE_STRING, string_buffer->str());
             delete string_buffer; string_buffer = NULL;
             return BYTES_LITERAL;
@@ -511,7 +537,7 @@ double_bytes_literal:
 string_literal:
 /*!re2c
     [")!}\]] {
-        if (string_close_char == *(m_cursor-1)) {
+        if (close_char == *(m_cursor-1)) {
             *yylval = new StrNode(NODE_STRING, string_buffer->str());
             delete string_buffer; string_buffer = NULL;
             return STRING_LITERAL;
@@ -566,17 +592,24 @@ string_literal:
 
 regexp_literal:
 /*!re2c
-    "/" [xmsig]* {
+    [/)!}\],] [xmsig]* {
         // m_cursor is next char.
         // # <REGEXP>"\\/" tora_add_string_literal('/');
         int flag = 0;
-        for (char * ptr=m_cursor-1; *ptr!='/'; --ptr) {
+        char *ptr;
+        for (ptr=m_cursor-1; isalpha(*ptr); --ptr) {
             flag |= tora::regexp_flag(*ptr);
         }
-
-        *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str(), flag);
-        delete string_buffer; string_buffer = NULL;
-        return REGEXP_LITERAL;
+        if (*ptr==close_char) {
+            *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str(), flag);
+            delete string_buffer; string_buffer = NULL;
+            return REGEXP_LITERAL;
+        } else {
+            for (; ptr < m_cursor; ++ptr) {
+                tora_add_string_literal(*ptr);
+            }
+            goto regexp_literal;
+        }
     }
     ANY_CHARACTER {
         tora_add_string_literal(*(m_cursor-1));
