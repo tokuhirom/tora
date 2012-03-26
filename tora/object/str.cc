@@ -56,10 +56,29 @@ static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rew
     }
 }
 
+/**
+ * "foobar".substr(3) # => "bar"
+ * "foobar".substr(3,2) # => "ba"
+ *
+ * Get a substring from string.
+ */
+static SharedPtr<Value> str_substr(VM *vm, const std::vector<SharedPtr<Value>>& args) {
+    assert(args[0]->value_type == VALUE_TYPE_STR);
+    const std::string & str = args[0]->upcast<StrValue>()->str_value();
+    if (args.size()-1 == 1) { // "foobar".substr(3)
+        return new StrValue(str.substr(args[1]->to_int()));
+    } else if (args.size()-1 == 2) { // "foobar".substr(3,2)
+        return new StrValue(str.substr(args[1]->to_int(), args[2]->to_int()));
+    } else {
+        throw new ArgumentExceptionValue("String#substr requires 1 or 2 arguments");
+    }
+}
+
 void tora::Init_Str(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
     pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
     pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
     pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));
+    pkg->add_method(vm->symbol_table->get_id("substr"), new CallbackFunction(str_substr));
 }
 
