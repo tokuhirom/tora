@@ -1,0 +1,13 @@
+class HTTP::Response {
+    sub new($minor_version, $status, $message, $headers, $content) {
+        self.bless({
+            minor_version => $minor_version,
+            status => $status,
+            message => $message,
+            headers => $headers,
+            content => $content,
+        });
+    }
+    sub status() { ${self}['status'] }
+}
+

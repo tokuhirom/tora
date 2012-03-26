@@ -77,12 +77,12 @@ syntax
    }
  * localize STDOUT
  * local Foo::method = sub { };
- * $1, $2, $3
  * /xxx/x
  * /xxx/s
  * /xxx/m
  * super()
  * signal handler
+   * perl5's safe signals.
 
 lambda
 ------

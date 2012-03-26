@@ -161,7 +161,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             char buf[4096];
             int ret = read(fd, buf, sizeof(buf));
             if (ret > 0) {
-                printf("CONT!\n");
+                // printf("CONT!\n");
                 readed += ret;
                 bbuf += std::string(buf, ret);
                 continue;

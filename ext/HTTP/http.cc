@@ -252,7 +252,7 @@ done:
 }
 
 static SharedPtr<Value> HTTP_Parser_parse_http_response(VM *vm, Value *bytes_v, Value *opt, Value *special_headers) {
-    if (bytes_v->value_type != VALUE_TYPE_BYTES) {
+    if (bytes_v->value_type != VALUE_TYPE_BYTES && bytes_v->value_type != VALUE_TYPE_STR) {
         throw new ExceptionValue("You must pass bytes value for this function.");
     }
 
@@ -290,8 +290,8 @@ static SharedPtr<Value> HTTP_Parser_parse_http_response(VM *vm, Value *bytes_v, 
             SharedPtr<BytesValue> namesv  = new BytesValue(name, h.name_len);
             SharedPtr<BytesValue> valuesv = new BytesValue(
                 h.value, h.value_len);
-            res_headers->upcast<ArrayValue>()->push(namesv);
-            res_headers->upcast<ArrayValue>()->push(valuesv);
+            res_headers->upcast<ArrayValue>()->push_back(namesv);
+            res_headers->upcast<ArrayValue>()->push_back(valuesv);
             last_element_value_sv = valuesv.get();
         } else {
             if (last_element_value_sv) {

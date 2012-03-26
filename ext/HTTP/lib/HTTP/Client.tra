@@ -1,0 +1,41 @@
+use Socket *;
+use HTTP::Parser *;
+use HTTP::Response;
+use URI::Split *;
+
+class HTTP::Client {
+
+    sub new() {
+        self.bless({});
+    }
+
+    sub get($url) {
+        my ($scheme, $authority, $path, $query) = uri_split($url);
+        if (!$scheme) {
+            die "Invalid uri: $url";
+        }
+
+        if (my $matched = $authority.match(/^(.+)(?::(\d+))?$/)) {
+            my $host = $matched[1];
+            my $port = $matched[2] || 80;
+
+            my $path_query = $path;
+            if ($query) {
+                $path_query += "?" + $query;
+            }
+
+            my $sock = Socket.socket(AF_INET, SOCK_STREAM, 0);
+            $sock.connect(Socket.sockaddr_in($port, Socket.inet_aton($host)));
+            $sock.write("GET " + $path_query + " HTTP/1.0\r\n\r\n");
+            my $src = $sock.read();
+            my ($ret, $minor_version, $status, $message, $headers)
+                = parse_http_response($src, HEADERS_AS_ARRAYREF, {});
+            # my $content = $src.substr($ret);
+            my $content = $src;
+            return HTTP::Response.new($minor_version, $status, $message, $headers, $content);
+        } else {
+            die "Invalid uri: $uri";
+        }
+    }
+}
+

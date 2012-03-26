@@ -4,4 +4,9 @@ XSLoader.load('HTTP::Parser');
 
 __END__
 
+SYNOPSIS
+--------
+
+    my ($ret, $minor_version, $status, $message, $headers)
+        = parse_http_response($response, HEADERS_AS_ARRAYREF);
 
