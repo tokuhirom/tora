@@ -39,7 +39,10 @@ static SharedPtr<Value> av_sort(VM* vm, Value* self) {
  * Perl5: push(@array, $elem);
  */
 static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
-    self->upcast<ArrayValue>()->push(v);
+    Inspector ins(vm);
+    printf("# ARRY PUSH: %p\n", v);
+    self->upcast<ArrayValue>()->set_item(self->upcast<ArrayValue>()->size()-1+1, v);
+    // self->upcast<ArrayValue>()->push_back(v);
     return self;
 }
 
@@ -121,7 +124,7 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
 
         vm->function_call_ex(1, code, UndefValue::instance());
 
-        ret->push(vm->stack.back());
+        ret->push_back(vm->stack.back());
         vm->stack.pop_back();
     }
     return ret;

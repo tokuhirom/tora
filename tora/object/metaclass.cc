@@ -36,7 +36,7 @@ static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
     Package * pkg = vm->find_package(pkgid);
     SharedPtr<ArrayValue> av = new ArrayValue();
     for (auto iter=pkg->begin(); iter!=pkg->end(); ++iter) {
-        av->push(new StrValue(vm->symbol_table->id2name(iter->first)));
+        av->push_back(new StrValue(vm->symbol_table->id2name(iter->first)));
     }
     return av;
 }

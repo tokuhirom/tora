@@ -260,8 +260,8 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
     if (fd >= 0) {
         SharedPtr<ObjectValue> new_sock = new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(fd));
         SharedPtr<TupleValue> t = new TupleValue();
-        t->push(new StrValue(std::string(namebuf, len)));
-        t->push(new_sock);
+        t->push_back(new StrValue(std::string(namebuf, len)));
+        t->push_back(new_sock);
         return t;
     } else {
         return new ErrnoExceptionValue(errno);

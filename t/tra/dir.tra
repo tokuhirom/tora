@@ -2,9 +2,19 @@ use Test::More *;
 
 my $d = opendir('t/dat/dir');
 my $a = [];
-while (my $e = $d.read()) {
+while (1) {
+    my $e = $d.read();
+    if (!$e) {
+        last;
+    }
     $a.push($e);
+    p($a);
 }
+ok($a[0]);
+if (!$a[0]) {
+    die("OOPS");
+}
+
 $a = $a.sort();
 is($a[0], '.');
 is($a[1], '..');

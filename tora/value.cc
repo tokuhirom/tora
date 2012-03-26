@@ -7,6 +7,7 @@
 #include "value/object.h"
 #include "value/symbol.h"
 #include "symbols.gen.h"
+#include "peek.h"
 #include <stdarg.h>
 #include <errno.h>
 
@@ -165,7 +166,12 @@ Value& tora::Value::operator=(const Value&lhs) {
         delete this->str_value_;
         this->str_value_ = NULL;
         break;
+    case VALUE_TYPE_ARRAY:
+        delete this->array_value_;
+        this->array_value_ = NULL;
+        break;
     default:
+        printf("OOPS %s=%s\n", this->type_str(), lhs.type_str());
         abort();
     }
 
@@ -182,7 +188,16 @@ Value& tora::Value::operator=(const Value&lhs) {
     }
     case VALUE_TYPE_STR: {
         this->value_type = lhs.value_type;
-        this->str_value_ = lhs.str_value_;
+        // printf("# COPY!\n");
+        this->str_value_ = new boost::shared_ptr<std::string>(*(lhs.str_value_));
+        return *this;
+    }
+    case VALUE_TYPE_ARRAY: {
+        const ArrayValue *ap = static_cast<const ArrayValue*>(&lhs);
+        this->value_type = lhs.value_type;
+        this->array_value_ = new ArrayImpl();
+        // this->array_value_->reset(ap->array_value_->get());
+        *(this->array_value_) = *(ap->array_value_);
         return *this;
     }
     default: {

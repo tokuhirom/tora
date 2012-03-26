@@ -71,6 +71,7 @@ public:
     void push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target);
     const char *type_str() const;
     SharedPtr<Value> get_variable_dynamic(int level, int no) const;
+    void dump_pad(VM *vm);
 
     template<class Y>
     Y* upcast() {

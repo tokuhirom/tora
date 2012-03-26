@@ -28,7 +28,7 @@ LexicalVarsFrame::~LexicalVarsFrame() {
 
 void LexicalVarsFrame::set_variable_dynamic(int level, int no, const SharedPtr<Value>& v) {
     this->pad_list->set_dynamic(level, no, v);
-    assert(this->pad_list->get_dynamic(level, no).get() == v.get());
+    // assert(this->pad_list->get_dynamic(level, no).get() == v.get());
 }
 
 void LexicalVarsFrame::set_variable(int id, const SharedPtr<Value>& v) {
@@ -63,6 +63,10 @@ const char *LexicalVarsFrame::type_str() const {
         return "for";
     }
     abort();
+}
+
+void LexicalVarsFrame::dump_pad(VM *vm) {
+    pad_list->dump(vm);
 }
 
 boost::object_pool<FunctionFrame> FunctionFrame::pool_;

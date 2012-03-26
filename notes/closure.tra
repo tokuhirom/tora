@@ -1,0 +1,37 @@
+use Test::More *;
+
+note('dir.tra');
+{
+    my $e = 1;
+    my $ary = [];
+    $ary.push($e);
+    $e=2;
+    $ary.push($e);
+    Internals.dump($ary[0]);
+    Internals.dump($ary[1]);
+    is($ary.tora(), [1,2].tora());
+}
+
+note('swap.tra');
+{
+    my $x = 1;
+    my $y = 2;
+    ($x, $y) = ($y, $x);
+    is([$x, $y].tora(), [2,1].tora());
+}
+
+note('arguments.tra');
+{
+    my $x = 1234;
+    sub f() {
+        $x = 5963;
+    }
+    is($x, 1234);
+    f();
+    is($x, 5963);
+    $x = 4649;
+    is($x, 5963);
+}
+
+done_testing;
+

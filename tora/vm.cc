@@ -86,7 +86,7 @@ void VM::init_globals(int argc, char**argv) {
     // $ARGV
     SharedPtr<ArrayValue> avalue = new ArrayValue();
     for (int i=0; i<argc; i++) {
-        avalue->push(new StrValue(argv[i]));
+        avalue->push_back(new StrValue(argv[i]));
     }
     this->global_vars->push_back(avalue);
 
@@ -96,7 +96,7 @@ void VM::init_globals(int argc, char**argv) {
 
     // $LIBPATH : Array
     SharedPtr<ArrayValue> libpath = new ArrayValue();
-    libpath->push(new StrValue("lib"));
+    libpath->push_back(new StrValue("lib"));
     this->global_vars->push_back(libpath);
 
     // $REQUIRED : Hash
@@ -497,8 +497,8 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
 
             stack.resize(frame->top);
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push(UndefValue::instance());
-            t->push(exception.get());
+            t->push_back(UndefValue::instance());
+            t->push_back(exception.get());
 
             frame_stack->pop_back();
 
@@ -607,7 +607,7 @@ void VM::load_dynamic_library(const std::string &filename, const std::string &en
 
 void VM::add_library_path(const std::string &dir) {
     SharedPtr<Value> libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
-    libpath->upcast<ArrayValue>()->push(new StrValue(dir));
+    libpath->upcast<ArrayValue>()->push_back(new StrValue(dir));
 }
 
 /**

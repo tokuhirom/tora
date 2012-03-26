@@ -1,0 +1,10 @@
+use Test::More *;
+
+my $f="hogehoge";
+my $g=$f;
+$f = $f.replace("o", "p");
+is($f, 'hpgehpge');
+is($g, 'hogehoge');
+
+done_testing;
+

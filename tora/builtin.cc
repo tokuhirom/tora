@@ -150,7 +150,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
                 if (skiped_first) {
                     FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
                     SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->symbol_table->get_id("Caller"), fframe->code);
-                    av->push(o);
+                    av->push_back(o);
                 } else {
                     skiped_first = true; // skip myself.
                 }

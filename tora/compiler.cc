@@ -913,10 +913,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         enter->operand.int_value = this->blocks->back()->vars.size();
         this->pop_block();
 
-        SharedPtr<OP> goto_ = new OP;
-        goto_->op_type = OP_JUMP;
-        goto_->operand.int_value = label1;
-        push_op(goto_);
+        push_op(new OP(OP_JUMP, label1));
 
         int label2 = ops->size();
         jump_if_false->operand.int_value = label2;

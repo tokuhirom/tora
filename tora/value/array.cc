@@ -17,20 +17,20 @@ public:
 };
 
 ArrayValue::ArrayValue(const ArrayValue & a) : Value(VALUE_TYPE_ARRAY) {
-    this->array_value_ = new ArrayImpl();
+    this->array_value_ = new ArrayImpl(new std::deque<SharedPtr<Value>>());
     // this->values->reserve(a.values->size());
-    std::copy(a.VAL().begin(), a.VAL().end(), std::back_inserter(this->VAL()));
+    std::copy(a.VAL()->begin(), a.VAL()->end(), std::back_inserter((*(this->VAL()))));
 }
 
 // unstable sort
 void ArrayValue::sort() {
-    std::sort(VAL().begin(), VAL().end(), LessValue());
+    std::sort(VAL()->begin(), VAL()->end(), LessValue());
 }
 // TODO: Array#stable_sort()
 
 SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
     int i = index->to_int();
-    if (i > (int)VAL().size()) {
+    if (i > (int)VAL()->size()) {
         return UndefValue::instance();
     } else {
         return this->at(i);
@@ -38,13 +38,19 @@ SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
 }
 
 void ArrayValue::set_item(int i, const SharedPtr<Value> &v) {
-    if ((int)VAL().size()-1 < i) {
-        for (int j=VAL().size()-1; j<i-1; j++) {
+    if ((int)VAL()->size()-1 < i) {
+        for (int j=VAL()->size()-1; j<i-1; j++) {
             this->push_back(UndefValue::instance());
         }
-        VAL().insert(VAL().begin()+i, v);
+        VAL()->insert(VAL()->begin()+i, v);
     } else {
-        *(VAL()[i]) = *v;
+        if (1) {
+            VAL()->erase(VAL()->begin()+i);
+            VAL()->insert(VAL()->begin()+i, v);
+        } else {
+            *(VAL()->at(i).get()) = *v;
+        }
+        // VAL()->insert(VAL()->begin()+i, v);
     }
 }
 

@@ -603,6 +603,7 @@ OP_GETDYNAMIC {
     SharedPtr<Value> v = frame_stack->back()->get_variable_dynamic(level, no);
 
     // dump_frame();
+    // frame_stack->back()->dump_pad(this);
     //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
     stack.push_back(v);
 }
@@ -660,7 +661,7 @@ OP_MAKE_ARRAY {
     int array_size = get_int_operand();
     for (int i=0; i<array_size; i++) {
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        a->push(v);
+        a->push_back(v);
     }
     stack.push_back(a);
 }
@@ -670,7 +671,7 @@ OP_MAKE_TUPLE {
     int tuple_size = get_int_operand();
     for (int i=0; i<tuple_size; i++) {
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        t->push(v);
+        t->push_back(v);
     }
     stack.push_back(t);
 }
@@ -831,7 +832,7 @@ OP_FOR_ITER {
             SharedPtr<Value> val = aiter->parent->at(aiter->counter);
             aiter->counter++;
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push(val);
+            t->push_back(val);
             stack.push_back(t);
         } else {
             stack.push_back(new StopIterationExceptionValue());
@@ -866,8 +867,8 @@ OP_FOR_ITER {
             SharedPtr<Value> val = riter->getval();
             riter->increment();
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push(val);
-            t->push(key);
+            t->push_back(val);
+            t->push_back(key);
             stack.push_back(t);
         } else {
             stack.push_back(new StopIterationExceptionValue());

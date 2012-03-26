@@ -16,9 +16,17 @@ sub bar($a, $b=4) {
 foo(1,2);
 
 {
+    bar(3);
+    p($first);
+    is($first, 3);
+    is($second, 4);
+}
+
+{
     $first = undef;
     $second = undef;
     bar(3);
+    p($first);
     is($first, 3);
     is($second, 4);
 }

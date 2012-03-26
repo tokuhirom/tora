@@ -10,13 +10,16 @@ void tora::peek(VM *vm, const SharedPtr<Value>& v) {
     peek(vm, v.get());
 }
 
+// vm is nullable.
 void tora::peek(VM *vm, const Value * v) {
     if (v) {
         printf("Value: %s(%p)\n", v->type_str(), v);
+        /*
         printf("  CODE SIZE: %zd\n", sizeof(CodeValue));
         printf("  STR SIZE: %zd\n", sizeof(StrValue));
         printf("  VALUE SIZE: %zd\n", sizeof(Value));
         printf("  INT SIZE: %zd\n", sizeof(IntValue));
+        */
         printf("  REFCNT: %d\n", v->refcnt);
         switch (v->value_type) {
         case VALUE_TYPE_SYMBOL: {
@@ -38,10 +41,14 @@ void tora::peek(VM *vm, const Value * v) {
             }
             break;
         }
+        case VALUE_TYPE_ARRAY: {
+            const ArrayValue* av = static_cast<const ArrayValue*>(v);
+            printf("  SIZE: %d\n", av->size());
+            break;
+        }
         case VALUE_TYPE_UNDEF:
         case VALUE_TYPE_BOOL:
         case VALUE_TYPE_STR:
-        case VALUE_TYPE_ARRAY:
         case VALUE_TYPE_DOUBLE:
         case VALUE_TYPE_REGEXP:
         case VALUE_TYPE_TUPLE:
