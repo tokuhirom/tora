@@ -1,0 +1,19 @@
+use Test::More *;
+use URI::Split *;
+
+{
+    my ($scheme, $auth, $path, $query) = uri_split('http://google.com/');
+    is($scheme, 'http');
+    is($auth, 'google.com');
+    is($path, '/');
+    is($query, undef);
+}
+
+{
+    my ($scheme, $auth, $path, $query) = uri_split('http://foo:bar@google.com/baz/boz?poo=pom#bar');
+    is($scheme, 'http');
+    is($auth, 'foo:bar@google.com');
+    is($path, '/baz/boz');
+    is($query, 'poo=pom');
+}
+

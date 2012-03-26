@@ -1,0 +1,26 @@
+# ported from URI::Split::uri_split from perl5
+sub uri_split($uri) {
+     my $matched = $uri.match(qr{^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$});
+     return $matched ? ($matched[1], $matched[2], $matched[3], $matched[4]) : undef;
+}
+
+__END__
+
+NAME
+====
+
+URI::Split - Prase and compose URI strings
+
+SYNOPSIS
+========
+
+    ($scheme, $auth, $path, $query, $frag) = uri_split($uri);
+
+AUTHORS
+=======
+
+Tokuhiro Matsuno
+
+And this module was ported from Perl5's URI::Split module.
+Thanks to gaas++ http://search.cpan.org/dist/URI/URI/Split.pm
+
