@@ -42,6 +42,12 @@ class Path::Dir is Path::Base {
     sub rmtree() {
         ...
     }
+    sub __iter__() {
+        ...
+    }
+    sub __next__() {
+        ...
+    }
 
     # dir(...).recurse(-> $x { say($x) })
     sub recurse($code) {

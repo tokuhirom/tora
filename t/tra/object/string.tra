@@ -7,6 +7,7 @@ note("substr"); {
 
 note("scan"); {
     is("ablacadabla".scan(/.a/).tora(), ["la","ca","da","la"].tora());
+    is("hoge:045-111-2222 boke:045-222-2222".scan(/(\S+):([\d\-]+)/).tora(), [["hoge", "045-111-2222"], ["boke", "045-222-2222"]].tora());
 }
 
 done_testing;

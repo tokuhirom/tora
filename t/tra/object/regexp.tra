@@ -37,4 +37,15 @@ is("foo".match('OO'), false);
 
 is(Regexp.quotemeta("f.o"), 'f\\.o');
 
+note('s option(DOTALL)'); {
+    ok("hogehogeabXabhogehoge".match(qr{ab.ab}));
+    ok(!"hogehogeab\nabhogehoge".match(qr{ab.ab}));
+    ok("hogehogeab\nabhogehoge".match(qr{ab.ab}s));
+}
+
+note('m option'); {
+    ok(!"hoge\nhege".match(qr{^hege}));
+    ok("hoge\nhege".match(qr{^hege}m));
+}
+
 done_testing;

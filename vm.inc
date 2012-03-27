@@ -820,12 +820,10 @@ OP_ENTER_FOREACH {
                 TODO();
             }
         } else {
-            this->die("This object doesn't support iteration\n");
-            abort();
+            this->die("The object  %s doesn't support iteration(Does not have a __iter__ method)\n", symbol_table->id2name(pkg->id()).c_str());
         }
     } else {
-        this->die("This object doesn't support iteration\n");
-        abort();
+        this->die("The object %s doesn't support iteration\n", a->type_str());
     }
 
     int vars_cnt = get_int_operand();

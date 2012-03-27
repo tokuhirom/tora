@@ -7,11 +7,13 @@
 
 namespace tora {
 
+// ref. http://docs.python.org/library/re.html#module-contents
 enum regexp_flags {
-    REGEXP_GLOBAL     = 1,
-    REGEXP_MULTILINE  = 2,
-    REGEXP_IGNORECASE = 4,
-    REGEXP_EXPANDED   = 8
+    REGEXP_GLOBAL     = 1, // 'g'
+    REGEXP_MULTILINE  = 2, // 'm'
+    REGEXP_IGNORECASE = 4, // 'i'
+    REGEXP_EXPANDED   = 8, // 'x'
+    REGEXP_DOTALL     = 16 // 's'
 };
 
 class AbstractRegexpValue : public Value {
@@ -37,20 +39,8 @@ private:
         return static_cast<RE2*>(this->ptr_value_);
     }
 public:
-    RE2RegexpValue(std::string &str, int flags) : AbstractRegexpValue(flags) {
-        RE2::Options opt;
-        // allow Perl's \d \s \w \D \S \W
-        opt.set_perl_classes(true);
-        // allow Perl's \b \B (word boundary and not)
-        opt.set_word_boundary(true);
-        if (flags & REGEXP_IGNORECASE) {
-            opt.set_case_sensitive(false);
-        }
-        ptr_value_ = (void*)new RE2(str, opt);
-    }
-    ~RE2RegexpValue() {
-        delete VAL();
-    }
+    RE2RegexpValue(std::string &str, int flags);
+    ~RE2RegexpValue();
     bool ok() {
         return VAL()->ok();
     }
@@ -94,6 +84,8 @@ static inline int regexp_flag(char c) {
         return REGEXP_IGNORECASE;
     case 'x':
         return REGEXP_EXPANDED;
+    case 's':
+        return REGEXP_DOTALL;
     default:
         printf("[BUG] Unknown regexp option: %c\n", c);
         abort();
