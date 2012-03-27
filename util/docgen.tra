@@ -1,0 +1,38 @@
+use Path *;
+
+system("mkdir -p docs/object/");
+
+my $files = [];
+for (my $e in opendir('tora/object/')) {
+    if $e.match(/\.cc$/) {
+        my $src = open("tora/object/" + $e).slurp();
+        say('-- ' + $e);
+        my $sections = [];
+        for (my $f in $src.scan(qr{/\*\*(.+?)\*/}s)) {
+            my $section_src = $f[0].replace(/^\s*\*/gm, '');
+            $sections.push($section_src);
+        }
+
+        if ($sections.size > 0) {
+
+            my $title_section = $sections.shift();
+            my $titles = $title_section.split(/\n/);
+            my $title = $titles.shift();
+            my $out = "<!doctype html>\n<html>\n<head>\n<meta charset=utf8>\n<title>" + $title + '</title></head><body><h1>' + $title + '</h1><div class="content">';
+            $out += '<div>' + $titles.join("<br />\n") + '</div>';
+
+            for (my $section in $sections) {
+                $out += '<section><pre>' + $section + '</pre></section>';
+            }
+            $out += '</div></body></html>';
+            open("docs/object/" + $e.replace(/\.cc$/, '.html'), 'wb').write($out);
+            $files.push([$e.replace(/\.cc$/, '.html'), $title]);
+        } else {
+            say("There is no documentation section in " + $e);
+        }
+    }
+}
+
+open("docs/object/index.html", "w").write(
+    "<!doctype html><html><head><title>Embedded objects.</title></head><body><h1>Builtin Objects</h1><div><ul>" + $files.map(-> $x { "<li><a href='" + $x[0] + "'>" + $x[1] + "</a></li>" }).join("\n") + "</ul></div></body></html>"
+);
