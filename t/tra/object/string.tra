@@ -1,8 +1,13 @@
 use Test::More *;
 
-note("substr");
-is("foobar".substr(3), "bar");
-is("foobar".substr(3,2), "ba");
+note("substr"); {
+    is("foobar".substr(3), "bar");
+    is("foobar".substr(3,2), "ba");
+}
+
+note("scan"); {
+    is("ablacadabla".scan(/.a/).tora(), ["la","ca","da","la"].tora());
+}
 
 done_testing;
 

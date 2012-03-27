@@ -177,6 +177,10 @@ tora = env.Program('bin/tora', [
 ])
 Default(tora)
 
+env.Program('hoge', [
+    ['hoge.cc'],
+    libre2
+])
 
 # lemon
 lemon_env = Environment()

@@ -74,11 +74,31 @@ static SharedPtr<Value> str_substr(VM *vm, const std::vector<SharedPtr<Value>>& 
     }
 }
 
+/**
+ * for ($x in "ablacadabla".scan(/.a/)) {
+ * }
+ *
+ * Scan the strings by regular expression.
+ */
+static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
+    if (re_v->value_type != VALUE_TYPE_REGEXP) {
+        throw new ExceptionValue("First argument of String#scan must be regexp object.");
+    }
+
+    assert(self->value_type == VALUE_TYPE_STR);
+    return re_v->upcast<AbstractRegexpValue>()->scan(
+        vm, self->upcast<StrValue>()->str_value()
+    );
+}
+
 void tora::Init_Str(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
-    pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
-    pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
-    pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));
-    pkg->add_method(vm->symbol_table->get_id("substr"), new CallbackFunction(str_substr));
+    {
+        SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
+        pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
+        pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
+        pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));
+        pkg->add_method(vm->symbol_table->get_id("substr"), new CallbackFunction(str_substr));
+        pkg->add_method("scan", new CallbackFunction(str_scan));
+    }
 }
 
