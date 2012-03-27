@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <dirent.h>
+#include <stdlib.h>
 
 #include "builtin.h"
 #include "vm.h"
@@ -208,6 +209,16 @@ static SharedPtr<Value> builtin_getppid(VM *vm) {
     return new IntValue(getppid());
 }
 
+/**
+ * system(Str $command); : Int
+ *
+ * Run the command with system(3).
+ */
+static SharedPtr<Value> builtin_system(VM *vm, Value * command) {
+    // system(3) conforming to: C89, C99, POSIX.1-2001.
+    return new IntValue(system(command->to_s()->str_value().c_str()));
+}
+
 static SharedPtr<Value> builtin_abs(VM *vm, Value *v) {
     if (v->value_type == VALUE_TYPE_INT) {
         int i = v->to_int();
@@ -305,6 +316,7 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("getcwd",   builtin_getcwd);
     vm->add_builtin_function("getpid",   builtin_getpid);
     vm->add_builtin_function("getppid",   builtin_getppid);
+    vm->add_builtin_function("system",   builtin_system);
     
     // numeric functions
     vm->add_builtin_function("sqrt",   builtin_sqrt);

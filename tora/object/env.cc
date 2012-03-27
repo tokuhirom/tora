@@ -6,9 +6,19 @@
 
 using namespace tora;
 
+/**
+ * class Env
+ *
+ * Environment variable class. This is a singleton class.
+ */
+
 // TODO: delete $ENV['PATH']
 
-// $ENV['hoge'] = 'foo';
+/**
+ * $ENV['hoge'] = 'foo';
+ *
+ * set a environment variable.
+ */
 static SharedPtr<Value> env_set(VM * vm, Value* self, Value*k, Value*v) {
     if (v->value_type == VALUE_TYPE_UNDEF) {
         unsetenv(k->to_s()->str_value().c_str());
@@ -22,7 +32,11 @@ static SharedPtr<Value> env_set(VM * vm, Value* self, Value*k, Value*v) {
     return UndefValue::instance();
 }
 
-// say($ENV['hoge']);
+/**
+ * $ENV['hoge'];
+ *
+ * get a environment variable.
+ */
 static SharedPtr<Value> env_get(VM * vm, Value* self, Value*k) {
     char *v = getenv(k->to_s()->str_value().c_str());
     if (v) {

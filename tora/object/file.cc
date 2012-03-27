@@ -70,6 +70,22 @@ static SharedPtr<Value> file_close(VM * vm, Value* self) {
 }
 
 /**
+ * $file.write(Str $str);
+ *
+ * write $string to a file.
+ */
+static SharedPtr<Value> file_write(VM * vm, Value* self, Value *str_v) {
+    assert(self->value_type == VALUE_TYPE_FILE);
+    const std::string & str = str_v->to_s()->str_value();
+    size_t ret = fwrite(str.c_str(), sizeof(char), str.size(), FP(self));
+    if (ret==str.size()) {
+        return UndefValue::instance();
+    } else {
+        throw new ExceptionValue("Cannot write a text for file(%zd < %zd).", ret, str.size());
+    }
+}
+
+/**
  * $file.flush();
  *
  * flush a writing buffer in stdio.
@@ -96,6 +112,7 @@ void tora::Init_File(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("File");
     pkg->add_method(vm->symbol_table->get_id("open"), new CallbackFunction(file_open_method));
     pkg->add_method(vm->symbol_table->get_id("slurp"), new CallbackFunction(file_slurp));
+    pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(file_write));
     pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(file_close));
     pkg->add_method(vm->symbol_table->get_id("flush"), new CallbackFunction(file_flush));
     pkg->add_method(vm->symbol_table->get_id("fileno"), new CallbackFunction(file_fileno));

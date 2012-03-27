@@ -10,5 +10,11 @@ note("scan"); {
     is("hoge:045-111-2222 boke:045-222-2222".scan(/(\S+):([\d\-]+)/).tora(), [["hoge", "045-111-2222"], ["boke", "045-222-2222"]].tora());
 }
 
+note('split'); {
+    is('foo'.split(//).tora(), qw(f o o).tora());
+    is("x\nb\nc".split(/\n/).tora(), qw(x b c).tora());
+    is('aaaXbbbXccc'.split(/X/).tora(), qw(aaa bbb ccc).tora());
+};
+
 done_testing;
 

@@ -44,7 +44,6 @@ sub note($msg) {
     say("# " + $msg);
 }
 
-
 sub done_testing() {
     say("1.." + $counter);
     if ($counter == 0) {

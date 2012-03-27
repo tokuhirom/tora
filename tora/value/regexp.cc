@@ -62,8 +62,35 @@ SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
         } else {
             res->push_back(new StrValue(buf[0].as_string()));
         }
-        start = buf[0].data() - str.c_str() + buf[0].length();
+        start = buf[0].data() - str.c_str() + (buf[0].length() > 0 ? buf[0].length() : 1);
     }
     return res;
+}
+
+SharedPtr<Value> RE2RegexpValue::split(VM *vm, const std::string &str) {
+    // $str.split(//)
+    if (this->pattern() == "") {
+        SharedPtr<ArrayValue> res = new ArrayValue();
+        for (size_t i=0; i<str.size(); i++) {
+            res->push_back(new StrValue(str.substr(i, 1)));
+        }
+        return res;
+    } else {
+        re2::StringPiece buf[1];
+
+        int start = 0;
+        SharedPtr<ArrayValue> res = new ArrayValue();
+
+        std::string src = str;
+
+        while (VAL()->Match(src, 0, src.length(), RE2::UNANCHORED, buf, 1)) {
+            res->push_back(new StrValue(src.substr(start, buf[0].data() - src.c_str())));
+            src = src.substr((buf[0].data()-src.c_str())+buf[0].length());
+        }
+        if (src.size() > 0) {
+            res->push_back(new StrValue(src));
+        }
+        return res;
+    }
 }
 

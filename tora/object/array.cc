@@ -9,6 +9,16 @@
 using namespace tora;
 
 /**
+ * class Array
+ *
+ * Array class is an array class.
+ * 
+ * You can construct an Array instance from array literal like:
+ * <pre>[1,2,3, "hoge"]</pre>
+ * Array can contains any objects.
+ */
+
+/**
  * Array#size()
  * 
  * Get the number of elements in an array.

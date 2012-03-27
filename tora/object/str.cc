@@ -91,6 +91,23 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
     );
 }
 
+/**
+ * "foo".split(//) # => qw(f o o)
+ * "a\nb\nc".split(/\n/) # => qw(a b c)
+ *
+ * Split a string by string or regexp.
+ */
+static SharedPtr<Value> str_split(VM *vm, Value *self, Value *re_v) {
+    if (re_v->value_type != VALUE_TYPE_REGEXP) {
+        throw new ExceptionValue("First argument of String#split must be regexp object.");
+    }
+
+    assert(self->value_type == VALUE_TYPE_STR);
+    return re_v->upcast<AbstractRegexpValue>()->split(
+        vm, self->upcast<StrValue>()->str_value()
+    );
+}
+
 void tora::Init_Str(VM *vm) {
     {
         SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
@@ -99,6 +116,7 @@ void tora::Init_Str(VM *vm) {
         pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));
         pkg->add_method(vm->symbol_table->get_id("substr"), new CallbackFunction(str_substr));
         pkg->add_method("scan", new CallbackFunction(str_scan));
+        pkg->add_method("split", new CallbackFunction(str_split));
     }
 }
 
