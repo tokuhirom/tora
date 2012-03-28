@@ -12,6 +12,12 @@
 using namespace tora;
 
 /**
+ * class Time
+ *
+ * The Time object.
+ */
+
+/**
  * my $t = Time.new(Int $epoch);
  * my $t = Time.now(Int $epoch);
  *
@@ -94,28 +100,55 @@ static struct tm* GET_TM(Value *self) {
 }
 
 /**
- * Time.year()
+ * $time.year() : Int
+ *
+ * Get a year from $time.
  */
 static SharedPtr<Value> time_year(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_year + 1900);
 }
 
+/**
+ * $time.month() : Int
+ *
+ * Get a month from $time.
+ */
 static SharedPtr<Value> time_month(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_mon + 1);
 }
 
+/**
+ * $time.day() : Int
+ *
+ * Get a month from $time.
+ */
 static SharedPtr<Value> time_day(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_mday);
 }
 
+/**
+ * $time.hour() : Int
+ *
+ * Get a month from $time.
+ */
 static SharedPtr<Value> time_hour(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_hour);
 }
 
+/**
+ * $time.minute() : Int
+ *
+ * Get a month value from $time.
+ */
 static SharedPtr<Value> time_minute(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_min);
 }
 
+/**
+ * $time.minute() : Int
+ *
+ * Get a month value from $time.
+ */
 static SharedPtr<Value> time_second(VM* vm, Value* self) {
     return new IntValue(GET_TM(self)->tm_sec);
 }

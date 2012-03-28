@@ -9,6 +9,16 @@
 
 using namespace tora;
 
+/**
+ * class MetaClass
+ *
+ * This is a metaclass. Meta class is class of class.
+ *
+ * You can get a meta class for $foo from $foo.meta().
+ * 
+ * Note. API is compatible with Moose in Perl5, preferably.
+ */
+
 static inline Package *GET_PACKAGE(VM *vm, Value *self) {
     ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     Package * pkg = vm->find_package(pkgid);
@@ -16,7 +26,7 @@ static inline Package *GET_PACKAGE(VM *vm, Value *self) {
 }
 
 /**
- * $meta.has_method('foo');
+ * $meta.has_method(Str $name) : Boolean
  *
  * Returns a boolean indicating whether or not the class defines the named method.
  * It does not include methods inherited from parent classes.
@@ -29,6 +39,8 @@ static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) 
 }
 
 /**
+ * $meta.get_method_list() : Array[Str]
+ *
  * Get a method list defined in package.
  */
 static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
@@ -41,13 +53,19 @@ static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
     return av;
 }
 
+
+/**
+ * $meta.name() : String
+ *
+ * Get a name of class.
+ */
 static SharedPtr<Value> mc_name(VM * vm, Value* self) {
     ID pkgid = self->upcast<ObjectValue>()->data()->upcast<IntValue>()->int_value();
     return new StrValue(vm->symbol_table->id2name(pkgid));
 }
 
 /**
- * $meta.superclass() : Str;
+ * $meta.superclass() : String
  *
  * This method returns superclass in string.
  * If the class does not have a superclass, it returns undef.

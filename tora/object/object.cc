@@ -12,6 +12,15 @@
 using namespace tora;
 
 /**
+ * class Object
+ *
+ * Object is a base class of all classes.
+ * It's known as UNIVERSAL package in Perl5.
+ */
+
+/**
+ * $object.tora() : String
+ *
  * convert object to tora source.
  */
 static SharedPtr<Value> object_tora(VM *vm, Value *self) {
@@ -20,7 +29,7 @@ static SharedPtr<Value> object_tora(VM *vm, Value *self) {
 }
 
 /**
- * $object.meta();
+ * $object.meta() : MetaClass
  *
  * get a meta class.
  */
@@ -49,6 +58,11 @@ static bool check_isa(VM *vm, ID pkgid, ID target_id) {
     }
 }
 
+/**
+ * $object.isa($target) : Boolean
+ *
+ * This method returns true if $object is-a $target, false otherwise.
+ */
 static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
     ID pkgid = vm->symbol_table->get_id(self->type_str());
     SharedPtr<StrValue> target = target_v->to_s();
@@ -58,8 +72,8 @@ static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
 
 void tora::Init_Object(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package("Object");
-    pkg->add_method(vm->symbol_table->get_id("tora"), new CallbackFunction(object_tora));
-    pkg->add_method(vm->symbol_table->get_id("meta"), new CallbackFunction(object_meta));
-    pkg->add_method(vm->symbol_table->get_id("isa"), new CallbackFunction(object_isa));
+    pkg->add_method("tora", new CallbackFunction(object_tora));
+    pkg->add_method("meta", new CallbackFunction(object_meta));
+    pkg->add_method("isa",  new CallbackFunction(object_isa));
 }
 

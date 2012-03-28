@@ -8,6 +8,12 @@
 using namespace tora;
 
 /**
+ * class Bytes
+ *
+ * Bytes class is character set independent byte string class.
+ */
+
+/**
  * $bytes.length() : Int
  *
  * Return the caller code object.

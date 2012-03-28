@@ -8,6 +8,12 @@
 using namespace tora;
 
 /**
+ * class Regexp
+ *
+ * Regular expression object.
+ */
+
+/**
  * $re.flags() : Int
  *
  * Return the flags.
@@ -55,10 +61,11 @@ static SharedPtr<Value> Regexp_EXPANDED(VM * vm, Value* self) {
 
 void tora::Init_Regexp(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package("Regexp");
-    pkg->add_method(vm->symbol_table->get_id("flags"), new CallbackFunction(Regexp_flags));
-    pkg->add_method(vm->symbol_table->get_id("quotemeta"), new CallbackFunction(Regexp_quotemeta));
-    pkg->add_method(vm->symbol_table->get_id("MULTILINE"), new CallbackFunction(Regexp_MULTILINE));
-    pkg->add_method(vm->symbol_table->get_id("IGNORECASE"), new CallbackFunction(Regexp_IGNORECASE));
-    pkg->add_method(vm->symbol_table->get_id("EXPANDED"), new CallbackFunction(Regexp_EXPANDED));
+    pkg->add_method("flags",      new CallbackFunction(Regexp_flags));
+    pkg->add_method("quotemeta",  new CallbackFunction(Regexp_quotemeta));
+
+    pkg->add_method("MULTILINE",  new CallbackFunction(Regexp_MULTILINE));
+    pkg->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
+    pkg->add_method("EXPANDED",   new CallbackFunction(Regexp_EXPANDED));
 }
 

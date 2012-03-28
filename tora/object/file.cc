@@ -5,6 +5,12 @@
 
 using namespace tora;
 
+/**
+ * class File
+ *
+ * The file class.
+ */
+
 inline static FILE *FP(Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
     return self->upcast<FileValue>()->fp();
@@ -39,6 +45,15 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
 /**
  * File.open(Str $fname) : FileHandle
  * File.open(Str $fname, Str $mode) : FileHandle
+ *
+ * Open the file named $fname by $mode.
+ *
+ * Str $mode: file opening mode. You can specify the option as following:
+ *   "w": writing mode
+ *   "r": reading mode
+ *   "a": appending mode
+ *
+ * File.open passes $mode to fopen(3).
  */
 static SharedPtr<Value> file_open_method(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     if (args.size() != 2 && args.size() != 3) {
@@ -49,7 +64,7 @@ static SharedPtr<Value> file_open_method(VM *vm, const std::vector<SharedPtr<Val
 }
 
 /**
- * $file.slurp()
+ * $file.slurp() : String
  *
  * Read all file content and return it in string.
  */
@@ -59,7 +74,7 @@ static SharedPtr<Value> file_slurp(VM * vm, Value* self) {
 }
 
 /**
- * $file.close();
+ * $file.close() : Undef
  *
  * Close a file.
  */
@@ -70,7 +85,7 @@ static SharedPtr<Value> file_close(VM * vm, Value* self) {
 }
 
 /**
- * $file.write(Str $str);
+ * $file.write(Str $str); : Undef
  *
  * write $string to a file.
  */
@@ -110,11 +125,11 @@ void tora::Init_File(VM* vm) {
     // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
     // tell(), truncate(), write($str), fdopen
     SharedPtr<Package> pkg = vm->find_package("File");
-    pkg->add_method(vm->symbol_table->get_id("open"), new CallbackFunction(file_open_method));
-    pkg->add_method(vm->symbol_table->get_id("slurp"), new CallbackFunction(file_slurp));
-    pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(file_write));
-    pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(file_close));
-    pkg->add_method(vm->symbol_table->get_id("flush"), new CallbackFunction(file_flush));
-    pkg->add_method(vm->symbol_table->get_id("fileno"), new CallbackFunction(file_fileno));
+    pkg->add_method("open",   new CallbackFunction(file_open_method));
+    pkg->add_method("slurp",  new CallbackFunction(file_slurp));
+    pkg->add_method("write",  new CallbackFunction(file_write));
+    pkg->add_method("close",  new CallbackFunction(file_close));
+    pkg->add_method("flush",  new CallbackFunction(file_flush));
+    pkg->add_method("fileno", new CallbackFunction(file_fileno));
 }
 

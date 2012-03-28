@@ -9,15 +9,27 @@
 
 using namespace tora;
 
+/**
+ * class String
+ *
+ * The string class.
+ */
+
+/**
+ * $string.length() : Int
+ *
+ * Get a String length.
+ */
 static SharedPtr<Value> str_length(VM *vm, Value* self) {
     return new IntValue(self->upcast<StrValue>()->length());
 }
 
 /**
- * 'foo'.match(/oo/) : boolean
- * 'foo'.match('oo') : boolean
+ * $string.match(Regexp $pattern) : Maybe[RE2::Regexp::Matched]
+ * $string.match(String $pattern) : Maybe[RE2::Regexp::Matched]
  *
- * match.
+ * $string match with $pattern. If it does not matched, returns undefinied value.
+ * If it's matched, returns RE2::Regexp::Matched object.
  */
 static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
     if (arg1->value_type == VALUE_TYPE_STR) {
@@ -33,11 +45,11 @@ static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
 }
 
 /**
- * "foo".replace(/o/g, 'p') : Str
- * "foo".replace(/o/,  'p') : Str
- * "foo".replace('o',  'p') : Str
+ * $string.replace(Regexp $pattern, String $replacer) : Str
+ * $string.replace(String $pattern, String $replacer) : Str
  *
- * Replace string parts.
+ * Replace string parts by regexp or string. It returns replaced string.
+ * This method does not rewrite original $string.
  */
 static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rewrite_v) {
     if (arg1->value_type == VALUE_TYPE_STR) {
@@ -57,8 +69,14 @@ static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rew
 }
 
 /**
- * "foobar".substr(3) # => "bar"
- * "foobar".substr(3,2) # => "ba"
+ * $string.substr(Int $start)              : Str
+ * $string.substr(Int $start, Int $length) : Str
+ *
+ * It returns substring from $string.
+ *
+ * Example:
+ *   "foobar".substr(3) # => "bar"
+ *   "foobar".substr(3,2) # => "ba"
  *
  * Get a substring from string.
  */
@@ -75,8 +93,7 @@ static SharedPtr<Value> str_substr(VM *vm, const std::vector<SharedPtr<Value>>& 
 }
 
 /**
- * for ($x in "ablacadabla".scan(/.a/)) {
- * }
+ * $string.scan(Regexp $pattern) : Array[String]
  *
  * Scan the strings by regular expression.
  */
@@ -92,10 +109,13 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
 }
 
 /**
- * "foo".split(//) # => qw(f o o)
- * "a\nb\nc".split(/\n/) # => qw(a b c)
+ * $string.split(Regexp $pattern) : Array[String]
  *
- * Split a string by string or regexp.
+ * Examples:
+ *   "foo".split(//) # => qw(f o o)
+ *   "a\nb\nc".split(/\n/) # => qw(a b c)
+ *
+ * Split a string by regexp.
  */
 static SharedPtr<Value> str_split(VM *vm, Value *self, Value *re_v) {
     if (re_v->value_type != VALUE_TYPE_REGEXP) {
@@ -109,14 +129,12 @@ static SharedPtr<Value> str_split(VM *vm, Value *self, Value *re_v) {
 }
 
 void tora::Init_Str(VM *vm) {
-    {
-        SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
-        pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(str_length));
-        pkg->add_method(vm->symbol_table->get_id("match"), new CallbackFunction(str_match));
-        pkg->add_method(vm->symbol_table->get_id("replace"), new CallbackFunction(str_replace));
-        pkg->add_method(vm->symbol_table->get_id("substr"), new CallbackFunction(str_substr));
-        pkg->add_method("scan", new CallbackFunction(str_scan));
-        pkg->add_method("split", new CallbackFunction(str_split));
-    }
+    SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
+    pkg->add_method("length",  new CallbackFunction(str_length));
+    pkg->add_method("match",   new CallbackFunction(str_match));
+    pkg->add_method("replace", new CallbackFunction(str_replace));
+    pkg->add_method("substr",  new CallbackFunction(str_substr));
+    pkg->add_method("scan",    new CallbackFunction(str_scan));
+    pkg->add_method("split",   new CallbackFunction(str_split));
 }
 

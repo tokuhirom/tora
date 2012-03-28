@@ -6,7 +6,6 @@ builtin functions
 
 stat()
 alarm()
-system()
 printf()
 sprintf()
 pack()
@@ -216,4 +215,5 @@ ErrnoException?
 String#substr(n)
 String#substr(n, m)
   * Bytes class.
+system()
 

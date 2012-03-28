@@ -32,7 +32,7 @@ my $dat = [
     ['SYMBOL_RANGE_ITERATOR_CLASS' => 'Range::Iterator'],
     ['SYMBOL_HASH_ITERATOR_CLASS' => 'Hash::Iterator'],
     ['SYMBOL_REFERENCE_CLASS' => 'Reference'],
-    ['SYMBOL_RE2_REGEXP_MATCHED_CLASS' => 'Re2::Regexp::Matched'],
+    ['SYMBOL_RE2_REGEXP_MATCHED_CLASS' => 'RE2::Regexp::Matched'],
 
     ['SYMBOL___GET_ITEM__' => '__getitem__'],
 ];
