@@ -32,6 +32,7 @@ void Init_Time(VM *vm);
 void Init_Bytes(VM *vm);
 void Init_Regexp(VM *vm);
 void Init_RE2_Regexp_Matched(VM *vm);
+void Init_Hash(VM *vm);
 
 SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
 ObjectValue* Dir_new(VM *vm, StrValue *dirname);

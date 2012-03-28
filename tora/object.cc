@@ -14,6 +14,7 @@ void tora::load_builtin_objects(VM *vm) {
     Init_Bytes(vm);
     Init_Regexp(vm);
     Init_RE2_Regexp_Matched(vm);
+    Init_Hash(vm);
 
     // DynaLoader
     Init_DynaLoader(vm);

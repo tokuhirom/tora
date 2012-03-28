@@ -49,12 +49,22 @@ public:
     size_t size() {
         return VAL().size();
     }
-    bool has_key(SharedPtr<Value> key) {
+    bool has_key(const SharedPtr<Value> & key) const {
         SharedPtr<StrValue> k = key->to_s();
         return this->has_key(k->str_value());
     }
-    bool has_key(const std::string & key) {
+    bool has_key(const std::string & key) const {
         return this->VAL().find(key) != this->VAL().end();
+    }
+    void delete_key(const SharedPtr<Value> &key) {
+        SharedPtr<StrValue> k = key->to_s();
+        this->delete_key(k->str_value());
+    }
+    void delete_key(const std::string &key) {
+        auto iter = this->VAL().find(key);
+        if (iter != this->VAL().end()) {
+            this->VAL().erase(iter);
+        }
     }
 
     class iterator : public Value {

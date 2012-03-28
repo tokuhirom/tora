@@ -95,7 +95,7 @@ libfiles = [
 
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
         object/dynaloader.cc object/object.cc object/metaclass.cc
-        object/bytes.cc object/regexp.cc
+        object/bytes.cc object/regexp.cc object/hash.cc
         object/re2_regexp_matched.cc
 
     ''')

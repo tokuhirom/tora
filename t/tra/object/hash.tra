@@ -1,0 +1,23 @@
+use Test::More *;
+
+note("keys"); {
+    is({1=>2, 3=>4}.keys.tora(), ['1','3'].tora);
+}
+
+note("values"); {
+    is({1=>2, 3=>4}.values.tora(), [2,4].tora);
+}
+
+note("delete"); {
+    my $h = {1=>2,3=>4};
+    $h.delete(1);
+    is($h.tora(), {3=>4}.tora);
+}
+
+note("exists"); {
+    my $h = {1=>2,3=>4};
+    is($h.exists(1), true);
+    is($h.exists(0), false);
+}
+
+done_testing;
