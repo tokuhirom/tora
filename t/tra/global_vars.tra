@@ -1,0 +1,12 @@
+use Test::More *;
+
+is(typeof($STDIN), "File");
+is(typeof($STDOUT), "File");
+is(typeof($STDERR), "File");
+
+is($STDIN.fileno,  0);
+is($STDOUT.fileno, 1);
+is($STDERR.fileno, 2);
+
+done_testing;
+

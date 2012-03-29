@@ -150,6 +150,9 @@ void tora::Compiler::init_globals() {
     this->define_global_var("$ENV");
     this->define_global_var("$LIBPATH");
     this->define_global_var("$REQUIRED");
+    this->define_global_var("$STDIN");
+    this->define_global_var("$STDOUT");
+    this->define_global_var("$STDERR");
 }
 
 

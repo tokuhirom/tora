@@ -101,6 +101,15 @@ void VM::init_globals(int argc, char**argv) {
 
     // $REQUIRED : Hash
     this->global_vars->push_back(new HashValue());
+
+    // $STDIN : File
+    this->global_vars->push_back(new FileValue(stdin));
+
+    // $STDOUT : File
+    this->global_vars->push_back(new FileValue(stdout));
+
+    // $STDERR : File
+    this->global_vars->push_back(new FileValue(stderr));
 }
 
 void VM::die(const char *format, ...) {

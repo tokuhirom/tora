@@ -121,6 +121,26 @@ static SharedPtr<Value> file_fileno(VM * vm, Value* self) {
     return new IntValue(fileno(FP(self)));
 }
 
+/**
+ * $file.getc() : Maybe[Str]
+ *
+ * Get a character from $file.
+ * If EOF reached, returns undef.
+ */
+static SharedPtr<Value> file_getc(VM * vm, Value* self) {
+    assert(self->value_type == VALUE_TYPE_FILE);
+    int c = fgetc(FP(self));
+    if (c>=0) {
+        return new StrValue(std::string(1, (char)c));
+    } else {
+        if (feof(FP(self))) {
+            return UndefValue::instance();
+        } else {
+            throw new ErrnoExceptionValue(errno);
+        }
+    }
+}
+
 void tora::Init_File(VM* vm) {
     // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
     // tell(), truncate(), write($str), fdopen
@@ -131,5 +151,6 @@ void tora::Init_File(VM* vm) {
     pkg->add_method("close",  new CallbackFunction(file_close));
     pkg->add_method("flush",  new CallbackFunction(file_flush));
     pkg->add_method("fileno", new CallbackFunction(file_fileno));
+    pkg->add_method("getc",   new CallbackFunction(file_getc));
 }
 

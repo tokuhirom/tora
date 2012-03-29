@@ -21,8 +21,10 @@ public:
     }
     ~ObjectValue();
     const SharedPtr<Value> data() const { return VAL().data_; }
+    SharedPtr<Value> data() { return VAL().data_; }
     void release();
     void call_destroy();
+    VM * vm() const { return VAL().vm_; }
 
     ID package_id() const { return VAL().package_id_; }
 

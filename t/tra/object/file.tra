@@ -1,0 +1,8 @@
+use Test::More *;
+
+note('getc'); {
+    my $f = open('t/dat/file/f1');
+    is($f.getc(), 'H');
+};
+
+done_testing;

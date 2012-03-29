@@ -15,6 +15,9 @@ public:
     FileValue() : Value(VALUE_TYPE_FILE) {
         this->file_value_ = (FILE*)NULL;
     }
+    explicit FileValue(FILE *fp) : Value(VALUE_TYPE_FILE) {
+        this->file_value_ = fp;
+    }
     ~FileValue() {
         if (VAL()) { this->close(); }
     }
