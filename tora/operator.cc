@@ -202,6 +202,12 @@ SharedPtr<Value> tora::op_get_item(const SharedPtr<Value>& container, const Shar
 
 template <class operationI, class operationD, class OperationS>
 bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS operation_s, const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
+#ifndef NDEBUG
+        if (rhs->value_type == VALUE_TYPE_SYMBOL) {
+            fprintf(stderr, "[BUG] Do not compare with symbol value.\n");
+            abort();
+        }
+#endif
  
     switch (lhs->value_type) {
     case VALUE_TYPE_INT: {

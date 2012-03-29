@@ -1,6 +1,8 @@
 TODO
 ====
 
+rename class File to IO.
+
 builtin functions
 -----------------
 
@@ -23,6 +25,11 @@ Enumerable#reduce()
 Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
+
+Dir.mkdir
+Dir.rmdir
+
+File::Temp
 
 open()
 open($fname, $mode, $encoding)

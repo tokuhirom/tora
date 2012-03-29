@@ -341,6 +341,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_const_int) {
+        for (int i=0; i<argcnt; i++) {
+            stack.pop_back(); // Foo::Bar.baz();
+        }
         stack.push_back(new IntValue(callback->const_int));
     } else {
         fprintf(stderr, "Unknown callback type: %d\n", callback->argc);

@@ -153,11 +153,12 @@ public:
     void call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id);
     void call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
 
+    void dump_value(const SharedPtr<Value> & v);
+
 #include "vm.ops.inc.h"
 
 private:
     void handle_exception(const SharedPtr<Value> & exception);
-    void dump_value(const SharedPtr<Value> & v);
 };
 
 };

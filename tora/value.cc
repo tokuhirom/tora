@@ -150,9 +150,12 @@ int Value::to_int() const {
         } else {
             throw new ErrnoExceptionValue(errno);
         }
+    } else if (value_type == VALUE_TYPE_SYMBOL) {
+        fprintf(stderr, "[BUG] DO NOT CALL to_int() method in symbol value\n");
+        abort();
     }
 
-    throw new ExceptionValue("to_i is not supported yet in %s\n", this->type_str());
+    throw new ExceptionValue("to_int is not supported yet in %s\n", this->type_str());
 }
 
 Value& tora::Value::operator=(const Value&lhs) {
