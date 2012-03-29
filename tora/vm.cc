@@ -563,8 +563,12 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
 
     // TODO: vargs support
     // TODO: kwargs support
-    // printf("%d, %zd\n", argcnt, code->code_params()->size());
-    assert(argcnt == (int)code->code_params()->size());
+#ifndef NDEBUG
+    if (argcnt != (int)code->code_params()->size()) {
+        fprintf(stderr, "[BUG] argument count mismatch. name: %s, argcnt: %d, code_params.size(): %zd\n", symbol_table->id2name(code->package_id()).c_str(), argcnt, code->code_params()->size());
+        abort();
+    }
+#endif
     mark_stack.push_back(stack.size());
     frame_stack->push_back(fframe);
 }
