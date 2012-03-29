@@ -1,0 +1,14 @@
+use XSLoader;
+XSLoader.load('HTTP::Server::Mongoose');
+
+sub set_callback($code) {
+    if ($code.isa("Code")) {
+        ${self}[1] = $code;
+        p(${self});
+    } else {
+        die "code required.";
+    }
+}
+
+__END__
+
