@@ -20,4 +20,10 @@ is($ret.tora(), '[2,4,6]');
     is($inner.tora(), '[1,2,3]');
 }
 
+note("out-of-range"); {
+    my $a = [];
+    is($a[0], undef);
+    is($a[100], undef);
+};
+
 done_testing;

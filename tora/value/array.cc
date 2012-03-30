@@ -30,7 +30,7 @@ void ArrayValue::sort() {
 
 SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
     int i = index->to_int();
-    if (i > (int)VAL()->size()) {
+    if (i >= (int)VAL()->size()) {
         return UndefValue::instance();
     } else {
         return this->at(i);
