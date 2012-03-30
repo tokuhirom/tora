@@ -20,9 +20,11 @@ Value * tora::op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
             return new IntValue(lhs->upcast<IntValue>()->int_value() + i);
         }
     } else if (lhs->value_type == VALUE_TYPE_STR) {
-        // TODO: support null terminated string
         SharedPtr<Value> s(rhs->to_s());
         return new StrValue(lhs->upcast<StrValue>()->str_value() + s->upcast<StrValue>()->str_value());
+    } else if (lhs->value_type == VALUE_TYPE_BYTES) {
+        SharedPtr<Value> s(rhs->to_s());
+        return new BytesValue(lhs->upcast<BytesValue>()->str_value() + s->upcast<BytesValue>()->str_value());
     } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
         return new DoubleValue(lhs->to_double() + rhs->to_double());
     } else {

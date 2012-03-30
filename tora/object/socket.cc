@@ -3,6 +3,7 @@
 #include "../value/object.h"
 #include "../value/array.h"
 #include "../value/tuple.h"
+#include "../value/bytes.h"
 #include "../package.h"
 
 #include <sys/types.h>
@@ -149,7 +150,10 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
 }
 
 /**
- * $sock.read()
+ * $socket.read() : Bytes
+ * $socket.read(Int $len) : Bytes
+ *
+ * Read $len bytes from the $socket.
  */
 static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&args) {
     SharedPtr<Value> self = args.at(0);
@@ -166,9 +170,9 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
                 bbuf += std::string(buf, ret);
                 continue;
             } else if (ret == 0) { // EOF
-                return new StrValue(bbuf);
+                return new BytesValue(bbuf);
             } else {
-                return new ErrnoExceptionValue(errno);
+                throw new ErrnoExceptionValue(errno);
             }
         }
     } else if (args.size() == 2) {
@@ -179,16 +183,19 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
 #endif
         int ret = read(fd, buf.get(), size);
         if (ret >= 0) {
-            SharedPtr<Value> s = new StrValue(std::string(buf.get(), ret));
-            return s;
+            return new BytesValue(std::string(buf.get(), ret));
         } else {
-            return new ErrnoExceptionValue(errno);
+            throw new ErrnoExceptionValue(errno);
         }
     } else {
-        return new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
+        throw new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
     }
 }
 
+/**
+ * $sock.bind(Str $addr) : Undef
+ *
+ */
 static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     SharedPtr<Value> addr = addr_v->to_s();
     if (addr->is_exception()) { return addr; }
@@ -198,7 +205,7 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(errno);
     }
 }
 

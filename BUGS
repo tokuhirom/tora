@@ -11,6 +11,7 @@ KNOWN BUGS LIST
 * (-> { 3 }).();
 * possibly memory leaks in global destruction.
 * sub a () { (1,2,3) } my ($a, $b, $c, $d, $e) = a() causes segfault
+* my$x=4; { try { p($x); } }
 
 __END__
 use Test::More *;

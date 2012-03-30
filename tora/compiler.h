@@ -107,18 +107,7 @@ public:
         }
         block->vars.push_back(new std::string(name));
     }
-    void dump_localvars() {
-        printf("-- dump_localvars --\n");
-        printf("Levels: %zd\n", this->blocks->size());
-        for (size_t level = 0; level < this->blocks->size(); ++level) {
-            SharedPtr<Block> block = this->blocks->at(level);
-            printf("[%zd]\n", level);
-            for (size_t i=0; i<block->vars.size(); i++) {
-                printf("    %s\n", block->vars.at(i)->c_str());
-            }
-        }
-        printf("--------------------\n");
-    }
+    void dump_localvars();
     void fail(const char *format, ...) {
         fprintf(stderr, "Compilation failed:\n");
         va_list ap;

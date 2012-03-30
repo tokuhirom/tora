@@ -7,6 +7,18 @@
 
 using namespace tora;
 
+
+SharedPtr<Value> LexicalVarsFrame::get_variable(int id) const {
+#ifndef NDEBUG
+    if (id >= this->vars.capacity()) {
+        fprintf(stderr, "[BUG] id< vars.capacity(). id: %d, capacity: %d\n", id, this->vars.capacity());
+        abort();
+    }
+#endif
+    assert(id < this->vars.capacity());
+    return this->pad_list->get(id);
+}
+
 LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_) : refcnt(0), vm_(vm), vars(vars_cnt), top(top), type(type_) {
     this->pad_list = new PadList(
         vars_cnt,

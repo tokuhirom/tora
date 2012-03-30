@@ -551,6 +551,11 @@ void VM::dump_value(const SharedPtr<Value> & v) {
     printf("%s\n", ins.inspect(v).c_str());
 }
 
+void VM::dump_pad() {
+    assert(this->frame_stack->size()!=0);
+    this->frame_stack->back()->dump_pad(this);
+}
+
 void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> &self) {
     SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
     fframe->return_address = this->pc;

@@ -1,0 +1,53 @@
+use Socket *;
+use HTTP::Parser *;
+
+class HTTP::Server::Simple {
+    sub new($host, $port=80) {
+        self.bless({host => $host, port => $port});
+    }
+    sub run() {
+        my $server = Socket.socket(AF_INET, SOCK_STREAM, 0);
+        $server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1);
+        $server.bind(Socket.sockaddr_in(${self}['port'], Socket.inet_aton(${self}['host'])));
+        $server.listen(SOMAXCONN);
+        while (1) {
+            my ($csock, $sockaddr) = $server.accept();
+            my $buf = b'';
+            while (1) {
+                $buf += $csock.read(4068);
+                my $headers = {};
+                my $ret = parse_http_request($buf, $headers);
+                if ($ret == -2) {
+                    say("[DEBUG] Incomplete request.");
+                } elsif ($ret == -1) {
+                    say("[INFO] Broken request.");
+                    last;
+                } else {
+                    # parsed.
+                    say("[INFO] Parsed http request.");
+                    my $content = $buf.substr($ret);
+                    $csock.write("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n" + $headers.tora());
+                    $csock.close();
+                    last;
+                }
+            }
+        }
+        $server.close();
+    }
+}
+
+__END__
+
+HTP::Server::Simple
+===================
+
+SYNOPSIS
+--------
+
+    use HTTP::Server::Simple;
+
+    my $httpd = HTTP::Server::Simple.new('127.0.0.1', 8080);
+    $httpd.run(-> $env {
+        return [200, [], ["OK"]];
+    });
+

@@ -398,7 +398,7 @@ OP_LAST {
         SharedPtr<LexicalVarsFrame> frame(frame_stack->back());
         assert(frame->type != FRAME_TYPE_FUNCTION);
         assert(frame->type != FRAME_TYPE_TRY);
-        stack.resize(stack.size());
+        stack.resize(frame->top);
         frame_stack->pop_back();
         if (frame->type == FRAME_TYPE_WHILE || frame->type == FRAME_TYPE_FOREACH || frame->type == FRAME_TYPE_FOR) {
             pc = get_int_operand();

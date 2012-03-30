@@ -28,6 +28,19 @@ public:
     }
 };
 
+void Compiler::dump_localvars() {
+    printf("-- dump_localvars --\n");
+    printf("Levels: %zd\n", this->blocks->size());
+    for (size_t level = 0; level < this->blocks->size(); ++level) {
+        SharedPtr<Block> block = this->blocks->at(level);
+        printf("[%zd] %d\n", level, block->type);
+        for (size_t i=0; i<block->vars.size(); i++) {
+            printf("    %s\n", block->vars.at(i)->c_str());
+        }
+    }
+    printf("--------------------\n");
+}
+
 /**
  * Count up the number of variables declared at this scope.
  */
@@ -122,7 +135,7 @@ int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closu
     DBG("FIND LOCAL VAR %d\n", 0);
     need_closure = false;
     int seen_funcdef = -1;
-    for (level = 0; level<this->blocks->size(); level++) {
+    for (level = 0; level<this->blocks->size(); ++level) {
         SharedPtr<Block> block = this->blocks->at(this->blocks->size()-1-level);
         if (block->type == BLOCK_TYPE_FUNCDEF && seen_funcdef == -1) {
             seen_funcdef = level;
@@ -932,7 +945,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         jump_if_false->operand.int_value = label2;
 
         BOOST_FOREACH(auto n, last_labels) {
-            *n = label2;
+            *n = label2 - 1;
         }
         last_labels.clear();
 
@@ -966,6 +979,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             int funcdef_level;
             int no = this->find_localvar(std::string(node->upcast<StrNode>()->str_value), level, need_closure, is_arg, funcdef_level);
             // dump_localvars();
+            // printf("-- %s, no: %d, level: %d\n", varname.c_str(), no, level);
             if (no<0) {
                 fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
                 this->error++;
@@ -1000,10 +1014,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                     push_op(tmp);
                 } else if (level == 0) {
                     DBG2("LOCAL\n");
-                    SharedPtr<OP> tmp = new OP;
-                    tmp->op_type = OP_GETLOCAL;
-                    tmp->operand.int_value = no;
-                    push_op(tmp);
+                    push_op(new OP(OP_GETLOCAL, no));
                 } else {
                     SharedPtr<OP> tmp = new OP;
                     DBG2("DYNAMIC\n");

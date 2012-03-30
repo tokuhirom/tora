@@ -154,6 +154,7 @@ public:
     void call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
 
     void dump_value(const SharedPtr<Value> & v);
+    void dump_pad();
 
 #include "vm.ops.inc.h"
 

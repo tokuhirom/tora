@@ -44,6 +44,14 @@ void Disasm::disasm(const SharedPtr<OPArray>& ops) {
             printf(" level: %d, no: %d", level, no);
             break;
         }
+        case OP_JUMP: {
+            printf("\t%d", op->operand.int_value);
+            break;
+        }
+        case OP_LAST: {
+            printf("\t%d", op->operand.int_value);
+            break;
+        }
         case OP_SETDYNAMIC: {
             int level = (op->operand.int_value >> 16) & 0x0000FFFF;
             int no    = op->operand.int_value & 0x0000ffff;
