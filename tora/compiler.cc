@@ -656,6 +656,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (this->dump_ops) {
             Disasm::disasm(funccomp.ops);
         }
+        this->error += funccomp.error;
 
         // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
