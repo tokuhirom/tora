@@ -69,3 +69,10 @@ SYNOPSIS
         return [200, [], ["OK"]];
     });
 
+LICENSE
+-------
+
+Copyright (C)2011 Tokuhiro Matsuno
+
+Licensed under the perl license.
+
