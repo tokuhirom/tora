@@ -1,11 +1,13 @@
 use Socket *;
 use HTTP::Parser *;
+use HTTP::Status *;
 
 class HTTP::Server::Simple {
     sub new($host, $port=80) {
         self.bless({host => $host, port => $port});
     }
-    sub run() {
+
+    sub run($app) {
         my $server = Socket.socket(AF_INET, SOCK_STREAM, 0);
         $server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1);
         $server.bind(Socket.sockaddr_in(${self}['port'], Socket.inet_aton(${self}['host'])));
@@ -25,9 +27,25 @@ class HTTP::Server::Simple {
                 } else {
                     # parsed.
                     say("[INFO] Parsed http request.");
+
+                    my $res = $app.($headers);
+
+                    my $code = $res[0];
+
                     my $content = $buf.substr($ret);
-                    $csock.write("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n" + $headers.tora());
+                    my $res_heads = $res[1];
+
+                    my $header = "HTTP/1.0 " + $code + " " + status_message($code) + "\r\n";
+                    for (my $i=0; $i<$res_heads.size(); $i+=2) {
+                        $header += $res_heads[$i] + " : " + $res_heads[$i+1] + "\r\n";
+                    }
+                    $header += "\r\n";
+                    $csock.write($header);
+                    for (my $part in $res[2]) {
+                        $csock.write($part);
+                    }
                     $csock.close();
+
                     last;
                 }
             }

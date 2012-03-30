@@ -47,6 +47,9 @@ String.lc()
 String.uc()
 String#replace(regexp|str, code)
 
+my $a=[];
+$a[100]; # => undef
+
 generate document
 
 Standard Libraries
