@@ -25,22 +25,22 @@ static Value* json_encode2(std::string & buf, Value *v) {
         break;
     }
     case VALUE_TYPE_STR: {
-        picojson::value x(v->upcast<StrValue>()->str_value);
+        picojson::value x(v->upcast<StrValue>()->str_value());
         buf += x.serialize();
         break;
     }
     case VALUE_TYPE_INT: {
-        picojson::value x((double)v->upcast<IntValue>()->int_value);
+        picojson::value x((double)v->upcast<IntValue>()->int_value());
         buf += x.serialize();
         break;
     }
     case VALUE_TYPE_DOUBLE: {
-        picojson::value x(v->upcast<DoubleValue>()->double_value);
+        picojson::value x(v->upcast<DoubleValue>()->double_value());
         buf += x.serialize();
         break;
     }
     case VALUE_TYPE_BOOL: {
-        buf += v->upcast<BoolValue>()->bool_value ? "true" : "false";
+        buf += v->upcast<BoolValue>()->bool_value() ? "true" : "false";
         break;
     }
     case VALUE_TYPE_UNDEF: {
@@ -87,15 +87,15 @@ static SharedPtr<Value> json_decode2(picojson::value & v) {
     } else if (v.is<picojson::array>()) {
         picojson::array & ary = v.get<picojson::array>();
         SharedPtr<ArrayValue> av = new ArrayValue();
-        for (auto iter: ary) {
-            av->push(json_decode2(iter));
+        for (auto iter = ary.begin(); iter != ary.end(); iter++) {
+            av->push_back(json_decode2(*iter));
         }
         return av;
     } else if (v.is<picojson::object>()) {
         picojson::object & obj = v.get<picojson::object>();
         SharedPtr<HashValue> hv = new HashValue();
-        for (auto iter: obj) {
-            hv->set(iter.first, json_decode2(iter.second));
+        for (auto iter = obj.begin(); iter != obj.end(); iter++) {
+            hv->set(iter->first, json_decode2(iter->second));
         }
         return hv;
     } else {
@@ -111,8 +111,8 @@ static SharedPtr<Value> json_decode2(picojson::value & v) {
 static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* json_v) {
     StrValue * json_sv = static_cast<StrValue*>(json_v);
     picojson::value v;
-    const char * in = json_sv->str_value.c_str();
-    std::string err = picojson::parse(v, in, in + json_sv->str_value.size());
+    const char * in = json_sv->str_value().c_str();
+    std::string err = picojson::parse(v, in, in + json_sv->str_value().size());
     if (!err.empty()) {
         throw new ExceptionValue(err);
     }
