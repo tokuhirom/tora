@@ -92,6 +92,7 @@ syntax
  * super()
  * signal handler
    * perl5's safe signals.
+ * 'a' x 3
 
 lambda
 ------

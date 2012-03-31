@@ -16,6 +16,11 @@ Contents:
    control
    operators
 
+
+   builtin_object
+
+   styleguide
+
 Indices and tables
 ==================
 
