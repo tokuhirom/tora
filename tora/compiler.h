@@ -108,15 +108,7 @@ public:
         block->vars.push_back(new std::string(name));
     }
     void dump_localvars();
-    void fail(const char *format, ...) {
-        fprintf(stderr, "Compilation failed:\n");
-        va_list ap;
-        va_start(ap, format);
-        vfprintf(stderr, format, ap);
-        va_end(ap);
-
-        error++;
-    }
+    void fail(const char *format, ...);
 
     void push_op(OP * op);
     void push_op(const SharedPtr<OP> & op) {

@@ -395,6 +395,19 @@ bool tora::Compiler::is_builtin(const std::string &s) {
     return false;
 }
 
+void tora::Compiler::fail(const char *format, ...) {
+    fprintf(stderr, "Compilation failed: ");
+
+    va_list ap;
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+
+    fprintf(stderr, " at %s line %d\n", filename_.c_str(), current_node->lineno);
+
+    error++;
+}
+
 void tora::Compiler::compile(const SharedPtr<Node> &node) {
     this->current_node.reset(node.get());
 
@@ -982,8 +995,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             // dump_localvars();
             // printf("-- %s, no: %d, level: %d\n", varname.c_str(), no, level);
             if (no<0) {
-                fprintf(stderr, "There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
-                this->error++;
+                this->fail("There is no variable named '%s'(NODE_GETVARIABLE)\n", node->upcast<StrNode>()->str_value.c_str());
                 return;
             }
 

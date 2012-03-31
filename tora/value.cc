@@ -247,6 +247,9 @@ ID Value::object_package_id() const {
         return SYMBOL_RANGE_ITERATOR_CLASS;
     case VALUE_TYPE_REFERENCE:
         return SYMBOL_REFERENCE_CLASS;
+    case VALUE_TYPE_TUPLE:
+        fprintf(stderr, "[BUG] You must not get a package name from tuple.\n");
+        abort();
     case VALUE_TYPE_SYMBOL:
         return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:

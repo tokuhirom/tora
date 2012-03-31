@@ -7,6 +7,10 @@
 
 using namespace tora;
 
+ObjectValue::ObjectValue(VM *v, ID pkgid, const SharedPtr<Value>& d) : Value(VALUE_TYPE_OBJECT) {
+    object_value_ = new ObjectImpl(v, v->find_package(pkgid), d);
+}
+
 ObjectValue::~ObjectValue() {
     delete object_value_;
 }
@@ -24,16 +28,20 @@ void ObjectValue::release() {
 }
 
 const char *ObjectValue::type_str() const {
-    return VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str();
+    return VAL().vm_->symbol_table->id2name(this->package_id()).c_str();
+}
+
+std::string ObjectValue::package_name() const {
+    return VAL().vm_->symbol_table->id2name(VAL().package_->id());
 }
 
 void ObjectValue::dump(int indent) {
     print_indent(indent);
-    printf("[dump] Object: %s(refcnt: %d)\n", VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str(), this->refcnt);
+    printf("[dump] Object: %s(refcnt: %d)\n", this->package_name().c_str(), this->refcnt);
 }
 
 SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
-    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    const SharedPtr<Package> & pkg = this->VAL().package_;
     auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("__setitem__"));
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
@@ -52,7 +60,7 @@ SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v)
                 return ret;
             } else {
                 // this is just a warnings?
-                fprintf(stderr, "%s::__setitem__ method requires 2 arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
+                fprintf(stderr, "%s::__setitem__ method requires 2 arguments. This is not allowed.\n", this->package_name().c_str());
                 return new ExceptionValue("HMM");
             }
 
@@ -88,7 +96,7 @@ SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v)
 }
 
 SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
-    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    const SharedPtr<Package> & pkg = this->VAL().package_;
     auto iter = pkg->find(SYMBOL___GET_ITEM__);
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
@@ -107,7 +115,7 @@ SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
                 return ret;
             } else {
                 // this is just a warnings?
-                fprintf(stderr, "%s::DESTROY method requires arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
+                fprintf(stderr, "%s::DESTROY method requires arguments. This is not allowed.\n", this->package_name().c_str());
                 return new ExceptionValue("HMM");
             }
 
@@ -143,7 +151,7 @@ SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
 
 // call DESTROY method if it's available.
 void ObjectValue::call_destroy() {
-    SharedPtr<Package> pkg = this->VAL().vm_->find_package(VAL().package_id_);
+    const SharedPtr<Package> & pkg = this->VAL().package_;
     auto iter = pkg->find(this->VAL().vm_->symbol_table->get_id("DESTROY"));
     if (iter != pkg->end()) {
         SharedPtr<Value>code_v = iter->second;
@@ -155,7 +163,7 @@ void ObjectValue::call_destroy() {
                 SharedPtr<Value> ret = code->callback()->func_vm1(VAL().vm_, this);
             } else {
                 // this is just a warnings?
-                throw new ExceptionValue("%s::DESTROY method requires arguments. This is not allowed.\n", this->VAL().vm_->symbol_table->id2name(VAL().package_id_).c_str());
+                throw new ExceptionValue("%s::DESTROY method requires arguments. This is not allowed.\n", this->package_name().c_str());
             }
             // this->VAL().vm_->frame_stack->pop_back();
         } else {

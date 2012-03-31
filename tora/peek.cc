@@ -43,7 +43,7 @@ void tora::peek(VM *vm, const Value * v) {
         }
         case VALUE_TYPE_ARRAY: {
             const ArrayValue* av = static_cast<const ArrayValue*>(v);
-            printf("  SIZE: %d\n", av->size());
+            printf("  SIZE: %zd\n", av->size());
             break;
         }
         case VALUE_TYPE_UNDEF:

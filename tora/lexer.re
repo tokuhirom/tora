@@ -182,6 +182,11 @@ std:
     "**" { return POW; }
     "*" { return MUL; }
     "%" { return MOD; }
+    "qr/" {
+        close_char = '/';
+        tora_open_string_literal();
+        goto regexp_literal;
+    }
     "qr{" {
         close_char = '}';
         tora_open_string_literal();

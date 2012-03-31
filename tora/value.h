@@ -52,6 +52,7 @@ class DoubleValue;
 class StrValue;
 class BoolValue;
 class RangeValue;
+class ObjectImpl;
 
 class CallbackFunction;
 class OPArray;
@@ -63,21 +64,6 @@ protected:
     SharedPtr<IntValue> right_;
     RangeImpl(IntValue* l, IntValue *r) : left_(l), right_(r) {
     }
-};
-
-class ObjectImpl {
-    friend class ObjectValue;
-protected:
-    VM * vm_;
-    ID package_id_;
-    bool destroyed_;
-    SharedPtr<Value> data_;
-    ObjectImpl(VM *vm, ID pkgid, const SharedPtr<Value>& d)
-        : vm_(vm)
-        , package_id_(pkgid)
-        , destroyed_(false)
-        , data_(d)
-        { }
 };
 
 class ExceptionImpl {
