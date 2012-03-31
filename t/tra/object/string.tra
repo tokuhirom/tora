@@ -16,5 +16,13 @@ note('split'); {
     is('aaaXbbbXccc'.split(/X/).tora(), qw(aaa bbb ccc).tora());
 };
 
+note("index"); {
+    is("foobar".index("foo"), 0);
+    is("foobar".index("oo"), 1);
+    is("foobar".index("r"), 5);
+    is("foobar".index("x"), -1);
+    is("foobar".index("r", 1), 5); # same as perl5.
+};
+
 done_testing;
 

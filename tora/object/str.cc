@@ -128,6 +128,26 @@ static SharedPtr<Value> str_split(VM *vm, Value *self, Value *re_v) {
     );
 }
 
+/**
+ * $string.index(Str pattern) : Int
+ * $string.index(Str pattern, Int $position) : Int
+ *
+ */
+static SharedPtr<Value> str_index(VM *vm, const std::vector<SharedPtr<Value>>& args) {
+    size_t pos = 0;
+    if (args.size() == 2) {
+        // nop
+    } else if (args.size() == 3) {
+        pos = args.at(2)->to_int();
+    } else {
+        throw new ArgumentExceptionValue("Arguments must be 1 or 2 for Str#index");
+    }
+
+    StrValue * v = args.at(0)->upcast<StrValue>();
+    size_t ret = v->str_value().find(args.at(1)->to_s()->str_value(), pos);
+    return new IntValue(ret == std::string::npos ? -1 : ret);
+}
+
 void tora::Init_Str(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
     pkg->add_method("length",  new CallbackFunction(str_length));
@@ -136,5 +156,6 @@ void tora::Init_Str(VM *vm) {
     pkg->add_method("substr",  new CallbackFunction(str_substr));
     pkg->add_method("scan",    new CallbackFunction(str_scan));
     pkg->add_method("split",   new CallbackFunction(str_split));
+    pkg->add_method("index",   new CallbackFunction(str_index));
 }
 

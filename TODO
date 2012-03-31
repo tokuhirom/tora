@@ -16,6 +16,9 @@ unpack()
 builtin objects
 ---------------
 
+String#index
+
+Array#grep
 Array#sort!()
 Array#any()
 Array#shuffle()

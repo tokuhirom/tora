@@ -32,11 +32,11 @@ class Test::Builder {
     }
     sub fail($msg=undef) {
         self.incr_counter();
-        my $buf = "not ok " + self.counter;
+        print("not ok " + self.counter);
         if ($msg!=undef) {
-            $buf += " " + $msg;
+            print(" - " + $msg);
         }
-        say($buf);
+        print("\n");
         self.incr_failed;
     }
     sub is($a, $b, $msg=undef) {
@@ -53,6 +53,7 @@ class Test::Builder {
             if $msg != undef {
                 print(" - " + $msg);
             }
+            print("\n");
             say(" # got:      " + $a);
             say(" # expected: " + $b);
             self.incr_failed;
