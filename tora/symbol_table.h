@@ -9,7 +9,7 @@
 namespace tora {
 
 class SymbolTable {
-    PRIM_DECL(SymbolTable);
+    PRIM_DECL();
 private:
     int counter;
     std::map<std::string, int> tbl;

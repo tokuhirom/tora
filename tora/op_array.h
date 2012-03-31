@@ -8,7 +8,7 @@
 namespace tora {
 
 class OPArray {
-    PRIM_DECL(OPArray)
+    PRIM_DECL()
 private:
     std::vector<op_type_t> op_types;
     std::vector<OP*> ops;

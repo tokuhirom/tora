@@ -13,7 +13,7 @@ class CallbackFunction;
 class VM;
 
 class Package {
-    PRIM_DECL(Package);
+    PRIM_DECL();
 private:
     VM *vm_;
     ID name_id;

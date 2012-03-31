@@ -10,7 +10,7 @@ namespace tora {
 class Value;
 
 class OP {
-    PRIM_DECL(OP);
+    PRIM_DECL();
 public:
     op_type_t op_type;
     union {

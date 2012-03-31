@@ -33,7 +33,7 @@ typedef enum {
 } frame_type_t;
 
 struct DynamicScopeData {
-    PRIM_DECL(DynamicScopeData);
+    PRIM_DECL();
     Package * package_;
     ID moniker_id_;
     SharedPtr<Value> value_;
@@ -48,7 +48,7 @@ public:
 
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame {
-    PRIM_DECL(LexicalVarsFrame);
+    PRIM_DECL();
 protected:
     VM * vm_;
     std::vector<SharedPtr<Value>> vars;

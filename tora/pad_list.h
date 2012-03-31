@@ -12,7 +12,7 @@ class Value;
 
 class PadList {
 private:
-    PRIM_DECL(PadList);
+    PRIM_DECL();
     std::vector<SharedPtr<Value>> pad_;
     SharedPtr<PadList> next_;
 public:

@@ -14,7 +14,7 @@ class Package;
 class VM;
 
 class PackageMap {
-    PRIM_DECL(PackageMap)
+    PRIM_DECL()
     boost::unordered_map<ID, SharedPtr<Package>> data;
 public:
     typedef boost::unordered_map<ID, SharedPtr<Package>>::iterator iterator;
