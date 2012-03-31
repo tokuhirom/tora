@@ -41,7 +41,7 @@ class HTTP::Server::Simple {
                     }
                     $header += "\r\n";
                     $csock.write($header);
-                    for (my $part in $res[2]) {
+                    for $res[2] -> $part {
                         $csock.write($part);
                     }
                     $csock.close();
