@@ -1256,7 +1256,16 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         // store variables
         if (node->upcast<ForEachNode>()->vars()) {
-            this->set_lvalue(node->upcast<ForEachNode>()->vars());
+            SharedPtr<Node> n;
+            if (node->upcast<ForEachNode>()->vars()->size() == 1) {
+                n = node->upcast<ForEachNode>()->vars()->at(0);
+            } else {
+                n = node->upcast<ForEachNode>()->vars();
+                n->type = NODE_TUPLE;
+            }
+            SharedPtr<ListNode> nl = new ListNode(NODE_MY);
+            nl->push_back(n);
+            this->set_lvalue(nl);
         } else {
             SharedPtr<ListNode> nl = new ListNode(NODE_MY);
             nl->push_back(new StrNode(NODE_GETVARIABLE, "$_"));

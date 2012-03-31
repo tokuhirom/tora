@@ -23,7 +23,7 @@ is($a[3], 'y');
 is($a[4], 'z');
 
 my $p = [];
-for (my $e in opendir('t/dat/dir')) {
+for opendir('t/dat/dir') -> $e {
     $p.push($e);
 }
 is($p.sort().tora(), '[".","..","x","y","z"]');

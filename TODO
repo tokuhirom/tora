@@ -50,6 +50,8 @@ String#replace(regexp|str, code)
 my $a=[];
 $a[100]; # => undef
 
+Fcntl.flock()
+
 generate document
 
 Standard Libraries
@@ -87,8 +89,6 @@ syntax
  * localize STDOUT
  * local Foo::method = sub { };
  * /xxx/x
- * /xxx/s
- * /xxx/m
  * super()
  * signal handler
    * perl5's safe signals.
@@ -228,3 +228,5 @@ String#substr(n, m)
   * Bytes class.
 system()
 
+ * /xxx/s
+ * /xxx/m

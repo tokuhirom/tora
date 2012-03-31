@@ -141,7 +141,7 @@ statement(A) ::= expression(B) WHILE expression(C) SEMICOLON. {
     A = new BinaryNode(NODE_WHILE, C, B);
 }
 statement(A) ::= expression(B) FOR expression(C) SEMICOLON. {
-    A = new ForEachNode(NULL, C, B);
+    A = new ForEachNode(C, NULL, B);
 }
 statement(A) ::= SEMICOLON. {
     A = new Node(NODE_VOID);
@@ -154,11 +154,11 @@ statement(A) ::= WHILE L_PAREN expression(B) R_PAREN maybe_block(C). {
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN maybe_block(E). {
     A = new ForNode(B, C, D, E);
 }
-statement(A) ::= FOR L_PAREN expression(B) IN expression(C) R_PAREN maybe_block(D). {
+statement(A) ::= FOR expression(B) LAMBDA lambda_parameter_list(C) maybe_block(D). {
     A = new ForEachNode(B, C, D);
 }
-statement(A) ::= FOR L_PAREN expression(B) R_PAREN maybe_block(C). {
-    A = new ForEachNode(NULL, B, C);
+statement(A) ::= FOR expression(B) LAMBDA maybe_block(C). {
+    A = new ForEachNode(B, NULL, C);
 }
 statement(A) ::= sub_stmt(B).   { A = B; }
 statement(A) ::= block(B).   { A = B; }

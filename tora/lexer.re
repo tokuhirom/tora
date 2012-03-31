@@ -289,7 +289,6 @@ std:
     "if" { return IF; }
     "unless" { return UNLESS; }
     "undef" { return UNDEF; }
-    "in" { return IN; }
     "class" { divable = false; return CLASS; }
     "<" { divable = false; return GT; }
     ">" { divable = false; return LT; }

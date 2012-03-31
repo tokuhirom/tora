@@ -171,13 +171,13 @@ public:
 
 class ForEachNode: public Node {
 public:
-    SharedPtr<Node> vars() { return this->list->at(0); }
-    SharedPtr<Node> source() { return this->list->at(1); }
+    SharedPtr<Node> source() { return this->list->at(0); }
+    SharedPtr<Node> vars() { return this->list->at(1); }
     SharedPtr<Node> block() { return this->list->at(2); }
-    ForEachNode(SharedPtr<Node> i, SharedPtr<Node> s, SharedPtr<Node> b): Node() {
+    ForEachNode(SharedPtr<Node> src_, SharedPtr<Node> vars_, SharedPtr<Node> b): Node() {
         this->type = NODE_FOREACH;
-        this->list->push_back(i);
-        this->list->push_back(s);
+        this->list->push_back(src_);
+        this->list->push_back(vars_);
         this->list->push_back(b);
     }
 };

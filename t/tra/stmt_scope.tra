@@ -1,12 +1,12 @@
 use Test::More *;
 
-for (my $i in 1..1) {
+for 1..1 -> $i {
     (1,2);
     my $n = rand();
     is(typeof($n), 'Double');
 }
 
-for (my ($k, $v) in {"A" => "B"}) {
+for {"A" => "B"} -> $k, $v {
     my $n = rand();
     is(typeof($n), 'Double');
 }

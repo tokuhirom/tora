@@ -33,9 +33,15 @@ C style for statement::
 
 for-each style for statement::
 
-    for (my $v in [1,2,3]) {
+    for [1,2,3] -> $k {
         ...
     }
+
+    for [1,2,3] -> {
+        p($_);
+    }
+
+If there is no argument, variables are copied to $_.
 
 while
 -----

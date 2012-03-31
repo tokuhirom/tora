@@ -1,6 +1,6 @@
 use Test::More *;
 
-for (my $i in 1..100) {
+for 1..100 -> $i {
     my $n = rand();
     is(typeof($n), 'Double');
     ok(0.0 <= $n);
@@ -8,7 +8,7 @@ for (my $i in 1..100) {
 }
 
 # rand(int)
-for (my $i in 1..100) {
+for 1..100 -> $i {
     my $n = rand(100);
     is(typeof($n), 'Int');
     ok(0 <= $n);
@@ -16,7 +16,7 @@ for (my $i in 1..100) {
 }
 
 # rand(double)
-for (my $i in 1..100) {
+for 1..100 -> $i {
     my $n = rand(100.0);
     is(typeof($n), 'Double');
     ok(0.0 <= $n);
