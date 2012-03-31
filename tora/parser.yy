@@ -148,7 +148,7 @@ statement(A) ::= SEMICOLON. {
 }
 statement(A) ::= jump_statement(B). { A = B; }
 statement(A) ::= if_statement(B).   { A = B; }
-statement(A) ::= WHILE L_PAREN expression(B) R_PAREN maybe_block(C). {
+statement(A) ::= WHILE expression(B) maybe_block(C). {
     A = new BinaryNode(NODE_WHILE, B, C);
 }
 statement(A) ::= FOR L_PAREN expression(B) SEMICOLON expression(C) SEMICOLON expression(D) R_PAREN maybe_block(E). {
