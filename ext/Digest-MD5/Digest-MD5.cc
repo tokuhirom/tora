@@ -24,7 +24,7 @@ static SharedPtr<Value> Digest_MD5_md5_hex(VM *vm, Value *str) {
     md5_state_t pms;
     md5_byte_t digest[16];
     md5_init(&pms);
-    md5_append(&pms, (const md5_byte_t*)str->upcast<StrValue>()->str_value.c_str(), str->upcast<StrValue>()->str_value.size());
+    md5_append(&pms, (const md5_byte_t*)str->upcast<StrValue>()->str_value().c_str(), str->upcast<StrValue>()->str_value().size());
     md5_finish(&pms, digest);
     std::string ret;
     for (int i=0; i<16; i++) {

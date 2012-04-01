@@ -2,7 +2,7 @@ import os
 
 env = Environment(
     CCFLAGS=[
-        '-I../../src/',
+        '-I../../tora/',
         '-I../../vendor/boost_1_49_0/',
         '-g',
         '-DNDEBUG'
@@ -36,5 +36,5 @@ if ARGUMENTS.get('ndebug', 1) != '0':
 shlib = env.SharedLibrary("lib/URI/Escape.so", ['URI-Escape.cc'], SHLIBPREFIX='')
 Default(shlib)
 
-env.Command('test', [shlib], '../../tora -I lib -I ../../lib/ t/01-uri.tra')
+env.Command('test', [shlib], '../../bin/tora -I lib -I ../../lib/ t/01-uri.tra')
 

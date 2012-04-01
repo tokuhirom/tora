@@ -4,7 +4,7 @@
 #include <cassert>
 #include <stdio.h>
 
-#define PRIM_DECL(klass) \
+#define PRIM_DECL() \
 public: \
     int refcnt; \
     void release() { \
@@ -17,26 +17,5 @@ public: \
         assert(refcnt >= 0); \
         ++refcnt; \
     }
-
-class Prim {
-protected:
-    Prim(): refcnt(0) { }
-    int refcnt;
-    Prim(const Prim&) = delete;
-    Prim& operator=(const Prim&) = delete;
-public:
-    virtual ~Prim() { }
-    void release() {
-        // assert(refcnt > 0);
-        --refcnt;
-        if (refcnt == 0) {
-            delete this;
-        }
-    }
-    void retain() {
-        assert(refcnt >= 0);
-        ++refcnt;
-    }
-};
 
 #endif // TORA_PRIM_H_

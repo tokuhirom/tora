@@ -20,8 +20,8 @@ ID SymbolTable::get_id(const std::string &str) {
 }
 
 void SymbolTable::dump() const {
-    for (auto iter: tbl) {
-        std::cout << iter.first << " " << iter.second << std::endl;
+    for (auto iter = tbl.begin(); iter != tbl.end(); iter++) {
+        std::cout << iter->first << " " << iter->second << std::endl;
     }
 }
 

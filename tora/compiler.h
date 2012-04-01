@@ -26,7 +26,8 @@ enum block_type_t {
     BLOCK_TYPE_CLASS,
 };
 
-class Block : public Prim {
+class Block {
+    PRIM_DECL()
 public:
     block_type_t type;
     std::vector<std::string*> vars;

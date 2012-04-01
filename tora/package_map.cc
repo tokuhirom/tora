@@ -26,8 +26,8 @@ void PackageMap::set(SharedPtr<Package> &pkg) {
 
 void PackageMap::dump(VM *vm) {
     printf("[dump] PackageMap(%zd)\n", data.size());
-    for (auto iter : data) {
-        iter.second->dump(vm, 1);
+    for (auto iter = data.begin(); iter != data.end(); iter++) {
+        iter->second->dump(vm, 1);
     }
 }
 

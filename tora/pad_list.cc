@@ -20,8 +20,8 @@ PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
 static std::string dump_array(VM *vm, PadList *n) {
     Inspector ins(vm);
     std::string o = "[";
-    for (auto iter: n->pad_) {
-        o += ins.inspect(iter);
+    for (auto iter = n->pad_.begin(); iter != n->pad_.end(); iter++) {
+        o += ins.inspect(*iter);
     }
     o += "]";
     return o;

@@ -27,7 +27,7 @@ struct ParserState {
 };
 
 class Scanner {
-    PRIM_DECL(Scanner)
+    PRIM_DECL()
 private:
     // iostream sucks. very slow.
     std::istream *ifs;

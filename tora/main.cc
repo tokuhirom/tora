@@ -156,8 +156,8 @@ int main(int argc, char **argv) {
     tora::VM vm(compiler.ops, symbol_table, dump_ops);
     vm.init_globals(argc-optind, argv+optind);
     vm.register_standard_methods();
-    for (auto iter: libs) {
-        vm.add_library_path(iter);
+    for (auto iter = libs.begin(); iter != libs.end(); iter++) {
+        vm.add_library_path(*iter);
     }
     vm.add_library_path(std::string(TORA_PREFIX) + "/lib/tora-" + TORA_VERSION_STR);
     if (dump_ops) {

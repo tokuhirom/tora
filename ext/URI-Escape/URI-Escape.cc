@@ -1,19 +1,22 @@
 #include "nanouri.h"
-#include "tora-ext.h"
-
-extern "C" {
+#include "tora.h"
+#include <vm.h>
+#include <value.h>
+#include <package.h>
 
 using namespace tora;
 
 static SharedPtr<Value> uri_escape(VM *vm, Value *val) {
     SharedPtr<StrValue> str = val->to_s();
-    return new StrValue(nu_escape_uri(str->str_value));
+    return new StrValue(nu_escape_uri(str->str_value()));
 }
 
 static SharedPtr<Value> uri_unescape(VM *vm, Value *val) {
     SharedPtr<StrValue> str = val->to_s();
-    return new StrValue(nu_unescape_uri(str->str_value));
+    return new StrValue(nu_unescape_uri(str->str_value()));
 }
+
+extern "C" {
 
 void Init_URI_Escape(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package("URI::Escape");

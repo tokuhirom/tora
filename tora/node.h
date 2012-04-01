@@ -29,7 +29,7 @@ class ListNode;
 class TryNode;
 
 class Node {
-    PRIM_DECL(Node);
+    PRIM_DECL();
 public:
     node_type_t type;
     std::vector<SharedPtr<Node>> *list;

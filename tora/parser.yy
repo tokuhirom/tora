@@ -109,6 +109,13 @@ using namespace tora;
 root ::= translation_unit(A). {
     state->root_node = new NodeNode(NODE_ROOT, A);
 }
+root ::= translation_unit(A) expression(B). {
+    state->root_node = new NodeNode(NODE_ROOT,
+        new BinaryNode(NODE_STMTS, A, B));
+}
+root ::= expression(A). {
+    state->root_node = new NodeNode(NODE_ROOT, A);
+}
 root ::= . {
     state->root_node = new NodeNode(NODE_ROOT, new Node(NODE_VOID));
 }
@@ -303,12 +310,19 @@ block(A) ::= L_BRACE expression(B) R_BRACE. {
     A = new NodeNode(NODE_BLOCK, ln);
 }
 
-statement_list(A) ::= statement(B). {
+statement_list(A) ::= statement_list_inner(B).  {
+    A = B;
+}
+statement_list(A) ::= statement_list_inner(B) expression(C).  {
+    B->upcast<ListNode>()->push_back(C);
+    A = B;
+}
+statement_list_inner(A) ::= statement(B). {
     ListNode* ln = new ListNode(NODE_STMTS_LIST);
     ln->push_back(B);
     A = ln;
 }
-statement_list(A) ::= statement_list(B) statement(C).  {
+statement_list_inner(A) ::= statement_list_inner(B) statement(C). {
     B->upcast<ListNode>()->push_back(C);
     A = B;
 }
