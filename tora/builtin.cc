@@ -15,6 +15,7 @@
 #include "value.h"
 #include "object.h"
 #include "inspector.h"
+#include "printf.h"
 
 using namespace tora;
 
@@ -299,6 +300,15 @@ static SharedPtr<Value> builtin_sin(VM *vm, Value *v) {
     return new DoubleValue(sin(v->to_double()));
 }
 
+static SharedPtr<Value> builtin_printf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
+    tora_printf(args);
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> builtin_sprintf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
+    return new StrValue(tora_sprintf(args));
+}
+
 void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
     vm->add_builtin_function("exit", builtin_exit);
@@ -317,6 +327,8 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("getpid",   builtin_getpid);
     vm->add_builtin_function("getppid",   builtin_getppid);
     vm->add_builtin_function("system",   builtin_system);
+    vm->add_builtin_function("printf",   builtin_printf);
+    vm->add_builtin_function("sprintf",   builtin_sprintf);
     
     // numeric functions
     vm->add_builtin_function("sqrt",   builtin_sqrt);

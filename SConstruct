@@ -84,6 +84,7 @@ libfiles = [
         symbol_table.cc package_map.cc frame.cc package.cc operator.cc
         builtin.cc
         object.cc pad_list.cc
+        printf.cc
 
         ops.gen.cc token.gen.cc lexer.gen.cc vm.gen.cc nodes.gen.cc symbols.gen.cc
 
