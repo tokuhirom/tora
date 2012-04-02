@@ -16,6 +16,7 @@ sub write_file {
     unlink $fname if -f $fname;
     open my $fh, '>', $fname;
     print $fh $body;
+    close $fh;
     chmod 0444, $fname;
 }
 
@@ -40,6 +41,7 @@ sub parse {
         }
         $lineno++;
     }
+    close $fh;
     return \@ret;
 }
 
