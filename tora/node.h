@@ -46,7 +46,7 @@ public:
      * ~Node is not a virtual for performance reason.
      * Do not override it.
      */
-    ~Node() { delete list; }
+    virtual ~Node() { delete list; }
     const char *type_name_str() const {
         return node_type2name[this->type];
     }
@@ -117,8 +117,7 @@ public:
     bool is_bare;
     SharedPtr<Node>name() { return this->list->at(0); }
     SharedPtr<ListNode> args() { return this->list->at(1)->upcast<ListNode>(); }
-    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_, bool bare=false) {
-        this->type = NODE_FUNCALL;
+    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_, bool bare=false) : Node(NODE_FUNCALL) {
         this->list->push_back(name_);
         this->list->push_back(args_);
         is_bare = bare;
@@ -133,8 +132,7 @@ public:
     }
     SharedPtr<ListNode> params() { return this->list->at(1)->upcast<ListNode>(); }
     SharedPtr<Node>block() { return this->list->at(2); }
-    FuncdefNode(SharedPtr<Node> n, SharedPtr<ListNode> p, SharedPtr<Node> b):Node() {
-        this->type = NODE_FUNCDEF;
+    FuncdefNode(SharedPtr<Node> n, SharedPtr<ListNode> p, SharedPtr<Node> b):Node(NODE_FUNCDEF) {
         this->list->push_back(n);
         this->list->push_back(p);
         this->list->push_back(b);
@@ -156,8 +154,7 @@ public:
 
 class ForNode: public Node {
 public:
-    ForNode(SharedPtr<Node>i, SharedPtr<Node>c, SharedPtr<Node>p, SharedPtr<Node>b): Node() {
-        this->type = NODE_FOR;
+    ForNode(SharedPtr<Node>i, SharedPtr<Node>c, SharedPtr<Node>p, SharedPtr<Node>b): Node(NODE_FOR) {
         this->list->push_back(i);
         this->list->push_back(c);
         this->list->push_back(p);
@@ -174,8 +171,7 @@ public:
     SharedPtr<Node> source() { return this->list->at(0); }
     SharedPtr<Node> vars() { return this->list->at(1); }
     SharedPtr<Node> block() { return this->list->at(2); }
-    ForEachNode(SharedPtr<Node> src_, SharedPtr<Node> vars_, SharedPtr<Node> b): Node() {
-        this->type = NODE_FOREACH;
+    ForEachNode(SharedPtr<Node> src_, SharedPtr<Node> vars_, SharedPtr<Node> b): Node(NODE_FOREACH) {
         this->list->push_back(src_);
         this->list->push_back(vars_);
         this->list->push_back(b);
@@ -187,8 +183,7 @@ public:
     SharedPtr<Node> cond() { return this->list->at(0); }
     SharedPtr<Node> if_body() { return this->list->at(1); }
     SharedPtr<Node> else_body() { return this->list->at(2); }
-    IfNode(node_type_t t, SharedPtr<Node> c, SharedPtr<Node> i, SharedPtr<Node> e) : Node() {
-        type = t;
+    IfNode(node_type_t t, SharedPtr<Node> c, SharedPtr<Node> i, SharedPtr<Node> e) : Node(t) {
         this->list->push_back(c);
         this->list->push_back(i);
         this->list->push_back(e);
@@ -197,8 +192,7 @@ public:
 
 class NodeNode: public Node {
 public:
-    NodeNode(node_type_t t,SharedPtr<Node>n) : Node() {
-        type = t;
+    NodeNode(node_type_t t,SharedPtr<Node>n) : Node(t) {
         this->list->push_back(n);
     }
     SharedPtr<Node> node() { return this->list->at(0); }
@@ -210,8 +204,7 @@ public:
     SharedPtr<Node>method() { return this->list->at(1); }
     SharedPtr<ListNode> args() { return this->list->at(2)->upcast<ListNode>(); }
 
-    MethodCallNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<ListNode> a) : Node() {
-        type = NODE_METHOD_CALL;
+    MethodCallNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<ListNode> a) : Node(NODE_METHOD_CALL) {
         this->list->push_back(o);
         this->list->push_back(m);
         this->list->push_back(a);
@@ -225,8 +218,7 @@ public:
     SharedPtr<ListNode> roles()  { return this->list->at(2)->upcast<ListNode>(); }
     SharedPtr<Node>     block()  { return this->list->at(3); }
 
-    ClassNode(SharedPtr<Node> k, SharedPtr<Node>p, SharedPtr<ListNode>r, SharedPtr<Node> b) : Node() {
-        type = NODE_CLASS;
+    ClassNode(SharedPtr<Node> k, SharedPtr<Node>p, SharedPtr<ListNode>r, SharedPtr<Node> b) : Node(NODE_CLASS) {
         this->list->push_back(k);
         this->list->push_back(p);
         this->list->push_back(r);
@@ -239,8 +231,7 @@ class BinaryNode: public Node {
 public:
     SharedPtr<Node>left () const { return this->list->at(0); }
     SharedPtr<Node>right() const { return this->list->at(1); }
-    BinaryNode(node_type_t t, SharedPtr<Node> l, SharedPtr<Node> r) {
-        type = t;
+    BinaryNode(node_type_t t, SharedPtr<Node> l, SharedPtr<Node> r) : Node(t) {
         this->list->push_back(l);
         this->list->push_back(r);
     }
