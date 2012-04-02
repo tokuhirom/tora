@@ -1,5 +1,6 @@
 import os
 import json
+from glob import glob
 
 conf = json.loads(open('../../config.json').read())
 
@@ -17,10 +18,12 @@ libs = ['tora', 're2']
 if os.name == 'nt':
     libs += ['ws2_32', 'pthread']
 
-shlib = env.SharedLibrary("lib/HTTP/Parser" + conf['TORA_EXTSUFFIX'], ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+shlib = env.SharedLibrary("lib/Socket" + env['SHLIBSUFFIX'], ['socket.cc'], LIBPATH=['../..'], LIBS=libs)
 Default(shlib)
 
-env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
+env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+
+PREFIX=conf['PREFIX']
 
 installs = []
 for x in os.listdir('lib/'):
@@ -29,3 +32,4 @@ for x in os.listdir('lib/'):
     installs += [env.InstallAs(dst, src)]
 
 env.Alias('install', [shlib, installs])
+

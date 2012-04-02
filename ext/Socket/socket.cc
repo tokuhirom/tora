@@ -1,10 +1,10 @@
-#include "../object.h"
-#include "../vm.h"
-#include "../value/object.h"
-#include "../value/array.h"
-#include "../value/tuple.h"
-#include "../value/bytes.h"
-#include "../package.h"
+#include "object.h"
+#include "vm.h"
+#include "value/object.h"
+#include "value/array.h"
+#include "value/tuple.h"
+#include "value/bytes.h"
+#include "package.h"
 
 #include <sys/types.h>
 #ifdef _WIN32
@@ -311,7 +311,9 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
     }
 }
 
-void tora::Init_Socket(VM* vm) {
+extern "C" {
+
+void Init_Socket(VM* vm) {
     // socket, bind, listen, accept, send, recv
     // "accept", "bind", "connect", "getpeername", "getsockname", "getsockopt", "listen", "recv", "send", "setsockopt",
     // "shutdown", "socket", "socketpair"
@@ -344,3 +346,4 @@ void tora::Init_Socket(VM* vm) {
     }
 }
 
+}

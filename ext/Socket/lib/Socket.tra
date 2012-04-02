@@ -1,3 +1,7 @@
+use XSLoader;
+
+XSLoader.load("Socket");
+
 sub AF_INET     () { return 2; }
 sub SOCK_STREAM () { return 1; }
 sub SO_REUSEADDR () { return 2; }

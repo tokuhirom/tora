@@ -24,7 +24,6 @@ void Init_File(VM *vm);
 void Init_Internals(VM *vm);
 void Init_MetaClass(VM *vm);
 void Init_Object(VM *vm);
-void Init_Socket(VM *vm);
 void Init_Stat(VM *vm);
 void Init_Str(VM *vm);
 void Init_Symbol(VM *vm);
