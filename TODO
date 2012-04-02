@@ -37,7 +37,6 @@ open($fname, $mode, $encoding)
 file($fname).open($mode="rb", $encoding="utf-8")
 File#write()
 File#read(n)
-File#sync()
 
 Bytes#decode() / with icu?
 
@@ -233,3 +232,4 @@ File#seek()
 File#rewind()
 Dir.mkdir
 Dir.rmdir
+File#sync()
