@@ -227,7 +227,7 @@ with open('lib/Config.tra', 'w') as f:
     f.write("    $Config;\n")
     f.write("}\n")
 
-libtora = env.Library('lib/libtora.a', [
+libtora = env.Library('tora', [
     libfiles,
     libre2
 ])

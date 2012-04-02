@@ -14,7 +14,11 @@ env = Environment(
     tools=conf['TOOLS'],
 )
 
-shlib = env.SharedLibrary("lib/JSON" + conf['TORA_EXTSUFFIX'], ['json.cc'])
+libs = ['tora', 're2']
+if os.name == 'nt':
+    libs += ['ws2_32', 'pthread']
+
+shlib = env.SharedLibrary("lib/JSON" + conf['TORA_EXTSUFFIX'], ['json.cc'], LIBPATH=['../..'], LIBS=libs)
 Default(shlib)
 
 env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
