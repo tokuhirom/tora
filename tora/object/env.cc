@@ -4,6 +4,17 @@
 #include "../vm.h"
 #include "../package.h"
 
+#ifdef _WIN32
+#include <windows.h>
+static void unsetenv(const char* name) {
+	SetEnvironmentVariable(name, NULL);
+}
+
+static void setenv(const char* name, const char* value, int /* overwrite */) {
+	SetEnvironmentVariable(name, value);
+}
+#endif
+
 using namespace tora;
 
 /**

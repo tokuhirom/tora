@@ -5,6 +5,12 @@
 #include <map>
 #include <set>
 #include <stdarg.h>
+#include <stdio.h>
+
+#if (defined(__MINGW32__) || defined(__MINGW64__)) && (__GNUC__ == 4)
+// workaround a mingw bug, http://sourceforge.net/tracker/index.php?func=detail&aid=2373234&group_id=2435&atid=102435
+int swprintf (wchar_t *, size_t, const wchar_t *, ...);
+#endif
 
 #include "tora.h"
 #include "op.h"

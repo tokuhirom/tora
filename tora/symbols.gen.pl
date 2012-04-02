@@ -38,6 +38,7 @@ my $dat = [
 ];
 
 open my $hfh, '>', 'tora/symbols.gen.h';
+binmode $hfh;
 print $hfh render_mt(<<'...', $dat);
 #ifndef TORA_SYMBOLS_GEN_H_
 #define TORA_SYMBOLS_GEN_H_
@@ -57,6 +58,7 @@ close $hfh;
 
 
 open my $cfh, '>', 'tora/symbols.gen.cc';
+binmode $cfh;
 print $cfh render_mt(<<'...', $dat);
 #include "symbol_table.h"
 

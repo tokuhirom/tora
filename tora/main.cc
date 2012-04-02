@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <wchar.h>
 #include <iostream>
 #include <istream>
 #include <fstream>

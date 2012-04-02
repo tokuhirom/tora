@@ -36,12 +36,31 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/errno.h>
 // #include <random>
 
 #include <boost/random.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#ifdef _WIN32
+#include <windows.h>
+#define dlopen(x,y) (void*)LoadLibrary(x)
+#define dlsym(x,y) (void*)GetProcAddress((HMODULE)x,y)
+#define dlclose(x) FreeLibrary((HMODULE)x)
+const char* dlerror() {
+    static char szMsgBuf[256];
+    FormatMessage(
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            GetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            szMsgBuf,
+            sizeof szMsgBuf,
+            NULL);
+    return szMsgBuf;
+}
+#else
 #include <dlfcn.h>
+#endif
 
 using namespace tora;
 
@@ -215,7 +234,7 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     if (ifs.is_open()) {
         return eval_foo(vm, &ifs, vm->package_name(), fname->str_value());
     } else {
-        throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + strerror(errno));
+        throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + get_strerror(get_errno()));
     }
 }
 
@@ -259,7 +278,7 @@ SharedPtr<Value> VM::require(Value * v) {
                 return ret;
             } else {
                 required->set_item(new StrValue(s), UndefValue::instance());
-                throw new ExceptionValue(realfilename + " : " + strerror(errno));
+                throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
             }
         }
     }
@@ -483,7 +502,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 } else if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()));
+                    fprintf(stderr, "%s\n", get_strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()).c_str());
                 } else {
                     fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
                 }

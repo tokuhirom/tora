@@ -33,10 +33,10 @@ public:
         this_type(rhs).swap(*this);
         return *this;
     }
+#ifdef move
     SharedPtr(SharedPtr && rhs): ptr( rhs.ptr ) {
         rhs.ptr = 0;
     }
-#ifdef move
     SharedPtr & operator=(SharedPtr && rhs) {
         this_type(std::move(rhs)).swap(*this);
         return *this;

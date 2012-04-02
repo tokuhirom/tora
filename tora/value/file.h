@@ -44,7 +44,7 @@ public:
             return new StrValue(s);
         } else {
             // err?
-            throw new ErrnoExceptionValue(errno);
+            throw new ErrnoExceptionValue(tora::get_errno());
         }
     }
 };

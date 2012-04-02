@@ -22,23 +22,55 @@ AddOption('--prefix',
     help='installation prefix'
 )
 
-env = Environment(
-    LIBS=['re2', 'pthread', 'dl'],
-    LIBPATH=['./'],
-    CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g',
-        # '-DPERLISH_CLOSURE'
-    ],
-    PREFIX=GetOption('prefix')
-)
+tools = ['default']
+if os.name == 'nt':
+    tools = ['mingw']
+if os.name == 'nt':
+    env = Environment(
+        ENV={'PATH': os.environ['PATH']},
+        LIBS=['re2', 'pthread', 'ws2_32'],
+        LIBPATH=['./'],
+        CXXFLAGS=['-std=c++0x'],
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-march=native', '-g',
+            # '-DPERLISH_CLOSURE'
+        ],
+        PREFIX=GetOption('prefix'),
+        tools=tools
+    )
+    re2_env = Environment(
+        ENV={'PATH': os.environ['PATH']},
+        CCFLAGS=['-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
+        LIBS=['pthread'],
+        tools=tools
+    )
+else:
+    env = Environment(
+        LIBS=['re2', 'pthread', 'dl'],
+        LIBPATH=['./'],
+        CXXFLAGS=['-std=c++0x'],
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g',
+            # '-DPERLISH_CLOSURE'
+        ],
+        PREFIX=GetOption('prefix'),
+        tools=tools
+    )
+    re2_env = Environment(
+        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
+        LIBS=['pthread'],
+        tools=tools
+    )
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
-print 'PREFIX: ' + env['PREFIX']
-re2_env = Environment(
-    CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
-    LIBS=['pthread'],
-)
 
-if os.uname()[0]=='Darwin':
+exe_suffix = os.name == 'nt' and '.exe' or ''
+lemon = os.name == 'nt' and '.\\tools\\lemon\\lemon.exe' or './tools/lemon/lemon'
+
+if os.name == 'nt':
+    #re2_env.Replace(CXX='g++')
+    #env.Replace(CXX='g++')
+    env.Append(
+        LINKFLAGS=['-Wl,-E'],
+    )
+elif os.uname()[0]=='Darwin':
     re2_env.Replace(CXX='clang++', CC='clang')
     env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
@@ -110,7 +142,7 @@ libfiles = [
 
 programs = ['bin/tora']
 for src in glob("tests/test_*.cc"):
-    programs.append(env.Program(src.rstrip(".cc") + '.t', [
+    programs.append(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
         libfiles,
         src,
     ]))
@@ -140,12 +172,13 @@ env.Command('docs', ['bin/tora', Glob("tora/object/*.cc"), Glob("docs/source/*")
 
 ########
 # main programs
+
 env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h');
 env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl');
 env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc');
-env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl > tora/vm.gen.cc');
+env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl');
 env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl');
-t = env.Command(['tora/parser.h', 'tora/parser.cc'], ['tools/lemon/lemon', 'tora/parser.yy', 'tora/lempar.c'], './tools/lemon/lemon tora/parser.yy');
+t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy');
 Clean(t, 'tora/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
@@ -205,7 +238,7 @@ env.Program('hoge', [
 # lemon
 lemon_env = Environment()
 lemon_env.Append(CCFLAGS=['-O2'])
-lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
+lemon_env.Program(lemon, ['tools/lemon/lemon.c']);
 
 
 # ----------------------------------------------------------------------

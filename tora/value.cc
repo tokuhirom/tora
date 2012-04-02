@@ -9,7 +9,6 @@
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>
-#include <errno.h>
 
 using namespace tora;
 
@@ -137,18 +136,18 @@ int Value::to_int() const {
         }
     } else if (value_type == VALUE_TYPE_STR) {
         const StrValue *s = static_cast<const StrValue*>(this);
-        errno = 0;
+        set_errno(0);
         char *endptr = (char*)(s->str_value().c_str()+s->str_value().size());
         long ret = strtol(s->str_value().c_str(), &endptr, 10);
-        if (errno == 0) {
+        if (get_errno() == 0) {
             return ret;
-        } else if (errno == EINVAL) {
+        } else if (get_errno() == EINVAL) {
             throw new ExceptionValue("String contains non numeric character: %s", s->str_value().c_str());
-        } else if (errno == ERANGE) {
+        } else if (get_errno() == ERANGE) {
             // try to the bigint?
             TODO();
         } else {
-            throw new ErrnoExceptionValue(errno);
+            throw new ErrnoExceptionValue(get_errno());
         }
     } else if (value_type == VALUE_TYPE_SYMBOL) {
         fprintf(stderr, "[BUG] DO NOT CALL to_int() method in symbol value\n");
