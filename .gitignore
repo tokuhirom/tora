@@ -32,3 +32,6 @@ lib/Config.tra
 hoge.*
 hoge
 config.json
+*.o
+*.exe
+tags
