@@ -205,6 +205,7 @@ with open('config.json', 'w') as f:
         'CCFLAGS':     env.get('CCFLAGS'),
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
+        'LIBS':        env.get('LIBS') + ['tora'],
         'TOOLS':       tools,
         'SHLIBPREFIX': '',
         'LINKFLAGS':   ['' + x for x in env.get('LINKFLAGS')[1:]],

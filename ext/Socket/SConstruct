@@ -11,14 +11,11 @@ env = Environment(
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],
+    LIBS=conf['LIBS'],
     tools=conf['TOOLS'],
 )
 
-libs = ['tora', 're2']
-if os.name == 'nt':
-    libs += ['ws2_32', 'pthread']
-
-shlib = env.SharedLibrary("lib/Socket" + env['SHLIBSUFFIX'], ['socket.cc'], LIBPATH=['../..'], LIBS=libs)
+shlib = env.SharedLibrary("lib/Socket" + env['SHLIBSUFFIX'], ['socket.cc'], LIBPATH=['../..'])
 Default(shlib)
 
 env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
