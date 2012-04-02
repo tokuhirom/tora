@@ -176,6 +176,19 @@ static SharedPtr<Value> file_tell(VM * vm, Value* self) {
     }
 }
 
+/**
+ * $file.sync() : Undef
+ *
+ * Syncs buffers and file.
+ */
+static SharedPtr<Value> file_sync(VM * vm, Value* self) {
+    if (fsync(fileno(FP(self))) == 0) {
+        return UndefValue::instance();
+    } else {
+        throw new ErrnoExceptionValue(get_errno());
+    }
+}
+
 void tora::Init_File(VM* vm) {
     // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
     // tell(), truncate(), write($str), fdopen
@@ -189,6 +202,7 @@ void tora::Init_File(VM* vm) {
     pkg->add_method("getc",   new CallbackFunction(file_getc));
     pkg->add_method("seek",   new CallbackFunction(file_seek));
     pkg->add_method("tell",   new CallbackFunction(file_tell));
+    pkg->add_method("sync",   new CallbackFunction(file_sync));
     pkg->add_constant("SEEK_SET", SEEK_SET);
     pkg->add_constant("SEEK_CUR", SEEK_CUR);
     pkg->add_constant("SEEK_END", SEEK_END);

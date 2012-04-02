@@ -5,6 +5,12 @@ note('getc'); {
     is($f.getc(), 'H');
 };
 
+note("sync"); {
+    my $f = open("t/dat/file/f1");
+    $f.sync();
+    ok($f);
+};
+
 note("seek/tell"); {
     my $f = open("t/dat/file/f1");
     is($f.tell(), 0);
