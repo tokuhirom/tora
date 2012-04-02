@@ -83,7 +83,15 @@ static SharedPtr<Value> dir_mkdir(VM * vm, const std::vector<SharedPtr<Value>> &
     }
 
     int mode = args.size() == 2 ? 0777 : args[2]->to_int();
-    if (mkdir(args[1]->to_s()->str_value().c_str(), mode) == 0) {
+    int ret;
+#ifdef _WIN32
+	ret = mkdir(args[1]->to_s()->str_value().c_str());
+    if (ret == 0)
+	    chmod(args[1]->to_s()->str_value().c_str(), mode);
+#else
+	ret = mkdir(args[1]->to_s()->str_value().c_str(), mode);
+#endif
+    if (ret == 0) {
         return UndefValue::instance();
     } else {
         throw new ErrnoExceptionValue(errno);
