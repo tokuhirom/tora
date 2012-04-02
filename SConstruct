@@ -156,6 +156,8 @@ TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS'))
 # config.h
 with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
+    f.write('#define TORA_CC      "' + TORA_CC      + "\"\n")
+    f.write('#define TORA_CXX     "' + TORA_CXX     + "\"\n")
     f.write('#define TORA_CCFLAGS "' + TORA_CCFLAGS + "\"\n")
     f.write('#define TORA_PREFIX  "' + TORA_PREFIX + "\"\n")
     f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
