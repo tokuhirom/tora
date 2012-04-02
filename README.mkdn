@@ -16,6 +16,7 @@ Build Dependencies
  * gcc 4.4.3 or later
  * SConstruct
  * Perl5
+ * Python 2.6 or later(for JSON library)
 
 Build Dependendies from git clone
 ---------------------------------

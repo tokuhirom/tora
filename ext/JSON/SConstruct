@@ -1,35 +1,30 @@
 import os
+import json
+from glob import glob
+
+conf = json.loads(open('../../config.json').read())
 
 env = Environment(
-    CCFLAGS=[
-        '-I../../tora/',
-        '-I../../vendor/boost_1_49_0/',
-        '-g',
-        '-DNDEBUG'
-    ],
-    LINKFLAGS=[
-    ],
-    CXXFLAGS=[
-        '-std=c++0x'
-    ]
+    CXXFLAGS=conf['CXXFLAGS'],
+    CCFLAGS=conf['CCFLAGS'],
+    LINKFLAGS=conf['LINKFLAGS'],
+    CC=conf['CC'],
+    CXX=conf['CXX'],
+    SHLIBPREFIX=conf['SHLIBPREFIX']
 )
 
-if os.uname()[0]=='Darwin':
-    env.Replace(CXX='clang++', CC='clang')
-    env.Append(
-        CCFLAGS=[
-            '-Wno-unused-function',
-            '-DBOOST_NO_CHAR16_T',
-            '-DBOOST_NO_CHAR32_T'
-        ],
-    )
-else:
-    env.Append(
-        CCFLAGS=['-march=native'],
-        LINKFLAGS=['-Wl,-Bsymbolic'],
-    )
-
-shlib = env.SharedLibrary("lib/JSON.so", ['json.cc'], SHLIBPREFIX='')
+shlib = env.SharedLibrary("lib/JSON.so", ['json.cc'])
 Default(shlib)
 
-env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/json.tra && ../../bin/tora -I lib -I ../../lib/ t/decode.tra')
+env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+
+PREFIX=conf['PREFIX']
+
+installs = []
+for x in os.listdir('lib/'):
+    dst = conf['TORA_LIBPREFIX'] + x
+    src = "lib/" + x
+    installs += [env.InstallAs(dst, src)]
+
+env.Alias('install', [shlib, installs])
+

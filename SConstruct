@@ -4,6 +4,7 @@ import subprocess
 import platform
 import re
 import sys
+import json
 
 from os.path import join, dirname, abspath
 from types import DictType, StringTypes
@@ -25,11 +26,12 @@ env = Environment(
     LIBS=['re2', 'pthread', 'dl'],
     LIBPATH=['./'],
     CXXFLAGS=['-std=c++0x'],
-    CCFLAGS=['-Wall', '-Wno-sign-compare', '-Ivendor/boost_1_49_0/', '-I./vendor/re2/', '-fstack-protector', '-march=native', '-g',
+    CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g',
         # '-DPERLISH_CLOSURE'
     ],
     PREFIX=GetOption('prefix')
 )
+env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 print 'PREFIX: ' + env['PREFIX']
 re2_env = Environment(
     CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
@@ -162,6 +164,19 @@ with open('tora/config.h', 'w') as f:
     f.write('#define TORA_PREFIX  "' + TORA_PREFIX + "\"\n")
     f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
 
+with open('config.json', 'w') as f:
+    f.write(json.dumps({
+        'CC':          TORA_CC,
+        'CXX':         TORA_CXX,
+        'CCFLAGS':     env.get('CCFLAGS'),
+        'CXXFLAGS':    env.get('CXXFLAGS'),
+        'PREFIX':      env.get('PREFIX'),
+        'SHLIBPREFIX': '',
+        'LINKFLAGS':   ['' + x for x in env.get('LINKFLAGS')[1:]],
+        'TORA_VERSION_STR': TORA_VERSION_STR,
+        'TORA_LIBPREFIX':      env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/",
+    }))
+
 with open('lib/Config.tra', 'w') as f:
     f.write("my $Config = {\n")
     f.write("  TORA_PREFIX      => '" + TORA_PREFIX      + "',\n")
@@ -192,9 +207,14 @@ lemon_env = Environment()
 lemon_env.Append(CCFLAGS=['-O2'])
 lemon_env.Program('tools/lemon/lemon', ['tools/lemon/lemon.c']);
 
+
+# ----------------------------------------------------------------------
 # instalation
 installs = []
 installs += [env.Install(env['PREFIX']+'/bin/', 'bin/tora')];
 installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
-env.Alias('install', [env['PREFIX']+'/bin/', installs])
+exts = []
+for ext in os.listdir('ext'):
+    exts += [env.Command(['ext/%s/_installed' % ext], Glob('ext/' + ext + "/*"), "cd ext/" + ext + " && scons install")]
+env.Alias('install', [exts, env['PREFIX']+'/bin/', installs])
 

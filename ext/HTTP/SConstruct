@@ -1,36 +1,27 @@
 import os
+import json
+from glob import glob
+
+conf = json.loads(open('../../config.json').read())
 
 env = Environment(
-    CCFLAGS=[
-        '-I../../tora/',
-        '-I../../vendor/boost_1_49_0/',
-        '-g',
-        '-DNDEBUG',
-        '-Wall'
-    ],
-    LINKFLAGS=[
-    ],
-    CXXFLAGS=[
-        '-std=c++0x'
-    ]
+    CXXFLAGS=conf['CXXFLAGS'],
+    CCFLAGS=conf['CCFLAGS'],
+    LINKFLAGS=conf['LINKFLAGS'],
+    CC=conf['CC'],
+    CXX=conf['CXX'],
+    SHLIBPREFIX=conf['SHLIBPREFIX']
 )
-
-if os.uname()[0]=='Darwin':
-    env.Replace(CXX='clang++', CC='clang')
-    env.Append(
-        CCFLAGS=[
-            '-Wno-unused-function',
-            '-DBOOST_NO_CHAR16_T',
-            '-DBOOST_NO_CHAR32_T'
-        ],
-    )
-else:
-    env.Append(
-        CCFLAGS=['-march=native'],
-        LINKFLAGS=['-Wl,-Bsymbolic'],
-    )
 
 shlib = env.SharedLibrary("lib/HTTP/Parser.so", ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='')
 Default(shlib)
 
 env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I lib -I ../../lib/" t/*.tra')
+
+installs = []
+for x in os.listdir('lib/'):
+    dst = conf['TORA_LIBPREFIX'] + x
+    src = "lib/" + x
+    installs += [env.InstallAs(dst, src)]
+
+env.Alias('install', [shlib, installs])
