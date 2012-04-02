@@ -1,3 +1,6 @@
+#undef __STRICT_ANSI__
+#include <stdio.h>
+
 #include "../object.h"
 #include "../vm.h"
 #include "../value/file.h"
@@ -38,7 +41,7 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
     )) {
         return file;
     } else {
-        return new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), strerror(errno));
+        return new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), get_strerror(get_errno()).c_str());
     }
 }
 
@@ -136,7 +139,7 @@ static SharedPtr<Value> file_getc(VM * vm, Value* self) {
         if (feof(FP(self))) {
             return UndefValue::instance();
         } else {
-            throw new ErrnoExceptionValue(errno);
+            throw new ErrnoExceptionValue(get_errno());
         }
     }
 }

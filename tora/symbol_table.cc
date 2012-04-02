@@ -1,5 +1,7 @@
 #include "symbol_table.h"
+#ifndef _WIN32
 #include <execinfo.h>
+#endif
 #include <iostream>
 
 

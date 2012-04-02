@@ -106,6 +106,7 @@ my @nodes = qw(
 );
 
 open my $cc, '>', 'tora/nodes.gen.cc';
+binmode $cc;
 
 printf (<<'...', join(", ", @nodes));
 #ifndef NODES_GEN_H_
@@ -131,4 +132,4 @@ printf $cc (<<'...', join(", ", map { qq{"$_"} } @nodes) );
 const char*tora::node_type2name[] = {"NODE_UNKNOWN", %s};
 ...
 
-
+close $cc;

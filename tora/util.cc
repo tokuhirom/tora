@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include "util.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 void tora::print_indent(int indent) {
     for (int i=0; i<indent; i++) {
@@ -45,3 +50,35 @@ int tora::hexchar2int(unsigned char c) {
     }
 }
 
+void tora::set_errno(int err) {
+#ifdef _WIN32
+    SetLastError(err);
+#else
+    errno = err;
+#endif
+}
+
+int tora::get_errno() {
+#ifdef _WIN32
+    return GetLastError();
+#else
+    return errno;
+#endif
+}
+
+std::string tora::get_strerror(int err) {
+#ifdef _WIN32
+    static char buf[256];
+    FormatMessage(
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            err,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            buf,
+            sizeof buf,
+            NULL);
+    return std::string(buf);
+#else
+    return std::string(strerror(err));
+#endif
+}

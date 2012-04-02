@@ -190,7 +190,7 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
         delete ptr;
         return new StrValue(ptr_s);
     } else {
-        throw new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -199,7 +199,11 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
  */
 static SharedPtr<Value> builtin_getpid(VM *vm) {
     // POSIX.1-2001, 4.3BSD, SVr4.
+#ifdef _WIN32
+    return new IntValue(-1);
+#else
     return new IntValue(getpid());
+#endif
 }
 
 /**
@@ -207,7 +211,11 @@ static SharedPtr<Value> builtin_getpid(VM *vm) {
  */
 static SharedPtr<Value> builtin_getppid(VM *vm) {
     // POSIX.1-2001, 4.3BSD, SVr4.
+#ifdef _WIN32
+    return new IntValue(-1);
+#else
     return new IntValue(getppid());
+#endif
 }
 
 /**
@@ -260,10 +268,10 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     }
     const std::string s = v->upcast<StrValue>()->c_str();
     char *endp;
-    errno = 0;
+    set_errno(0);
     long n = strtol(s.c_str(), &endp, 16);
-    if (errno == ERANGE) {
-        throw new ErrnoExceptionValue(errno);
+    if (get_errno() == ERANGE) {
+        throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
@@ -277,10 +285,10 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     }
     const std::string s = v->upcast<StrValue>()->c_str();
     char *endp;
-    errno = 0;
+    set_errno(0);
     long n = strtol(s.c_str(), &endp, 8);
-    if (errno == ERANGE) {
-        throw new ErrnoExceptionValue(errno);
+    if (get_errno() == ERANGE) {
+        throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());

@@ -27,7 +27,7 @@ ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
     if (dp) {
         return new ObjectValue(vm, vm->symbol_table->get_id("Dir"), new PointerValue(dp));
     } else {
-        throw new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(get_errno());
     }
 }
 

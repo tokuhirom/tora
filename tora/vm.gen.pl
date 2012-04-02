@@ -15,9 +15,10 @@ sub write_file {
     my ($fname, $body) = @_;
     unlink $fname if -f $fname;
     open my $fh, '>', $fname;
+    binmode $fh;
     print $fh $body;
     close $fh;
-    chmod 0444, $fname;
+    chmod 0444, $fname if $^O ne 'MSWin32'; # win32 sucks.
 }
 
 sub parse {

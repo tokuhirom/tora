@@ -7,11 +7,22 @@
 #include "../package.h"
 
 #include <sys/types.h>
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include <boost/scoped_array.hpp>
+
+#ifdef _WIN32
+static int inet_aton(const char *cp, struct in_addr *addr) {
+    addr->s_addr = inet_addr(cp);
+    return (addr->s_addr == INADDR_NONE) ? 0 : 1;
+}
+#endif
 
 using namespace tora;
 
@@ -46,7 +57,7 @@ static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Valu
 
     int sock = socket(domain, type, protocol);
     if (sock == -1) {
-        throw new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(get_errno());
     } else {
         return new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(sock));
     }
@@ -68,7 +79,7 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -141,9 +152,14 @@ static SharedPtr<Value> sock_write(VM * vm, Value*self, Value* src_v) {
 
     const std::string &s = src->upcast<StrValue>()->str_value();
     int fd = GETFD(vm, self);
-    int ret = write(fd, s.c_str(), s.size());
+    int ret;
+#ifdef _WIN32
+    ret = send(fd, s.c_str(), s.size(), 0);
+#else
+    ret = write(fd, s.c_str(), s.size());
+#endif
     if (ret == -1) {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     } else {
         return new IntValue(ret);
     }
@@ -163,7 +179,12 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
         std::string bbuf;
         while (1) {
             char buf[4096];
-            int ret = read(fd, buf, sizeof(buf));
+            int ret;
+#ifdef _WIN32
+            ret = recv(fd, buf, sizeof(buf), 0);
+#else
+            ret = read(fd, buf, sizeof(buf));
+#endif
             if (ret > 0) {
                 // printf("CONT!\n");
                 readed += ret;
@@ -172,7 +193,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             } else if (ret == 0) { // EOF
                 return new BytesValue(bbuf);
             } else {
-                throw new ErrnoExceptionValue(errno);
+                throw new ErrnoExceptionValue(get_errno());
             }
         }
     } else if (args.size() == 2) {
@@ -181,11 +202,16 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
 #ifndef NDEBUG
         memset(buf.get(), 0, size);
 #endif
-        int ret = read(fd, buf.get(), size);
+        int ret;
+#ifdef _WIN32
+        ret = recv(fd, buf.get(), size, 0);
+#else
+        ret = read(fd, buf.get(), size);
+#endif
         if (ret >= 0) {
             return new BytesValue(std::string(buf.get(), ret));
         } else {
-            throw new ErrnoExceptionValue(errno);
+            throw new ErrnoExceptionValue(get_errno());
         }
     } else {
         throw new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
@@ -205,7 +231,7 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     if (ret==0) {
         return UndefValue::instance();
     } else {
-        throw new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -216,7 +242,7 @@ static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -239,20 +265,30 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
         optlen = optval_s->upcast<StrValue>()->str_value().size();
     }
 
-    int ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);
+    int ret;
+#ifdef _WIN32
+	ret = setsockopt(GETFD(vm, self), level, optname, (char*) optval, optlen);
+#else
+	ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);
+#endif
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     }
 }
 
 static SharedPtr<Value> sock_sock_close(VM * vm, Value* self) {
-    int ret = close(GETFD(vm, self));
+    int ret;
+#ifdef _WIN32
+    ret = closesocket(GETFD(vm, self));
+#else
+    ret = close(GETFD(vm, self));
+#endif
     if (ret == 0) {
         return UndefValue::instance();
     } else {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -271,7 +307,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
         t->push_back(new_sock);
         return t;
     } else {
-        return new ErrnoExceptionValue(errno);
+        return new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -279,6 +315,13 @@ void tora::Init_Socket(VM* vm) {
     // socket, bind, listen, accept, send, recv
     // "accept", "bind", "connect", "getpeername", "getsockname", "getsockopt", "listen", "recv", "send", "setsockopt",
     // "shutdown", "socket", "socketpair"
+
+#ifdef _WIN32
+    {
+        WSADATA wsa_data;
+        WSAStartup(MAKEWORD(2, 2), &wsa_data);
+    }
+#endif
 
     {
         SharedPtr<Package> pkg = vm->find_package("Socket");
