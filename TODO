@@ -30,9 +30,6 @@ Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
 
-Dir.mkdir
-Dir.rmdir
-
 File::Temp
 
 open()
@@ -41,11 +38,8 @@ file($fname).open($mode="rb", $encoding="utf-8")
 File#write()
 File#read(n)
 File#sync()
-File#seek()
-File#rewind()
-File#tell()
 
-Bytes#decode()
+Bytes#decode() / with icu?
 
 String.lc()
 String.uc()
@@ -234,3 +228,8 @@ system()
 
  * /xxx/s
  * /xxx/m
+File#tell()
+File#seek()
+File#rewind()
+Dir.mkdir
+Dir.rmdir
