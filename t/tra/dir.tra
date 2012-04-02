@@ -8,7 +8,6 @@ while (1) {
         last;
     }
     $a.push($e);
-    p($a);
 }
 ok($a[0]);
 if (!$a[0]) {

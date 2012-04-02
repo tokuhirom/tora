@@ -26,7 +26,7 @@ say($e);
 say($x);
 ...
 
-run_is(<<'...', '', qq{'hoge' is not numeric. You cannot divide.\n}, 1);
+run_is(<<'...', '', qq{'hoge' is not numeric. You cannot divide. line 2\n}, 1);
 my $x = "hoge";
 say($x/"fuga");
 ...

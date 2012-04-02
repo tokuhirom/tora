@@ -809,13 +809,9 @@ OP_ENTER_FOREACH {
             CodeValue * code = iter->second->upcast<CodeValue>();
             if (code->is_native()) {
                 stack.push_back(a);
-               this->call_native_func(code->callback(), 0);
+               this->call_native_func(code->callback(), 1);
                iiter = stack.back();
                stack.pop_back();
-               if (iiter->value_type == VALUE_TYPE_EXCEPTION) {
-                    this->die(iiter);
-                    TODO();
-               }
             } else {
                 TODO();
             }
@@ -895,7 +891,7 @@ OP_FOR_ITER {
             CodeValue * code = iter->second->upcast<CodeValue>();
             if (code->is_native()) {
                 stack.push_back(o);
-               this->call_native_func(code->callback(), 0);
+               this->call_native_func(code->callback(), 1);
                SharedPtr<Value> val = stack.back();
                stack.pop_back();
                if (val->value_type == VALUE_TYPE_EXCEPTION) {

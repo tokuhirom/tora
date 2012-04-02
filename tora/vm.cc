@@ -509,11 +509,11 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_GENERAL) {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                    fprintf(stderr, "%s line %d\n", exception->upcast<ExceptionValue>()->message().c_str(), lineno);
                 } else if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", get_strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()).c_str());
+                    fprintf(stderr, "%s line %d\n", get_strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()).c_str(), lineno);
                 } else {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                    fprintf(stderr, "%s line %d\n", exception->upcast<ExceptionValue>()->message().c_str(), lineno);
                 }
             } else {
                 fprintf(stderr, "died\n");

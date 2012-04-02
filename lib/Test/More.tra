@@ -40,15 +40,10 @@ class Test::Builder {
         self.incr_failed;
     }
     sub is($a, $b, $msg=undef) {
-        self.incr_counter;
         if ($a==$b) {
-            print("ok " + self.counter);
-            # Internals.dump($msg);
-            if ($msg != undef) {
-                print(" - " + $msg);
-            }
-            print("\n");
+            self.pass($msg);
         } else {
+            self.incr_counter;
             print("not ok " + self.counter);
             if $msg != undef {
                 print(" - " + $msg);
