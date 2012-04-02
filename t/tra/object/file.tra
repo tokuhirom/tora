@@ -5,4 +5,27 @@ note('getc'); {
     is($f.getc(), 'H');
 };
 
+note("sync"); {
+    my $f = open("t/dat/file/f1");
+    $f.sync();
+    ok($f);
+};
+
+note("seek/tell"); {
+    my $f = open("t/dat/file/f1");
+    is($f.tell(), 0);
+    is($f.getc(), 'H');
+    is($f.tell(), 1);
+    is($f.getc(), 'e');
+    $f.seek(-1, File.SEEK_END);
+    is($f.getc(), "\n");
+    is($f.tell(), 13);
+    $f.seek(3, File.SEEK_SET);
+    is($f.tell(), 3);
+    is($f.getc(), "l");
+    $f.seek(6, File.SEEK_CUR);
+    is($f.tell(), 10);
+    is($f.getc(), "n");
+};
+
 done_testing;

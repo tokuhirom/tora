@@ -48,20 +48,21 @@ else:
         LIBS=['re2', 'pthread', 'dl'],
         LIBPATH=['./'],
         CXXFLAGS=['-std=c++0x'],
-        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g',
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
         ],
         PREFIX=GetOption('prefix'),
         tools=tools
     )
     re2_env = Environment(
-        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
+        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/', '-fPIC'],
         LIBS=['pthread'],
         tools=tools
     )
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
 exe_suffix = os.name == 'nt' and '.exe' or ''
+ext_suffix = os.name == 'nt' and '.dll' or '.so'
 lemon = os.name == 'nt' and '.\\tools\\lemon\\lemon.exe' or './tools/lemon/lemon'
 
 if os.name == 'nt':
@@ -128,7 +129,7 @@ libfiles = [
         value/object.cc value/int.cc value/bool.cc value/exception.cc
         value/bytes.cc
 
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
         object/dynaloader.cc object/object.cc object/metaclass.cc
         object/bytes.cc object/regexp.cc object/hash.cc
         object/re2_regexp_matched.cc
@@ -186,8 +187,8 @@ libre2 = re2_env.Library('re2', re2files)
 TORA_PREFIX   = env.get('PREFIX')
 TORA_CC       = env.get('CC')
 TORA_CXX      = env.get('CXX')
-TORA_CCFLAGS  = ' '.join(env.get('CCFLAGS'))
-TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS'))
+TORA_CCFLAGS  = ' '.join(env.get('CCFLAGS')).replace("\\", "/")
+TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS')).replace("\\", "/")
 # config.h
 with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
@@ -204,10 +205,14 @@ with open('config.json', 'w') as f:
         'CCFLAGS':     env.get('CCFLAGS'),
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
+        'LIBS':        env.get('LIBS') + ['tora'],
+        'TOOLS':       tools,
         'SHLIBPREFIX': '',
         'LINKFLAGS':   ['' + x for x in env.get('LINKFLAGS')[1:]],
         'TORA_VERSION_STR': TORA_VERSION_STR,
         'TORA_LIBPREFIX':      env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/",
+        'TORA_EXESUFFIX':      exe_suffix,
+        'TORA_EXTSUFFIX':      ext_suffix,
     }))
 
 with open('lib/Config.tra', 'w') as f:
@@ -223,17 +228,18 @@ with open('lib/Config.tra', 'w') as f:
     f.write("    $Config;\n")
     f.write("}\n")
 
+libtora = env.Library('tora', [
+    libfiles,
+    libre2
+])
+
 tora = env.Program('bin/tora', [
     ['tora/main.cc'],
-    libfiles,
+    libtora,
     libre2
 ])
 Default(tora)
 
-env.Program('hoge', [
-    ['hoge.cc'],
-    libre2
-])
 
 # lemon
 lemon_env = Environment()

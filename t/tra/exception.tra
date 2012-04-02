@@ -5,11 +5,6 @@ my ($err2) = try {
 };
 is($err2, "OK");
 
-my ($err) = try {
-    Socket.socket(99, 499, 552);
-};
-is(typeof($err), "Exception");
-
 my $err3;
 {
     my $thing;

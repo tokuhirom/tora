@@ -309,6 +309,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             stack.push_back(ret);
         }
     } else if (callback->argc==-3) {
+        if (argcnt != 1) {
+            throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 1, argcnt);
+        }
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
@@ -332,6 +335,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm3) {
+        if (argcnt != 3) {
+            throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 3, argcnt);
+        }
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> v2 = stack.back();
@@ -345,6 +351,9 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
             stack.push_back(ret);
         }
     } else if (callback->argc == CallbackFunction::type_vm4) {
+        if (argcnt != 4) {
+            throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 4, argcnt);
+        }
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> v2 = stack.back();
@@ -500,11 +509,11 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
                 fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_GENERAL) {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                    fprintf(stderr, "%s line %d\n", exception->upcast<ExceptionValue>()->message().c_str(), lineno);
                 } else if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_ERRNO) {
-                    fprintf(stderr, "%s\n", get_strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()).c_str());
+                    fprintf(stderr, "%s line %d\n", get_strerror(exception->upcast<ErrnoExceptionValue>()->get_errno()).c_str(), lineno);
                 } else {
-                    fprintf(stderr, "%s\n", exception->upcast<ExceptionValue>()->message().c_str());
+                    fprintf(stderr, "%s line %d\n", exception->upcast<ExceptionValue>()->message().c_str(), lineno);
                 }
             } else {
                 fprintf(stderr, "died\n");

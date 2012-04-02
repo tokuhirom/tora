@@ -23,7 +23,6 @@ void tora::load_builtin_objects(VM *vm) {
     Init_Dir(vm);
     Init_Env(vm);
     Init_Stat(vm);
-    Init_Socket(vm);
     Init_File(vm);
     Init_Time(vm);
 
