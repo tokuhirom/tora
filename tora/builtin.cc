@@ -15,6 +15,7 @@
 #include "value.h"
 #include "object.h"
 #include "inspector.h"
+#include "printf.h"
 
 using namespace tora;
 
@@ -189,7 +190,7 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
         delete ptr;
         return new StrValue(ptr_s);
     } else {
-        throw new ErrnoExceptionValue(errno);
+        throw new ErrnoExceptionValue(get_errno());
     }
 }
 
@@ -198,7 +199,11 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
  */
 static SharedPtr<Value> builtin_getpid(VM *vm) {
     // POSIX.1-2001, 4.3BSD, SVr4.
+#ifdef _WIN32
+    return new IntValue(-1);
+#else
     return new IntValue(getpid());
+#endif
 }
 
 /**
@@ -206,7 +211,11 @@ static SharedPtr<Value> builtin_getpid(VM *vm) {
  */
 static SharedPtr<Value> builtin_getppid(VM *vm) {
     // POSIX.1-2001, 4.3BSD, SVr4.
+#ifdef _WIN32
+    return new IntValue(-1);
+#else
     return new IntValue(getppid());
+#endif
 }
 
 /**
@@ -259,10 +268,10 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     }
     const std::string s = v->upcast<StrValue>()->c_str();
     char *endp;
-    errno = 0;
+    set_errno(0);
     long n = strtol(s.c_str(), &endp, 16);
-    if (errno == ERANGE) {
-        throw new ErrnoExceptionValue(errno);
+    if (get_errno() == ERANGE) {
+        throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
@@ -276,10 +285,10 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     }
     const std::string s = v->upcast<StrValue>()->c_str();
     char *endp;
-    errno = 0;
+    set_errno(0);
     long n = strtol(s.c_str(), &endp, 8);
-    if (errno == ERANGE) {
-        throw new ErrnoExceptionValue(errno);
+    if (get_errno() == ERANGE) {
+        throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
         throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());
@@ -297,6 +306,15 @@ static SharedPtr<Value> builtin_log(VM *vm, Value *v) {
 
 static SharedPtr<Value> builtin_sin(VM *vm, Value *v) {
     return new DoubleValue(sin(v->to_double()));
+}
+
+static SharedPtr<Value> builtin_printf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
+    tora_printf(args);
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> builtin_sprintf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
+    return new StrValue(tora_sprintf(args));
 }
 
 void tora::Init_builtins(VM *vm) {
@@ -317,6 +335,8 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("getpid",   builtin_getpid);
     vm->add_builtin_function("getppid",   builtin_getppid);
     vm->add_builtin_function("system",   builtin_system);
+    vm->add_builtin_function("printf",   builtin_printf);
+    vm->add_builtin_function("sprintf",   builtin_sprintf);
     
     // numeric functions
     vm->add_builtin_function("sqrt",   builtin_sqrt);

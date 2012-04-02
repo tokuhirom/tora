@@ -1,7 +1,8 @@
 TODO
 ====
 
-rename class File to IO.
+tora --config
+# => dump json config vars
 
 builtin functions
 -----------------

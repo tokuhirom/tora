@@ -1,6 +1,5 @@
 #include <ctime>
 #include <iomanip>
-#include <errno.h>
 
 #include "../object.h"
 #include "../vm.h"
@@ -8,6 +7,16 @@
 #include "../value/object.h"
 #include "../value/symbol.h"
 #include "../value/pointer.h"
+
+#ifdef _WIN32
+struct tm * localtime_r (const time_t *timer, struct tm *res) {
+   struct tm *lt;
+   lt = localtime(timer);
+   if (lt == NULL || res == NULL) return NULL;
+   memcpy(res, lt, sizeof(res));
+   return res;
+}
+#endif
 
 using namespace tora;
 
@@ -41,7 +50,7 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
     struct tm * retlocal = localtime_r(&i, buf);
     if (!retlocal) {
         delete buf;
-        throw new ExceptionValue("Error in localtime_r: %s", strerror(errno));
+        throw new ExceptionValue("Error in localtime_r: %s", get_strerror(get_errno()).c_str());
     }
     return new ObjectValue(vm, klass->upcast<SymbolValue>()->id(), new PointerValue(buf));
 }

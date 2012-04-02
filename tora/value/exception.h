@@ -3,6 +3,7 @@
 
 #include "../exception.h"
 #include "../value.h"
+#include "../util.h"
 
 namespace tora {
 
@@ -37,7 +38,7 @@ public:
     }
     int get_errno() const { return exception_value_->errno_; }
     std::string message() const {
-        return std::string(strerror(get_errno()));
+        return tora::get_strerror(exception_value_->errno_);
     }
 };
 

@@ -1,0 +1,16 @@
+import os
+
+Import('env')
+
+shlib = env.SharedLibrary("lib/JSON.so", ['json.cc'])
+Default(shlib)
+
+env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+
+installs = []
+for x in os.listdir('lib/'):
+    dst = env['TORA_LIBPREFIX'] + x
+    src = "lib/" + x
+    installs += [env.InstallAs(dst, src)]
+
+env.Alias('install', [shlib, installs])

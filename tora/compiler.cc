@@ -385,6 +385,7 @@ bool tora::Compiler::is_builtin(const std::string &s) {
         "system",
         "abs", "atan2", "cos", "exp", "hex", "int", "log", "oct", "rand",
         "sin", "sqrt", "srand",
+        "sprintf", "printf",
         NULL
     };
     for (int i=0; bs[i]; i++) {
@@ -728,8 +729,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         auto re = node->upcast<RegexpNode>();
         SharedPtr<AbstractRegexpValue> sv = new RE2RegexpValue(re->regexp_value, re->flags);
         if (!sv->ok()) {
-            fprintf(stderr, "Regexp compilation failed: /%s/ : %s\n", sv->pattern().c_str(), sv->error().c_str());
-            this->error++;
+            this->fail("Regexp compilation failed: /%s/ : %s\n", sv->pattern().c_str(), sv->error().c_str());
             break;
         }
         push_op(new ValueOP(OP_PUSH_VALUE, sv));

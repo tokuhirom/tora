@@ -22,6 +22,7 @@ extern const char *token_id2name[];
 ...
 
 open my $ofh, '>', 'tora/token.gen.cc';
+binmode $ofh;
 print $ofh qq!#include "token.gen.h"\n!;
 print $ofh qq!const char *tora::token_id2name[] = {"EOF",\n!;
 while (<$fh>) {
@@ -32,4 +33,4 @@ while (<$fh>) {
     print $ofh qq{"$name",\n};
 }
 print $ofh qq!};\n!;
-
+close $ofh;

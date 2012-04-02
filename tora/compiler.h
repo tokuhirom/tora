@@ -31,7 +31,7 @@ class Block {
 public:
     block_type_t type;
     std::vector<std::string*> vars;
-    Block(block_type_t t) : type(t) { }
+    Block(block_type_t t) : refcnt(0), type(t) { }
     ~Block() {
         for (size_t i=0; i<vars.size(); i++) {
             delete vars.at(i);

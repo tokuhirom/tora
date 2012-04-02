@@ -1,5 +1,13 @@
 This is yet another programming language for general scripting.
 
+Platforms
+---------
+
+authors tested following parts.
+
+  * osx lion
+  * ubuntu linux latest
+
 Build Dependencies
 ------------------
 
@@ -7,4 +15,14 @@ Build Dependencies
    * for supporting C++11 features
  * gcc 4.4.3 or later
  * SConstruct
+ * Perl5
+ * Python 2.6 or later(for JSON library)
+
+Build Dependendies from git clone
+---------------------------------
+
+Distribution tar ball(not yet) have a compiled source.
+If you want to build from git, nededs more softwares.
+
+  * re2c
 
