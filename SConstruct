@@ -48,14 +48,14 @@ else:
         LIBS=['re2', 'pthread', 'dl'],
         LIBPATH=['./'],
         CXXFLAGS=['-std=c++0x'],
-        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g',
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
         ],
         PREFIX=GetOption('prefix'),
         tools=tools
     )
     re2_env = Environment(
-        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/'],
+        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/', '-fPIC'],
         LIBS=['pthread'],
         tools=tools
     )
@@ -129,7 +129,7 @@ libfiles = [
         value/object.cc value/int.cc value/bool.cc value/exception.cc
         value/bytes.cc
 
-        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/socket.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
+        object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
         object/dynaloader.cc object/object.cc object/metaclass.cc
         object/bytes.cc object/regexp.cc object/hash.cc
         object/re2_regexp_matched.cc
