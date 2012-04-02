@@ -1,6 +1,5 @@
 import os
 import json
-from glob import glob
 
 conf = json.loads(open('../../config.json').read())
 
@@ -10,10 +9,11 @@ env = Environment(
     LINKFLAGS=conf['LINKFLAGS'],
     CC=conf['CC'],
     CXX=conf['CXX'],
-    SHLIBPREFIX=conf['SHLIBPREFIX']
+    SHLIBPREFIX=conf['SHLIBPREFIX'],
+    tools=conf['TOOLS'],
 )
 
-shlib = env.SharedLibrary("lib/HTTP/Parser.so", ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='')
+shlib = env.SharedLibrary("lib/HTTP/Parser" + conf['TORA_EXTSUFFIX'], ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='')
 Default(shlib)
 
 env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I lib -I ../../lib/" t/*.tra')
