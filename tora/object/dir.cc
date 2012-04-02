@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #include "../object.h"
 #include "../shared_ptr.h"
@@ -69,6 +70,47 @@ static SharedPtr<Value> dir_close(VM * vm, Value* self) {
 }
 
 /**
+ * Dir.mkdir(Str $name[, Int $mode]) : Undef
+ *
+ * Create directory named $name. Default mode value is 0777.
+ *
+ * This method may throws ErrnoException if it's failed.
+ */
+static SharedPtr<Value> dir_mkdir(VM * vm, const std::vector<SharedPtr<Value>> & args) {
+    // POSIX.1-2001.
+    if (args.size() != 2 && args.size() == 3) {
+        throw new ArgumentExceptionValue("You passed %d arguments, but usage: Dir.mkdir(Str $name[, Int $mode])", args.size()-1);
+    }
+
+    int mode = args.size() == 2 ? 0777 : args[2]->to_int();
+    if (mkdir(args[1]->to_s()->str_value().c_str(), mode) == 0) {
+        return UndefValue::instance();
+    } else {
+        throw new ErrnoExceptionValue(errno);
+    }
+}
+
+/**
+ * Dir.rmdir(Str $name) : Undef
+ *
+ * Remove $name directory.
+ *
+ * This method may throws ErrnoException if it's failed.
+ */
+static SharedPtr<Value> dir_rmdir(VM * vm, const std::vector<SharedPtr<Value>> & args) {
+    // POSIX.1-2001.
+    if (args.size() != 2) {
+        throw new ArgumentExceptionValue("You passed %d arguments, but usage: Dir.rmdir(Str $name)", args.size()-1);
+    }
+
+    if (rmdir(args[1]->to_s()->str_value().c_str()) == 0) {
+        return UndefValue::instance();
+    } else {
+        throw new ErrnoExceptionValue(errno);
+    }
+}
+
+/**
  * $dir.DESTROY() : undef
  *
  * This is a destructor, closes directory automatically.
@@ -116,6 +158,8 @@ void tora::Init_Dir(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package("Dir");
     pkg->add_method("read",     new CallbackFunction(dir_read));
     pkg->add_method("close",    new CallbackFunction(dir_close));
+    pkg->add_method("mkdir",    new CallbackFunction(dir_mkdir));
+    pkg->add_method("rmdir",    new CallbackFunction(dir_rmdir));
     pkg->add_method("DESTROY",  new CallbackFunction(dir_DESTROY));
     pkg->add_method("__iter__", new CallbackFunction(dir___iter__));
 
