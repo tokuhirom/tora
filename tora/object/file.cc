@@ -184,11 +184,14 @@ static SharedPtr<Value> file_tell(VM * vm, Value* self) {
  * $file.sync() : Undef
  *
  * Syncs buffers and file.
+ *
+ * On win32, this method is not implementede yet.
  */
 static SharedPtr<Value> file_sync(VM * vm, Value* self) {
 #ifdef _WIN32
     throw new ErrnoExceptionValue(ERROR_CALL_NOT_IMPLEMENTED);
 #else
+    // fsync: POSIX.1-2001.
     if (fsync(fileno(FP(self))) == 0) {
         return UndefValue::instance();
     } else {
@@ -201,16 +204,16 @@ void tora::Init_File(VM* vm) {
     // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
     // tell(), truncate(), write($str), fdopen
     SharedPtr<Package> pkg = vm->find_package("File");
-    pkg->add_method("open",   new CallbackFunction(file_open_method));
-    pkg->add_method("slurp",  new CallbackFunction(file_slurp));
-    pkg->add_method("write",  new CallbackFunction(file_write));
-    pkg->add_method("close",  new CallbackFunction(file_close));
-    pkg->add_method("flush",  new CallbackFunction(file_flush));
-    pkg->add_method("fileno", new CallbackFunction(file_fileno));
-    pkg->add_method("getc",   new CallbackFunction(file_getc));
-    pkg->add_method("seek",   new CallbackFunction(file_seek));
-    pkg->add_method("tell",   new CallbackFunction(file_tell));
-    pkg->add_method("sync",   new CallbackFunction(file_sync));
+    pkg->add_method("open",    new CallbackFunction(file_open_method));
+    pkg->add_method("slurp",   new CallbackFunction(file_slurp));
+    pkg->add_method("write",   new CallbackFunction(file_write));
+    pkg->add_method("close",   new CallbackFunction(file_close));
+    pkg->add_method("flush",   new CallbackFunction(file_flush));
+    pkg->add_method("fileno",  new CallbackFunction(file_fileno));
+    pkg->add_method("getc",    new CallbackFunction(file_getc));
+    pkg->add_method("seek",    new CallbackFunction(file_seek));
+    pkg->add_method("tell",    new CallbackFunction(file_tell));
+    pkg->add_method("sync",    new CallbackFunction(file_sync));
     pkg->add_constant("SEEK_SET", SEEK_SET);
     pkg->add_constant("SEEK_CUR", SEEK_CUR);
     pkg->add_constant("SEEK_END", SEEK_END);
