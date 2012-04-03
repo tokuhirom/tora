@@ -990,6 +990,17 @@ OP_DEREF {
     stack[stack.size()-1].reset(obj->upcast<ObjectValue>()->data().get());
 }
 
+OP_EXTRACT_ARRAY {
+    // *[a,r,r,a,y]
+    const SharedPtr<Value> & obj = stack.back();
+    if (obj->value_type != VALUE_TYPE_ARRAY) {
+        throw new ExceptionValue("You cannot extract %s by '*' operator. You can only extract Array.", obj->type_str());
+    }
+    SharedPtr<Value> res = obj->upcast<ArrayValue>()->reverse();
+    res->value_type = VALUE_TYPE_TUPLE; // Difference of array and tuple is only value_type.
+    stack[stack.size()-1].reset(res.get());
+}
+
 OP_SET_PACKAGE_VARIABLE {
     // $Foo::Bar = 3;
     SharedPtr<Value> pkgid = stack.back();

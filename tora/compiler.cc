@@ -1541,6 +1541,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(new OP(OP_DEREF));
         break;
     }
+    case NODE_EXTRACT_ARRAY: {
+        this->compile(node->at(0));
+        push_op(new OP(OP_EXTRACT_ARRAY));
+        break;
+    }
 
     default:
         this->error++;

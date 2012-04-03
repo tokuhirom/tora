@@ -42,6 +42,10 @@ public:
         type = n;
         list = new std::vector<SharedPtr<Node>>();
     }
+    Node(node_type_t type_, Node* node) :refcnt(0), type(type_) {
+        list = new std::vector<SharedPtr<Node>>();
+        list->push_back(node);
+    }
     /**
      * ~Node is not a virtual for performance reason.
      * Do not override it.

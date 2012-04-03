@@ -4,6 +4,11 @@ TODO
 tora --config
 # => dump json config vars
 
+Internals
+---------
+
+remove NodeNode.
+
 builtin functions
 -----------------
 
@@ -13,9 +18,14 @@ printf()
 sprintf()
 pack()
 unpack()
+warn()
 
 builtin objects
 ---------------
+
+$STDERR.print()
+
+Class::Load
 
 String#index
 

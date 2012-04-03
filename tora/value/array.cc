@@ -54,3 +54,11 @@ void ArrayValue::set_item(int i, const SharedPtr<Value> &v) {
     }
 }
 
+const SharedPtr<Value> ArrayValue::reverse() const {
+    SharedPtr<ArrayValue> res(new ArrayValue());
+    for (auto iter = VAL()->rbegin(); iter!= VAL()->rend(); ++iter) {
+        res->push_back(*iter);
+    }
+    return res.get();
+}
+

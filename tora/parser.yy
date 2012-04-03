@@ -508,6 +508,9 @@ unary_expression(A) ::= LAMBDA maybe_block(C). {
     A = new FuncdefNode(NULL, new ListNode(), C);
     A->type = NODE_LAMBDA;
 }
+unary_expression(A) ::= MUL unary_expression(C). {
+    A = new Node(NODE_EXTRACT_ARRAY, C);
+}
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }
 postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKET. {

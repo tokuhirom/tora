@@ -72,6 +72,7 @@ public:
     void set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
         this->set_item(index->to_int(), v);
     }
+    const SharedPtr<Value> reverse() const;
 
     // rename to Iterator
     class iterator : public Value {
