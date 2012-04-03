@@ -1,0 +1,37 @@
+import os
+import json
+from glob import glob
+
+conf = json.loads(open('../../config.json').read())
+
+env = Environment(
+    CXXFLAGS=conf['CXXFLAGS'],
+    CCFLAGS=conf['CCFLAGS'],
+    LINKFLAGS=conf['LINKFLAGS'],
+    CC=conf['CC'],
+    CXX=conf['CXX'],
+    SHLIBPREFIX=conf['SHLIBPREFIX'],
+    LIBS=conf['LIBS'],
+    tools=conf['TOOLS'],
+)
+
+shlib = env.SharedLibrary("lib/File/Path" + env['SHLIBSUFFIX'], [
+    'path.cc',
+    '../../vendor/boost_1_49_0/libs/system/src/error_code.cpp',
+    '../../vendor/boost_1_49_0/libs/filesystem/v3/src/operations.cpp',
+    '../../vendor/boost_1_49_0/libs/filesystem/v3/src/path.cpp',
+], LIBPATH=['../..'])
+Default(shlib)
+
+env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+
+PREFIX=conf['PREFIX']
+
+installs = []
+for x in os.listdir('lib/'):
+    dst = conf['TORA_LIBPREFIX'] + x
+    src = "lib/" + x
+    installs += [env.InstallAs(dst, src)]
+
+env.Alias('install', [shlib, installs])
+

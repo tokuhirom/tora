@@ -1,0 +1,26 @@
+use Test::More *;
+use File::Path *;
+
+if -d 't/tmp/foo/bar/' {
+    Dir.rmdir('t/tmp/foo/bar/');
+}
+if -d 't/tmp/foo/' {
+    Dir.rmdir('t/tmp/foo/');
+}
+if !-d 't/tmp/' {
+    Dir.mkdir('t/tmp/');
+}
+
+ok(!-d 't/tmp/foo');
+
+mkpath('t/tmp/foo/bar/');
+
+ok(-d 't/tmp/foo/bar/');
+
+rmpath('t/tmp/foo/');
+
+ok(!-e 't/tmp/foo/bar/');
+ok(!-e 't/tmp/foo/');
+ok(-d 't/tmp/');
+
+done_testing;
