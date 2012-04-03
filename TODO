@@ -40,8 +40,6 @@ File#read(n)
 
 Bytes#decode() / with icu?
 
-String.lc()
-String.uc()
 String#replace(regexp|str, code)
 
 my $a=[];
@@ -238,3 +236,5 @@ Dir.rmdir
 File#sync()
 Fcntl.flock()
 
+String.lc()
+String.uc()
