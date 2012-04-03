@@ -12,19 +12,22 @@ from glob import glob
 
 TORA_VERSION_STR='0.0.3'
 
+tools = ['default']
+default_prefix = '/usr/local'
+if os.name == 'nt':
+    tools = ['mingw']
+    default_prefix = 'c:/tora'
+
 AddOption('--prefix',
     dest='prefix',
     nargs=1,
     type='string',
     action='store',
     metavar='DIR',
-    default='/usr/local/',
+    default=default_prefix,
     help='installation prefix'
 )
 
-tools = ['default']
-if os.name == 'nt':
-    tools = ['mingw']
 if os.name == 'nt':
     env = Environment(
         ENV={'PATH': os.environ['PATH']},
