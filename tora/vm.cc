@@ -713,7 +713,16 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
 
             // TODO: vargs support
             // TODO: kwargs support
-            assert(argcnt == (int)code->code_params()->size());
+            // TODO: support code_defaults
+            if (argcnt != code->code_params()->size()) {
+                throw new ArgumentExceptionValue(
+                    "%s::%s needs %d arguments but you passed %d arguments",
+                    symbol_table->id2name(klass_id).c_str(),
+                    symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(),
+                    code->code_params()->size()
+                );
+            }
+            // assert(argcnt == (int)code->code_params()->size());
             mark_stack.push_back(stack.size());
             frame_stack->push_back(fframe);
         }
