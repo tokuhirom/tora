@@ -1,3 +1,5 @@
+use File::Path;
+
 sub dir($path) {
     Path::Dir.new($path);
 }
@@ -36,11 +38,11 @@ class Path::Dir is Path::Base {
     sub children() {
         ...
     }
-    sub mkpath() {
-        ...
+    sub mkpath($path) {
+        File::Path::mkpath($path);
     }
-    sub rmtree() {
-        ...
+    sub rmtree($path) {
+        File::Path::rmtree($path);
     }
     sub __iter__() {
         ...
