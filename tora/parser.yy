@@ -108,17 +108,17 @@ using namespace tora;
 %start_symbol root
 
 root ::= translation_unit(A). {
-    state->root_node = new NodeNode(NODE_ROOT, A);
+    state->root_node = new Node(NODE_ROOT, A);
 }
 root ::= translation_unit(A) expression(B). {
-    state->root_node = new NodeNode(NODE_ROOT,
+    state->root_node = new Node(NODE_ROOT,
         new BinaryNode(NODE_STMTS, A, B));
 }
 root ::= expression(A). {
-    state->root_node = new NodeNode(NODE_ROOT, A);
+    state->root_node = new Node(NODE_ROOT, A);
 }
 root ::= . {
-    state->root_node = new NodeNode(NODE_ROOT, new Node(NODE_VOID));
+    state->root_node = new Node(NODE_ROOT, new Node(NODE_VOID));
 }
 
 translation_unit(A) ::= statement(B). { A = B; }
@@ -140,7 +140,7 @@ statement(A) ::= expression(B) SEMICOLON . {
     A = B;
 }
 statement(A) ::= expression(B) UNLESS expression(C) SEMICOLON. {
-    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, C), B, NULL);
+    A = new IfNode(NODE_IF, new Node(NODE_NOT, C), B, NULL);
 }
 statement(A) ::= expression(B) IF expression(C) SEMICOLON. {
     A = new IfNode(NODE_IF, C, B, NULL);
@@ -185,7 +185,7 @@ jump_statement(A) ::= RETURN argument_list(B) SEMICOLON. {
 }
 
 if_statement(A) ::= UNLESS expression(B) maybe_block(C). {
-    A = new IfNode(NODE_IF, new NodeNode(NODE_NOT, B), C, NULL);
+    A = new IfNode(NODE_IF, new Node(NODE_NOT, B), C, NULL);
 }
 
 if_statement(A) ::= IF expression(B) maybe_block(C). {
@@ -303,12 +303,12 @@ maybe_block(A) ::= L_BRACE R_BRACE. {
     A = new Node(NODE_VOID);
 }
 block(A) ::= L_BRACE statement_list(B) R_BRACE. {
-    A = new NodeNode(NODE_BLOCK, B);
+    A = new Node(NODE_BLOCK, B);
 }
 block(A) ::= L_BRACE expression(B) R_BRACE. {
     ListNode* ln = new ListNode(NODE_STMTS_LIST);
     ln->push_back(B);
-    A = new NodeNode(NODE_BLOCK, ln);
+    A = new Node(NODE_BLOCK, ln);
 }
 
 statement_list(A) ::= statement_list_inner(B).  {
@@ -344,7 +344,7 @@ expression(A) ::= LOCAL variable(B) ASSIGN expression(C).   {
     A = ln;
 }
 expression(A) ::= DIE expression(B). {
-    A = new NodeNode(NODE_DIE, B);
+    A = new Node(NODE_DIE, B);
 }
 expression(A) ::= use_expression(B).   { A = B; }
 expression(A) ::= identifier(B). {
@@ -482,23 +482,23 @@ multiplicative_expression(A) ::= multiplicative_expression(B) POW unary_expressi
 
 unary_expression(A) ::= postfix_expression(B). { A = B; }
 unary_expression(A) ::= /* --$i */ MINUSMINUS unary_expression(B). {
-    A = new NodeNode(NODE_PRE_DECREMENT, B);
+    A = new Node(NODE_PRE_DECREMENT, B);
 }
 unary_expression(A) ::= /* ++$i */ PLUSPLUS unary_expression(B). {
-    A = new NodeNode(NODE_PRE_INCREMENT, B);
+    A = new Node(NODE_PRE_INCREMENT, B);
 }
 unary_expression(A) ::= /* -f $file */ FILE_TEST(B) unary_expression(C). {
     A = new BinaryNode(NODE_FILE_TEST, B, C);
 }
 unary_expression(A) ::= NOT unary_expression(B). {
-    A = new NodeNode(NODE_NOT, B);
+    A = new Node(NODE_NOT, B);
 }
 unary_expression(A) ::= SUB unary_expression(B). {
-    A = new NodeNode(NODE_UNARY_NEGATIVE, B);
+    A = new Node(NODE_UNARY_NEGATIVE, B);
 }
 /* my ($err, $ret) = try { }; */
 unary_expression(A) ::= TRY maybe_block(B). {
-    A = new NodeNode(NODE_TRY, B);
+    A = new Node(NODE_TRY, B);
 }
 unary_expression(A) ::= LAMBDA lambda_parameter_list(B) maybe_block(C). {
     A = new FuncdefNode(NULL, B->upcast<ListNode>(), C);
@@ -552,15 +552,15 @@ postfix_expression(A) ::= postfix_expression(B) DOT identifier(C). {
     A = new MethodCallNode(B, C, new ListNode());
 }
 postfix_expression(A) ::= /* $i-- */ postfix_expression(B) MINUSMINUS. {
-    A = new NodeNode(NODE_POST_DECREMENT, B);
+    A = new Node(NODE_POST_DECREMENT, B);
 }
 postfix_expression(A) ::= /* $i++ */ postfix_expression(B) PLUSPLUS. {
-    A = new NodeNode(NODE_POST_INCREMENT, B);
+    A = new Node(NODE_POST_INCREMENT, B);
 }
 
 primary_expression(A) ::= DEREF expression(B) R_BRACE. {
     /* ${ obj } */
-    A = new NodeNode(NODE_DEREF, B);
+    A = new Node(NODE_DEREF, B);
 }
 primary_expression(A) ::= int(B). { A = B; }
 primary_expression(A) ::= DOUBLE_LITERAL(B). {

@@ -4,11 +4,6 @@ TODO
 tora --config
 # => dump json config vars
 
-Internals
----------
-
-remove NodeNode.
-
 builtin functions
 -----------------
 

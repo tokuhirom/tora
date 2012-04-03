@@ -16,7 +16,6 @@ namespace tora {
 
 class BinaryNode;
 class MethodCallNode;
-class NodeNode;
 class IfNode;
 class ForNode;
 class ForEachNode;
@@ -192,14 +191,6 @@ public:
         this->list->push_back(i);
         this->list->push_back(e);
     }
-};
-
-class NodeNode: public Node {
-public:
-    NodeNode(node_type_t t,SharedPtr<Node>n) : Node(t) {
-        this->list->push_back(n);
-    }
-    SharedPtr<Node> node() { return this->list->at(0); }
 };
 
 class MethodCallNode: public Node {

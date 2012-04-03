@@ -424,7 +424,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         OP *enter = new OP(OP_ENTER);
         push_op(enter);
 
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
 
         push_op(new OP(OP_END));
 
@@ -495,8 +495,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_BLOCK: {
         {
-            OptimizableEnterScope es(this, node->upcast<NodeNode>()->node());
-            this->compile(node->upcast<NodeNode>()->node());
+            OptimizableEnterScope es(this, node->at(0));
+            this->compile(node->at(0));
         }
 
         break;
@@ -1154,7 +1154,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
 
     case NODE_UNARY_NEGATIVE: {
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
 
         push_op(new OP(OP_UNARY_NEGATIVE));
 
@@ -1335,7 +1335,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_NOT: {
         // ! $val
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_NOT));
         break;
     }
@@ -1349,25 +1349,25 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_POST_DECREMENT: {
         // $i--
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_POST_DECREMENT));
         break;
     }
     case NODE_PRE_DECREMENT: {
         // --$i
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_PRE_DECREMENT));
         break;
     }
     case NODE_POST_INCREMENT: {
         // $i++
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_POST_INCREMENT));
         break;
     }
     case NODE_PRE_INCREMENT: {
         // ++$i
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_PRE_INCREMENT));
         break;
     }
@@ -1397,8 +1397,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         OP *enter_op = new OP(OP_ENTER);
         push_op(enter_op);
 
-        SharedPtr<NodeNode> n = node->upcast<NodeNode>();
-        this->compile(n->node());
+        this->compile(node->at(0));
 
         push_op(new OP(OP_PUSH_UNDEF));
         push_op(new OP(OP_PUSH_UNDEF));
@@ -1416,7 +1415,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_DIE: {
-        this->compile(node->upcast<NodeNode>()->node());
+        this->compile(node->at(0));
         push_op(new OP(OP_DIE));
         break;
     }
