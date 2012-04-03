@@ -38,11 +38,11 @@ class Path::Dir is Path::Base {
     sub children() {
         ...
     }
-    sub mkpath($path) {
-        File::Path::mkpath($path);
+    sub mkpath() {
+        File::Path::mkpath(${self});
     }
     sub rmtree($path) {
-        File::Path::rmtree($path);
+        File::Path::rmtree(${self});
     }
     sub __iter__() {
         ...
