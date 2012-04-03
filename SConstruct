@@ -249,6 +249,14 @@ lemon_env = Environment()
 lemon_env.Append(CCFLAGS=['-O2'])
 lemon_env.Program(lemon, ['tools/lemon/lemon.c']);
 
+# ----------------------------------------------------------------------
+# test extensions
+def test_exts():
+    exts = []
+    for ext in os.listdir('ext'):
+        exts += [env.Command(['ext/%s/_tested' % ext], Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
+    env.Command('test.ext', exts, 'echo ok')
+test_exts()
 
 # ----------------------------------------------------------------------
 # instalation
