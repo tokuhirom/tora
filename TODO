@@ -64,6 +64,8 @@ Test::Fatal
 
 File::which
 
+UV or EV?
+
 syntax
 ------
 
@@ -89,7 +91,7 @@ syntax
  * super()
  * signal handler
    * perl5's safe signals.
- * 'a' x 3
+ * 'a' x 3 or 'a' * 3
 
 lambda
 ------

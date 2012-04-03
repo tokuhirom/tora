@@ -57,7 +57,7 @@ static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
  */
 static SharedPtr<Value> builtin_open(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     if (args.size() != 1 && args.size() != 2) {
-        throw new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
+        throw new ExceptionValue("Invalid argument count for open(): %ld. open() function requires 1 or 2 argument.", (long int) args.size());
     }
     return File_open(vm, args.at(0).get(), args.size() == 2 ? args.at(1).get() : NULL);
 }

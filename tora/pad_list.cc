@@ -58,7 +58,7 @@ void PadList::set(int i, const SharedPtr<Value> & v) {
             pad_.erase(pad_.begin()+i);
             pad_.insert(pad_.begin()+i, v);
         } else {
-            // fprintf(stderr, "# OK: %zd, %d\n", pad_.size(), i);
+            // fprintf(stderr, "# OK: %ld, %d\n", (long int) pad_.size(), i);
             *(pad_.at(i).get()) = *v;
         }
         // pad_->insert(pad_->begin()+i, v);
@@ -74,11 +74,11 @@ SharedPtr<Value> PadList::get_dynamic(int level, int index) const {
 }
 
 SharedPtr<Value> PadList::get(int index) const {
-// printf("GET:: %d, %zd\n", index, pad_.size());
+// printf("GET:: %d, %ld\n", index, (long int) pad_.size());
     if (index < pad_.size()) {
         return pad_.at(index);
     } else {
-// printf("UNDEF:: %d, %zd\n", index, pad_.size());
+// printf("UNDEF:: %d, %ld\n", index, (long int) pad_.size());
         return UndefValue::instance();
     }
 }

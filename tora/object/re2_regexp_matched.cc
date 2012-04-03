@@ -85,7 +85,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM * vm, Value* self, Value *
     } else if (index->value_type == VALUE_TYPE_STR) {
         TODO();
     } else {
-        throw new ExceptionValue("RE2::Regexp::Matched[index], index should be string or integer but you passed %s", index->type_str());
+        throw new ExceptionValue("RE2::Regexp::Matched[index], index should be string or integer but you passed %s", (long int) index->type_str());
     }
 }
 

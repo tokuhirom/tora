@@ -11,7 +11,7 @@ using namespace tora;
 SharedPtr<Value> LexicalVarsFrame::get_variable(int id) const {
 #ifndef NDEBUG
     if (id >= this->vars.capacity()) {
-        fprintf(stderr, "[BUG] id< vars.capacity(). id: %d, capacity: %zd\n", id, this->vars.capacity());
+        fprintf(stderr, "[BUG] id< vars.capacity(). id: %d, capacity: %ld\n", (long int) id, (long int) this->vars.capacity());
         abort();
     }
 #endif

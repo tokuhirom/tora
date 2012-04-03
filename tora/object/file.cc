@@ -6,6 +6,10 @@
 #include "../value/file.h"
 #include "../package.h"
 
+#ifdef _WIN32
+#include <winerror.h>
+#endif
+
 using namespace tora;
 
 /**
@@ -60,7 +64,7 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
  */
 static SharedPtr<Value> file_open_method(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     if (args.size() != 2 && args.size() != 3) {
-        return new ExceptionValue("Invalid argument count for open(): %zd. open() function requires 1 or 2 argument.", args.size());
+        return new ExceptionValue("Invalid argument count for open(): %ld. open() function requires 1 or 2 argument.", (long int) args.size());
     }
 
     return File_open(vm, args.at(1).get(), args.size()==3 ? args.at(2).get() : NULL);
@@ -99,7 +103,7 @@ static SharedPtr<Value> file_write(VM * vm, Value* self, Value *str_v) {
     if (ret==str.size()) {
         return UndefValue::instance();
     } else {
-        throw new ExceptionValue("Cannot write a text for file(%zd < %zd).", ret, str.size());
+        throw new ExceptionValue("Cannot write a text for file(%ld < %ld).", (long int) ret, (long int) str.size());
     }
 }
 
@@ -182,11 +186,15 @@ static SharedPtr<Value> file_tell(VM * vm, Value* self) {
  * Syncs buffers and file.
  */
 static SharedPtr<Value> file_sync(VM * vm, Value* self) {
+#ifdef _WIN32
+    throw new ErrnoExceptionValue(ERROR_CALL_NOT_IMPLEMENTED);
+#else
     if (fsync(fileno(FP(self))) == 0) {
         return UndefValue::instance();
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
+#endif
 }
 
 void tora::Init_File(VM* vm) {

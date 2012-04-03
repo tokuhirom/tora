@@ -38,7 +38,7 @@ void CodeValue::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
     printf("[dump] code: name: %s::%s\n", symbol_table->id2name(this->package_id).c_str(), symbol_table->id2name(this->func_name_id).c_str());
     for (size_t i=0; i<this->code_opcodes->size(); i++) {
         print_indent(indent+1);
-        printf("[%zd] %s\n", i, opcode2name[this->code_opcodes->at(i)->op_type]);
+        printf("[%ld] %s\n", (long int) i, opcode2name[this->code_opcodes->at(i)->op_type]);
     }
     printf("----------------\n");
 }

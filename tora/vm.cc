@@ -450,7 +450,7 @@ void VM::dump_frame() {
         printf("type: %s [%d]\n", (*f)->type_str(), i++);
         /*
         for (size_t n=0; n<(*f)->vars.size(); n++) {
-            printf("  %zd:", n);
+            printf("  %ld:", (long int) n);
             SharedPtr<Value> val = (*f)->vars.at(n);
             if (val.get()) {
                 dump_value(val);
@@ -466,7 +466,7 @@ void VM::dump_frame() {
 void VM::dump_stack() {
     printf("-- STACK DUMP --\nSP: %d\n", sp);
     for (size_t i=0; i<stack.size(); i++) {
-        printf("[%zd] ", i);
+        printf("[%ld] ", (long int) i);
         dump_value(stack.at(i));
     }
     printf("----------------\n");
@@ -598,7 +598,7 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     // TODO: kwargs support
 #ifndef NDEBUG
     if (argcnt != (int)code->code_params()->size()) {
-        fprintf(stderr, "[BUG] argument count mismatch. name: %s, argcnt: %d, code_params.size(): %zd\n", symbol_table->id2name(code->package_id()).c_str(), argcnt, code->code_params()->size());
+        fprintf(stderr, "[BUG] argument count mismatch. name: %s, argcnt: %d, code_params.size(): %ld\n", symbol_table->id2name(code->package_id()).c_str(), argcnt, (long int) code->code_params()->size());
         abort();
     }
 #endif
@@ -666,7 +666,7 @@ void VM::add_library_path(const std::string &dir) {
  */
 void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id) {
     if (!(stack.size() >= (size_t) get_int_operand())) {
-        // printf("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), stack.size());
+        // printf("[BUG] bad argument: %s requires %d arguments but only %ld items available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), (long int) stack.size());
         dump_stack();
         abort();
     }

@@ -30,10 +30,10 @@ public:
 
 void Compiler::dump_localvars() {
     printf("-- dump_localvars --\n");
-    printf("Levels: %zd\n", this->blocks->size());
+    printf("Levels: %ld\n", (long int) this->blocks->size());
     for (size_t level = 0; level < this->blocks->size(); ++level) {
         SharedPtr<Block> block = this->blocks->at(level);
-        printf("[%zd] %d\n", level, block->type);
+        printf("[%ld] %d\n", (long int) level, block->type);
         for (size_t i=0; i<block->vars.size(); i++) {
             printf("    %s\n", block->vars.at(i)->c_str());
         }
@@ -651,7 +651,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                 assert(funcdef_node->params()->at(i)->list->size() == 2);
                 const SharedPtr<Node>& default_node = funcdef_node->params()->at(i)->at(1);
                 if (default_node.get()) {
-                    // printf("FOUND DEFAULT VALUE: %zd\n", i);
+                    // printf("FOUND DEFAULT VALUE: %ld\n", (long int) i);
                     // compile arguments to anonymous function.
                     defaults->push_back(funccomp.ops->size());
                     funccomp.compile(default_node);
