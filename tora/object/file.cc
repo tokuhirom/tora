@@ -41,7 +41,7 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
     )) {
         return file;
     } else {
-        return new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), get_strerror(get_errno()).c_str());
+        throw new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), get_strerror(get_errno()).c_str());
     }
 }
 

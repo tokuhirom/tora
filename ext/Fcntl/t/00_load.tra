@@ -1,0 +1,12 @@
+use Test::More *;
+use Fcntl;
+
+ok(Fcntl.meta.has_method('LOCK_SH'));
+ok(Fcntl.meta.has_method('LOCK_EX'));
+ok(Fcntl.meta.has_method('LOCK_UN'));
+ok(Fcntl.meta.has_method('flock'));
+
+my $fh = open('t/00_load.tra');
+Fcntl.flock($fh.fileno, Fcntl.LOCK_EX);
+
+done_testing;
