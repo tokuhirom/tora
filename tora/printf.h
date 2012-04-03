@@ -2,6 +2,7 @@
 #define TORA_PRINTF_H_
 
 #include <vector>
+#include <string>
 #include "shared_ptr.h"
 
 namespace tora {
