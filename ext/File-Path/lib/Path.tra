@@ -41,7 +41,7 @@ class Path::Dir is Path::Base {
     sub mkpath() {
         File::Path::mkpath(${self});
     }
-    sub rmtree($path) {
+    sub rmtree() {
         File::Path::rmtree(${self});
     }
     sub __iter__() {

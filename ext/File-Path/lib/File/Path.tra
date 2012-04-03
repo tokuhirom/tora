@@ -16,7 +16,7 @@ METHODS
 
 This method is same as `mkdir -p $name`.
 
-### rmpath(Str $name) : Undef
+### rmtree(Str $name) : Undef
 
 This method is same as `rm -rf $name`.
 

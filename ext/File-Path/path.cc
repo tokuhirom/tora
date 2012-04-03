@@ -24,9 +24,9 @@ static SharedPtr<Value> File_Path_mkpath(VM *vm, Value *name) {
 }
 
 /**
- * File::Path::rmpath(Str $name) : Undef
+ * File::Path::rmtree(Str $name) : Undef
  */
-static SharedPtr<Value> File_Path_rmpath(VM *vm, Value *name) {
+static SharedPtr<Value> File_Path_rmtree(VM *vm, Value *name) {
     try {
         boost::filesystem::remove_all(name->to_s()->c_str());
         return UndefValue::instance();
@@ -40,7 +40,7 @@ extern "C" {
 void Init_File_Path(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("File::Path");
     pkg->add_method("mkpath", new CallbackFunction(File_Path_mkpath));
-    pkg->add_method("rmpath", new CallbackFunction(File_Path_rmpath));
+    pkg->add_method("rmtree", new CallbackFunction(File_Path_rmtree));
 }
 
 }

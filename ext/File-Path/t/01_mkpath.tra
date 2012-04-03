@@ -17,7 +17,7 @@ mkpath('t/tmp/foo/bar/');
 
 ok(-d 't/tmp/foo/bar/');
 
-rmpath('t/tmp/foo/');
+rmtree('t/tmp/foo/');
 
 ok(!-e 't/tmp/foo/bar/');
 ok(!-e 't/tmp/foo/');
