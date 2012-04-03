@@ -2,3 +2,21 @@ use XSLoader;
 
 XSLoader.load("File::Path");
 
+__END__
+
+File::Path
+==========
+
+Create/Remove directories recursively.
+
+METHODS
+-------
+
+### mkpath(Str $name) : Undef
+
+This method is same as `mkdir -p $name`.
+
+### rmpath(Str $name) : Undef
+
+This method is same as `rm -rf $name`.
+

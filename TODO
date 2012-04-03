@@ -30,6 +30,8 @@ Enumerable#sort_by()
 
 for (my $e in dir('t')) { ... }
 
+`` operator.
+
 File::Temp
 
 open()
