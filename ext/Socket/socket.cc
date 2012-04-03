@@ -214,7 +214,7 @@ static SharedPtr<Value> sock_read(VM * vm, const std::vector<SharedPtr<Value>>&a
             throw new ErrnoExceptionValue(get_errno());
         }
     } else {
-        throw new ExceptionValue("Invalid argument count for Socket::Socket::read: %zd", args.size());
+        throw new ExceptionValue("Invalid argument count for Socket::Socket::read: %ld", (long int) args.size());
     }
 }
 

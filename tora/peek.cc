@@ -15,10 +15,10 @@ void tora::peek(VM *vm, const Value * v) {
     if (v) {
         printf("Value: %s(%p)\n", v->type_str(), v);
         /*
-        printf("  CODE SIZE: %zd\n", sizeof(CodeValue));
-        printf("  STR SIZE: %zd\n", sizeof(StrValue));
-        printf("  VALUE SIZE: %zd\n", sizeof(Value));
-        printf("  INT SIZE: %zd\n", sizeof(IntValue));
+        printf("  CODE SIZE: %ld\n", (long int) sizeof(CodeValue));
+        printf("  STR SIZE: %ld\n", (long int) sizeof(StrValue));
+        printf("  VALUE SIZE: %ld\n", (long int) sizeof(Value));
+        printf("  INT SIZE: %ld\n", (long int) sizeof(IntValue));
         */
         printf("  REFCNT: %d\n", v->refcnt);
         switch (v->value_type) {
@@ -43,7 +43,7 @@ void tora::peek(VM *vm, const Value * v) {
         }
         case VALUE_TYPE_ARRAY: {
             const ArrayValue* av = static_cast<const ArrayValue*>(v);
-            printf("  SIZE: %zd\n", av->size());
+            printf("  SIZE: %ld\n", (long int) av->size());
             break;
         }
         case VALUE_TYPE_UNDEF:

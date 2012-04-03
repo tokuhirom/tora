@@ -7,7 +7,7 @@ using namespace tora;
 
 void tora::Node::dump(int indent) {
     print_indent(indent);
-    printf("[%s] %s(size: %zd)\n", this->type_name_str(), node_type2name[this->type], this->list->size());
+    printf("[%s] %s(size: %ld)\n", this->type_name_str(), node_type2name[this->type], (long int) this->list->size());
     for (size_t i=0; i<this->list->size(); i++) {
         auto n = this->list->at(i);
         if (n.get()) {

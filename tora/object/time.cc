@@ -96,7 +96,7 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
     size_t r = strftime(out, sizeof(out), format_s->upcast<StrValue>()->str_value().c_str(), static_cast<const struct tm*>(tm));
     if (r == sizeof(out)) {
         // should be retry?
-        return new ExceptionValue("strftime overflow: %d", sizeof(r));
+        return new ExceptionValue("strftime overflow: %ld", (long int) sizeof(r));
     }
 
     return new StrValue(out);
