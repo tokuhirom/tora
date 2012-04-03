@@ -16,9 +16,11 @@ env = Environment(
     tools=conf['TOOLS'],
 )
 
-libs = ['tora', 're2']
+libs = conf['LIBS']
 if os.name == 'nt':
-    libs += ['ws2_32', 'pthread', 'curldll']
+    libs += ['curldll']
+else:
+    libs += ['curl']
 
 shlib = env.SharedLibrary("lib/Curl" + conf['TORA_EXTSUFFIX'], ['curl.cc'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
 Default(shlib)
