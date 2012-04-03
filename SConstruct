@@ -144,7 +144,7 @@ libfiles = [
 ########
 # tests.
 
-programs = ['bin/tora']
+programs = ['bin/tora' + exe_suffix]
 for src in glob("tests/test_*.cc"):
     programs.append(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
         libfiles,
@@ -164,7 +164,7 @@ if 'test' in COMMAND_LINE_TARGETS:
     except: pass
     env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
 
-env.Command('test.valgrind', ['bin/tora'], 'perl misc/valgrind.pl');
+env.Command('test.valgrind', ['bin/tora' + exe_suffix], 'perl misc/valgrind.pl');
 
 if 'bench' in COMMAND_LINE_TARGETS:
     env.Command('bench', [], 'git log --oneline | head -1 && scons ndebug=1 test && ./bin/tora -V && time ./bin/tora benchmark/fib/fib.tra 39')
@@ -172,7 +172,7 @@ if 'bench' in COMMAND_LINE_TARGETS:
 if 'op' in COMMAND_LINE_TARGETS:
     env.Command('op', [], 'git log --oneline | head -1 && scons && ./bin/tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./bin/tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
 
-env.Command('docs', ['bin/tora', Glob("tora/object/*.cc"), Glob("docs/source/*")], './bin/tora util/docgen.tra && cd docs/ && make html')
+env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("docs/source/*")], './bin/tora util/docgen.tra && cd docs/ && make html')
 
 ########
 # main programs
@@ -236,7 +236,7 @@ libtora = env.Library('tora', [
     libre2
 ])
 
-tora = env.Program('bin/tora', [
+tora = env.Program('bin/tora' + exe_suffix, [
     ['tora/main.cc'],
     libtora,
     libre2
@@ -253,7 +253,7 @@ lemon_env.Program(lemon, ['tools/lemon/lemon.c']);
 # ----------------------------------------------------------------------
 # instalation
 installs = []
-installs += [env.Install(env['PREFIX']+'/bin/', 'bin/tora')];
+installs += [env.Install(env['PREFIX']+'/bin/', 'bin/tora' + exe_suffix)];
 installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
 exts = []
 for ext in os.listdir('ext'):
