@@ -148,6 +148,46 @@ static SharedPtr<Value> str_index(VM *vm, const std::vector<SharedPtr<Value>>& a
     return new IntValue(ret == std::string::npos ? -1 : ret);
 }
 
+/**
+ * $string.upper() : Str
+ *
+ * Return a copy of s, but with upper case letters converted to upper case.
+ */
+static SharedPtr<Value> str_upper(VM *vm, Value *self) {
+    if (self->value_type != VALUE_TYPE_STR) {
+        throw new ExceptionValue("This is a method for string object.");
+    }
+    std::string s = static_cast<StrValue*>(self)->str_value();
+    std::string ret;
+    std::string::iterator i = s.begin();
+    std::string::iterator end = s.end();
+    while (i != end) {
+        ret += std::toupper((unsigned char)*i);
+        ++i;
+    }
+    return new StrValue(ret);
+}
+
+/**
+ * $string.lower() : Str
+ *
+ * Return a copy of s, but with upper case letters converted to lower case.
+ */
+static SharedPtr<Value> str_lower(VM *vm, Value *self) {
+    if (self->value_type != VALUE_TYPE_STR) {
+        throw new ExceptionValue("This is a method for string object.");
+    }
+    std::string s = static_cast<StrValue*>(self)->str_value();
+    std::string ret;
+    std::string::iterator i = s.begin();
+    std::string::iterator end = s.end();
+    while (i != end) {
+        ret += std::tolower((unsigned char)*i);
+        ++i;
+    }
+    return new StrValue(ret);
+}
+
 void tora::Init_Str(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
     pkg->add_method("length",  new CallbackFunction(str_length));
@@ -157,5 +197,7 @@ void tora::Init_Str(VM *vm) {
     pkg->add_method("scan",    new CallbackFunction(str_scan));
     pkg->add_method("split",   new CallbackFunction(str_split));
     pkg->add_method("index",   new CallbackFunction(str_index));
+    pkg->add_method("upper",   new CallbackFunction(str_upper));
+    pkg->add_method("lower",   new CallbackFunction(str_lower));
 }
 

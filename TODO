@@ -47,8 +47,6 @@ String#replace(regexp|str, code)
 my $a=[];
 $a[100]; # => undef
 
-Fcntl.flock()
-
 generate document
 
 Standard Libraries
@@ -65,6 +63,9 @@ Test::Fatal
 File::which
 
 UV or EV?
+
+XML::LibXML
+(HTML::Parser)
 
 syntax
 ------
@@ -235,3 +236,5 @@ File#rewind()
 Dir.mkdir
 Dir.rmdir
 File#sync()
+Fcntl.flock()
+

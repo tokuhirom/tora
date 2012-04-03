@@ -24,5 +24,10 @@ note("index"); {
     is("foobar".index("r", 1), 5); # same as perl5.
 };
 
+note("uc"); {
+    is("fOobar1234".upper, 'FOOBAR1234');
+    is("FoobAr1234".lower, 'foobar1234');
+};
+
 done_testing;
 
