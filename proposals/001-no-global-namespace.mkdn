@@ -1,0 +1,76 @@
+No global namespaces for Class
+==============================
+
+Problem
+-------
+
+Current version of tora have a global package name space like Perl5.
+
+It causes versioning issue. module Foo 0.0.1 requires module Bar 0.0.2, and module Baz requires module Bar 1.0.1, then it cannot resolve. Perl5 cannot resolve this issue. Tora should provide solution for this issue.
+
+I think node.js' solution is good for this problem.
+
+Solusion
+--------
+
+Export public class by use statement.
+
+    # in Foo.tra
+    class Foo {
+        sub new() {
+            self.bless([]);
+        }
+    }
+
+    # in Bar.tra
+    use Foo *;
+    Foo.new();
+
+You can use alias.
+
+    use Foo {
+        Foo => 'Bar',
+    };
+    Bar.new();
+
+Class is not depend to public namespace.
+
+    class Foo {
+        sub new() {
+            self.bless([]);
+        }
+    }
+
+means
+
+    my $klass = Class.new('Foo');
+    $klass.add_method('new', sub ($self) {
+        $self.bless([]);
+    });
+
+If you want to inherit from existing class, you must export parent class to the current context.
+
+    my $parent = Class.new('Parent');
+    my $klass = Class.new('Foo');
+    $klass.parent($parent);
+    $klass.add_method('new', sub ($self) {
+        $self.bless([]);
+    });
+
+### How can I use class without importing?
+
+You can call it by following form.
+
+    # Foo.tra
+    class Foo {
+        sub new() {
+            self.bless([]);
+        }
+    }
+
+    # main.tra
+    use Foo;
+
+    my $foo = Foo.Foo.new();
+
+
