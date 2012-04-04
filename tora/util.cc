@@ -52,6 +52,10 @@ int tora::hexchar2int(unsigned char c) {
     }
 }
 
+int tora::octchar2int(unsigned char c) {
+    return c-'0';
+}
+
 void tora::set_errno(int err) {
 #ifdef _WIN32
     SetLastError(err);

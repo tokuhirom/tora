@@ -7,6 +7,8 @@
 #include "value/object.h"
 #include "value/regexp.h"
 
+#include <boost/format.hpp>
+
 using namespace tora;
 
 Inspector::Inspector(VM *vm) : vm_(vm) {
@@ -71,9 +73,20 @@ std::string Inspector::inspect(Value* v) const {
         return "#<Exception>";
     case VALUE_TYPE_SYMBOL:
         return "#<Symbol>";
-    case VALUE_TYPE_BYTES:
-        // TODO: support better inspeciton
-        return "#<Bytes>";
+    case VALUE_TYPE_BYTES: {
+        std::ostringstream os;
+        std::string buf = static_cast<const BytesValue*>(v)->str_value();
+
+        os << "b\"";
+        for (auto iter: buf) {
+            const unsigned char c = iter;
+            os << "\\x";
+            os << "0123456789abcdef"[c>>4&0x0f];
+            os << "0123456789abcdef"[c&0x0f];
+        }
+        os << '"';
+        return os.str();
+    }
     case VALUE_TYPE_HASH: {
         std::string ret("{");
         SharedPtr<HashValue> hv = v->upcast<HashValue>();

@@ -532,6 +532,15 @@ double_bytes_literal:
         tora_add_string_literal(static_cast<char>(ret));
         goto double_bytes_literal;
     }
+    "\\" [0-7]{3} {
+        char ret = (
+              (octchar2int(*(m_cursor-3)) << 6)
+            + (octchar2int(*(m_cursor-2)) << 3)
+            + octchar2int(*(m_cursor-1))
+        );
+        tora_add_string_literal(static_cast<char>(ret));
+        goto double_bytes_literal;
+    }
     ANY_CHARACTER {
         tora_add_string_literal(*(m_cursor-1));
         goto double_bytes_literal;
