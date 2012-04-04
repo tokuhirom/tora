@@ -32,7 +32,7 @@ if os.name == 'nt':
     env = Environment(
         ENV={'PATH': os.environ['PATH']},
         LIBS=['re2', 'pthread', 'ws2_32'],
-        LIBPATH=['./'],
+        LIBPATH=['./', os.getcwd() + '/vendor/icu/source/lib'],
         CXXFLAGS=['-std=c++0x'],
         CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-march=native', '-g',
             # '-DPERLISH_CLOSURE'
@@ -49,7 +49,7 @@ if os.name == 'nt':
 else:
     env = Environment(
         LIBS=['re2', 'pthread', 'dl'],
-        LIBPATH=['./'],
+        LIBPATH=['./', os.getcwd() + '/vendor/icu/source/lib'],
         CXXFLAGS=['-std=c++0x'],
         CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
@@ -62,6 +62,10 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
+env.Append(
+    CCFLAGS=['-I' + os.getcwd() + '/vendor/icu/source/'],
+    LIBS=['icuuc', 'icudata']
+)
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
 exe_suffix = os.name == 'nt' and '.exe' or ''
@@ -105,6 +109,8 @@ else:
 # scons debug=1
 if ARGUMENTS.get('debug', 0):
     env.Append(CCFLAGS=['-g'])
+
+libicu = env.Command('', Glob('vendor/icu/*'), 'cd vendor/icu/source/ && ./configure --prefix=%s --enable-static --disable-tests --disable-samples --disable-icuio --disable-extras --disable-layout && make' % env.get('PREFIX'))
 
 re2files = [
     Glob('vendor/re2/re2/*.cc'),
@@ -233,7 +239,8 @@ with open('lib/Config.tra', 'w') as f:
 
 libtora = env.Library('tora', [
     libfiles,
-    libre2
+    libre2,
+    libicu
 ])
 
 tora = env.Program('bin/tora' + exe_suffix, [
