@@ -121,6 +121,7 @@ static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* json_v) {
 
 extern "C" {
 
+TORA_EXPORT
 void Init_JSON(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("JSON");
     pkg->add_method(vm->symbol_table->get_id("encode"), new CallbackFunction(json_encode));

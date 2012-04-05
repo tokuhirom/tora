@@ -18,6 +18,7 @@ static SharedPtr<Value> uri_unescape(VM *vm, Value *val) {
 
 extern "C" {
 
+TORA_EXPORT
 void Init_URI_Escape(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package("URI::Escape");
     pkg->add_method(vm->symbol_table->get_id("uri_escape"), new CallbackFunction(uri_escape));

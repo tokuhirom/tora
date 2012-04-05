@@ -10,14 +10,11 @@ env = Environment(
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],
+    LIBS=conf['LIBS'],
     tools=conf['TOOLS'],
 )
 
-libs = ['tora', 're2']
-if os.name == 'nt':
-    libs += ['ws2_32', 'pthread']
-
-shlib = env.SharedLibrary("lib/HTTP/Parser" + conf['TORA_EXTSUFFIX'], ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+shlib = env.SharedLibrary("lib/HTTP/Parser" + conf['TORA_EXTSUFFIX'], ['http.cc', 'picohttpparser.c'], SHLIBPREFIX='', LIBPATH=['../..'])
 Default(shlib)
 
 env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
