@@ -45,7 +45,7 @@ file($fname).open($mode="rb", $encoding="utf-8")
 File#write()
 File#read(n)
 
-Bytes#decode() / with icu?
+String#encode()
 
 String#replace(regexp|str, code)
 
@@ -247,3 +247,4 @@ Fcntl.flock()
 String.lc()
 String.uc()
  * 'a' x 3 or 'a' * 3
+Bytes#decode() / with icu?

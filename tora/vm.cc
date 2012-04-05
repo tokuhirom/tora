@@ -292,7 +292,8 @@ SharedPtr<Value> VM::require(Value * v) {
 }
 
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
-    if (callback->argc==-1) {
+    switch (callback->argc) {
+    case CallbackFunction::type_vmv: {
         std::vector<SharedPtr<Value>> vec;
         for (int i=0; i<argcnt; i++) {
             SharedPtr<Value> arg = stack.back();
@@ -301,26 +302,26 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         }
         SharedPtr<Value> ret = callback->func_vmv(this, vec);
         stack.push_back(ret);
-    } else if (callback->argc==-2) {
+        break;
+    }
+    case CallbackFunction::type_vm0: {
         SharedPtr<Value> ret = callback->func_vm0(this);
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push_back(ret);
-        }
-    } else if (callback->argc==-3) {
+        assert(ret->value_type != VALUE_TYPE_EXCEPTION);
+        stack.push_back(ret);
+        break;
+    }
+    case CallbackFunction::type_vm1: {
         if (argcnt != 1) {
             throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 1, argcnt);
         }
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
         SharedPtr<Value> ret = callback->func_vm1(this, v.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type() != EXCEPTION_TYPE_STOP_ITERATION) {
-            this->die(ret);
-        } else {
-            stack.push_back(ret);
-        }
-    } else if (callback->argc==-4) {
+        assert(!(ret->value_type == VALUE_TYPE_EXCEPTION && ret->upcast<ExceptionValue>()->exception_type() != EXCEPTION_TYPE_STOP_ITERATION));
+        stack.push_back(ret);
+        break;
+    }
+    case CallbackFunction::type_vm2: {
         if (argcnt != 2) {
             throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 2, argcnt);
         }
@@ -328,13 +329,13 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         stack.pop_back();
         SharedPtr<Value> v2 = stack.back();
         stack.pop_back();
+
         SharedPtr<Value> ret = callback->func_vm2(this, v.get(), v2.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push_back(ret);
-        }
-    } else if (callback->argc == CallbackFunction::type_vm3) {
+        assert(ret->value_type != VALUE_TYPE_EXCEPTION);
+        stack.push_back(ret);
+        break;
+    }
+    case CallbackFunction::type_vm3: {
         if (argcnt != 3) {
             throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 3, argcnt);
         }
@@ -344,13 +345,13 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         stack.pop_back();
         SharedPtr<Value> v3 = stack.back();
         stack.pop_back();
+
         SharedPtr<Value> ret = callback->func_vm3(this, v.get(), v2.get(), v3.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push_back(ret);
-        }
-    } else if (callback->argc == CallbackFunction::type_vm4) {
+        assert(ret->value_type != VALUE_TYPE_EXCEPTION);
+        stack.push_back(ret);
+        break;
+    }
+    case CallbackFunction::type_vm4: {
         if (argcnt != 4) {
             throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 4, argcnt);
         }
@@ -362,20 +363,41 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         stack.pop_back();
         SharedPtr<Value> v4 = stack.back();
         stack.pop_back();
+
         SharedPtr<Value> ret = callback->func_vm4(this, v.get(), v2.get(), v3.get(), v4.get());
-        if (ret->value_type == VALUE_TYPE_EXCEPTION) {
-            this->die(ret);
-        } else {
-            stack.push_back(ret);
-        }
-    } else if (callback->argc == CallbackFunction::type_const_int) {
+        assert(ret->value_type != VALUE_TYPE_EXCEPTION);
+        stack.push_back(ret);
+        break;
+    }
+    case CallbackFunction::type_const_int: {
         for (int i=0; i<argcnt; i++) {
             stack.pop_back(); // Foo::Bar.baz();
         }
         stack.push_back(new IntValue(callback->const_int));
-    } else {
-        fprintf(stderr, "Unknown callback type: %d\n", callback->argc);
+        break;
+    }
+    case CallbackFunction::type_vm_self_v: {
+        if (argcnt < 1) {
+            throw new ExceptionValue("ArgumentException: The method requires %d arguments but you passed %d.", 4, argcnt);
+        }
+
+        SharedPtr<Value> self = stack.back();
+        stack.pop_back();
+
+        std::vector<SharedPtr<Value>> vec;
+        for (int i=1; i<argcnt; i++) {
+            SharedPtr<Value> arg = stack.back();
+            stack.pop_back();
+            vec.push_back(arg);
+        }
+        SharedPtr<Value> ret = callback->func_vm_self_v(this, self.get(), vec);
+        stack.push_back(ret);
+        break;
+    }
+    default: {
+        this->die("Unknown callback type: %d\n", callback->argc);
         abort();
+    }
     }
 }
 

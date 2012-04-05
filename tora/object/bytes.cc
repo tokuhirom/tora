@@ -65,26 +65,22 @@ std::string eucjpToUtf8(const std::string& value)
 /**
  * $bytes.decode(Str $type="utf-8") : Undef
  */
-static SharedPtr<Value> Bytes_decode(VM *vm, const std::vector<SharedPtr<Value>>& args) {
-    if (args.size()==0) {
-        throw new ArgumentExceptionValue("Bytes#decode requires 0 or 1 arguments. but you passed %d.", args.size()-1);
-    }
-
-    if (args[0]->value_type != VALUE_TYPE_BYTES) {
+static SharedPtr<Value> Bytes_decode(VM *vm, Value *self_v, const std::vector<SharedPtr<Value>>& args) {
+    if (self_v->value_type != VALUE_TYPE_BYTES) {
         throw new ArgumentExceptionValue("This is not a bytes value.");
     }
-    BytesValue *self = args.at(0)->upcast<BytesValue>();
-    if (args.size() == 1) { // "foobar".decode()
+    BytesValue *self = static_cast<BytesValue*>(self_v);
+    if (args.size() == 0) { // "foobar".decode()
         return new StrValue(self->str_value());
-    } else if (args.size() == 2) {
+    } else if (args.size() == 1) {
         // convert to utf-8.
-        const char *srccharset = args[1]->to_s()->str_value().c_str();
+        const char *srccharset = args[0]->to_s()->str_value().c_str();
         icu::UnicodeString src(self->str_value().c_str(), self->str_value().length(), srccharset);
         std::string buf;
         src.toUTF8String(buf);
         return new StrValue(buf);
     } else {
-        throw new ArgumentExceptionValue("Bytes#decode requires 0 or 1 arguments. but you passed %d.", args.size()-1);
+        throw new ArgumentExceptionValue("Bytes#decode requires 0 or 1 arguments. but you passed %d.", args.size());
     }
 }
 

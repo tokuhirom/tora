@@ -6,6 +6,7 @@
 #include "../package.h"
 #include "../symbols.gen.h"
 #include <re2/re2.h>
+#include <unicode/unistr.h>
 
 using namespace tora;
 
