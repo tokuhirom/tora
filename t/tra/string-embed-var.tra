@@ -1,0 +1,9 @@
+use Test::More *;
+
+my $x='hoge';
+
+is("foo$x", "foohoge");
+is("foo $x bar", "foo hoge bar");
+is("$x bar", "hoge bar");
+
+done_testing;

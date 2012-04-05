@@ -49,13 +49,15 @@ bool Scanner::fill(int n) {
 
  
 int Scanner::scan(Node **yylval) {
+    char *start;
 std:
     m_token = m_cursor;
 
-    if (next_token) {
-        int n = next_token;
-        next_token = 0;
-        return n;
+    if (this->node_queue.size() > 0) {
+        NodeQueueStuff st = this->node_queue.front();
+        this->node_queue.pop();
+        *yylval = st.lval;
+        return st.type;
     }
 
     char close_char = '\0';
@@ -548,12 +550,22 @@ double_bytes_literal:
 */
 
 string_literal:
+    start = m_cursor;
 /*!re2c
     [")!}\]] {
         if (close_char == *(m_cursor-1)) {
-            *yylval = new StrNode(NODE_STRING, string_buffer->str());
-            delete string_buffer; string_buffer = NULL;
-            return STRING_LITERAL;
+            {
+                NodeQueueStuff st = {
+                    new StrNode(NODE_STRING, string_buffer->str()),
+                    STRING_LITERAL
+                };
+                this->node_queue.push(st);
+                tora_close_string_literal();
+            }
+            NodeQueueStuff st = this->node_queue.front();
+            this->node_queue.pop();
+            *yylval = st.lval;
+            return st.type;
         } else {
             tora_add_string_literal(*(m_cursor-1));
             goto string_literal;
@@ -594,6 +606,38 @@ string_literal:
     }
     "\\\\" {
         tora_add_string_literal('\\');
+        goto string_literal;
+    }
+    VARNAME {
+        // "xxx $foo yyy" => "xxx " + $foo + " yyy"
+        {
+            NodeQueueStuff st = {
+                new StrNode(NODE_STRING, string_buffer->str()),
+                STRING_LITERAL
+            };
+            this->node_queue.push(st);
+        }
+        {
+            NodeQueueStuff st = {
+                NULL, ADD
+            };
+            this->node_queue.push(st);
+        }
+        {
+            std::string token(start, m_cursor-start);
+            NodeQueueStuff st = {
+                new StrNode(NODE_GETVARIABLE, token),
+                VARIABLE
+            };
+            this->node_queue.push(st);
+        }
+        {
+            NodeQueueStuff st = {
+                NULL, ADD
+            };
+            this->node_queue.push(st);
+        }
+        tora_open_string_literal();
         goto string_literal;
     }
     ANY_CHARACTER {
@@ -645,7 +689,10 @@ qw_literal:
             qw_mode = '\0';
 
             if (string_buffer) {
-                this->next_token = QW_END;
+                NodeQueueStuff st = {
+                    NULL, QW_END
+                };
+                this->node_queue.push(st);
 
                 *yylval = new StrNode(NODE_STRING, string_buffer->str());
                 delete string_buffer; string_buffer = NULL;

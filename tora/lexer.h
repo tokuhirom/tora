@@ -10,6 +10,8 @@
 #include <fstream>
 #include <queue>
 
+#include <boost/shared_ptr.hpp>
+
 #include "node.h"
 #include "prim.h"
 
@@ -44,13 +46,18 @@ private:
     bool divable;
     std::stringstream *string_buffer;
     unsigned char qw_mode;
-    int next_token;
 
     struct HereDoc {
         StrNode *val;
         std::string marker;
     };
     std::queue<HereDoc*> heredoc_queue;
+    struct NodeQueueStuff {
+        Node *lval;
+        int type;
+    };
+    // queue to store the parsed stuffs.
+    std::queue<NodeQueueStuff> node_queue;
     std::string filename_;
  
 public:
@@ -78,6 +85,10 @@ public:
         assert(string_buffer);
         (*string_buffer) << c;
     }
+    void tora_close_string_literal() {
+        delete string_buffer;
+        string_buffer = NULL;
+    }
  
     Scanner( std::istream *ifs_, const std::string & filename, int init_size=1024 )
         : refcnt(0)
@@ -91,7 +102,6 @@ public:
         , divable(false)
         , string_buffer(NULL)
         , qw_mode('\0')
-        , next_token(0)
         , filename_(filename)
     {
         m_buffer = new char[m_buffer_size];
