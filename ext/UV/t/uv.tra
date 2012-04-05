@@ -1,0 +1,10 @@
+use UV *;
+use Test::More *;
+
+my $loop = UV.uv_default_loop();
+UV.uv_run($loop);
+
+ok(1);
+
+done_testing;
+
