@@ -123,7 +123,6 @@ feature
   * ~~
   * bignum support using ttmath?
   * for (my $i=0; $i<100; $i++) { } say($i); should be fail.
-  * use ICU for converting encoding.
   * local $n
   * check deep recursion
   * traits
@@ -142,16 +141,13 @@ Library
 -------
 
  * Socket
- * flock
  * readline
  * ANSIColor
  * HTTP client
- * HTTP server
  * B::Deparse
  * Test::More
- * dir()
- * file()
  * Text::MicroTemplate
+ * implement Path::Class detial.
 
 Finished
 --------
@@ -249,3 +245,8 @@ Bytes#decode() / with icu?
 
 String#encode()
 open()
+ * dir()
+ * file()
+ * flock
+ * HTTP server
+  * use ICU for converting encoding.

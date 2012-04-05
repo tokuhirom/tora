@@ -71,7 +71,9 @@ OP_NEW_RANGE {
 }
 
 OP_FUNCDEF {
-    SharedPtr<Value> code = stack.back(); stack.pop_back(); // code object
+    SharedPtr<Value> code = stack.back();
+    stack.pop_back();
+
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
     int pkgid = code->upcast<CodeValue>()->package_id();
@@ -947,14 +949,9 @@ OP_USE {
     SharedPtr<Value> include  = stack.back();
     stack.pop_back();
 
-    SharedPtr<Value> ret = this->require(mod_name.get());
-    if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1) {
-        SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id(), this->package_id());
-        if (v->is_exception()) {
-            this->die(ret);
-        }
-    }
-    stack.push_back(ret);
+    bool is_copy_all = include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1;
+    this->use(mod_name.get(), is_copy_all);
+    stack.push_back(UndefValue::instance());
 }
 
 OP_NOT {

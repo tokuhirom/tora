@@ -103,7 +103,8 @@ public:
 
     void dump_frame();
     void dump_stack();
-    SharedPtr<Value> require(Value *v);
+    void use(Value *v, bool);
+    void require_package(const std::string &);
     void add_function(ID pkgid, ID id, SharedPtr<Value> code);
     void add_function(ID pkgid, std::string &name, SharedPtr<Value> code) {
         this->add_function(pkgid, this->symbol_table->get_id(name), code);
@@ -126,7 +127,7 @@ public:
         return ops->at(pc)->operand.double_value;
     }
 
-    SharedPtr<Value> copy_all_public_symbols(ID srcid, ID dstid);
+    void copy_all_public_symbols(ID srcid, ID dstid);
     SharedPtr<Value> get_self();
 
     const SharedPtr<Value>& TOP() { return stack.back(); }

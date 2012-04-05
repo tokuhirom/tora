@@ -73,4 +73,8 @@ You can call it by following form.
 
     my $foo = Foo.Foo.new();
 
+Scoping
+-------
+
+Class and Function may register to file scope context.
 

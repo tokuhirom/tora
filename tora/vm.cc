@@ -240,12 +240,19 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     }
 }
 
-SharedPtr<Value> VM::require(Value * v) {
+void VM::use(Value * package_v, bool need_copy) {
+    std::string package = symbol_table->id2name(package_v->upcast<SymbolValue>()->id());
+    this->require_package(package);
+    if (need_copy) {
+        this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id(), this->package_id());
+    }
+}
+
+void VM::require_package(const std::string &package) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
     SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
-    std::string s = symbol_table->id2name(v->upcast<SymbolValue>()->id());
-    std::string package = s;
+    std::string s = package;
     {
         auto iter = s.find("::");
         while (iter != std::string::npos) {
@@ -260,7 +267,7 @@ SharedPtr<Value> VM::require(Value * v) {
         if (required->get(s)->value_type == VALUE_TYPE_UNDEF) {
             throw new StrValue("Compilation failed in require");
         } else {
-            return new IntValue(1);
+            return;
         }
     }
 
@@ -276,8 +283,8 @@ SharedPtr<Value> VM::require(Value * v) {
             required->set_item(new StrValue(s), realfilename_value);
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
-                SharedPtr<Value> ret = eval_foo(vm, &ifs, package, realfilename).get();
-                return ret;
+                (void)eval_foo(vm, &ifs, package, realfilename).get();
+                return;
             } else {
                 required->set_item(new StrValue(s), UndefValue::instance());
                 throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
@@ -412,7 +419,7 @@ void VM::register_standard_methods() {
     this->add_builtin_function("do",   builtin_do);
 }
 
-SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
+void VM::copy_all_public_symbols(ID srcid, ID dstid) {
     SharedPtr<Package> srcpkg = this->find_package(srcid);
     SharedPtr<Package> dstpkg = this->find_package(dstid);
 
@@ -427,8 +434,6 @@ SharedPtr<Value> VM::copy_all_public_symbols(ID srcid, ID dstid) {
             // copy non-code value to other package?
         }
     }
-    // dstpkg->dump(this->symbol_table, 1);
-    return UndefValue::instance();
 }
 
 void VM::add_function(ID pkgid, ID id, SharedPtr<Value> code) {

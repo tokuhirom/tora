@@ -10,6 +10,7 @@
 #include "value/object.h"
 #include "value/pointer.h"
 #include "value/array.h"
+#include "value/symbol.h"
 #include "value/str.h"
 #include "value/exception.h"
 #include "value.h"
@@ -119,7 +120,10 @@ static SharedPtr<Value> builtin_self(VM *vm) {
  * require("foo/bar.tra")
  */
 static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
-    return vm->require(v);
+    ID id = v->upcast<SymbolValue>()->id();
+    std::string name = vm->symbol_table->id2name(id);
+    vm->require_package(name);
+    return UndefValue::instance();
 }
 
 /**
