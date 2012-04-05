@@ -628,28 +628,29 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     frame_stack->push_back(fframe);
 }
 
-/**
- * inject codevalue to VM, and execute it.
- */
 void VM::function_call_ex(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> &self) {
-    // non-native only?
-    size_t pc = this->pc;
-    // TODO: catch exceptions in destroy
+    if (code->is_native()) {
+        this->call_native_func(code->callback(), argcnt);
+    } else {
+        // inject codevalue to VM, and execute it.
+        size_t pc = this->pc;
+        // TODO: catch exceptions in destroy
 
-    SharedPtr<OPArray> end_ops = new OPArray();
-    end_ops->push_back(new OP(OP_END), -1);
+        SharedPtr<OPArray> end_ops = new OPArray();
+        end_ops->push_back(new OP(OP_END), -1);
 
-    this->function_call(argcnt, code, self);
-    this->frame_stack->back()->upcast<FunctionFrame>()->return_address = -1;
-    SharedPtr<OPArray> orig_ops = this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops;
-    this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops = end_ops;
-    this->pc = 0;
-    this->execute();
+        this->function_call(argcnt, code, self);
+        this->frame_stack->back()->upcast<FunctionFrame>()->return_address = -1;
+        SharedPtr<OPArray> orig_ops = this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops;
+        this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops = end_ops;
+        this->pc = 0;
+        this->execute();
 
-    // restore
-    // TODO: restore variables by RAII
-    this->pc  = pc;
-    this->ops = orig_ops;
+        // restore
+        // TODO: restore variables by RAII
+        this->pc  = pc;
+        this->ops = orig_ops;
+    }
 }
 
 void VM::load_dynamic_library(const std::string &filename, const std::string &endpoint) {

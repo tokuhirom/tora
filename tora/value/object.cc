@@ -168,6 +168,7 @@ void ObjectValue::call_destroy() {
             // this->VAL().vm_->frame_stack->pop_back();
         } else {
             this->VAL().vm_->function_call_ex(0, code, this);
+            VAL().vm_->stack.pop_back(); // trash stack top.
         }
     }
 
