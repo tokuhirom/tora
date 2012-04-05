@@ -1,8 +1,17 @@
 use UV *;
 use Test::More *;
 
-my $loop = UV.uv_default_loop();
-UV.uv_run($loop);
+my $count = 3;
+my $loop = UV.default_loop();
+my $timer = UV::Timer.new();
+my $callback = -> $status {
+    say("count down $count");
+    if $count-- == 0 {
+        $loop.unref();
+    }
+};
+$timer.start($callback, 1000, 1000);
+$loop.run();
 
 ok(1);
 
