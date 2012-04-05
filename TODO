@@ -40,13 +40,10 @@ for (my $e in dir('t')) { ... }
 
 File::Temp
 
-open()
 open($fname, $mode, $encoding)
 file($fname).open($mode="rb", $encoding="utf-8")
 File#write()
 File#read(n)
-
-String#encode()
 
 String#replace(regexp|str, code)
 
@@ -249,3 +246,6 @@ String.lc()
 String.uc()
  * 'a' x 3 or 'a' * 3
 Bytes#decode() / with icu?
+
+String#encode()
+open()
