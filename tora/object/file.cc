@@ -207,6 +207,7 @@ void tora::Init_File(VM* vm) {
     pkg->add_method("open",    new CallbackFunction(file_open_method));
     pkg->add_method("slurp",   new CallbackFunction(file_slurp));
     pkg->add_method("write",   new CallbackFunction(file_write));
+    pkg->add_method("print",   new CallbackFunction(file_write));
     pkg->add_method("close",   new CallbackFunction(file_close));
     pkg->add_method("flush",   new CallbackFunction(file_flush));
     pkg->add_method("fileno",  new CallbackFunction(file_fileno));
