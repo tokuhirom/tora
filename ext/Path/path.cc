@@ -37,6 +37,7 @@ static SharedPtr<Value> File_Path_rmtree(VM *vm, Value *name) {
 
 extern "C" {
 
+TORA_EXPORT
 void Init_File_Path(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("File::Path");
     pkg->add_method("mkpath", new CallbackFunction(File_Path_mkpath));

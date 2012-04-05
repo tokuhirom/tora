@@ -11,14 +11,11 @@ env = Environment(
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],
+    LIBS=conf['LIBS'],
     tools=conf['TOOLS'],
 )
 
-libs = ['tora', 're2']
-if os.name == 'nt':
-    libs += ['ws2_32', 'pthread']
-
-shlib = env.SharedLibrary("lib/Digest/MD5" + conf['TORA_EXTSUFFIX'], ['Digest-MD5.cc', 'md5.c'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+shlib = env.SharedLibrary("lib/Digest/MD5" + conf['TORA_EXTSUFFIX'], ['Digest-MD5.cc', 'md5.c'], SHLIBPREFIX='', LIBPATH=['../..'])
 Default(shlib)
 
 env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/test.tra')

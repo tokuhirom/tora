@@ -47,16 +47,18 @@
 #define dlsym(x,y) (void*)GetProcAddress((HMODULE)x,y)
 #define dlclose(x) FreeLibrary((HMODULE)x)
 const char* dlerror() {
-    static char szMsgBuf[256];
+    DWORD err = (int) GetLastError();
+    if (err == 0) return NULL;
+    static char buf[256];
     FormatMessage(
             FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL,
-            GetLastError(),
+            err,
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            szMsgBuf,
-            sizeof szMsgBuf,
+            buf,
+            sizeof buf,
             NULL);
-    return szMsgBuf;
+    return buf;
 }
 #else
 #include <dlfcn.h>

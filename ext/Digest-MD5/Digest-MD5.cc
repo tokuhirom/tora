@@ -36,6 +36,7 @@ static SharedPtr<Value> Digest_MD5_md5_hex(VM *vm, Value *str) {
 
 extern "C" {
 
+TORA_EXPORT
 void Init_Digest_MD5(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("Digest::MD5");
     pkg->add_method(vm->symbol_table->get_id("md5_hex"), new CallbackFunction(Digest_MD5_md5_hex));

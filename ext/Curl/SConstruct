@@ -6,6 +6,12 @@ from glob import glob
 
 conf = json.loads(open('../../config.json').read())
 
+libs = conf['LIBS']
+if os.name == 'nt':
+    libs += ['curldll']
+else:
+    libs += ['curl']
+
 env = Environment(
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
@@ -13,16 +19,11 @@ env = Environment(
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],
+    LIBS=libs,
     tools=conf['TOOLS'],
 )
 
-libs = conf['LIBS']
-if os.name == 'nt':
-    libs += ['curldll']
-else:
-    libs += ['curl']
-
-shlib = env.SharedLibrary("lib/Curl" + conf['TORA_EXTSUFFIX'], ['curl.cc'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+shlib = env.SharedLibrary("lib/Curl" + conf['TORA_EXTSUFFIX'], ['curl.cc'], SHLIBPREFIX='', LIBPATH=['../..'])
 Default(shlib)
 
 env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/curl.tra')

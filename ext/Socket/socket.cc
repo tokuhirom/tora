@@ -313,6 +313,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
 
 extern "C" {
 
+TORA_EXPORT
 void Init_Socket(VM* vm) {
     // socket, bind, listen, accept, send, recv
     // "accept", "bind", "connect", "getpeername", "getsockname", "getsockopt", "listen", "recv", "send", "setsockopt",

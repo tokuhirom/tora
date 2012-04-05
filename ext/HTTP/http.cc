@@ -311,6 +311,7 @@ static SharedPtr<Value> HTTP_Parser_parse_http_response(VM *vm, Value *bytes_v, 
 
 extern "C" {
 
+TORA_EXPORT
 void Init_HTTP_Parser(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("HTTP::Parser");
     pkg->add_method("parse_http_request", new CallbackFunction(HTTP_Parser_parse_http_request));

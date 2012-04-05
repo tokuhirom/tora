@@ -26,6 +26,7 @@ static SharedPtr<Value> Fcntl_flock(VM *vm, Value *str, Value *fileno_v, Value *
 
 extern "C" {
 
+TORA_EXPORT
 void Init_Fcntl(VM* vm) {
     SharedPtr<Package> pkg = vm->find_package("Fcntl");
     pkg->add_method("flock", new CallbackFunction(Fcntl_flock));
