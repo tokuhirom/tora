@@ -1,0 +1,9 @@
+Extension developer's guide
+===========================
+
+Notes
+-----
+
+ * You can wrap a C++ level pointer to the PointerValue. Do not use IntValue, it's not portable.
+ * You must return the value instance from each methods. You must not return NULL. It cause segv.
+
