@@ -9,12 +9,13 @@ conf = json.loads(open('../../config.json').read())
 if os.name == 'nt':
     libs = conf['LIBS'] + ['uv', 'psapi', 'iphlpapi', 'pthread']
 else:
-    libs = conf['LIBS']
+    libs = conf['LIBS'] + ['m', 'rt', 'pthread']
 
 env = Environment(
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
     LINKFLAGS=conf['LINKFLAGS'],
+    CPPPATH=conf['CPPPATH']+['../../vendor/libuv/include/'],
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],
@@ -22,7 +23,12 @@ env = Environment(
     tools=conf['TOOLS'],
 )
 
-shlib = env.SharedLibrary("lib/UV_" + conf['TORA_EXTSUFFIX'], ['uv.cc'], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+# see http://stackoverflow.com/questions/2246399/scons-to-make-a-shared-library-so-with-a-static-libarary-a
+env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1
+
+libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), [], 'cd ../../vendor/libuv/ && make CFLAGS+=-fPIC');
+
+shlib = env.SharedLibrary("lib/UV_" + conf['TORA_EXTSUFFIX'], ['uv.cc', libuv], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
 Default(shlib)
 
 env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/uv.tra')

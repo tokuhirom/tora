@@ -23,7 +23,7 @@ struct _uv_data {
 };
 
 static SharedPtr<Value> _uv_default_loop(VM * vm, Value* self) {
-    return new ObjectValue(vm, vm->symbol_table->get_id("UV::Loop"), new IntValue((int) uv_default_loop()));
+    return new ObjectValue(vm, vm->symbol_table->get_id("UV::Loop"), new PointerValue(uv_default_loop()));
 }
 
 static SharedPtr<Value> _uv_run(VM * vm, Value* self) {
@@ -58,12 +58,13 @@ static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value
     if (args.size() == 1) {
         loop = uv_default_loop();
     } else {
+        // uv.cc:61:48: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
         loop = (uv_loop_t*) args.at(2)->to_int();
     }
     uv_timer_t* timer = new uv_timer_t;
     if (uv_timer_init(loop, timer) == 0) {
         timer->data = new _uv_data(vm, loop, NULL);
-        return new ObjectValue(vm, vm->symbol_table->get_id("UV::Timer"), new IntValue((int) timer));
+        return new ObjectValue(vm, vm->symbol_table->get_id("UV::Timer"), new PointerValue(timer));
     } else {
         delete timer;
         throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
@@ -71,15 +72,16 @@ static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value
 }
 
 void __uv_timer_cb(uv_timer_t* timer, int status) {
-    ((_uv_data*) timer->data)->vm->VM::function_call_ex(
-        1, ((_uv_data*) timer->data)->callback, new IntValue(status));
+    VM *vm = ((_uv_data*) timer->data)->vm;
+    vm->function_call_ex(
+        0, ((_uv_data*) timer->data)->callback, new IntValue(status));
 }
 
 static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v, Value* timeout_v, Value* repeat_v) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> timer_ = self->upcast<ObjectValue>()->data();
-    assert(timer_->value_type == VALUE_TYPE_INT);
-    uv_timer_t *timer = (uv_timer_t*) timer_->upcast<IntValue>()->int_value();
+    assert(timer_->value_type == VALUE_TYPE_POINTER);
+    uv_timer_t *timer = (uv_timer_t*) timer_->upcast<PointerValue>()->ptr();
 
     assert(callback_v->value_type == VALUE_TYPE_CODE);
     ((_uv_data*) timer->data)->callback = callback_v->upcast<CodeValue>();
@@ -88,7 +90,7 @@ static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v,
     if (uv_timer_start(timer, __uv_timer_cb, timeout_v->to_int(), repeat_v->to_int()) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) timer->data)->loop)));
     }
-    return NULL;
+    return UndefValue::instance();
 }
 
 static SharedPtr<Value> _uv_timer_DESTROY(VM *vm, Value *self) {
@@ -99,7 +101,7 @@ static SharedPtr<Value> _uv_timer_DESTROY(VM *vm, Value *self) {
     uv_close((uv_handle_t*) timer, NULL);
     if (timer->data) delete ((_uv_data*) timer->data);
     delete timer;
-    return NULL;
+    return UndefValue::instance();
 }
 
 extern "C" {
