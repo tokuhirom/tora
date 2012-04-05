@@ -189,6 +189,33 @@ static SharedPtr<Value> str_lower(VM *vm, Value *self) {
     return new StrValue(ret);
 }
 
+/**
+ * $str.encode(Str $encoding='utf-8') : Bytes
+ *
+ * Encode a string to bytes.
+ */
+static SharedPtr<Value> str_encode(VM *vm, Value *self_v, const std::vector<SharedPtr<Value>> & args) {
+    if (self_v->value_type != VALUE_TYPE_STR) {
+        throw new ArgumentExceptionValue("This is not a string value.");
+    }
+    StrValue *self = static_cast<StrValue*>(self_v);
+    if (args.size() == 0) { // "foobar".decode()
+        return new BytesValue(self->str_value());
+    } else if (args.size() == 1) {
+        // convert to utf-8.
+        icu::UnicodeString src(self->str_value().c_str(), "utf8");
+        const char *dstcharset = args[0]->to_s()->str_value().c_str();
+        int length = src.extract(0, src.length(), NULL, dstcharset);
+
+        std::vector<char> result(length + 1);
+        src.extract(0, src.length(), &result[0], dstcharset);
+
+        return new BytesValue(std::string(result.begin(), result.end() - 1));
+    } else {
+        throw new ArgumentExceptionValue("Bytes#decode requires 0 or 1 arguments. but you passed %d.", args.size());
+    }
+}
+
 void tora::Init_Str(VM *vm) {
     SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
     pkg->add_method("length",  new CallbackFunction(str_length));
@@ -200,5 +227,6 @@ void tora::Init_Str(VM *vm) {
     pkg->add_method("index",   new CallbackFunction(str_index));
     pkg->add_method("upper",   new CallbackFunction(str_upper));
     pkg->add_method("lower",   new CallbackFunction(str_lower));
+    pkg->add_method("encode",  new CallbackFunction(str_encode));
 }
 
