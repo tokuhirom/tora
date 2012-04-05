@@ -91,6 +91,13 @@ Value * tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
         } else {
             return new IntValue(lhs->upcast<IntValue>()->int_value() * rhs->upcast<IntValue>()->int_value());
         }
+    } else if (lhs->value_type == VALUE_TYPE_STR) {
+        std::ostringstream buf;
+        int n = rhs->to_int();
+        for (int i=0; i<n; i++) {
+            buf << lhs->upcast<StrValue>()->str_value();
+        }
+        return new StrValue(buf.str());
     } else { 
         SharedPtr<Value> s(lhs->to_s());
         throw new ExceptionValue("'%s' is not numeric. You cannot multiply.", s->upcast<StrValue>()->str_value().c_str());

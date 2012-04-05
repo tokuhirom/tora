@@ -72,6 +72,8 @@ UV or EV?
 XML::LibXML
 (HTML::Parser)
 
+Digest::SHA1
+
 syntax
 ------
 
@@ -97,7 +99,6 @@ syntax
  * super()
  * signal handler
    * perl5's safe signals.
- * 'a' x 3 or 'a' * 3
 
 lambda
 ------
@@ -245,3 +246,4 @@ Fcntl.flock()
 
 String.lc()
 String.uc()
+ * 'a' x 3 or 'a' * 3

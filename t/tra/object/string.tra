@@ -29,5 +29,9 @@ note("uc"); {
     is("FoobAr1234".lower, 'foobar1234');
 };
 
+note("*"); {
+    is("hoge"*3, "hogehogehoge");
+}
+
 done_testing;
 
