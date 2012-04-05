@@ -695,18 +695,13 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                 this->compile(new StrNode(NODE_GETVARIABLE, *iter));
             }
 
-            push_op(new ValueOP(OP_PUSH_VALUE, code));
-
             // define method.
-            SharedPtr<OP> op = new OP(OP_CLOSUREDEF);
-            op->operand.int_value = funccomp.closure_vars->size();
-            push_op(op);
-        } else {
             push_op(new ValueOP(OP_PUSH_VALUE, code));
-
+            push_op(new OP(OP_CLOSUREDEF, funccomp.closure_vars->size()));
+        } else {
             // create normal function
-            SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
-            push_op(define_method);
+            push_op(new ValueOP(OP_PUSH_VALUE, code));
+            push_op(new OP(OP_FUNCDEF));
         }
 
         push_op(new ValueOP(OP_PUSH_VALUE, code));
