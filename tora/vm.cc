@@ -258,7 +258,7 @@ SharedPtr<Value> VM::require(Value * v) {
     // inc check
     if (required->has_key(s)) {
         if (required->get(s)->value_type == VALUE_TYPE_UNDEF) {
-            return new StrValue("Compilation failed in require");
+            throw new StrValue("Compilation failed in require");
         } else {
             return new IntValue(1);
         }
@@ -290,7 +290,7 @@ SharedPtr<Value> VM::require(Value * v) {
     for (int i=0; i<libpath->size(); i++) {
         message += "  " + libpath->at(i)->to_s()->str_value();
     }
-    return new ExceptionValue(message);
+    throw new ExceptionValue(message);
 }
 
 void VM::call_native_func(const CallbackFunction* callback, int argcnt) {

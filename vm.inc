@@ -946,18 +946,15 @@ OP_USE {
     stack.pop_back();
     SharedPtr<Value> include  = stack.back();
     stack.pop_back();
+
     SharedPtr<Value> ret = this->require(mod_name.get());
-    if (ret->is_exception()) {
-        this->die(ret);
-    } else {
-        if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1) {
-            SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id(), this->package_id());
-            if (v->is_exception()) {
-                this->die(ret);
-            }
+    if (include->value_type == VALUE_TYPE_INT && include->upcast<IntValue>()->int_value() == 1) {
+        SharedPtr<Value> v = this->copy_all_public_symbols(mod_name->upcast<SymbolValue>()->id(), this->package_id());
+        if (v->is_exception()) {
+            this->die(ret);
         }
-        stack.push_back(ret);
     }
+    stack.push_back(ret);
 }
 
 OP_NOT {
