@@ -129,8 +129,6 @@ public:
     SharedPtr<Value> copy_all_public_symbols(ID srcid, ID dstid);
     SharedPtr<Value> get_self();
 
-    void call_native_func(const CallbackFunction* callback, int argcnt);
-
     const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
     void extract_tuple(const SharedPtr<TupleValue> &t);
@@ -168,6 +166,7 @@ public:
 
 private:
     void handle_exception(const SharedPtr<Value> & exception);
+    void call_native_func(const CallbackFunction* callback, int argcnt);
 };
 
 };
