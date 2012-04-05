@@ -24,6 +24,11 @@ bool split_package_funname(const std::string & src, std::string & pkgname, std::
 int hexchar2int(unsigned char c);
 
 /**
+ * convert oct character to integer
+ */
+int octchar2int(unsigned char c);
+
+/**
  * retrun OS related assigning errno.
  */
 void set_errno(int err);

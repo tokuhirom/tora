@@ -62,6 +62,9 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
+env.MergeFlags([
+    '!icu-config --cppflags --ldflags'
+])
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
 exe_suffix = os.name == 'nt' and '.exe' or ''
@@ -233,7 +236,7 @@ with open('lib/Config.tra', 'w') as f:
 
 libtora = env.Library('tora', [
     libfiles,
-    libre2
+    libre2,
 ])
 
 tora = env.Program('bin/tora' + exe_suffix, [

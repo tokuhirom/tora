@@ -1,0 +1,7 @@
+use Test::More *;
+
+is(b"\xa4\xdb\xa4\xb2\xa4\xdb\xa4\xb2", b"\244\333\244\262\244\333\244\262");
+
+is(b"\xa4\xdb\xa4\xb2\xa4\xdb\xa4\xb2".decode('euc-jp'), 'ほげほげ');
+
+done_testing;
