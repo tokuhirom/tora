@@ -46,6 +46,9 @@ if os.name == 'nt':
         LIBS=['pthread'],
         tools=tools
     )
+    env.MergeFlags([
+        '-licuuc48 -licudt48'
+    ])
 else:
     env = Environment(
         LIBS=['re2', 'pthread', 'dl'],
@@ -62,9 +65,10 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
-env.MergeFlags([
-    '!icu-config --cppflags --ldflags'
-])
+    env.MergeFlags([
+        '!icu-config --cppflags --ldflags'
+    ])
+
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
 exe_suffix = os.name == 'nt' and '.exe' or ''
