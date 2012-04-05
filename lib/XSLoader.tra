@@ -1,4 +1,7 @@
-my $SOEXT = '.so';
+use Config *;
+
+my $conf = tora_config();
+my $SOEXT = $conf['SHLIBSUFFIX'];
 
 sub load($pkg) {
     for $LIBPATH -> $path {

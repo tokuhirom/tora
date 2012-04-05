@@ -223,6 +223,7 @@ with open('config.json', 'w') as f:
 
 with open('lib/Config.tra', 'w') as f:
     f.write("my $Config = {\n")
+    f.write("  SHLIBSUFFIX      => '" + env.get("SHLIBSUFFIX") + "',\n")
     f.write("  TORA_PREFIX      => '" + TORA_PREFIX      + "',\n")
     f.write("  TORA_CC          => '" + TORA_CC          + "',\n")
     f.write("  TORA_CXX         => '" + TORA_CXX         + "',\n")

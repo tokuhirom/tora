@@ -12,6 +12,7 @@ KNOWN BUGS LIST
 * possibly memory leaks in global destruction.
 * sub a () { (1,2,3) } my ($a, $b, $c, $d, $e) = a() causes segfault
 * my$x=4; { try { p($x); } }
+* use Config; tora_config()['SHLIBSUFFIX'];
 
 __END__
 use Test::More *;
