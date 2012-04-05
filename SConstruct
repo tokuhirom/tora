@@ -147,7 +147,6 @@ libfiles = [
     ''')
 ]
 
-
 ########
 # tests.
 
@@ -213,6 +212,7 @@ with open('config.json', 'w') as f:
         'CC':          TORA_CC,
         'CXX':         TORA_CXX,
         'CCFLAGS':     env.get('CCFLAGS'),
+        'CPPPATH':     env.get('CPPPATH'),
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
         'LIBS':        ['tora'] + env.get('LIBS'),
