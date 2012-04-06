@@ -1,7 +1,0 @@
-use UV;
-
-my $timer = UV::Timer.new;
-$timer.start(sub () {
-  say("timer!");
-}, 1, 1);
-UV.run();

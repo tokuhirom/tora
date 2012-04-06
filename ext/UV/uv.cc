@@ -91,12 +91,12 @@ static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value
         loop = static_cast<uv_loop_t*>(args.at(2)->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     }
     uv_timer_t* timer = new uv_timer_t;
-    if (uv_timer_init(loop, timer) == 0) {
-        timer->data = new _uv_data(vm, loop, NULL);
-        return new ObjectValue(vm, vm->symbol_table->get_id("UV::Timer"), new PointerValue(timer));
-    } else {
+    if (uv_timer_init(loop, timer) != 0) {
         delete timer;
         throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
+    } else {
+        timer->data = new _uv_data(vm, loop, NULL);
+        return new ObjectValue(vm, vm->symbol_table->get_id("UV::Timer"), new PointerValue(timer));
     }
 }
 
@@ -145,12 +145,12 @@ static SharedPtr<Value> _uv_tcp_new(VM * vm, const std::vector<SharedPtr<Value>>
         loop = static_cast<uv_loop_t*>(args.at(2)->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     }
     uv_tcp_t* tcp = new uv_tcp_t;
-    if (uv_tcp_init(loop, tcp) == 0) {
-        tcp->data = new _uv_data(vm, loop, NULL);
-        return new ObjectValue(vm, vm->symbol_table->get_id("UV::TCP"), new PointerValue(tcp));
-    } else {
+    if (uv_tcp_init(loop, tcp) != 0) {
         delete tcp;
         throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
+    } else {
+        tcp->data = new _uv_data(vm, loop, NULL);
+        return new ObjectValue(vm, vm->symbol_table->get_id("UV::TCP"), new PointerValue(tcp));
     }
 }
 
@@ -245,6 +245,66 @@ static SharedPtr<Value> _uv_read(VM * vm, Value* self, Value* callback_v) {
     return UndefValue::instance();
 }
 
+static SharedPtr<Value> _uv_tcp_bind(VM * vm, Value* self, Value* addr_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    SharedPtr<Value> addr = addr_v->to_s();
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
+
+    if (uv_tcp_bind(tcp, *(const sockaddr_in*)addr_s.c_str()) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
+static void __uv_connection_cb(uv_stream_t* handle, int status) {
+    VM *vm = ((_uv_data*) handle->data)->vm;
+    vm->stack.push_back(new IntValue(status));
+    vm->function_call_ex(
+        1, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+}
+
+static SharedPtr<Value> _uv_listen(VM * vm, Value* self, Value* backlog_v, Value* callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    assert(backlog_v->value_type == VALUE_TYPE_INT);
+    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+
+    if (uv_listen((uv_stream_t*) tcp, backlog_v->to_int(), __uv_connection_cb) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> _uv_accept(VM * vm, Value* self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    uv_loop_t* loop = ((_uv_data*) tcp->data)->loop;
+    
+    uv_tcp_t* client = new uv_tcp_t;
+    if (uv_tcp_init(loop, client) != 0) {
+        delete client;
+        throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
+    }
+    if (uv_accept((uv_stream_t*) tcp, (uv_stream_t*) client) != 0) {
+        delete client;
+        throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
+    } else {
+        client->data = new _uv_data(vm, loop, NULL);
+        return new ObjectValue(vm, vm->symbol_table->get_id("UV::TCP"), new PointerValue(client));
+    }
+}
+
 extern "C" {
 
 TORA_EXPORT
@@ -277,6 +337,9 @@ void Init_UV_(VM* vm) {
         pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(_uv_write));
         pkg->add_method(vm->symbol_table->get_id("read"), new CallbackFunction(_uv_read));
         pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
+        pkg->add_method(vm->symbol_table->get_id("bind"), new CallbackFunction(_uv_tcp_bind));
+        pkg->add_method(vm->symbol_table->get_id("listen"), new CallbackFunction(_uv_listen));
+        pkg->add_method(vm->symbol_table->get_id("accept"), new CallbackFunction(_uv_accept));
         pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
     }
 }
