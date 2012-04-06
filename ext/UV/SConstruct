@@ -10,6 +10,7 @@ else:
     libs = conf['LIBS'] + ['m', 'rt', 'pthread']
 
 env = Environment(
+    ENV={'PATH': conf['PATH']},
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
     LINKFLAGS=conf['LINKFLAGS'],
@@ -24,10 +25,7 @@ env = Environment(
 # see http://stackoverflow.com/questions/2246399/scons-to-make-a-shared-library-so-with-a-static-libarary-a
 env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1
 
-if os.name == 'nt':
-    libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), [], 'cmd /c "cd ..\\..\\vendor\\libuv && mingw32-make"');
-else:
-    libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), [], 'cd ../../vendor/libuv/ && make CFLAGS+=-fPIC');
+libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), None, 'make', chdir=1)
 
 env.Append(LIBPATH=['../../vendor/libuv/', '../../'])
 
