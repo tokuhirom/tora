@@ -7,7 +7,7 @@ conf = json.loads(open('../../config.json').read())
 if os.name == 'nt':
     libs = conf['LIBS'] + ['uv', 'psapi', 'iphlpapi', 'pthread']
 else:
-    libs = conf['LIBS'] + ['uv', 'm', 'rt', 'pthread']
+    libs = conf['LIBS'] + ['m', 'rt', 'pthread']
 
 env = Environment(
     CXXFLAGS=conf['CXXFLAGS'],
@@ -29,10 +29,12 @@ if os.name == 'nt':
 else:
     libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), [], 'cd ../../vendor/libuv/ && make CFLAGS+=-fPIC');
 
-shlib = env.SharedLibrary("lib/UV_" + conf['TORA_EXTSUFFIX'], ['uv.cc', libuv], SHLIBPREFIX='', LIBPATH=['../..'], LIBS=libs)
+env.Append(LIBPATH=['../../vendor/libuv/', '../../'])
+
+shlib = env.SharedLibrary("lib/UV_" + conf['TORA_EXTSUFFIX'], ['uv.cc', libuv])
 Default(shlib)
 
-env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/uv.tra')
+env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
 
 installs = []
 for x in os.listdir('lib/'):
