@@ -22,6 +22,25 @@ struct _uv_data {
     }
 };
 
+static void __uv_close_cb(uv_handle_t* handle) {
+    VM *vm = ((_uv_data*) handle->data)->vm;
+    vm->function_call_ex(
+        0, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+}
+
+static SharedPtr<Value> _uv_close(VM *vm, Value *self, Value *callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> handle_ = self->upcast<ObjectValue>()->data();
+    assert(handle_->value_type == VALUE_TYPE_POINTER);
+    uv_handle_t *handle = (uv_handle_t*) handle_->upcast<PointerValue>()->ptr();
+
+    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    ((_uv_data*) handle->data)->callback = callback_v->upcast<CodeValue>();
+
+    uv_close(handle, __uv_close_cb);
+    return UndefValue::instance();
+}
+
 static SharedPtr<Value> _uv_DESTROY(VM *vm, Value *self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> handle_ = self->upcast<ObjectValue>()->data();
@@ -117,10 +136,6 @@ static SharedPtr<Value> _uv_timer_stop(VM * vm, Value* self) {
     return UndefValue::instance();
 }
 
-static SharedPtr<Value> _uv_timer_DESTROY(VM *vm, Value *self) {
-    return _uv_DESTROY(vm, self);
-}
-
 static SharedPtr<Value> _uv_tcp_new(VM * vm, const std::vector<SharedPtr<Value>>& args) {
     SharedPtr<Value> self = args.at(0);
     uv_loop_t* loop;
@@ -153,8 +168,81 @@ static SharedPtr<Value> _uv_tcp_nodelay(VM * vm, Value* self, Value* enable_v) {
     return UndefValue::instance();
 }
 
-static SharedPtr<Value> _uv_tcp_DESTROY(VM *vm, Value *self) {
-    return _uv_DESTROY(vm, self);
+static void __uv_tcp_connect_cb(uv_connect_t* req, int status) {
+    VM *vm = ((_uv_data*) req->handle->data)->vm;
+    vm->stack.push_back(new IntValue(status));
+    vm->function_call_ex(
+        1, ((_uv_data*) req->handle->data)->callback, UndefValue::instance());
+}
+
+static SharedPtr<Value> _uv_tcp_connect(VM * vm, Value* self, Value* addr_v, Value* callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    SharedPtr<Value> addr = addr_v->to_s();
+    const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
+    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+
+    static uv_connect_t req;
+    if (uv_tcp_connect(&req, tcp, *(const sockaddr_in*)addr_s.c_str(), __uv_tcp_connect_cb) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
+static void __uv_write_cb(uv_write_t* req, int status) {
+    VM *vm = ((_uv_data*) req->handle->data)->vm;
+    vm->stack.push_back(new IntValue(status));
+    vm->function_call_ex(
+        1, ((_uv_data*) req->handle->data)->callback, UndefValue::instance());
+}
+
+static SharedPtr<Value> _uv_write(VM * vm, Value* self, Value* src_v, Value* callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    SharedPtr<Value> src = src_v->to_s();
+    const std::string &s = src->upcast<StrValue>()->str_value();
+    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+
+    static uv_write_t req;
+    static uv_buf_t buf = uv_buf_init((char*) s.c_str(), s.size());
+    if (uv_write(&req, (uv_stream_t*) tcp, &buf, 1, __uv_write_cb) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
+static uv_buf_t __uv_alloc_cb(uv_handle_t* handle, size_t suggested_size) {
+    return uv_buf_init(new char[suggested_size], suggested_size);
+}
+
+static void __uv_read_cb(uv_stream_t* handle, int nread, uv_buf_t buf) {
+    VM *vm = ((_uv_data*) handle->data)->vm;
+    vm->stack.push_back(new BytesValue(std::string(buf.base, nread)));
+    vm->function_call_ex(
+        1, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+}
+
+static SharedPtr<Value> _uv_read(VM * vm, Value* self, Value* callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> tcp_ = self->upcast<ObjectValue>()->data();
+    assert(tcp_->value_type == VALUE_TYPE_POINTER);
+    uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
+
+    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+
+    if (uv_read_start((uv_stream_t*) tcp, __uv_alloc_cb, __uv_read_cb) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
+    }
+    return UndefValue::instance();
 }
 
 extern "C" {
@@ -178,13 +266,18 @@ void Init_UV_(VM* vm) {
         pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_timer_new));
         pkg->add_method(vm->symbol_table->get_id("start"), new CallbackFunction(_uv_timer_start));
         pkg->add_method(vm->symbol_table->get_id("stop"), new CallbackFunction(_uv_timer_stop));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_timer_DESTROY));
+        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
+        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
     }
     {
         SharedPtr<Package> pkg = vm->find_package("UV::TCP");
         pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_tcp_new));
         pkg->add_method(vm->symbol_table->get_id("nodelay"), new CallbackFunction(_uv_tcp_nodelay));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_tcp_DESTROY));
+        pkg->add_method(vm->symbol_table->get_id("connect"), new CallbackFunction(_uv_tcp_connect));
+        pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(_uv_write));
+        pkg->add_method(vm->symbol_table->get_id("read"), new CallbackFunction(_uv_read));
+        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
+        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
     }
 }
 
