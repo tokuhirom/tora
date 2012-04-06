@@ -104,12 +104,14 @@ std::string Inspector::inspect(Value* v) const {
         ret += "}";
         return ret;
     }
+    case VALUE_TYPE_CLASS: {
+        return static_cast<ClassValue*>(v)->name() + ".meta()";
+    }
     case VALUE_TYPE_OBJECT: {
         std::string ret;
-        ID pkgid = v->upcast<ObjectValue>()->package_id();
         assert(vm_);
         assert(vm_->symbol_table);
-        ret += vm_->symbol_table->id2name(pkgid);
+        ret += v->type_str();
         ret += ".bless(";
         ret += this->inspect(v->upcast<ObjectValue>()->data());
         ret += ")";

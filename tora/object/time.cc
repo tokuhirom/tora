@@ -3,10 +3,11 @@
 
 #include "../object.h"
 #include "../vm.h"
-#include "../package.h"
 #include "../value/object.h"
 #include "../value/symbol.h"
 #include "../value/pointer.h"
+#include "../value/class.h"
+#include "../symbols.gen.h"
 
 #ifdef _WIN32
 struct tm * localtime_r (const time_t *timer, struct tm *res) {
@@ -37,7 +38,6 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
     if (!(args.size() == 1 || args.size() == 2)) {
         throw new ExceptionValue("ArgumentException: Time.new([$epoch]) is valid, but you passed %d arguments.", args.size());
     }
-    const SharedPtr<Value> & klass = args.at(0);
     time_t i;
     if (args.size() == 1) {
         i = time(NULL);
@@ -52,7 +52,7 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
         delete buf;
         throw new ExceptionValue("Error in localtime_r: %s", get_strerror(get_errno()).c_str());
     }
-    return new ObjectValue(vm, klass->upcast<SymbolValue>()->id(), new PointerValue(buf));
+    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_TIME_CLASS).get(), new PointerValue(buf));
 }
 
 static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
@@ -176,19 +176,20 @@ static SharedPtr<Value> time_wday(VM* vm, Value* self) {
 
 void tora::Init_Time(VM *vm) {
     // TODO: strptime
-    SharedPtr<Package> pkg = vm->find_package("Time");
-    pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(time_new));
-    pkg->add_method(vm->symbol_table->get_id("now"), new CallbackFunction(time_new));
-    pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(time_DESTROY));
-    pkg->add_method(vm->symbol_table->get_id("epoch"), new CallbackFunction(time_epoch));
-    pkg->add_method(vm->symbol_table->get_id("strftime"), new CallbackFunction(time_strftime));
-    pkg->add_method(vm->symbol_table->get_id("month"), new CallbackFunction(time_month));
-    pkg->add_method(vm->symbol_table->get_id("year"), new CallbackFunction(time_year));
-    pkg->add_method(vm->symbol_table->get_id("day"), new CallbackFunction(time_day));
-    pkg->add_method(vm->symbol_table->get_id("hour"), new CallbackFunction(time_hour));
-    pkg->add_method(vm->symbol_table->get_id("minute"), new CallbackFunction(time_minute));
-    pkg->add_method(vm->symbol_table->get_id("min"), new CallbackFunction(time_minute));
-    pkg->add_method(vm->symbol_table->get_id("second"), new CallbackFunction(time_second));
-    pkg->add_method(vm->symbol_table->get_id("day_of_week"), new CallbackFunction(time_wday));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_TIME_CLASS);
+    klass->add_method("new",         new CallbackFunction(time_new));
+    klass->add_method("now",         new CallbackFunction(time_new));
+    klass->add_method("DESTROY",     new CallbackFunction(time_DESTROY));
+    klass->add_method("epoch",       new CallbackFunction(time_epoch));
+    klass->add_method("strftime",    new CallbackFunction(time_strftime));
+    klass->add_method("month",       new CallbackFunction(time_month));
+    klass->add_method("year",        new CallbackFunction(time_year));
+    klass->add_method("day",         new CallbackFunction(time_day));
+    klass->add_method("hour",        new CallbackFunction(time_hour));
+    klass->add_method("minute",      new CallbackFunction(time_minute));
+    klass->add_method("min",         new CallbackFunction(time_minute));
+    klass->add_method("second",      new CallbackFunction(time_second));
+    klass->add_method("day_of_week", new CallbackFunction(time_wday));
+    vm->add_builtin_class(klass);
 }
 

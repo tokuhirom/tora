@@ -31,7 +31,7 @@ my $x = "hoge";
 say($x/"fuga");
 ...
 
-run_is(<<'...', '', qq{Unknown function 'foo' in package 'main' line 2.\n}, 1);
+run_is(<<'...', '', qq{Unknown function 'foo' line 2.\n}, 1);
 foo();
 ...
 

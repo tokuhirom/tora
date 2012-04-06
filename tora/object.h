@@ -22,7 +22,7 @@ void Init_DynaLoader(VM *vm);
 void Init_Env(VM *vm);
 void Init_File(VM *vm);
 void Init_Internals(VM *vm);
-void Init_MetaClass(VM *vm);
+void Init_Class(VM *vm);
 void Init_Object(VM *vm);
 void Init_Stat(VM *vm);
 void Init_Str(VM *vm);
@@ -32,6 +32,8 @@ void Init_Bytes(VM *vm);
 void Init_Regexp(VM *vm);
 void Init_RE2_Regexp_Matched(VM *vm);
 void Init_Hash(VM *vm);
+void Init_Int(VM *vm);
+void Init_Double(VM *vm);
 
 SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
 ObjectValue* Dir_new(VM *vm, StrValue *dirname);

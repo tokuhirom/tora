@@ -1,5 +1,5 @@
 $LIBPATH.push('t/lib/');
-use Basic;
+use Basic *;
 use Test::More *;
 
 is(typeof(Basic.new()), 'Basic');

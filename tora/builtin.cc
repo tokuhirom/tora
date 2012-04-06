@@ -17,6 +17,7 @@
 #include "object.h"
 #include "inspector.h"
 #include "printf.h"
+#include "symbols.gen.h"
 
 using namespace tora;
 
@@ -42,10 +43,6 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
         fputc('\n', stdout);
     }
     return UndefValue::instance();
-}
-
-static SharedPtr<Value> builtin_package(VM *vm) {
-    return new StrValue(vm->package_name());
 }
 
 static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
@@ -155,7 +152,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
             if ((*iter)->type == FRAME_TYPE_FUNCTION) {
                 if (skiped_first) {
                     FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
-                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->symbol_table->get_id("Caller"), fframe->code);
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(), fframe->code);
                     av->push_back(o);
                 } else {
                     skiped_first = true; // skip myself.
@@ -170,7 +167,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
             if ((*iter)->type == FRAME_TYPE_FUNCTION) {
                 FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
                 if (seen == need+1) {
-                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->symbol_table->get_id("Caller"), fframe->code);
+                    SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(), fframe->code);
                     return o;
                 }
                 ++seen;
@@ -325,7 +322,6 @@ void tora::Init_builtins(VM *vm) {
     vm->add_builtin_function("p", builtin_p);
     vm->add_builtin_function("exit", builtin_exit);
     vm->add_builtin_function("say", builtin_say);
-    vm->add_builtin_function("__PACKAGE__",   builtin_package);
     vm->add_builtin_function("typeof",   builtin_typeof);
     vm->add_builtin_function("open", builtin_open);
     vm->add_builtin_function("print", builtin_print);

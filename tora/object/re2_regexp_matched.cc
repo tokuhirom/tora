@@ -3,10 +3,11 @@
 #include "../vm.h"
 #include "../symbols.gen.h"
 #include "../value/code.h"
-#include "../package.h"
+#include "../symbols.gen.h"
 #include "../value/pointer.h"
 #include "../value/object.h"
 #include "../value/regexp.h"
+#include "../value/class.h"
 
 using namespace tora;
 
@@ -95,14 +96,15 @@ static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM * vm, Value* self) {
 }
 
 SharedPtr<Value> tora::RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const boost::shared_array<re2::StringPiece> & matches) {
-    return new ObjectValue(vm, SYMBOL_RE2_REGEXP_MATCHED_CLASS, new PointerValue(new RE2RegexpMatched(re, matches)));
+    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_RE2_REGEXP_MATCHED_CLASS).get(), new PointerValue(new RE2RegexpMatched(re, matches)));
 }
 
 void tora::Init_RE2_Regexp_Matched(VM* vm) {
-    SharedPtr<Package> pkg = vm->find_package(SYMBOL_RE2_REGEXP_MATCHED_CLASS);
-    pkg->add_method("regexp",            new CallbackFunction(RE2_Regexp_Matched_regexp));
-    pkg->add_method("to_array",          new CallbackFunction(RE2_Regexp_Matched_to_array));
-    pkg->add_method(SYMBOL___GET_ITEM__, new CallbackFunction(RE2_Regexp_Matched_getitem));
-    pkg->add_method("DESTROY",           new CallbackFunction(RE2_Regexp_Matched_DESTROY));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_RE2_REGEXP_MATCHED_CLASS);
+    klass->add_method("regexp",            new CallbackFunction(RE2_Regexp_Matched_regexp));
+    klass->add_method("to_array",          new CallbackFunction(RE2_Regexp_Matched_to_array));
+    klass->add_method(SYMBOL___GET_ITEM__, new CallbackFunction(RE2_Regexp_Matched_getitem));
+    klass->add_method("DESTROY",           new CallbackFunction(RE2_Regexp_Matched_DESTROY));
+    vm->add_builtin_class(klass);
 }
 

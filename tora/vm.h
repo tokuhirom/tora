@@ -31,48 +31,43 @@ const int GLOBAL_VAR_REQUIRED = 3;
 
 class Stack;
 class LexicalVarsFrame;
-class PackageMap;
 class TupleValue;
-class Package;
 class FunctionFrame;
 class CodeValue;
+class ClassValue;
 
 class VM;
 
 class VM {
-    ID package_id_;
-    SharedPtr<Package> package_; // cached
+    friend class LexicalVarsFrame;
+
+    SharedPtr<ClassValue> klass_;
     bool dump_ops_;
+    typedef std::map<ID, SharedPtr<Value>> file_scope_body_t;
+    boost::shared_ptr<file_scope_body_t> file_scope_;
+    std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>> file_scope_map_;
+    std::map<ID, SharedPtr<ClassValue>> builtin_classes_;
 public:
     int sp; // stack pointer
     int pc; // program counter
     SharedPtr<OPArray> ops;
     std::vector<SharedPtr<Value>> *global_vars;
     SharedPtr<SymbolTable> symbol_table;
-    SharedPtr<PackageMap> package_map;
-    Package* find_package(ID id);
-    Package* find_package(const char *name);
     std::vector<SharedPtr<Value>> stack;
     bool exec_trace;
 
-    std::string &package_name() {
-        return symbol_table->id2name(package_id_);
-    }
-    void package_name(const std::string& s) {
-        // will be deprecate
-        package_id_ = symbol_table->get_id(s);
-    }
-
     bool dump_ops() const { return dump_ops_; }
 
-    const SharedPtr<Package> & package() {
-        return package_;
-    }
+    const SharedPtr<ClassValue>& get_builtin_class(ID name_id) const;
 
-    ID package_id() {
-        return package_id_;
+    SharedPtr<ClassValue> get_class(ID name_id) const;
+
+    std::string id2name(ID id) const;
+
+    const SharedPtr<ClassValue>& klass() {
+        return klass_;
     }
-    void package_id(ID id);
+    void klass(const SharedPtr<Value>& k);
 
     std::map<ID, CallbackFunction*> builtin_functions;
 
@@ -105,10 +100,8 @@ public:
     void dump_stack();
     void use(Value *v, bool);
     void require_package(const std::string &);
-    void add_function(ID pkgid, ID id, SharedPtr<Value> code);
-    void add_function(ID pkgid, std::string &name, SharedPtr<Value> code) {
-        this->add_function(pkgid, this->symbol_table->get_id(name), code);
-    }
+    void add_function(const SharedPtr<Value>& klass);
+    void add_class(const SharedPtr<ClassValue>& code);
     void die(const SharedPtr<Value> & exception);
     void die(const char *format, ...);
 
@@ -127,7 +120,8 @@ public:
         return ops->at(pc)->operand.double_value;
     }
 
-    void copy_all_public_symbols(ID srcid, ID dstid);
+    void add_builtin_class(const SharedPtr<ClassValue>& klass);
+
     SharedPtr<Value> get_self();
 
     const SharedPtr<Value>& TOP() { return stack.back(); }
@@ -158,16 +152,19 @@ public:
     void add_library_path(const std::string &dir);
 
     void call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id);
-    void call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
+    void call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>& klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
 
     void dump_value(const SharedPtr<Value> & v);
     void dump_pad();
+
+    ID get_id(const std::string &name) const;
 
 #include "vm.ops.inc.h"
 
 private:
     void handle_exception(const SharedPtr<Value> & exception);
     void call_native_func(const CallbackFunction* callback, int argcnt);
+    void copy_all_public_symbols(ID srcid);
 };
 
 };

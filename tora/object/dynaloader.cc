@@ -2,7 +2,8 @@
 #include "../shared_ptr.h"
 #include "../value.h"
 #include "../vm.h"
-#include "../package.h"
+#include "../value/class.h"
+#include "../symbols.gen.h"
 
 using namespace tora;
 
@@ -28,7 +29,8 @@ static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v, 
 }
 
 void tora::Init_DynaLoader(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("DynaLoader");
-    pkg->add_method(vm->symbol_table->get_id("load"), new CallbackFunction(dynaloader_load));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DYNALOADER_CLASS);
+    klass->add_method("load", new CallbackFunction(dynaloader_load));
+    vm->add_builtin_class(klass);
 }
 

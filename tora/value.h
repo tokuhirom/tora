@@ -41,9 +41,11 @@ typedef enum {
     VALUE_TYPE_HASH,
     VALUE_TYPE_HASH_ITERATOR,
     VALUE_TYPE_OBJECT,
+    VALUE_TYPE_CLASS,
     VALUE_TYPE_POINTER,
     VALUE_TYPE_BYTES,
     VALUE_TYPE_REFERENCE,
+    VALUE_TYPE_FILE_PACKAGE,
 } value_type_t;
 
 class Value;
@@ -53,6 +55,7 @@ class StrValue;
 class BoolValue;
 class RangeValue;
 class ObjectImpl;
+class ClassImpl;
 
 class CallbackFunction;
 class OPArray;
@@ -85,6 +88,7 @@ protected:
 typedef boost::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 typedef boost::shared_ptr<std::string> StringImpl;
+typedef boost::shared_ptr<std::map<ID, SharedPtr<Value>>> FilePackageImpl;
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -118,7 +122,9 @@ protected:
         Value * value_value_;
         FILE *file_value_;
         ObjectImpl* object_value_;
+        ClassImpl* class_value_;
         ExceptionImpl* exception_value_;
+        FilePackageImpl* file_package_value_;
     };
 
     Value(value_type_t t) : refcnt(0), value_type(t) { }

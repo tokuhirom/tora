@@ -2,9 +2,10 @@
 
 #include "../vm.h"
 #include "../object.h"
-#include "../package.h"
+#include "../symbols.gen.h"
 #include "../value/array.h"
 #include "../value/hash.h"
+#include "../value/class.h"
 
 using namespace tora;
 
@@ -65,10 +66,11 @@ static SharedPtr<Value> Hash_exists(VM * vm, Value* self, Value *key) {
 }
 
 void tora::Init_Hash(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("Hash");
-    pkg->add_method("keys",   new CallbackFunction(Hash_keys));
-    pkg->add_method("values", new CallbackFunction(Hash_values));
-    pkg->add_method("delete", new CallbackFunction(Hash_delete));
-    pkg->add_method("exists", new CallbackFunction(Hash_exists));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_HASH_CLASS);
+    klass->add_method("keys",   new CallbackFunction(Hash_keys));
+    klass->add_method("values", new CallbackFunction(Hash_values));
+    klass->add_method("delete", new CallbackFunction(Hash_delete));
+    klass->add_method("exists", new CallbackFunction(Hash_exists));
+    vm->add_builtin_class(klass);
 }
 

@@ -2,7 +2,7 @@
 #include "tora.h"
 #include <vm.h>
 #include <value.h>
-#include <package.h>
+#include <value/class.h>
 
 using namespace tora;
 
@@ -20,9 +20,10 @@ extern "C" {
 
 TORA_EXPORT
 void Init_URI_Escape(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("URI::Escape");
-    pkg->add_method(vm->symbol_table->get_id("uri_escape"), new CallbackFunction(uri_escape));
-    pkg->add_method(vm->symbol_table->get_id("uri_unescape"), new CallbackFunction(uri_unescape));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, "URI::Escape");
+    klass->add_method(vm->symbol_table->get_id("uri_escape"), new CallbackFunction(uri_escape));
+    klass->add_method(vm->symbol_table->get_id("uri_unescape"), new CallbackFunction(uri_unescape));
+    vm->add_class(klass);
 }
 
 }

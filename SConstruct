@@ -126,7 +126,7 @@ libfiles = [
     "tora/" + x for x in Split('''
         parser.cc value.cc compiler.cc
         node.cc op.cc vm.cc util.cc
-        symbol_table.cc package_map.cc frame.cc package.cc operator.cc
+        symbol_table.cc frame.cc operator.cc
         builtin.cc
         object.cc pad_list.cc
         printf.cc
@@ -137,12 +137,13 @@ libfiles = [
 
         value/code.cc value/hash.cc value/str.cc value/array.cc value/regexp.cc value/range.cc
         value/object.cc value/int.cc value/bool.cc value/exception.cc
-        value/bytes.cc
+        value/bytes.cc value/class.cc
 
         object/str.cc object/array.cc object/dir.cc object/stat.cc object/env.cc object/time.cc object/file.cc object/internals.cc object/caller.cc object/code.cc object/symbol.cc
-        object/dynaloader.cc object/object.cc object/metaclass.cc
+        object/dynaloader.cc object/object.cc object/class.cc
         object/bytes.cc object/regexp.cc object/hash.cc
         object/re2_regexp_matched.cc
+        object/int.cc object/double.cc
 
     ''')
 ]

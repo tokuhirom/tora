@@ -2,7 +2,6 @@
 #include "frame.h"
 #include "vm.h"
 #include "peek.h"
-#include "package.h"
 #include "value/code.h"
 
 using namespace tora;

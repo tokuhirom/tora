@@ -1446,9 +1446,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             */
             klass_name
         );
-        OP *pkg = new OP(OP_PACKAGE_ENTER);
-        pkg->operand.int_value = package_id;
-        push_op(pkg);
+        push_op(new OP(OP_CLASS_ENTER, package_id));
 
         if (n->parent()) {
             OP * op = new OP(OP_SET_PARENT);
@@ -1460,7 +1458,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->compile(n->block());
         }
 
-        push_op(new OP(OP_PACKAGE_LEAVE));
+        push_op(new OP(OP_CLASS_LEAVE));
         this->pop_block();
 
         this->package_ = orig_pkgname;

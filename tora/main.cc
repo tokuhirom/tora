@@ -155,8 +155,8 @@ int main(int argc, char **argv) {
     // run it
 
     tora::VM vm(compiler.ops, symbol_table, dump_ops);
-    vm.init_globals(argc-optind, argv+optind);
     vm.register_standard_methods();
+    vm.init_globals(argc-optind, argv+optind);
     for (auto iter = libs.begin(); iter != libs.end(); iter++) {
         vm.add_library_path(*iter);
     }

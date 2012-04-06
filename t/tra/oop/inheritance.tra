@@ -22,7 +22,7 @@ my $bar = Bar.new();
 my $foo = Foo.new();
 
 is($foo.meta.superclass(), undef);
-is($bar.meta.superclass(), 'Foo');
+is($bar.meta.superclass().name, 'Foo');
 
 is($foo.isa('Foo'), true);
 is($foo.isa('Bar'), false);

@@ -2,10 +2,11 @@
 
 #include "../vm.h"
 #include "../object.h"
-#include "../package.h"
 #include "../value/bytes.h"
 #include "../value.h"
 #include "../value/str.h"
+#include "../value/class.h"
+#include "../symbols.gen.h"
 #include <unicode/unistr.h>
 
 using namespace tora;
@@ -85,9 +86,10 @@ static SharedPtr<Value> Bytes_decode(VM *vm, Value *self_v, const std::vector<Sh
 }
 
 void tora::Init_Bytes(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("Bytes");
-    pkg->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(bytes_length));
-    pkg->add_method("substr", new CallbackFunction(Bytes_substr));
-    pkg->add_method("decode", new CallbackFunction(Bytes_decode));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_BYTES_CLASS);
+    klass->add_method(vm->symbol_table->get_id("length"), new CallbackFunction(bytes_length));
+    klass->add_method("substr", new CallbackFunction(Bytes_substr));
+    klass->add_method("decode", new CallbackFunction(Bytes_decode));
+    vm->add_builtin_class(klass);
 }
 

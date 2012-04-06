@@ -76,12 +76,11 @@ OP_FUNCDEF {
 
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
-    int pkgid = code->upcast<CodeValue>()->package_id();
-    if (!pkgid) {
-        pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id(pkgid);
+    if (this->klass().get()) {
+        this->klass()->add_method( code );
+    } else {
+        this->add_function(code);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_CLOSUREDEF {
@@ -106,12 +105,11 @@ OP_CLOSUREDEF {
 #endif
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
-    int pkgid = code->upcast<CodeValue>()->package_id();
-    if (!pkgid) {
-        pkgid = this->package_id();
-        code->upcast<CodeValue>()->package_id(pkgid);
+    if (this->klass().get()) {
+        this->klass()->add_method( code );
+    } else {
+        this->add_function(code);
     }
-    this->add_function(pkgid, code->upcast<CodeValue>()->func_name_id(), code);
 }
 
 OP_GETCLOSURE {
@@ -293,18 +291,16 @@ OP_FUNCALL {
 
 // printf("CALLING------ %s\n", symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str());
     // TODO split this part to other op code for performance?
-    SharedPtr<Package> pkg = this->package();
     /*
     printf("in package '%s'\n",
         this->symbol_table->id2name(pkg->id()).c_str()
     );
     */
-    int pkgid = get_int_operand_low();
-    if (pkgid != 0) {
-        pkg = this->find_package(pkgid);
-    }
-    auto iter = pkg->find(id);
-    if (iter != pkg->end()) {
+    auto iter = this->file_scope_->find(id);
+    if (iter != this->file_scope_->end()) {
+        if (iter->second->value_type != VALUE_TYPE_CODE) {
+            throw new ExceptionValue("This is not a funciton.");
+        }
         CodeValue* code = iter->second->upcast<CodeValue>();
 
 // Disasm::disasm(this->ops);
@@ -341,8 +337,7 @@ OP_FUNCALL {
                             fframe->top++;
                         } else {
                             throw new ExceptionValue(
-                                "ArgumentException: %s::%s needs %d arguments but you passed %d arguments.",
-                                this->symbol_table->id2name(pkg->id()).c_str(),
+                                "ArgumentException: %s needs %d arguments but you passed %d arguments.",
                                 this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
                                 code->code_params()->size(),
                                 orig_argcnt);
@@ -377,11 +372,9 @@ OP_FUNCALL {
             frame_stack->push_back(fframe);
         }
     } else {
-        this->die("Unknown function '%s' in package '%s'",
-            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
-            this->symbol_table->id2name(pkg->id()).c_str()
+        this->die("Unknown function '%s'",
+            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str()
         );
-        // this->die("Unknown function: %s::%s(%d::%d)", symbol_table->id2name(pkg->id()).c_str(), this->symbol_table->id2name(funname->upcast<SymbolValue>()->id).c_str(), pkg->id(), funname->upcast<SymbolValue>()->id);
     }
 }
 
@@ -805,9 +798,8 @@ OP_ENTER_FOREACH {
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_OBJECT) {
         ObjectValue * o = a->upcast<ObjectValue>();
-        Package *pkg = this->find_package(o->package_id());
-        auto iter = pkg->find(this->symbol_table->get_id("__iter__"));
-        if (iter != pkg->end()) {
+        auto iter = o->class_value()->find_method(this->symbol_table->get_id("__iter__"));
+        if (iter != o->class_value()->end()) {
             CodeValue * code = iter->second->upcast<CodeValue>();
             if (code->is_native()) {
                 stack.push_back(a);
@@ -818,7 +810,7 @@ OP_ENTER_FOREACH {
                 TODO();
             }
         } else {
-            this->die("The object  %s doesn't support iteration(Does not have a __iter__ method)\n", symbol_table->id2name(pkg->id()).c_str());
+            this->die("The object  %s doesn't support iteration(Does not have a __iter__ method)\n", o->type_str());
         }
     } else {
         this->die("The object %s doesn't support iteration\n", a->type_str());
@@ -887,9 +879,8 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_OBJECT: {
         ObjectValue * o = iter->upcast<ObjectValue>();
-        Package *pkg = this->find_package(o->package_id());
-        auto iter = pkg->find(this->symbol_table->get_id("__next__"));
-        if (iter != pkg->end()) {
+        auto iter = o->class_value()->find_method(this->symbol_table->get_id("__next__"));
+        if (iter != o->class_value()->end()) {
             CodeValue * code = iter->second->upcast<CodeValue>();
             if (code->is_native()) {
                 stack.push_back(o);
@@ -909,7 +900,7 @@ OP_FOR_ITER {
                 TODO();
             }
         } else {
-            this->die("'%s' does not have a '__next__' method.", symbol_table->id2name(o->package_id()).c_str());
+            this->die("'%s' does not have a '__next__' method.", o->type_str());
         }
         break;
     }
@@ -963,15 +954,35 @@ OP_NOT {
 OP_PACKAGE_ENTER {
     ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    PackageFrame* pframe = new PackageFrame(this, stack.size(), this->package_id());
+    PackageFrame* pframe = new PackageFrame(this, stack.size());
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
-    this->package_id(package_id);
 }
 
 OP_PACKAGE_LEAVE {
     assert(this->frame_stack->back()->type == FRAME_TYPE_PACKAGE);
     this->frame_stack->pop_back();
+}
+
+OP_CLASS_ENTER {
+    ID package_id = get_int_operand();
+    // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
+    SharedPtr<Value> klass(new ClassValue(this, package_id));
+
+    ClassFrame* cframe = new ClassFrame(this, stack.size(), klass);
+    cframe->top = stack.size();
+    this->frame_stack->push_back(cframe);
+    this->klass_.reset(klass->upcast<ClassValue>());
+
+    this->file_scope_->insert(file_scope_body_t::value_type(package_id, klass));
+
+    stack.push_back(klass);
+}
+
+OP_CLASS_LEAVE {
+    assert(this->frame_stack->back()->type == FRAME_TYPE_CLASS);
+    this->frame_stack->pop_back();
+    this->klass_.reset(NULL);
 }
 
 OP_DEREF {
@@ -997,6 +1008,7 @@ OP_EXTRACT_ARRAY {
 
 OP_SET_PACKAGE_VARIABLE {
     // $Foo::Bar = 3;
+    /*
     SharedPtr<Value> pkgid = stack.back();
     stack.pop_back();
 
@@ -1008,10 +1020,14 @@ OP_SET_PACKAGE_VARIABLE {
     pkg->set_variable(vid, rval);
 
     stack.push_back(rval);
+    */
+    TODO();
 }
 
 OP_GET_PACKAGE_VARIABLE {
     // $Foo::Bar = 3;
+    TODO();
+    /*
     SharedPtr<Value> pkgid = stack.back();
     stack.pop_back();
 
@@ -1020,6 +1036,7 @@ OP_GET_PACKAGE_VARIABLE {
     auto iter = pkg->find(vid);
     SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
     stack.push_back(ret);
+    */
 }
 
 OP_LOCAL {
@@ -1030,6 +1047,7 @@ OP_LOCAL {
     // I know it's very slow. but dynamic scope is not important part in tora interpreter.
     // If you want to improvents performance, patches welcome.
     // TODO: optimize
+    /*
     const SharedPtr<Value> & snode = stack.back();
     assert(snode->value_type == VALUE_TYPE_STR);
 
@@ -1048,16 +1066,19 @@ OP_LOCAL {
     pkg->set_variable(vid, UndefValue::instance());
 
     stack.pop_back();
+    */
+    TODO();
 }
 
 OP_SET_PARENT {
-    const SharedPtr<Package> & pkg = this->package();
-    Package * super = this->find_package(get_int_operand());
-    if (super == pkg.get()) {
+    auto iter = this->file_scope_->find(get_int_operand());
+    if (iter == this->file_scope_->end()) {
+        throw new ExceptionValue("There is no class named %s.", symbol_table->id2name(get_int_operand()).c_str());
+    }
+    SharedPtr<ClassValue> super = iter->second->upcast<ClassValue>();
+    if (super->name_id() == this->klass()->name_id()) {
         throw new ExceptionValue("You cannot make itself as superclass.");
     }
-    assert(super);
-    pkg->superclass(super);
-    assert(pkg->superclass());
+    this->klass()->superclass(super);
 }
 

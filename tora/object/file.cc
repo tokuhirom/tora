@@ -4,7 +4,8 @@
 #include "../object.h"
 #include "../vm.h"
 #include "../value/file.h"
-#include "../package.h"
+#include "../symbols.gen.h"
+#include "../value/class.h"
 
 #ifdef _WIN32
 #include <winerror.h>
@@ -203,20 +204,21 @@ static SharedPtr<Value> file_sync(VM * vm, Value* self) {
 void tora::Init_File(VM* vm) {
     // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
     // tell(), truncate(), write($str), fdopen
-    SharedPtr<Package> pkg = vm->find_package("File");
-    pkg->add_method("open",    new CallbackFunction(file_open_method));
-    pkg->add_method("slurp",   new CallbackFunction(file_slurp));
-    pkg->add_method("write",   new CallbackFunction(file_write));
-    pkg->add_method("print",   new CallbackFunction(file_write));
-    pkg->add_method("close",   new CallbackFunction(file_close));
-    pkg->add_method("flush",   new CallbackFunction(file_flush));
-    pkg->add_method("fileno",  new CallbackFunction(file_fileno));
-    pkg->add_method("getc",    new CallbackFunction(file_getc));
-    pkg->add_method("seek",    new CallbackFunction(file_seek));
-    pkg->add_method("tell",    new CallbackFunction(file_tell));
-    pkg->add_method("sync",    new CallbackFunction(file_sync));
-    pkg->add_constant("SEEK_SET", SEEK_SET);
-    pkg->add_constant("SEEK_CUR", SEEK_CUR);
-    pkg->add_constant("SEEK_END", SEEK_END);
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILE_CLASS);
+    klass->add_method("open",    new CallbackFunction(file_open_method));
+    klass->add_method("slurp",   new CallbackFunction(file_slurp));
+    klass->add_method("write",   new CallbackFunction(file_write));
+    klass->add_method("print",   new CallbackFunction(file_write));
+    klass->add_method("close",   new CallbackFunction(file_close));
+    klass->add_method("flush",   new CallbackFunction(file_flush));
+    klass->add_method("fileno",  new CallbackFunction(file_fileno));
+    klass->add_method("getc",    new CallbackFunction(file_getc));
+    klass->add_method("seek",    new CallbackFunction(file_seek));
+    klass->add_method("tell",    new CallbackFunction(file_tell));
+    klass->add_method("sync",    new CallbackFunction(file_sync));
+    klass->add_constant("SEEK_SET", SEEK_SET);
+    klass->add_constant("SEEK_CUR", SEEK_CUR);
+    klass->add_constant("SEEK_END", SEEK_END);
+    vm->add_builtin_class(klass);
 }
 

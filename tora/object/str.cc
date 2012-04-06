@@ -3,7 +3,7 @@
 #include "../value.h"
 #include "../shared_ptr.h"
 #include "../value/regexp.h"
-#include "../package.h"
+#include "../value/class.h"
 #include "../symbols.gen.h"
 #include <re2/re2.h>
 #include <unicode/unistr.h>
@@ -217,16 +217,17 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v, const std::vector<Shar
 }
 
 void tora::Init_Str(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package(SYMBOL_STRING_CLASS);
-    pkg->add_method("length",  new CallbackFunction(str_length));
-    pkg->add_method("match",   new CallbackFunction(str_match));
-    pkg->add_method("replace", new CallbackFunction(str_replace));
-    pkg->add_method("substr",  new CallbackFunction(str_substr));
-    pkg->add_method("scan",    new CallbackFunction(str_scan));
-    pkg->add_method("split",   new CallbackFunction(str_split));
-    pkg->add_method("index",   new CallbackFunction(str_index));
-    pkg->add_method("upper",   new CallbackFunction(str_upper));
-    pkg->add_method("lower",   new CallbackFunction(str_lower));
-    pkg->add_method("encode",  new CallbackFunction(str_encode));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_STRING_CLASS);
+    klass->add_method("length",  new CallbackFunction(str_length));
+    klass->add_method("match",   new CallbackFunction(str_match));
+    klass->add_method("replace", new CallbackFunction(str_replace));
+    klass->add_method("substr",  new CallbackFunction(str_substr));
+    klass->add_method("scan",    new CallbackFunction(str_scan));
+    klass->add_method("split",   new CallbackFunction(str_split));
+    klass->add_method("index",   new CallbackFunction(str_index));
+    klass->add_method("upper",   new CallbackFunction(str_upper));
+    klass->add_method("lower",   new CallbackFunction(str_lower));
+    klass->add_method("encode",  new CallbackFunction(str_encode));
+    vm->add_builtin_class(klass);
 }
 

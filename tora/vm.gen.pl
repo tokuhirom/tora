@@ -54,8 +54,6 @@ sub vm_gen_cc {
 #include "frame.h"
 #include "value.h"
 #include "peek.h"
-#include "package_map.h"
-#include "package.h"
 #include "operator.h"
 #include "disasm.h"
 #include "value/hash.h"
@@ -67,6 +65,7 @@ sub vm_gen_cc {
 #include "value/regexp.h"
 #include "value/object.h"
 #include "value/exception.h"
+#include "value/class.h"
 #include "value/bool.h"
 #include "value/undef.h"
 #include "value/double.h"
@@ -82,6 +81,7 @@ sub vm_gen_cc {
 using namespace tora;
 ? for my $k (@{$_[0]}) {
 inline void VM::PP_<?= $k->[0] ?>() {
+#line <?= $k->[2]+1 ?> "vm.inc"
 <?= $k->[1] ?>
 }
 ? }

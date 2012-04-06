@@ -2,9 +2,10 @@
 #include "../vm.h"
 #include "../value/array.h"
 #include "../value/code.h"
-#include "../package.h"
+#include "../value/class.h"
 #include "../peek.h"
 #include "../frame.h"
+#include "../symbols.gen.h"
 
 using namespace tora;
 
@@ -166,17 +167,18 @@ static SharedPtr<Value> av_reserve(VM * vm, Value* self, Value * v) {
 */
 
 void tora::Init_Array(VM* vm) {
-    SharedPtr<Package> pkg = vm->find_package("Array");
-    pkg->add_method(vm->symbol_table->get_id("size"), new CallbackFunction(av_size));
-    pkg->add_method(vm->symbol_table->get_id("sort"), new CallbackFunction(av_sort));
-    pkg->add_method(vm->symbol_table->get_id("push"), new CallbackFunction(av_push));
-    pkg->add_method(vm->symbol_table->get_id("pop"), new CallbackFunction(av_pop));
-    pkg->add_method(vm->symbol_table->get_id("unshift"), new CallbackFunction(av_unshift));
-    pkg->add_method(vm->symbol_table->get_id("shift"), new CallbackFunction(av_shift));
-    pkg->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
-    pkg->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
-    pkg->add_method(vm->symbol_table->get_id("map"), new CallbackFunction(av_map));
-    // pkg->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
-    // pkg->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ARRAY_CLASS);
+    klass->add_method(vm->symbol_table->get_id("size"), new CallbackFunction(av_size));
+    klass->add_method(vm->symbol_table->get_id("sort"), new CallbackFunction(av_sort));
+    klass->add_method(vm->symbol_table->get_id("push"), new CallbackFunction(av_push));
+    klass->add_method(vm->symbol_table->get_id("pop"), new CallbackFunction(av_pop));
+    klass->add_method(vm->symbol_table->get_id("unshift"), new CallbackFunction(av_unshift));
+    klass->add_method(vm->symbol_table->get_id("shift"), new CallbackFunction(av_shift));
+    klass->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
+    klass->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
+    klass->add_method(vm->symbol_table->get_id("map"), new CallbackFunction(av_map));
+    // klass->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
+    // klass->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
+    vm->add_builtin_class(klass);
 }
 

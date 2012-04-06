@@ -18,7 +18,6 @@ namespace tora {
 class OPArray;
 class VM;
 class CodeValue;
-class Package;
 class ArrayValue;
 class PadList;
 
@@ -28,10 +27,12 @@ typedef enum {
     FRAME_TYPE_TRY,
     FRAME_TYPE_FOREACH,
     FRAME_TYPE_PACKAGE,
+    FRAME_TYPE_CLASS,
     FRAME_TYPE_WHILE,
     FRAME_TYPE_FOR,
 } frame_type_t;
 
+/*
 struct DynamicScopeData {
     PRIM_DECL();
     Package * package_;
@@ -44,6 +45,7 @@ public:
     Package * package() const { return package_; }
     SharedPtr<Value> value() const { return value_; }
 };
+*/
 
 
 // TODO rename LexicalVarsFrame to Frame
@@ -56,7 +58,7 @@ public:
     size_t top;
     frame_type_t type;
     SharedPtr<CodeValue> code;
-    std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
+    // std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
     SharedPtr<PadList> pad_list;
 
     LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
@@ -65,7 +67,7 @@ public:
     void set_variable_dynamic(int level, int id, const SharedPtr<Value>& v);
     void set_variable(int id, const SharedPtr<Value>& v);
     SharedPtr<Value> get_variable(int id) const;
-    void push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target);
+    // void push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target);
     const char *type_str() const;
     SharedPtr<Value> get_variable_dynamic(int level, int no) const;
     void dump_pad(VM *vm);
@@ -113,9 +115,16 @@ public:
 class PackageFrame : public LexicalVarsFrame {
     friend class LexicalVarsFrame;
 protected:
-    ID orig_package_id_;
 public:
-    PackageFrame(VM *vm, size_t top, ID pkgid) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_PACKAGE), orig_package_id_(pkgid) { }
+    PackageFrame(VM *vm, size_t top) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_PACKAGE) { }
+};
+
+class ClassFrame : public LexicalVarsFrame {
+    friend class LexicalVarsFrame;
+protected:
+    SharedPtr<Value> klass_;
+public:
+    ClassFrame(VM *vm, size_t top, const SharedPtr<Value> &klass) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_CLASS), klass_(klass) { }
 };
 
 };

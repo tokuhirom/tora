@@ -86,29 +86,29 @@ class Test::Builder {
     }
 }
 
-$Test::More::BUILDER = Test::Builder.new();
+my $BUILDER = Test::Builder.new();
 
 sub ok($b, $msg=undef) {
-    $Test::More::BUILDER.ok($b, $msg);
+    $BUILDER.ok($b, $msg);
 }
 
 sub fail($msg=undef) {
-    $Test::More::BUILDER.fail($msg);
+    $BUILDER.fail($msg);
 }
 
 sub is($a, $b, $msg=undef) {
-    $Test::More::BUILDER.is($a, $b, $msg);
+    $BUILDER.is($a, $b, $msg);
 }
 
 sub like($a, $b, $msg=undef) {
-    $Test::More::BUILDER.like($a, $b, $msg);
+    $BUILDER.like($a, $b, $msg);
 }
 
 sub note($msg) {
-    $Test::More::BUILDER.note($msg);
+    $BUILDER.note($msg);
 }
 
 sub done_testing() {
-    $Test::More::BUILDER.done_testing();
+    $BUILDER.done_testing();
 }
 

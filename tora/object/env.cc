@@ -2,7 +2,8 @@
 
 #include "../object.h"
 #include "../vm.h"
-#include "../package.h"
+#include "../value/class.h"
+#include "../symbols.gen.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -58,9 +59,10 @@ static SharedPtr<Value> env_get(VM * vm, Value* self, Value*k) {
 }
 
 void tora::Init_Env(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("Env");
-    pkg->add_method(vm->symbol_table->get_id("get"), new CallbackFunction(env_get));
-    pkg->add_method(vm->symbol_table->get_id("__getitem__"), new CallbackFunction(env_get));
-    pkg->add_method(vm->symbol_table->get_id("__setitem__"), new CallbackFunction(env_set));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ENV_CLASS);
+    klass->add_method("get", new CallbackFunction(env_get));
+    klass->add_method("__getitem__", new CallbackFunction(env_get));
+    klass->add_method("__setitem__", new CallbackFunction(env_set));
+    vm->add_builtin_class(klass);
 }
 

@@ -2,8 +2,9 @@
 
 #include "../vm.h"
 #include "../object.h"
-#include "../package.h"
+#include "../symbols.gen.h"
 #include "../value/regexp.h"
+#include "../value/class.h"
 
 using namespace tora;
 
@@ -60,12 +61,13 @@ static SharedPtr<Value> Regexp_EXPANDED(VM * vm, Value* self) {
 }
 
 void tora::Init_Regexp(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("Regexp");
-    pkg->add_method("flags",      new CallbackFunction(Regexp_flags));
-    pkg->add_method("quotemeta",  new CallbackFunction(Regexp_quotemeta));
+    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_REGEXP_CLASS);
+    klass->add_method("flags",      new CallbackFunction(Regexp_flags));
+    klass->add_method("quotemeta",  new CallbackFunction(Regexp_quotemeta));
 
-    pkg->add_method("MULTILINE",  new CallbackFunction(Regexp_MULTILINE));
-    pkg->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
-    pkg->add_method("EXPANDED",   new CallbackFunction(Regexp_EXPANDED));
+    klass->add_method("MULTILINE",  new CallbackFunction(Regexp_MULTILINE));
+    klass->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
+    klass->add_method("EXPANDED",   new CallbackFunction(Regexp_EXPANDED));
+    vm->add_builtin_class(klass);
 }
 

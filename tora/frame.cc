@@ -1,8 +1,8 @@
 #include "frame.h"
 #include "vm.h"
 #include "peek.h"
-#include "package.h"
 #include "value/code.h"
+#include "value/class.h"
 #include "pad_list.h"
 
 using namespace tora;
@@ -27,15 +27,16 @@ LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_
 }
 
 LexicalVarsFrame::~LexicalVarsFrame() {
-    if (this->type == FRAME_TYPE_PACKAGE) {
-        // printf("LEAVE PACKAGE FROM %s. back to %d\n", vm_->package_name().c_str(), orig_package_id_);
-        vm_->package_id(static_cast<PackageFrame*>(this)->orig_package_id_);
+    if (this->type == FRAME_TYPE_CLASS) {
+        vm_->klass_.reset(NULL);
     }
 
+    /*
     for (auto iter = dynamic_scope_vars.begin(); iter != dynamic_scope_vars.end(); ++iter) {
         const SharedPtr<DynamicScopeData> & dat = *iter;
         dat->package()->set_variable(dat->moniker_id(), dat->value());
     }
+    */
 }
 
 void LexicalVarsFrame::set_variable_dynamic(int level, int no, const SharedPtr<Value>& v) {
@@ -52,10 +53,12 @@ SharedPtr<Value> LexicalVarsFrame::get_variable_dynamic(int level, int no) const
     return pad_list->get_dynamic(level, no).get();
 }
 
+/*
 void LexicalVarsFrame::push_dynamic_scope_var(Package* pkgid, ID monikerid, const SharedPtr<Value> &target) {
     SharedPtr<DynamicScopeData> v(new DynamicScopeData(pkgid, monikerid, target));
     this->dynamic_scope_vars.push_back(v);
 }
+*/
 
 const char *LexicalVarsFrame::type_str() const {
     switch (type) {
@@ -63,8 +66,8 @@ const char *LexicalVarsFrame::type_str() const {
         return "function";
     case FRAME_TYPE_LEXICAL:
         return "lexical";
-    case FRAME_TYPE_PACKAGE:
-        return "package";
+    case FRAME_TYPE_CLASS:
+        return "class";
     case FRAME_TYPE_TRY:
         return "try";
     case FRAME_TYPE_FOREACH:

@@ -3,7 +3,7 @@ use Config *;
 my $conf = tora_config();
 my $SOEXT = $conf['SHLIBSUFFIX'];
 
-sub load($pkg) {
+sub load_xs($pkg) {
     for $LIBPATH -> $path {
         my $fname = $path + "/" + $pkg.replace('::', '/') + $SOEXT;
         if (-e $fname) {

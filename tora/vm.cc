@@ -2,8 +2,6 @@
 #include "value.h"
 #include "tora.h"
 #include "frame.h"
-#include "package_map.h"
-#include "package.h"
 #include "inspector.h"
 #include "symbols.gen.h"
 #include "callback.h"
@@ -17,12 +15,16 @@
 #include "value/array.h"
 #include "value/tuple.h"
 #include "value/object.h"
+#include "value/class.h"
+#include "value/file_package.h"
 
 #include "object.h"
 
 #include "builtin.h"
 
+#include <boost/scope_exit.hpp>
 #include <boost/foreach.hpp>
+
 #include "lexer.h"
 #include "parser.class.h"
 #include "compiler.h"
@@ -76,10 +78,9 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dum
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->package_map = new PackageMap();
-    this->package_id(symbol_table_->get_id("main"));
     this->myrand = new boost::mt19937(time(NULL));
     this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
+    this->file_scope_.reset(new std::map<ID, SharedPtr<Value>>());
 }
 
 VM::~VM() {
@@ -112,7 +113,7 @@ void VM::init_globals(int argc, char**argv) {
     this->global_vars->push_back(avalue);
 
     // $ENV
-    SharedPtr<ObjectValue> env = new ObjectValue(this, this->symbol_table->get_id("Env"), UndefValue::instance());
+    SharedPtr<ObjectValue> env = new ObjectValue(this, this->get_builtin_class(SYMBOL_ENV_CLASS), UndefValue::instance());
     this->global_vars->push_back(env);
 
     // $LIBPATH : Array
@@ -147,7 +148,7 @@ void VM::die(const SharedPtr<Value> & exception) {
     throw SharedPtr<Value>(exception);
 }
 
-static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & package, const std::string & fname) {
+static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & fname) {
     Scanner scanner(is, fname);
 
     Node *yylval = NULL;
@@ -169,7 +170,6 @@ static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & p
     // SharedPtr<SymbolTable> symbol_table = new SymbolTable();
     Compiler compiler(vm->symbol_table, fname);
     compiler.init_globals();
-    compiler.package(package);
     compiler.compile(parser.root_node());
     if (vm->dump_ops()) {
         printf("Dumping %s\n", fname.c_str());
@@ -223,7 +223,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
     std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
-    return eval_foo(vm, &ss, vm->package_name(), "<eval>");
+    return eval_foo(vm, &ss, "<eval>");
 }
 
 /**
@@ -234,7 +234,7 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     SharedPtr<StrValue> fname = v->to_s();
     std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
     if (ifs.is_open()) {
-        return eval_foo(vm, &ifs, vm->package_name(), fname->str_value());
+        return eval_foo(vm, &ifs, fname->str_value());
     } else {
         throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + get_strerror(get_errno()));
     }
@@ -244,7 +244,7 @@ void VM::use(Value * package_v, bool need_copy) {
     std::string package = symbol_table->id2name(package_v->upcast<SymbolValue>()->id());
     this->require_package(package);
     if (need_copy) {
-        this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id(), this->package_id());
+        this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id());
     }
 }
 
@@ -280,10 +280,23 @@ void VM::require_package(const std::string &package) {
         struct stat stt;
         if (stat(realfilename.c_str(), &stt)==0) {
             SharedPtr<Value> realfilename_value(new StrValue(realfilename));
-            required->set_item(new StrValue(s), realfilename_value);
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
-                (void)eval_foo(vm, &ifs, package, realfilename).get();
+                boost::shared_ptr<std::map<ID, SharedPtr<Value>>> orig_file_scope(this->file_scope_);
+                boost::shared_ptr<std::map<ID, SharedPtr<Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
+                VM *vm = this;
+                BOOST_SCOPE_EXIT( (&vm) (&orig_file_scope) ) {
+                    vm->file_scope_ = orig_file_scope;
+                }
+                BOOST_SCOPE_EXIT_END
+                ;
+
+                this->file_scope_map_.insert(
+                    std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
+                );
+                this->file_scope_ = file_scope_tmp;
+                (void)eval_foo(vm, &ifs, realfilename);
+                required->set_item(new StrValue(s), realfilename_value);
                 return;
             } else {
                 required->set_item(new StrValue(s), UndefValue::instance());
@@ -404,8 +417,7 @@ void VM::call_native_func(const CallbackFunction* callback, int argcnt) {
         break;
     }
     default: {
-        this->die("Unknown callback type: %d\n", callback->argc);
-        abort();
+        throw new ExceptionValue("Unknown callback type: %d", callback->argc);
     }
     }
 }
@@ -419,43 +431,13 @@ void VM::register_standard_methods() {
     this->add_builtin_function("do",   builtin_do);
 }
 
-void VM::copy_all_public_symbols(ID srcid, ID dstid) {
-    SharedPtr<Package> srcpkg = this->find_package(srcid);
-    SharedPtr<Package> dstpkg = this->find_package(dstid);
+void VM::copy_all_public_symbols(ID srcid) {
+    boost::shared_ptr<std::map<ID, SharedPtr<Value>>> src(this->file_scope_map_[srcid]);
 
-    // printf("Copying %s to %s\n", symbol_table->id2name(srcid).c_str(), symbol_table->id2name(dstid).c_str());
-    auto iter = srcpkg->begin();
-    for (; iter!=srcpkg->end(); iter++) {
-        SharedPtr<Value> v = iter->second;
-        if (v->value_type == VALUE_TYPE_CODE) {
-            // printf("  Copying %s method\n", symbol_table->id2name( v->upcast<CodeValue>()->func_name_id() ).c_str());
-            dstpkg->add_function(v->upcast<CodeValue>()->func_name_id(), v);
-        } else {
-            // copy non-code value to other package?
-        }
+    for (auto iter: *src) {
+        this->file_scope_->insert(file_scope_body_t::value_type(iter.first, iter.second));
     }
 }
-
-void VM::add_function(ID pkgid, ID id, SharedPtr<Value> code) {
-    // printf("FUNCDEF!! %s, %s\n", symbol_table->id2name(pkgid).c_str(), symbol_table->id2name(code->upcast<CodeValue>()->func_name_id()).c_str());
-    this->find_package(pkgid)->add_function(id, code);
-}
-
-Package* VM::find_package(const char * name) {
-    return this->find_package(this->symbol_table->get_id(name));
-}
-
-Package* VM::find_package(ID id) {
-    auto iter = this->package_map->find(id);
-    if (iter != this->package_map->end()) {
-        return iter->second.get();
-    } else {
-        Package* pkg =  new Package(this, id);
-        this->package_map->set(pkg);
-        return pkg;
-    }
-}
-
 
 SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const {
     switch (container->value_type) {
@@ -520,11 +502,6 @@ SharedPtr<Value> VM::get_self() {
         }
     }
     throw new ExceptionValue("Cannot call 'self' method out of method.");
-}
-
-void VM::package_id(ID id) {
-    package_id_ = id;
-    package_ = this->find_package(id);
 }
 
 void VM::handle_exception(const SharedPtr<Value> & exception) {
@@ -707,15 +684,20 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
     }
 
     std::set<ID> seen;
-    this->call_method(object, object->object_package_id(), function_id, seen);
+    if (object->value_type == VALUE_TYPE_OBJECT) {
+        this->call_method(object, object->upcast<ObjectValue>()->class_value(), function_id, seen);
+    } else if (object->value_type == VALUE_TYPE_SYMBOL) {
+        this->call_method(object, this->get_class(object->upcast<SymbolValue>()->id()), function_id, seen);
+    } else {
+        this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
+    }
 }
 
-void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
-    seen.insert(klass_id);
+void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue> &klass, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
+    seen.insert(klass->name_id());
 
-    SharedPtr<Package> pkg = this->find_package(klass_id);
-    auto iter = pkg->find(function_id->upcast<SymbolValue>()->id());
-    if (iter != pkg->end()) {
+    auto iter = klass->find_method(function_id->upcast<SymbolValue>()->id());
+    if (iter != klass->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
         SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
@@ -747,7 +729,7 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
             if (argcnt != code->code_params()->size()) {
                 throw new ArgumentExceptionValue(
                     "%s::%s needs %d arguments but you passed %d arguments",
-                    symbol_table->id2name(klass_id).c_str(),
+                    symbol_table->id2name(klass->name_id()).c_str(),
                     symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(),
                     code->code_params()->size()
                 );
@@ -758,22 +740,81 @@ void VM::call_method(const SharedPtr<Value> &object, ID klass_id, const SharedPt
         }
     } else {
         // find in super class.
-        Package * superclass = pkg->superclass();
-        if (superclass) {
-            this->call_method(object, superclass->id(), function_id, seen);
+        SharedPtr<ClassValue> super = klass->superclass();
+        if (super.get()) {
+            this->call_method(object, super, function_id, seen);
         // symbol class
         } else if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
-            this->call_method(object, SYMBOL_SYMBOL_CLASS, function_id, seen);
+            this->call_method(object, this->get_builtin_class(SYMBOL_SYMBOL_CLASS), function_id, seen);
             return;
-        // object class
-        } else if (klass_id != SYMBOL_OBJECT_CLASS && seen.find(SYMBOL_OBJECT_CLASS)==seen.end()) {
-            this->call_method(object, SYMBOL_OBJECT_CLASS, function_id, seen);
+        // object class(UNIVERSAL)
+        } else if (klass->name_id() != SYMBOL_OBJECT_CLASS && seen.find(SYMBOL_OBJECT_CLASS)==seen.end()) {
+            this->call_method(object, this->get_builtin_class(SYMBOL_OBJECT_CLASS), function_id, seen);
             return;
         } else {
             // dump_value(function_id);
             // dump_value(object);
-            this->die("Unknown method %s for %s\n", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
+            this->die("Unknown method %s for %s", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
         }
     }
+}
+
+void VM::add_function(const SharedPtr<Value> & code) {
+    this->file_scope_->insert(file_scope_body_t::value_type(code->upcast<CodeValue>()->func_name_id(), code));
+}
+
+void VM::add_class(const SharedPtr<ClassValue> & klass) {
+    assert(klass->value_type == VALUE_TYPE_CLASS);
+    this->file_scope_->insert(file_scope_body_t::value_type(klass->upcast<ClassValue>()->name_id(), klass));
+}
+
+
+const SharedPtr<ClassValue>& VM::get_builtin_class(ID name_id) const {
+    auto iter = builtin_classes_.find(name_id);
+    if (iter!=builtin_classes_.end()) {
+        return iter->second;
+    } else {
+        fprintf(stderr, "%s is not a builtin class.", symbol_table->id2name(name_id).c_str());
+        abort();
+    }
+}
+
+void VM::klass(const SharedPtr<Value>& k) {
+    assert(k->value_type == VALUE_TYPE_CLASS);
+    klass_.reset(k->upcast<ClassValue>());
+}
+
+void VM::add_builtin_class(const SharedPtr<ClassValue>& klass) {
+    this->builtin_classes_.insert(std::make_pair(klass->name_id(), klass));
+}
+
+SharedPtr<ClassValue> VM::get_class(ID name_id) const {
+    {
+        auto iter = this->file_scope_->find(name_id);
+        if (iter!=this->file_scope_->end()) {
+            if (iter->second->value_type != VALUE_TYPE_CLASS) {
+                throw new ExceptionValue("%s is not a class", id2name(name_id).c_str());
+            }
+            return iter->second->upcast<ClassValue>();
+        }
+    }
+    {
+        auto iter = builtin_classes_.find(name_id);
+        if (iter!=builtin_classes_.end()) {
+            if (iter->second->value_type != VALUE_TYPE_CLASS) {
+                throw new ExceptionValue("%s is not a class", id2name(name_id).c_str());
+            }
+            return iter->second;
+        }
+    }
+    throw new ExceptionValue("There is no class named %s", id2name(name_id).c_str());
+}
+
+std::string VM::id2name(ID id) const {
+    return symbol_table->id2name(id);
+}
+
+ID VM::get_id(const std::string &name) const {
+    return symbol_table->get_id(name);
 }
 

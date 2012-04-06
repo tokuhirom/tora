@@ -4,6 +4,7 @@ TODO
 tora --config
 # => dump json config vars
 
+rename tora/object/metaclass.cc to tora/object/class.cc
 
 builtin functions
 -----------------
@@ -95,6 +96,7 @@ syntax
  * local Foo::method = sub { };
  * /xxx/x
  * super()
+ * exceptions should display file name
  * signal handler
    * perl5's safe signals.
 

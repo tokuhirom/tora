@@ -5,10 +5,11 @@
 #include "../object.h"
 #include "../shared_ptr.h"
 #include "../vm.h"
-#include "../package.h"
 #include "../value/object.h"
 #include "../value/pointer.h"
+#include "../value/class.h"
 #include "../value.h"
+#include "../symbols.gen.h"
 
 using namespace tora;
 
@@ -26,7 +27,7 @@ using namespace tora;
 ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
     DIR * dp = opendir(dirname->c_str());
     if (dp) {
-        return new ObjectValue(vm, vm->symbol_table->get_id("Dir"), new PointerValue(dp));
+        return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_CLASS).get(), new PointerValue(dp));
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
@@ -143,7 +144,7 @@ static SharedPtr<Value> dir_DESTROY(VM * vm, Value* self) {
 static SharedPtr<Value> dir___iter__(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
 
-    ObjectValue* v = new ObjectValue(vm, vm->symbol_table->get_id("Dir::Iterator"), self);
+    ObjectValue* v = new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_ITERATOR_CLASS).get(), self);
     return v;
 }
 
@@ -163,15 +164,21 @@ static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
 }
 
 void tora::Init_Dir(VM *vm) {
-    SharedPtr<Package> pkg = vm->find_package("Dir");
-    pkg->add_method("read",     new CallbackFunction(dir_read));
-    pkg->add_method("close",    new CallbackFunction(dir_close));
-    pkg->add_method("mkdir",    new CallbackFunction(dir_mkdir));
-    pkg->add_method("rmdir",    new CallbackFunction(dir_rmdir));
-    pkg->add_method("DESTROY",  new CallbackFunction(dir_DESTROY));
-    pkg->add_method("__iter__", new CallbackFunction(dir___iter__));
+    {
+        SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DIR_CLASS);
+        klass->add_method("read",     new CallbackFunction(dir_read));
+        klass->add_method("close",    new CallbackFunction(dir_close));
+        klass->add_method("mkdir",    new CallbackFunction(dir_mkdir));
+        klass->add_method("rmdir",    new CallbackFunction(dir_rmdir));
+        klass->add_method("DESTROY",  new CallbackFunction(dir_DESTROY));
+        klass->add_method("__iter__", new CallbackFunction(dir___iter__));
+        vm->add_builtin_class(klass);
+    }
 
-    SharedPtr<Package> iter = vm->find_package("Dir::Iterator");
-    iter->add_method(vm->symbol_table->get_id("__next__"), new CallbackFunction(dir_Iterator___next__));
+    {
+        SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DIR_ITERATOR_CLASS);
+        klass->add_method("__next__", new CallbackFunction(dir_Iterator___next__));
+        vm->add_builtin_class(klass);
+    }
 }
 

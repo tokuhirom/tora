@@ -21,7 +21,6 @@ my $dat = [
     [ 'SYMBOL_FILE_CLASS'               => 'File' ],
     [ 'SYMBOL_STRING_CLASS'             => 'Str' ],
     [ 'SYMBOL_SYMBOL_CLASS'             => 'Symbol' ],
-    [ 'SYMBOL_METACLASS_CLASS'          => 'MetaClass' ],
     [ 'SYMBOL_BYTES_CLASS'              => 'Bytes' ],
     [ 'SYMBOL_REGEXP_CLASS'             => 'Regexp' ],
     [ 'SYMBOL_BOOLEAN_CLASS'            => 'Boolean' ],
@@ -33,8 +32,16 @@ my $dat = [
     [ 'SYMBOL_HASH_ITERATOR_CLASS'      => 'Hash::Iterator' ],
     [ 'SYMBOL_REFERENCE_CLASS'          => 'Reference' ],
     [ 'SYMBOL_RE2_REGEXP_MATCHED_CLASS' => 'RE2::Regexp::Matched' ],
+    [ 'SYMBOL_CLASS_CLASS'              => 'Class' ],
+    [ 'SYMBOL_ENV_CLASS'                => 'Env' ],
+    [ 'SYMBOL_DIR_CLASS'                => 'Dir' ],
+    [ 'SYMBOL_DIR_ITERATOR_CLASS'       => 'Dir::Iterator' ],
+    [ 'SYMBOL_TIME_CLASS'               => 'Time' ],
+    [ 'SYMBOL_INTERNALS_CLASS'          => 'Internals' ],
+    [ 'SYMBOL_DYNALOADER_CLASS'         => 'DynaLoader' ],
 
     [ 'SYMBOL___GET_ITEM__' => '__getitem__' ],
+    [ 'SYMBOL___SET_ITEM__' => '__setitem__' ],
 ];
 
 open my $hfh, '>', 'tora/symbols.gen.h';

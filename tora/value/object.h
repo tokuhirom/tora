@@ -2,7 +2,7 @@
 #define TORA_VALUE_OBJECT_T_
 
 #include "../value.h"
-#include "../package.h"
+#include "class.h"
 
 namespace tora {
 
@@ -12,12 +12,12 @@ class ObjectImpl {
     friend class ObjectValue;
 protected:
     VM * vm_;
-    SharedPtr<Package> package_;
+    SharedPtr<ClassValue> klass_;
     bool destroyed_;
     SharedPtr<Value> data_;
-    ObjectImpl(VM *vm, Package* pkg, const SharedPtr<Value>& d)
+    ObjectImpl(VM *vm, const SharedPtr<ClassValue>& klass, const SharedPtr<Value>& d)
         : vm_(vm)
-        , package_(pkg)
+        , klass_(klass)
         , destroyed_(false)
         , data_(d)
         { }
@@ -32,7 +32,7 @@ private:
         return *object_value_;
     }
 public:
-    ObjectValue(VM *v, ID pkgid, const SharedPtr<Value>& d);
+    ObjectValue(VM *v, const SharedPtr<ClassValue>& klass, const SharedPtr<Value>& data);
     ~ObjectValue();
     const SharedPtr<Value> data() const { return VAL().data_; }
     SharedPtr<Value> data() { return VAL().data_; }
@@ -40,16 +40,14 @@ public:
     void call_destroy();
     VM * vm() const { return VAL().vm_; }
 
-    ID package_id() const { return VAL().package_->id(); }
+    SharedPtr<ClassValue> class_value() const { return VAL().klass_; }
 
     void dump(int indent);
     const char *type_str() const;
 
     SharedPtr<Value> get_item(SharedPtr<Value> index);
     SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v);
-
-private:
-    std::string package_name() const;
+    bool isa(ID target_id) const;
 };
 
 };

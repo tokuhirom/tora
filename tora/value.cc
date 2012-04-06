@@ -34,6 +34,7 @@ const char * Value::type_str() const {
     case VALUE_TYPE_ARRAY_ITERATOR: return "Array::Iterator";
     case VALUE_TYPE_BYTES: return "Bytes";
     case VALUE_TYPE_REFERENCE: return "Reference";
+    case VALUE_TYPE_CLASS: return "Class";
     case VALUE_TYPE_OBJECT: {
         return ((const ObjectValue*)this)->type_str();
     }
@@ -77,6 +78,7 @@ double Value::to_double() const {
     case VALUE_TYPE_RANGE:
     case VALUE_TYPE_STR:
     case VALUE_TYPE_BYTES:
+    case VALUE_TYPE_CLASS:
     case VALUE_TYPE_REFERENCE:
         throw new ExceptionValue("%s cannot support to convert double value.", this->type_str());
     }
@@ -246,13 +248,15 @@ ID Value::object_package_id() const {
         return SYMBOL_RANGE_ITERATOR_CLASS;
     case VALUE_TYPE_REFERENCE:
         return SYMBOL_REFERENCE_CLASS;
+    case VALUE_TYPE_CLASS:
+        return SYMBOL_CLASS_CLASS;
     case VALUE_TYPE_TUPLE:
         fprintf(stderr, "[BUG] You must not get a package name from tuple.\n");
         abort();
     case VALUE_TYPE_SYMBOL:
         return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:
-        return static_cast<const ObjectValue*>(this)->package_id();
+        return static_cast<const ObjectValue*>(this)->class_value()->name_id();
     case VALUE_TYPE_UNDEF:
         throw new ExceptionValue("Cannot get package name from undefined value.");
     }
