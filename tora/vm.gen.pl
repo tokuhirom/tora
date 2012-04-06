@@ -106,7 +106,11 @@ void VM::<?= $method ?>() {
 ? for my $k (@{$_[0]}) {
         CODE_<?= $k->[0] ?>: {
 ?       if ($with_trace) {
-            printf("[%03d] calling PP_<?= $k->[0] ?>(%d).\n", pc, ops->at(pc)->op_type);
+            printf("[%03d] calling PP_<?= $k->[0] ?>(%d).", pc, ops->at(pc)->op_type);
+            if (ops->at(pc)->op_type == OP_PUSH_INT) {
+                printf(" INT:%d", ops->at(pc)->operand.int_value);
+            }
+            printf("\n");
 ?       }
             PP_<?= $k->[0] ?>();
             pc++;
