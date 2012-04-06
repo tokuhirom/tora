@@ -78,9 +78,10 @@ lemon = os.name == 'nt' and '.\\tools\\lemon\\lemon.exe' or './tools/lemon/lemon
 if os.name == 'nt':
     #re2_env.Replace(CXX='g++')
     #env.Replace(CXX='g++')
-    env.Append(
-        LINKFLAGS=['-Wl,-E'],
-    )
+    #env.Append(
+    #    LINKFLAGS=['-Wl,-E'],
+    #)
+    pass
 elif os.uname()[0]=='Darwin':
     re2_env.Replace(CXX='clang++', CC='clang')
     env.Replace(CXX='clang++', CC='clang')
@@ -212,7 +213,7 @@ with open('config.json', 'w') as f:
         'CC':          TORA_CC,
         'CXX':         TORA_CXX,
         'CCFLAGS':     env.get('CCFLAGS'),
-        'CPPPATH':     env.get('CPPPATH'),
+        'CPPPATH':     env.get('CPPPATH') or [],
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
         'LIBS':        ['tora'] + env.get('LIBS'),
