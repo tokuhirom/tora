@@ -20,6 +20,7 @@ struct _uv_data {
     SharedPtr<CodeValue> read_cb;
     SharedPtr<CodeValue> close_cb;
     SharedPtr<CodeValue> timer_cb;
+    SharedPtr<CodeValue> idle_cb;
     _uv_data(VM* vm, uv_loop_t* loop, void* data) {
         this->vm = vm;
         this->loop = loop;
@@ -344,6 +345,63 @@ static SharedPtr<Value> _uv_accept(VM * vm, Value* self) {
     }
 }
 
+static SharedPtr<Value> _uv_idle_new(VM * vm, const std::vector<SharedPtr<Value>>& args) {
+    SharedPtr<Value> self = args.at(0);
+    uv_loop_t* loop;
+    if (args.size() == 1) {
+        loop = uv_default_loop();
+    } else {
+        loop = static_cast<uv_loop_t*>(args.at(2)->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
+    }
+    uv_idle_t* idle = new uv_idle_t;
+    if (uv_idle_init(loop, idle) != 0) {
+        delete idle;
+        throw new ExceptionValue(uv_strerror(uv_last_error(loop)));
+    } else {
+        idle->data = new _uv_data(vm, loop, NULL);
+        return new ObjectValue(vm, vm->symbol_table->get_id("UV::Idle"), new PointerValue(idle));
+    }
+}
+
+void __uv_idle_cb(uv_idle_t* idle, int status) {
+    VM *vm = ((_uv_data*) idle->data)->vm;
+    SharedPtr<CodeValue> callback = ((_uv_data*) idle->data)->idle_cb;
+    if (callback != NULL) {
+        vm->stack.push_back(new IntValue(status));
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
+}
+
+static SharedPtr<Value> _uv_idle_start(VM * vm, Value* self, Value* callback_v) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> idle_ = self->upcast<ObjectValue>()->data();
+    assert(idle_->value_type == VALUE_TYPE_POINTER);
+    uv_idle_t *idle = (uv_idle_t*) idle_->upcast<PointerValue>()->ptr();
+
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) idle->data)->idle_cb = NULL;
+    } else {
+        ((_uv_data*) idle->data)->idle_cb = callback_v->upcast<CodeValue>();
+    }
+
+    if (uv_idle_start(idle, __uv_idle_cb) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) idle->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
+static SharedPtr<Value> _uv_idle_stop(VM * vm, Value* self) {
+    assert(self->value_type == VALUE_TYPE_OBJECT);
+    SharedPtr<Value> idle_ = self->upcast<ObjectValue>()->data();
+    assert(idle_->value_type == VALUE_TYPE_POINTER);
+    uv_idle_t *idle = (uv_idle_t*) idle_->upcast<PointerValue>()->ptr();
+
+    if (uv_idle_stop(idle) != 0) {
+        throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) idle->data)->loop)));
+    }
+    return UndefValue::instance();
+}
+
 extern "C" {
 
 TORA_EXPORT
@@ -379,6 +437,14 @@ void Init_UV_(VM* vm) {
         pkg->add_method(vm->symbol_table->get_id("bind"), new CallbackFunction(_uv_tcp_bind));
         pkg->add_method(vm->symbol_table->get_id("listen"), new CallbackFunction(_uv_listen));
         pkg->add_method(vm->symbol_table->get_id("accept"), new CallbackFunction(_uv_accept));
+        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
+    }
+    {
+        SharedPtr<Package> pkg = vm->find_package("UV::Idle");
+        pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_idle_new));
+        pkg->add_method(vm->symbol_table->get_id("start"), new CallbackFunction(_uv_idle_start));
+        pkg->add_method(vm->symbol_table->get_id("stop"), new CallbackFunction(_uv_idle_stop));
+        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
         pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
     }
 }
