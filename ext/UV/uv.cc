@@ -14,7 +14,12 @@ struct _uv_data {
     VM* vm;
     uv_loop_t* loop;
     void* data;
-    SharedPtr<CodeValue> callback;
+    SharedPtr<CodeValue> connect_cb;
+    SharedPtr<CodeValue> connection_cb;
+    SharedPtr<CodeValue> write_cb;
+    SharedPtr<CodeValue> read_cb;
+    SharedPtr<CodeValue> close_cb;
+    SharedPtr<CodeValue> timer_cb;
     _uv_data(VM* vm, uv_loop_t* loop, void* data) {
         this->vm = vm;
         this->loop = loop;
@@ -24,8 +29,10 @@ struct _uv_data {
 
 static void __uv_close_cb(uv_handle_t* handle) {
     VM *vm = ((_uv_data*) handle->data)->vm;
-    vm->function_call_ex(
-        0, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->close_cb;
+    if (callback != NULL) {
+        vm->function_call_ex(0, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_close(VM *vm, Value *self, Value *callback_v) {
@@ -34,8 +41,11 @@ static SharedPtr<Value> _uv_close(VM *vm, Value *self, Value *callback_v) {
     assert(handle_->value_type == VALUE_TYPE_POINTER);
     uv_handle_t *handle = (uv_handle_t*) handle_->upcast<PointerValue>()->ptr();
 
-    assert(callback_v->value_type == VALUE_TYPE_CODE);
-    ((_uv_data*) handle->data)->callback = callback_v->upcast<CodeValue>();
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) handle->data)->close_cb = NULL;
+    } else {
+        ((_uv_data*) handle->data)->close_cb = callback_v->upcast<CodeValue>();
+    }
 
     uv_close(handle, __uv_close_cb);
     return UndefValue::instance();
@@ -102,9 +112,11 @@ static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value
 
 void __uv_timer_cb(uv_timer_t* timer, int status) {
     VM *vm = ((_uv_data*) timer->data)->vm;
-    vm->stack.push_back(new IntValue(status));
-    vm->function_call_ex(
-        1, ((_uv_data*) timer->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) timer->data)->timer_cb;
+    if (callback != NULL) {
+        vm->stack.push_back(new IntValue(status));
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v, Value* timeout_v, Value* repeat_v) {
@@ -113,10 +125,13 @@ static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v,
     assert(timer_->value_type == VALUE_TYPE_POINTER);
     uv_timer_t *timer = (uv_timer_t*) timer_->upcast<PointerValue>()->ptr();
 
-    assert(callback_v->value_type == VALUE_TYPE_CODE);
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) timer->data)->timer_cb = NULL;
+    } else {
+        ((_uv_data*) timer->data)->timer_cb = callback_v->upcast<CodeValue>();
+    }
     assert(timeout_v->value_type == VALUE_TYPE_INT);
     assert(repeat_v->value_type == VALUE_TYPE_INT);
-    ((_uv_data*) timer->data)->callback = callback_v->upcast<CodeValue>();
 
     if (uv_timer_start(timer, __uv_timer_cb, timeout_v->to_int(), repeat_v->to_int()) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) timer->data)->loop)));
@@ -170,9 +185,11 @@ static SharedPtr<Value> _uv_tcp_nodelay(VM * vm, Value* self, Value* enable_v) {
 
 static void __uv_tcp_connect_cb(uv_connect_t* req, int status) {
     VM *vm = ((_uv_data*) req->handle->data)->vm;
-    vm->stack.push_back(new IntValue(status));
-    vm->function_call_ex(
-        1, ((_uv_data*) req->handle->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) req->handle->data)->connect_cb;
+    if (callback != NULL) {
+        vm->stack.push_back(new IntValue(status));
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_tcp_connect(VM * vm, Value* self, Value* addr_v, Value* callback_v) {
@@ -183,8 +200,11 @@ static SharedPtr<Value> _uv_tcp_connect(VM * vm, Value* self, Value* addr_v, Val
 
     SharedPtr<Value> addr = addr_v->to_s();
     const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
-    assert(callback_v->value_type == VALUE_TYPE_CODE);
-    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) tcp->data)->connect_cb = NULL;
+    } else {
+        ((_uv_data*) tcp->data)->connect_cb = callback_v->upcast<CodeValue>();
+    }
 
     static uv_connect_t req;
     if (uv_tcp_connect(&req, tcp, *(const sockaddr_in*)addr_s.c_str(), __uv_tcp_connect_cb) != 0) {
@@ -195,9 +215,11 @@ static SharedPtr<Value> _uv_tcp_connect(VM * vm, Value* self, Value* addr_v, Val
 
 static void __uv_write_cb(uv_write_t* req, int status) {
     VM *vm = ((_uv_data*) req->handle->data)->vm;
-    vm->stack.push_back(new IntValue(status));
-    vm->function_call_ex(
-        1, ((_uv_data*) req->handle->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) req->handle->data)->write_cb;
+    if (callback != NULL) {
+        vm->stack.push_back(new IntValue(status));
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_write(VM * vm, Value* self, Value* src_v, Value* callback_v) {
@@ -209,7 +231,11 @@ static SharedPtr<Value> _uv_write(VM * vm, Value* self, Value* src_v, Value* cal
     SharedPtr<Value> src = src_v->to_s();
     const std::string &s = src->upcast<StrValue>()->str_value();
     assert(callback_v->value_type == VALUE_TYPE_CODE);
-    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) tcp->data)->write_cb = NULL;
+    } else {
+        ((_uv_data*) tcp->data)->write_cb = callback_v->upcast<CodeValue>();
+    }
 
     static uv_write_t req;
     static uv_buf_t buf = uv_buf_init((char*) s.c_str(), s.size());
@@ -225,9 +251,14 @@ static uv_buf_t __uv_alloc_cb(uv_handle_t* handle, size_t suggested_size) {
 
 static void __uv_read_cb(uv_stream_t* handle, int nread, uv_buf_t buf) {
     VM *vm = ((_uv_data*) handle->data)->vm;
-    vm->stack.push_back(new BytesValue(std::string(buf.base, nread)));
-    vm->function_call_ex(
-        1, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->read_cb;
+    if (callback != NULL) {
+        if (nread >= 0)
+            vm->stack.push_back(new BytesValue(buf.base, nread));
+        else
+            vm->stack.push_back(UndefValue::instance());
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_read(VM * vm, Value* self, Value* callback_v) {
@@ -236,8 +267,11 @@ static SharedPtr<Value> _uv_read(VM * vm, Value* self, Value* callback_v) {
     assert(tcp_->value_type == VALUE_TYPE_POINTER);
     uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
 
-    assert(callback_v->value_type == VALUE_TYPE_CODE);
-    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) tcp->data)->read_cb = NULL;
+    } else {
+        ((_uv_data*) tcp->data)->read_cb = callback_v->upcast<CodeValue>();
+    }
 
     if (uv_read_start((uv_stream_t*) tcp, __uv_alloc_cb, __uv_read_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
@@ -262,9 +296,11 @@ static SharedPtr<Value> _uv_tcp_bind(VM * vm, Value* self, Value* addr_v) {
 
 static void __uv_connection_cb(uv_stream_t* handle, int status) {
     VM *vm = ((_uv_data*) handle->data)->vm;
-    vm->stack.push_back(new IntValue(status));
-    vm->function_call_ex(
-        1, ((_uv_data*) handle->data)->callback, UndefValue::instance());
+    SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->connection_cb;
+    if (callback != NULL) {
+        vm->stack.push_back(new IntValue(status));
+        vm->function_call_ex(1, callback, UndefValue::instance());
+    }
 }
 
 static SharedPtr<Value> _uv_listen(VM * vm, Value* self, Value* backlog_v, Value* callback_v) {
@@ -274,8 +310,11 @@ static SharedPtr<Value> _uv_listen(VM * vm, Value* self, Value* backlog_v, Value
     uv_tcp_t *tcp = (uv_tcp_t*) tcp_->upcast<PointerValue>()->ptr();
 
     assert(backlog_v->value_type == VALUE_TYPE_INT);
-    assert(callback_v->value_type == VALUE_TYPE_CODE);
-    ((_uv_data*) tcp->data)->callback = callback_v->upcast<CodeValue>();
+    if (callback_v->value_type != VALUE_TYPE_CODE) {
+        ((_uv_data*) tcp->data)->connection_cb = NULL;
+    } else {
+        ((_uv_data*) tcp->data)->connection_cb = callback_v->upcast<CodeValue>();
+    }
 
     if (uv_listen((uv_stream_t*) tcp, backlog_v->to_int(), __uv_connection_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
