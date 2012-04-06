@@ -564,10 +564,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         // if (funccomp.closure_vars->size() > 0) {
             // create closure
             // push variables  to stack.
-            auto iter = funccomp.closure_vars->begin();
-            for (; iter!=funccomp.closure_vars->end(); iter++) {
-                this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+#ifdef PERLISH_CLOSURE
+            {
+                auto iter = funccomp.closure_vars->begin();
+                for (; iter!=funccomp.closure_vars->end(); iter++) {
+                    this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+                }
             }
+#endif
 
             SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
             push_op(putval);
@@ -584,8 +588,6 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             push_op(define_method);
             */
         // }
-
-        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
 
         break;
     }
@@ -690,10 +692,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (1 && funccomp.closure_vars->size() > 0) {
             // create closure
             // push variables  to stack.
-            auto iter = funccomp.closure_vars->rbegin();
-            for (; iter!=funccomp.closure_vars->rend(); iter++) {
-                this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+#ifdef PERLISH_CLOSURE
+            {
+                auto iter = funccomp.closure_vars->rbegin();
+                for (; iter!=funccomp.closure_vars->rend(); iter++) {
+                    this->compile(new StrNode(NODE_GETVARIABLE, *iter));
+                }
             }
+#endif
 
             push_op(new ValueOP(OP_PUSH_VALUE, code));
 
@@ -708,8 +714,6 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             SharedPtr<OP> define_method = new OP(OP_FUNCDEF);
             push_op(define_method);
         }
-
-        push_op(new ValueOP(OP_PUSH_VALUE, code));
 
         break;
     }
