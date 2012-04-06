@@ -5,6 +5,7 @@ from glob import glob
 conf = json.loads(open('../../config.json').read())
 
 env = Environment(
+    ENV={'PATH': conf['PATH']},
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
     LINKFLAGS=conf['LINKFLAGS'],
