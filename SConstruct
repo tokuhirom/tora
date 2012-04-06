@@ -210,6 +210,7 @@ with open('tora/config.h', 'w') as f:
 
 with open('config.json', 'w') as f:
     f.write(json.dumps({
+        'PATH':        os.environ['PATH'],
         'CC':          TORA_CC,
         'CXX':         TORA_CXX,
         'CCFLAGS':     env.get('CCFLAGS'),
