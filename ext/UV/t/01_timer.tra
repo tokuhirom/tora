@@ -5,7 +5,7 @@ my $count = 3;
 my $loop = UV.default_loop();
 my $timer = UV::Timer.new();
 my $callback = -> $status {
-    say("count down $count");
+    note("count down $count");
     if $count-- == 0 {
         $loop.unref();
     }

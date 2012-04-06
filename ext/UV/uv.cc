@@ -54,13 +54,13 @@ static SharedPtr<Value> _uv_loop_run_once(VM * vm, Value* self) {
 static SharedPtr<Value> _uv_loop_ref(VM * vm, Value* self) {
     uv_loop_t* loop = static_cast<uv_loop_t*>(self->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     uv_ref(loop);
-    return NULL;
+    return UndefValue::instance();
 }
 
 static SharedPtr<Value> _uv_loop_unref(VM * vm, Value* self) {
     uv_loop_t* loop = static_cast<uv_loop_t*>(self->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     uv_unref(loop);
-    return NULL;
+    return UndefValue::instance();
 }
 
 static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value>>& args) {
@@ -83,8 +83,9 @@ static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value
 
 void __uv_timer_cb(uv_timer_t* timer, int status) {
     VM *vm = ((_uv_data*) timer->data)->vm;
+    vm->stack.push_back(new IntValue(status));
     vm->function_call_ex(
-        0, ((_uv_data*) timer->data)->callback, new IntValue(status));
+        1, ((_uv_data*) timer->data)->callback, UndefValue::instance());
 }
 
 static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v, Value* timeout_v, Value* repeat_v) {
