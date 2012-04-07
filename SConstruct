@@ -214,7 +214,7 @@ with open('config.json', 'w') as f:
         'CC':          TORA_CC,
         'CXX':         TORA_CXX,
         'CCFLAGS':     env.get('CCFLAGS'),
-        'CPPPATH':     env.get('CPPPATH'),
+        'CPPPATH':     env.get('CPPPATH') or [],
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
         'LIBS':        ['tora'] + env.get('LIBS'),

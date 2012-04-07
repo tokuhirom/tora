@@ -1,0 +1,16 @@
+use UV *;
+use Socket *;
+use Test::More *;
+
+my $tcp = UV::TCP.new();
+my $addr = Socket.sockaddr_in(8888, Socket.inet_aton('localhost'));
+$tcp.connect($addr, -> $status {
+    say("connected");
+    UV.default_loop().unref();
+});
+UV.run();
+
+ok(1);
+
+done_testing;
+
