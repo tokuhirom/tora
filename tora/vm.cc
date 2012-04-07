@@ -443,8 +443,8 @@ void VM::register_standard_methods() {
 void VM::copy_all_public_symbols(ID srcid) {
     boost::shared_ptr<std::map<ID, SharedPtr<Value>>> src(this->file_scope_map_[srcid]);
 
-    for (auto iter: *src) {
-        this->file_scope_->insert(file_scope_body_t::value_type(iter.first, iter.second));
+    for (auto iter = src->begin(); iter != src->end(); iter++) {
+        this->file_scope_->insert(file_scope_body_t::value_type(iter->first, iter->second));
     }
 }
 
