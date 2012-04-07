@@ -595,8 +595,21 @@ string_literal:
         tora_add_string_literal('\b');
         goto string_literal;
     }
+    "\\$" {
+        tora_add_string_literal('$');
+        goto string_literal;
+    }
     "\\f" {
         tora_add_string_literal('\f');
+        goto string_literal;
+    }
+    "\\" [0-7]{3} {
+        char ret = (
+              (octchar2int(*(m_cursor-3)) << 6)
+            + (octchar2int(*(m_cursor-2)) << 3)
+            + octchar2int(*(m_cursor-1))
+        );
+        tora_add_string_literal(static_cast<char>(ret));
         goto string_literal;
     }
     "\\x" [a-fA-F0-9]{2} {

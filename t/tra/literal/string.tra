@@ -1,0 +1,6 @@
+use Test::More *;
+
+is("\015", "\r");
+is("\012", "\n");
+
+done_testing;
