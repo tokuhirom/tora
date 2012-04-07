@@ -145,6 +145,11 @@ public:
     void function_call_ex(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> & self);
 
     /**
+     * eval the source code from is.
+     */
+    SharedPtr<Value> eval(std::istream* is, const std::string & fname);
+
+    /**
      * load dynamic library.
      */
     void load_dynamic_library(const std::string &filename, const std::string &endpoint);

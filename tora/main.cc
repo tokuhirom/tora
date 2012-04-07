@@ -27,10 +27,41 @@
 
 using namespace tora;
 
-void show_configuration() {
+static void show_configuration() {
     printf("Tora %s\n", TORA_VERSION_STR);
     printf("Build configuration: %s\n", TORA_CCFLAGS);
     printf("Install prefix: %s\n", TORA_PREFIX);
+}
+
+static void run_repl(int argc, char **argv, const std::vector<std::string> &libs) {
+    bool dump_ops = false;
+
+    SharedPtr<Scanner> scanner = new Scanner(&std::cin, "<stdin>");
+    SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+    tora::Compiler compiler(symbol_table, "<repl>");
+    compiler.init_globals();
+    // compiler.compile(parser.root_node());
+
+    tora::VM vm(compiler.ops, symbol_table, dump_ops);
+    vm.register_standard_methods();
+    vm.init_globals(argc-optind, argv+optind);
+    for (auto iter = libs.begin(); iter != libs.end(); iter++) {
+        vm.add_library_path(*iter);
+    }
+    vm.add_library_path(std::string(TORA_PREFIX) + "/lib/tora-" + TORA_VERSION_STR);
+
+    std::string buf;
+    while (!std::cin.eof()) {
+        try {
+            std::cout << ">> ";
+            std::getline(std::cin, buf, '\n');
+            std::stringstream iss(buf + ";");
+            SharedPtr<Value> ret = vm.eval(&iss, "<repl>");
+            vm.dump_value(ret);
+        } catch (ExceptionValue* e) {
+            std::cerr << e->message() << std::endl;
+        };
+    }
 }
 
 int main(int argc, char **argv) {
@@ -97,8 +128,13 @@ int main(int argc, char **argv) {
         filename = argv[optind];
         optind++;
     } else {
-        filename = "<stdin>";
-        scanner = new Scanner(&std::cin, "<stdin>");
+        if (isatty(fileno(stdin)) && isatty(fileno(stdout))) {
+            run_repl(argc, argv, libs);
+            return 0;
+        } else {
+            filename = "<stdin>";
+            scanner = new Scanner(&std::cin, "<stdin>");
+        }
     }
 
 #ifndef NDEBUG

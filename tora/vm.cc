@@ -148,7 +148,9 @@ void VM::die(const SharedPtr<Value> & exception) {
     throw SharedPtr<Value>(exception);
 }
 
-static SharedPtr<Value> eval_foo(VM *vm, std::istream* is, const std::string & fname) {
+SharedPtr<Value> VM::eval(std::istream* is, const std::string & fname) {
+    VM *vm = this;
+
     Scanner scanner(is, fname);
 
     Node *yylval = NULL;
@@ -223,7 +225,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
     std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
-    return eval_foo(vm, &ss, "<eval>");
+    return vm->eval(&ss, "<eval>");
 }
 
 /**
@@ -234,7 +236,7 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     SharedPtr<StrValue> fname = v->to_s();
     std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
     if (ifs.is_open()) {
-        return eval_foo(vm, &ifs, fname->str_value());
+        return vm->eval(&ifs, fname->str_value());
     } else {
         throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + get_strerror(get_errno()));
     }
@@ -302,7 +304,7 @@ void VM::require_package(const std::string &package) {
                     std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
                 );
                 this->file_scope_ = file_scope_tmp;
-                (void)eval_foo(vm, &ifs, realfilename);
+                (void)vm->eval(&ifs, realfilename);
                 required->set_item(new StrValue(s), realfilename_value);
                 return;
             } else {
