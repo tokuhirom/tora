@@ -78,8 +78,8 @@ std::string Inspector::inspect(Value* v) const {
         std::string buf = static_cast<const BytesValue*>(v)->str_value();
 
         os << "b\"";
-        for (auto iter: buf) {
-            const unsigned char c = iter;
+        for (auto iter = buf.begin(); iter != buf.end(); iter++) {
+            const unsigned char c = *iter;
             os << "\\x";
             os << "0123456789abcdef"[c>>4&0x0f];
             os << "0123456789abcdef"[c&0x0f];

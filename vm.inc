@@ -71,8 +71,8 @@ OP_NEW_RANGE {
 }
 
 OP_FUNCDEF {
-    SharedPtr<Value> code = stack.back();
-    stack.pop_back();
+    // do not modify stacks
+    const SharedPtr<Value> & code = stack.back();
 
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
@@ -84,8 +84,8 @@ OP_FUNCDEF {
 }
 
 OP_CLOSUREDEF {
-    SharedPtr<Value> code = stack.back();
-    stack.pop_back();
+    const SharedPtr<Value> &code = stack.back();
+    // do not modify stacks
 
     // take variables from stack. and push it to code->closure_cells.
     assert(code->value_type == VALUE_TYPE_CODE);

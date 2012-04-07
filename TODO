@@ -64,6 +64,8 @@ glob('src/object/*.cc')
 Test::LongString
 Test::Fatal
 
+File::Zglob
+
 File::which
 
 UV or EV?
@@ -72,6 +74,8 @@ XML::LibXML
 (HTML::Parser)
 
 Digest::SHA1
+
+Text::Mecab
 
 syntax
 ------
