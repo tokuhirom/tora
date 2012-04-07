@@ -10,7 +10,7 @@ from os.path import join, dirname, abspath
 from types import DictType, StringTypes
 from glob import glob
 
-TORA_VERSION_STR='0.0.3'
+TORA_VERSION_STR='0.0.5'
 
 tools = ['default']
 default_prefix = '/usr/local'

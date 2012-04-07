@@ -22,10 +22,17 @@ env = Environment(
     tools=conf['TOOLS'],
 )
 
+if not os.path.exists("../../vendor/libuv/include/uv.h"):
+    print "uv.h not found. You may forgot git submodule --init?"
+    Exit(1)
+
 # see http://stackoverflow.com/questions/2246399/scons-to-make-a-shared-library-so-with-a-static-libarary-a
 env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1
 
-libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), None, 'make', chdir=1)
+libuv_make = 'make'
+if os.name != 'nt':
+    libuv_make += ' CFLAGS+=-fPIC'
+libuv = env.Command('../../vendor/libuv/uv' + env.get('LIBSUFFIX'), None, libuv_make, chdir=1)
 
 env.Append(LIBPATH=['../../vendor/libuv/', '../../'])
 

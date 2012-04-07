@@ -250,7 +250,7 @@ static uv_buf_t __uv_alloc_cb(uv_handle_t* handle, size_t suggested_size) {
     return uv_buf_init(new char[suggested_size], suggested_size);
 }
 
-static void __uv_read_cb(uv_stream_t* handle, int nread, uv_buf_t buf) {
+static void __uv_read_cb(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
     VM *vm = ((_uv_data*) handle->data)->vm;
     SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->read_cb;
     if (callback != NULL) {
