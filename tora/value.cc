@@ -35,6 +35,7 @@ const char * Value::type_str() const {
     case VALUE_TYPE_BYTES: return "Bytes";
     case VALUE_TYPE_REFERENCE: return "Reference";
     case VALUE_TYPE_CLASS: return "Class";
+    case VALUE_TYPE_FILE_PACKAGE: return "FilePackage";
     case VALUE_TYPE_OBJECT: {
         return ((const ObjectValue*)this)->type_str();
     }
@@ -79,6 +80,7 @@ double Value::to_double() const {
     case VALUE_TYPE_STR:
     case VALUE_TYPE_BYTES:
     case VALUE_TYPE_CLASS:
+    case VALUE_TYPE_FILE_PACKAGE:
     case VALUE_TYPE_REFERENCE:
         throw new ExceptionValue("%s cannot support to convert double value.", this->type_str());
     }
@@ -212,6 +214,9 @@ Value& tora::Value::operator=(const Value&lhs) {
     abort();
 }
 
+/**
+ * Return the class id the value binded.
+ */
 ID Value::object_package_id() const {
     switch (value_type) {
     case VALUE_TYPE_STR:
@@ -250,6 +255,8 @@ ID Value::object_package_id() const {
         return SYMBOL_REFERENCE_CLASS;
     case VALUE_TYPE_CLASS:
         return SYMBOL_CLASS_CLASS;
+    case VALUE_TYPE_FILE_PACKAGE:
+        return SYMBOL_FILEPACKAGE_CLASS;
     case VALUE_TYPE_TUPLE:
         fprintf(stderr, "[BUG] You must not get a package name from tuple.\n");
         abort();

@@ -16,4 +16,4 @@ class Foo {
 
 is($n, 4649);
 
-done_testing;
+done_testing();

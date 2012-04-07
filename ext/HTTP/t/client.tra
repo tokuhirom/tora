@@ -1,4 +1,4 @@
-use HTTP::Client;
+use HTTP::Client *;
 use URI::Split *;
 use Socket *;
 use HTTP::Parser *;
@@ -8,4 +8,4 @@ my $h = HTTP::Client.new();
 my $res = $h.get('http://example.com/');
 is($res.status, 302);
 
-done_testing;
+done_testing();

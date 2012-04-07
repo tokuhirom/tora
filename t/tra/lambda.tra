@@ -31,4 +31,4 @@ note('pass by named arguments');
     is($i, 44);
 }
 
-done_testing;
+done_testing();

@@ -56,6 +56,7 @@ class BoolValue;
 class RangeValue;
 class ObjectImpl;
 class ClassImpl;
+class FilePackageImpl;
 
 class CallbackFunction;
 class OPArray;
@@ -88,7 +89,6 @@ protected:
 typedef boost::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 typedef boost::shared_ptr<std::string> StringImpl;
-typedef boost::shared_ptr<std::map<ID, SharedPtr<Value>>> FilePackageImpl;
 
 // TODO: remove virtual from this class for performance.
 /**

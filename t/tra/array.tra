@@ -19,4 +19,4 @@ $a.push(5);
 is($a.tora(), '[1,5]');
 is($a.reverse().tora(), '[5,1]');
 
-done_testing;
+done_testing();

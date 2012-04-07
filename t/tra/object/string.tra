@@ -37,5 +37,5 @@ note("encode"); {
     is('ほげほげ'.encode('euc-jp'), b"\xa4\xdb\xa4\xb2\xa4\xdb\xa4\xb2");
 }
 
-done_testing;
+done_testing();
 

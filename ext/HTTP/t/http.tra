@@ -14,4 +14,4 @@ use HTTP::Parser *;
     is($env.tora(), {"PATH_INFO" => "/","QUERY_STRING" => "","REQUEST_METHOD" => "GET","REQUEST_URI" => "/","SCRIPT_NAME" => "","SERVER_PROTOCOL" => "HTTP/1.0"}.tora());
 }
 
-done_testing;
+done_testing();

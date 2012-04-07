@@ -15,4 +15,4 @@ is(JSON.decode("{}").tora(), {}.tora);
 is(JSON.decode("{\"foo\":3}").tora(), {foo => 3}.tora);
 is(JSON.decode("[1,3,\"hoge\"]").tora(), [1,3,'hoge'].tora);
 
-done_testing;
+done_testing();

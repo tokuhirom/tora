@@ -8,5 +8,5 @@ is($code.line(), 4);
 is($code.filename(), __FILE__);
 is($code.package(), 'main');
 
-done_testing;
+done_testing();
 

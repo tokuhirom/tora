@@ -23,4 +23,4 @@ ok(!-e 't/tmp/foo/bar/');
 ok(!-e 't/tmp/foo/');
 ok(-d 't/tmp/');
 
-done_testing;
+done_testing();

@@ -79,7 +79,7 @@ OP_FUNCDEF {
     if (this->klass().get()) {
         this->klass()->add_method( code );
     } else {
-        this->add_function(code);
+        this->add_function(code->upcast<CodeValue>());
     }
 }
 
@@ -108,7 +108,7 @@ OP_CLOSUREDEF {
     if (this->klass().get()) {
         this->klass()->add_method( code );
     } else {
-        this->add_function(code);
+        this->add_function(code->upcast<CodeValue>());
     }
 }
 
@@ -952,7 +952,6 @@ OP_NOT {
 }
 
 OP_PACKAGE_ENTER {
-    ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
     PackageFrame* pframe = new PackageFrame(this, stack.size());
     pframe->top = stack.size();
@@ -1022,6 +1021,31 @@ OP_SET_PACKAGE_VARIABLE {
     stack.push_back(rval);
     */
     TODO();
+}
+
+OP_INSTANCIATE_IDENTIFIER {
+    ID id = get_int_operand();
+    auto iter = file_scope_->find(id);
+    if (iter != file_scope_->end()) {
+        if (iter->second->value_type == VALUE_TYPE_CODE) {
+            int argcnt = 0;
+            auto code = iter->second->upcast<CodeValue>();
+            if (code->is_native()) {
+                this->call_native_func(code->callback(), argcnt);
+            } else {
+                this->function_call(argcnt, iter->second->upcast<CodeValue>(), UndefValue::instance());
+            }
+        } else {
+            stack.push_back(iter->second);
+        }
+    } else {
+        auto iter = this->builtin_classes_.find(id);
+        if (iter != this->builtin_classes_.end()) {
+            stack.push_back(iter->second);
+        } else {
+            throw new ExceptionValue("There is no stuff named '%s'", id2name(id).c_str());
+        }
+    }
 }
 
 OP_GET_PACKAGE_VARIABLE {

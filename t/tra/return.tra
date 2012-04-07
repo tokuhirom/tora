@@ -8,4 +8,4 @@ f();
 is(typeof(e()), 'Hash');
 is(g(), "YES");
 
-done_testing;
+done_testing();

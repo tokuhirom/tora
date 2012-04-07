@@ -11,4 +11,4 @@ note("bar");
 is(bar('hoge').tora(), [5963, 'hoge', undef].tora());
 is(bar('hoge', 'fuga').tora(), [5963, 'hoge', 'fuga'].tora());
 
-done_testing;
+done_testing();

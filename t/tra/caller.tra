@@ -28,4 +28,4 @@ sub baz () {
 
 foo();
 
-done_testing;
+done_testing();

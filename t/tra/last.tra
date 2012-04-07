@@ -52,4 +52,4 @@ use Test::More *;
     is($n, 3);
 }
 
-done_testing;
+done_testing();

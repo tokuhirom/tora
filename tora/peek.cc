@@ -2,6 +2,7 @@
 #include "value.h"
 #include "value/symbol.h"
 #include "value/code.h"
+#include "value/class.h"
 #include "vm.h"
 
 using namespace tora;
@@ -46,6 +47,11 @@ void tora::peek(VM *vm, const Value * v) {
             printf("  SIZE: %ld\n", (long int) av->size());
             break;
         }
+        case VALUE_TYPE_CLASS: {
+            const ClassValue*cv = static_cast<const ClassValue*>(v);
+            printf("  NAME: %s\n", cv->name().c_str());
+            break;
+        }
         case VALUE_TYPE_UNDEF:
         case VALUE_TYPE_BOOL:
         case VALUE_TYPE_STR:
@@ -61,6 +67,8 @@ void tora::peek(VM *vm, const Value * v) {
         case VALUE_TYPE_HASH_ITERATOR:
         case VALUE_TYPE_OBJECT:
         case VALUE_TYPE_POINTER:
+        case VALUE_TYPE_REFERENCE:
+        case VALUE_TYPE_FILE_PACKAGE:
         case VALUE_TYPE_BYTES:
             // nop.
             break;

@@ -8,7 +8,7 @@ sub file($path) {
     Path::File.new($path);
 }
 
-$Path::SEPCHAR='/';
+my $SEPCHAR='/';
 
 class Path::Base {
     sub stat() {

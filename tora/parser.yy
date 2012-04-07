@@ -348,8 +348,8 @@ expression(A) ::= DIE expression(B). {
 }
 expression(A) ::= use_expression(B).   { A = B; }
 expression(A) ::= identifier(B). {
-    // in hash creation, It's a key.
-    A = new FuncallNode(B, new ListNode(), true);
+    B->type = NODE_INSTANCIATE_IDENTIFIER;
+    A = B;
 }
 use_expression(A) ::= USE identifier(B) MUL. {
     A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));
@@ -524,12 +524,15 @@ postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     A = new FuncallNode(B, C->upcast<ListNode>());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
+    B->type = NODE_INSTANCIATE_IDENTIFIER;
     A = new MethodCallNode(B, C, D->upcast<ListNode>());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
+    B->type = NODE_INSTANCIATE_IDENTIFIER;
     A = new MethodCallNode(B, C, new ListNode());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C).  {
+    B->type = NODE_INSTANCIATE_IDENTIFIER;
     // Foo.bar
     A = new MethodCallNode(B, C, new ListNode());
 }

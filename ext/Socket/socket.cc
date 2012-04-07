@@ -4,7 +4,7 @@
 #include "value/array.h"
 #include "value/tuple.h"
 #include "value/bytes.h"
-#include "package.h"
+#include "value/class.h"
 
 #include <sys/types.h>
 #ifdef _WIN32
@@ -59,7 +59,7 @@ static SharedPtr<Value> sock_socket(VM * vm, Value* klass, Value* domain_v, Valu
     if (sock == -1) {
         throw new ErrnoExceptionValue(get_errno());
     } else {
-        return new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(sock));
+        return new ObjectValue(vm, vm->get_class(vm->get_id("Socket::Socket")), new IntValue(sock));
     }
 }
 
@@ -301,7 +301,7 @@ static SharedPtr<Value> sock_sock_accept(VM * vm, Value* self) {
 
     int fd = accept(GETFD(vm, self), (struct sockaddr *)namebuf, &len);
     if (fd >= 0) {
-        SharedPtr<ObjectValue> new_sock = new ObjectValue(vm, vm->symbol_table->get_id("Socket::Socket"), new IntValue(fd));
+        SharedPtr<ObjectValue> new_sock = new ObjectValue(vm, vm->get_class(vm->symbol_table->get_id("Socket::Socket")), new IntValue(fd));
         SharedPtr<TupleValue> t = new TupleValue();
         t->push_back(new StrValue(std::string(namebuf, len)));
         t->push_back(new_sock);
@@ -327,23 +327,25 @@ void Init_Socket(VM* vm) {
 #endif
 
     {
-        SharedPtr<Package> pkg = vm->find_package("Socket");
-        pkg->add_method(vm->symbol_table->get_id("socket"), new CallbackFunction(sock_socket));
-        pkg->add_method(vm->symbol_table->get_id("sockaddr_in"), new CallbackFunction(sock_sockaddr_in));
-        pkg->add_method(vm->symbol_table->get_id("inet_aton"), new CallbackFunction(sock_inet_aton));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "Socket");
+        klass->add_method("socket", new CallbackFunction(sock_socket));
+        klass->add_method("sockaddr_in", new CallbackFunction(sock_sockaddr_in));
+        klass->add_method("inet_aton", new CallbackFunction(sock_inet_aton));
+        vm->add_class(klass);
     }
 
     {
-        SharedPtr<Package> pkg = vm->find_package("Socket::Socket");
-        pkg->add_method(vm->symbol_table->get_id("connect"), new CallbackFunction(sock_sock_connect));
-        pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(sock_write));
-        pkg->add_method(vm->symbol_table->get_id("read"), new CallbackFunction(sock_read));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(sock_sock_DESTROY));
-        pkg->add_method(vm->symbol_table->get_id("bind"), new CallbackFunction(sock_sock_bind));
-        pkg->add_method(vm->symbol_table->get_id("listen"), new CallbackFunction(sock_sock_listen));
-        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(sock_sock_close));
-        pkg->add_method(vm->symbol_table->get_id("accept"), new CallbackFunction(sock_sock_accept));
-        pkg->add_method(vm->symbol_table->get_id("setsockopt"), new CallbackFunction(sock_sock_setsockopt));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "Socket::Socket");
+        klass->add_method("connect", new CallbackFunction(sock_sock_connect));
+        klass->add_method("write", new CallbackFunction(sock_write));
+        klass->add_method("read", new CallbackFunction(sock_read));
+        klass->add_method("DESTROY", new CallbackFunction(sock_sock_DESTROY));
+        klass->add_method("bind", new CallbackFunction(sock_sock_bind));
+        klass->add_method("listen", new CallbackFunction(sock_sock_listen));
+        klass->add_method("close", new CallbackFunction(sock_sock_close));
+        klass->add_method("accept", new CallbackFunction(sock_sock_accept));
+        klass->add_method("setsockopt", new CallbackFunction(sock_sock_setsockopt));
+        vm->add_class(klass);
     }
 }
 

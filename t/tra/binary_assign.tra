@@ -48,4 +48,4 @@ use Test::More *;
     is($x, 4649%39);
 }
 
-done_testing;
+done_testing();

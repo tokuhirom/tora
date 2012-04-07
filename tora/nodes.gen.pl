@@ -16,6 +16,8 @@ my @nodes = qw(
     NODE_STRING
     NODE_BYTES
 
+    NODE_INSTANCIATE_IDENTIFIER
+
     NODE_FUNCALL
 
     NODE_ADD

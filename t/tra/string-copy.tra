@@ -6,5 +6,5 @@ $f = $f.replace("o", "p");
 is($f, 'hpgehpge');
 is($g, 'hogehoge');
 
-done_testing;
+done_testing();
 

@@ -6,4 +6,4 @@ $n++ while $i-- != 5;
 
 is($n, 5);
 
-done_testing;
+done_testing();

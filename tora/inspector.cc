@@ -105,7 +105,7 @@ std::string Inspector::inspect(Value* v) const {
         return ret;
     }
     case VALUE_TYPE_CLASS: {
-        return static_cast<ClassValue*>(v)->name() + ".meta()";
+        return static_cast<ClassValue*>(v)->name();
     }
     case VALUE_TYPE_OBJECT: {
         std::string ret;

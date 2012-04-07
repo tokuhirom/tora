@@ -11,4 +11,4 @@ use IMP2 *;
 # is(IMP2::bar(), 1111);
 ok(1);
 
-done_testing;
+done_testing();

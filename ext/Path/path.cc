@@ -4,7 +4,6 @@
 #include <value/array.h>
 #include <value/hash.h>
 #include <value/exception.h>
-#include <package.h>
 
 #include <boost/filesystem.hpp>
 
@@ -39,9 +38,8 @@ extern "C" {
 
 TORA_EXPORT
 void Init_File_Path(VM* vm) {
-    SharedPtr<Package> pkg = vm->find_package("File::Path");
-    pkg->add_method("mkpath", new CallbackFunction(File_Path_mkpath));
-    pkg->add_method("rmtree", new CallbackFunction(File_Path_rmtree));
+    vm->add_function("mkpath", new CallbackFunction(File_Path_mkpath));
+    vm->add_function("rmtree", new CallbackFunction(File_Path_rmtree));
 }
 
 }

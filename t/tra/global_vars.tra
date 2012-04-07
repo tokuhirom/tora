@@ -8,5 +8,5 @@ is($STDIN.fileno,  0);
 is($STDOUT.fileno, 1);
 is($STDERR.fileno, 2);
 
-done_testing;
+done_testing();
 

@@ -3,4 +3,4 @@ use Test::More *;
 my $code = sub () { };
 is($code.filename, 't/tra/syntax/method.tra');
 
-done_testing;
+done_testing();

@@ -9,4 +9,4 @@ $code.();
 is(typeof($code), 'Code');
 is($n, 1);
 
-done_testing;
+done_testing();

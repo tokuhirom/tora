@@ -10,4 +10,4 @@ sub foo() {
 
 foo();
 
-done_testing;
+done_testing();

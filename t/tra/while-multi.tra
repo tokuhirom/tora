@@ -18,5 +18,5 @@ while (bar() != 0) {
 
 ok(1);
 
-done_testing;
+done_testing();
 

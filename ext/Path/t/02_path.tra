@@ -10,4 +10,4 @@ ok(-d 't/tmp/foo/bar/baz');
 dir('t/tmp/foo').rmtree();
 ok(!-e 't/tmp/foo');
 
-done_testing;
+done_testing();

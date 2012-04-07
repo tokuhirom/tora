@@ -6,4 +6,4 @@ is("foo$x", "foohoge");
 is("foo $x bar", "foo hoge bar");
 is("$x bar", "hoge bar");
 
-done_testing;
+done_testing();

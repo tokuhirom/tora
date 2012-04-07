@@ -9,4 +9,4 @@ is($message, b"OK");
 is($headers[0], b'host');
 is($headers[1], b'example.com');
 
-done_testing;
+done_testing();

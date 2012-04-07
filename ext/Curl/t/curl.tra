@@ -16,5 +16,5 @@ p($buf);
 
 ok(1);
 
-done_testing;
+done_testing();
 

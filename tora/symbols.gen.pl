@@ -32,6 +32,7 @@ my $dat = [
     [ 'SYMBOL_HASH_ITERATOR_CLASS'      => 'Hash::Iterator' ],
     [ 'SYMBOL_REFERENCE_CLASS'          => 'Reference' ],
     [ 'SYMBOL_RE2_REGEXP_MATCHED_CLASS' => 'RE2::Regexp::Matched' ],
+    [ 'SYMBOL_METACLASS_CLASS'          => 'MetaClass' ],
     [ 'SYMBOL_CLASS_CLASS'              => 'Class' ],
     [ 'SYMBOL_ENV_CLASS'                => 'Env' ],
     [ 'SYMBOL_DIR_CLASS'                => 'Dir' ],
@@ -39,6 +40,7 @@ my $dat = [
     [ 'SYMBOL_TIME_CLASS'               => 'Time' ],
     [ 'SYMBOL_INTERNALS_CLASS'          => 'Internals' ],
     [ 'SYMBOL_DYNALOADER_CLASS'         => 'DynaLoader' ],
+    [ 'SYMBOL_FILEPACKAGE_CLASS'        => 'FilePackage' ],
 
     [ 'SYMBOL___GET_ITEM__' => '__getitem__' ],
     [ 'SYMBOL___SET_ITEM__' => '__setitem__' ],

@@ -22,6 +22,7 @@ my $bar = Bar.new();
 my $foo = Foo.new();
 
 is($foo.meta.superclass(), undef);
+is($bar.meta.name, 'Bar');
 is($bar.meta.superclass().name, 'Foo');
 
 is($foo.isa('Foo'), true);
@@ -32,4 +33,4 @@ is($bar.isa('Bar'), true);
 is($bar.m, 'BAR_M');
 is($bar.n(), 'FOO_N');
 
-done_testing;
+done_testing();

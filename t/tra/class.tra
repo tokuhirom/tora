@@ -19,4 +19,4 @@ is($foo.incr(), 44);
 is($foo.incr(), 45);
 is($foo.incr(), 46);
 
-done_testing;
+done_testing();

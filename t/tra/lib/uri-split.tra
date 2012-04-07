@@ -17,5 +17,5 @@ use URI::Split *;
     is($query, 'poo=pom');
 }
 
-done_testing;
+done_testing();
 

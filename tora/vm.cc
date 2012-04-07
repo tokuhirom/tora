@@ -241,10 +241,17 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
 }
 
 void VM::use(Value * package_v, bool need_copy) {
-    std::string package = symbol_table->id2name(package_v->upcast<SymbolValue>()->id());
+    ID package_id = package_v->upcast<SymbolValue>()->id();
+    std::string package = symbol_table->id2name(package_id);
     this->require_package(package);
     if (need_copy) {
         this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id());
+    } else {
+        SharedPtr<FilePackageValue> fpv = new FilePackageValue(package_id, file_scope_map_[package_id]);
+        this->file_scope_->insert(file_scope_body_t::value_type(
+            package_id,
+            fpv
+        ));
     }
 }
 
@@ -591,6 +598,8 @@ void VM::dump_pad() {
 }
 
 void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const SharedPtr<Value> &self) {
+    assert(code.get());
+
     SharedPtr<FunctionFrame> fframe = new FunctionFrame(this, argcnt, stack.size(), this->ops);
     fframe->return_address = this->pc;
     fframe->argcnt = argcnt;
@@ -603,7 +612,7 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue>& code, const Share
     // TODO: vargs support
     // TODO: kwargs support
 #ifndef NDEBUG
-    if (argcnt != (int)code->code_params()->size()) {
+    if (code->code_params() && argcnt != (int)code->code_params()->size()) {
         fprintf(stderr, "[BUG] argument count mismatch. name: %s, argcnt: %d, code_params.size(): %ld\n", symbol_table->id2name(code->package_id()).c_str(), argcnt, (long int) code->code_params()->size());
         abort();
     }
@@ -671,32 +680,58 @@ void VM::add_library_path(const std::string &dir) {
  *
  * call method. if method is not available, call parent class' method.
  */
-void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id) {
+void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id_v) {
     if (!(stack.size() >= (size_t) get_int_operand())) {
         // printf("[BUG] bad argument: %s requires %d arguments but only %ld items available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), (long int) stack.size());
         dump_stack();
         abort();
     }
-    assert(function_id->value_type == VALUE_TYPE_SYMBOL);
 
     if (object->value_type == VALUE_TYPE_UNDEF) {
-        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str());
+        throw new ExceptionValue("NullPointerException: Can't call method %s on an undefined value.", this->symbol_table->id2name(function_id_v->upcast<SymbolValue>()->id()).c_str());
     }
+
+    assert(function_id_v->value_type == VALUE_TYPE_SYMBOL);
+    ID function_id = function_id_v->upcast<SymbolValue>()->id();
 
     std::set<ID> seen;
     if (object->value_type == VALUE_TYPE_OBJECT) {
         this->call_method(object, object->upcast<ObjectValue>()->class_value(), function_id, seen);
     } else if (object->value_type == VALUE_TYPE_SYMBOL) {
-        this->call_method(object, this->get_class(object->upcast<SymbolValue>()->id()), function_id, seen);
+        printf("[OBSOLETE] MAY NOT REACHE HERE\n");
+        abort();
+        // this->call_method(object, this->get_class(object->upcast<SymbolValue>()->id()), function_id, seen);
+    } else if (object->value_type == VALUE_TYPE_CLASS) {
+        // class method
+        this->call_method(object, object->upcast<ClassValue>(), function_id, seen);
+    } else if (object->value_type == VALUE_TYPE_FILE_PACKAGE) {
+        auto iter = object->upcast<FilePackageValue>()->find(function_id);
+        if (iter != object->upcast<FilePackageValue>()->end()) {
+            SharedPtr<Value> v = iter->second;
+            int argcnt = get_int_operand();
+            switch (v->value_type) {
+            case VALUE_TYPE_CODE:
+                this->function_call_ex(argcnt, v->upcast<CodeValue>(), object);
+                break;
+            case VALUE_TYPE_CLASS:
+                stack.push_back(v);
+                break;
+            default:
+                this->die("Unknown stuff in FilePackage: %s\n", v->type_str());
+            }
+        } else {
+            this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
+        }
     } else {
         this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
     }
 }
 
-void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue> &klass, const SharedPtr<Value> &function_id, std::set<ID> &seen) {
+void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue> &klass, ID function_id, std::set<ID> &seen) {
     seen.insert(klass->name_id());
+    // std::cout << klass->name() << " " << id2name(function_id) << std::endl;
 
-    auto iter = klass->find_method(function_id->upcast<SymbolValue>()->id());
+    auto iter = klass->find_method(function_id);
     if (iter != klass->end()) {
         SharedPtr<Value>code_v = iter->second;
         assert(code_v->value_type == VALUE_TYPE_CODE);
@@ -730,7 +765,7 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>
                 throw new ArgumentExceptionValue(
                     "%s::%s needs %d arguments but you passed %d arguments",
                     symbol_table->id2name(klass->name_id()).c_str(),
-                    symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(),
+                    symbol_table->id2name(function_id).c_str(),
                     code->code_params()->size()
                 );
             }
@@ -744,8 +779,8 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>
         if (super.get()) {
             this->call_method(object, super, function_id, seen);
         // symbol class
-        } else if (object->value_type == VALUE_TYPE_SYMBOL && seen.find(SYMBOL_SYMBOL_CLASS)==seen.end()) {
-            this->call_method(object, this->get_builtin_class(SYMBOL_SYMBOL_CLASS), function_id, seen);
+        } else if (object->value_type == VALUE_TYPE_CLASS && seen.find(SYMBOL_CLASS_CLASS)==seen.end()) {
+            this->call_method(object, this->get_builtin_class(SYMBOL_CLASS_CLASS), function_id, seen);
             return;
         // object class(UNIVERSAL)
         } else if (klass->name_id() != SYMBOL_OBJECT_CLASS && seen.find(SYMBOL_OBJECT_CLASS)==seen.end()) {
@@ -754,13 +789,31 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>
         } else {
             // dump_value(function_id);
             // dump_value(object);
-            this->die("Unknown method %s for %s", this->symbol_table->id2name(function_id->upcast<SymbolValue>()->id()).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
+            this->die("Unknown method %s for %s", this->symbol_table->id2name(function_id).c_str(), this->symbol_table->id2name(object->object_package_id()).c_str());
         }
     }
 }
 
-void VM::add_function(const SharedPtr<Value> & code) {
-    this->file_scope_->insert(file_scope_body_t::value_type(code->upcast<CodeValue>()->func_name_id(), code));
+void VM::add_constant(const char *name, int n) {
+    this->add_function(get_id(name), new CallbackFunction(n));
+}
+
+void VM::add_function(const char *name, const CallbackFunction *cb) {
+    this->add_function(get_id(name), cb);
+}
+
+void VM::add_function(ID id, const CallbackFunction *cb) {
+    this->file_scope_->insert(file_scope_body_t::value_type(
+        id,
+        new CodeValue(0, id, cb)
+    ));
+}
+
+void VM::add_function(const SharedPtr<CodeValue> & code) {
+    this->file_scope_->insert(file_scope_body_t::value_type(
+        code->func_name_id(),
+        code
+    ));
 }
 
 void VM::add_class(const SharedPtr<ClassValue> & klass) {

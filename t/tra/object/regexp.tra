@@ -48,4 +48,4 @@ note('m option'); {
     ok("hoge\nhege".match(qr{^hege}m));
 }
 
-done_testing;
+done_testing();

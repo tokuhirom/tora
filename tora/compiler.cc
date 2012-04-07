@@ -70,10 +70,9 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
  * {foo => 'bar'}   =>    {'foo' => 'bar'}
  */
 inline static SharedPtr<Node> STRING_IF_BAREWORD(SharedPtr<Node>& node) {
-    if (node->type == NODE_FUNCALL && static_cast<FuncallNode*>(node.get())->is_bare) {
-        SharedPtr<Node> tmp = node->at(0);
-        tmp->type = NODE_STRING;
-        return tmp;
+    if (node->type == NODE_INSTANCIATE_IDENTIFIER) {
+        node->type = NODE_STRING;
+        return node;
     } else {
         return node;
     }
@@ -772,9 +771,12 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_IDENTIFIER: {
         ID id = this->symbol_table->get_id(node->upcast<StrNode>()->str_value);
-        SharedPtr<OP> o = new OP(OP_PUSH_IDENTIFIER);
-        o->operand.int_value = id;
-        push_op(o);
+        push_op(new OP(OP_PUSH_IDENTIFIER, id));
+        break;
+    }
+    case NODE_INSTANCIATE_IDENTIFIER: {
+        ID id = this->symbol_table->get_id(node->upcast<StrNode>()->str_value);
+        push_op(new OP(OP_INSTANCIATE_IDENTIFIER, id));
         break;
     }
 

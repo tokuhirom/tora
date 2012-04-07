@@ -20,4 +20,4 @@ note("exists"); {
     is($h.exists(0), false);
 }
 
-done_testing;
+done_testing();

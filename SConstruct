@@ -144,6 +144,7 @@ libfiles = [
         object/bytes.cc object/regexp.cc object/hash.cc
         object/re2_regexp_matched.cc
         object/int.cc object/double.cc
+        object/metaclass.cc object/file_package.cc
 
     ''')
 ]

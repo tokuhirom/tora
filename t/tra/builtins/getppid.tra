@@ -2,4 +2,4 @@ use Test::More *;
 
 is(typeof(getppid()), 'Int');
 
-done_testing;
+done_testing();

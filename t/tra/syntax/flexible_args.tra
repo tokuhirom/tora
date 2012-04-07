@@ -16,4 +16,4 @@ f0();
 f1(4);
 f3(1,2,3);
 
-done_testing;
+done_testing();

@@ -7,4 +7,4 @@ for 1..$n -> {
 }
 is($r, 55);
 
-done_testing;
+done_testing();

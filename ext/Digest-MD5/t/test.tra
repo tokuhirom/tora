@@ -3,4 +3,4 @@ use Digest::MD5 *;
 
 is(md5_hex('hoge'), 'ea703e7aa1efda0064eaa507d9e8ab7e');
 
-done_testing;
+done_testing();

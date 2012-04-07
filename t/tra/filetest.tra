@@ -18,5 +18,5 @@ is(-s "t/dat/filetest/foo", 8);
 is(-x './bin/tora', true);
 is(-x __FILE__, false);
 
-done_testing;
+done_testing();
 

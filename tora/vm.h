@@ -100,7 +100,10 @@ public:
     void dump_stack();
     void use(Value *v, bool);
     void require_package(const std::string &);
-    void add_function(const SharedPtr<Value>& klass);
+    void add_function(const SharedPtr<CodeValue>& klass);
+    void add_function(ID id, const CallbackFunction *cb);
+    void add_function(const char *name, const CallbackFunction *cb);
+    void add_constant(const char *name, int n);
     void add_class(const SharedPtr<ClassValue>& code);
     void die(const SharedPtr<Value> & exception);
     void die(const char *format, ...);
@@ -152,7 +155,7 @@ public:
     void add_library_path(const std::string &dir);
 
     void call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &function_id);
-    void call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>& klass_id, const SharedPtr<Value> &function_id, std::set<ID> &seen);
+    void call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>& klass_id, ID function_id, std::set<ID> &seen);
 
     void dump_value(const SharedPtr<Value> & v);
     void dump_pad();

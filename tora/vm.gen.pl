@@ -81,7 +81,7 @@ sub vm_gen_cc {
 using namespace tora;
 ? for my $k (@{$_[0]}) {
 inline void VM::PP_<?= $k->[0] ?>() {
-#line <?= $k->[2]+1 ?> "vm.inc"
+// #line <?= $k->[2]+1 ?> "vm.inc"
 <?= $k->[1] ?>
 }
 ? }

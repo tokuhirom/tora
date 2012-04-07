@@ -37,4 +37,4 @@ foo(1,2);
     is($second, 4);
 }
 
-done_testing;
+done_testing();

@@ -4,7 +4,6 @@
 #include <vm.h>
 #include <value/array.h>
 #include <value/hash.h>
-#include <package.h>
 #include "picojson.h"
 
 using namespace tora;
@@ -71,7 +70,7 @@ static Value* json_encode2(std::string & buf, Value *v) {
  *
  * This method encode $value to JSON format. and return a string.
  */
-static SharedPtr<Value> json_encode(VM *vm, Value *klass, Value* v) {
+static SharedPtr<Value> json_encode(VM *vm, Value* v) {
     std::string buf;
     json_encode2(buf, v);
     return new StrValue(buf);
@@ -108,7 +107,7 @@ static SharedPtr<Value> json_decode2(picojson::value & v) {
  *
  * Decode $json to Hash|Array.
  */
-static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* json_v) {
+static SharedPtr<Value> json_decode(VM *vm, Value* json_v) {
     StrValue * json_sv = static_cast<StrValue*>(json_v);
     picojson::value v;
     const char * in = json_sv->str_value().c_str();
@@ -119,13 +118,8 @@ static SharedPtr<Value> json_decode(VM *vm, Value *klass, Value* json_v) {
     return json_decode2(v);
 }
 
-extern "C" {
-
 TORA_EXPORT
 void Init_JSON(VM* vm) {
-    SharedPtr<Package> pkg = vm->find_package("JSON");
-    pkg->add_method(vm->symbol_table->get_id("encode"), new CallbackFunction(json_encode));
-    pkg->add_method(vm->symbol_table->get_id("decode"), new CallbackFunction(json_decode));
-}
-
+    vm->add_function(vm->symbol_table->get_id("encode"), new CallbackFunction(json_encode));
+    vm->add_function(vm->symbol_table->get_id("decode"), new CallbackFunction(json_decode));
 }

@@ -1,6 +1,6 @@
 use Socket *;
 use HTTP::Parser *;
-use HTTP::Response;
+use HTTP::Response *;
 use URI::Split *;
 
 class HTTP::Client {
@@ -33,7 +33,7 @@ class HTTP::Client {
             my $content = $src.substr($ret);
             return HTTP::Response.new($minor_version, $status, $message, $headers, $content);
         } else {
-            die "Invalid uri: $uri";
+            die "Invalid uri: $url";
         }
     }
 }

@@ -4,4 +4,4 @@ use Config *;
 # p(tora_config());
 ok((tora_config())['TORA_CC']);
 
-done_testing;
+done_testing();

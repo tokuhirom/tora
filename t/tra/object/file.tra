@@ -28,4 +28,4 @@ note("seek/tell"); {
     is($f.getc(), "n");
 };
 
-done_testing;
+done_testing();

@@ -25,4 +25,4 @@ is(oct('777'), 511);
 
 is(sin(0), 0);
 
-done_testing;
+done_testing();

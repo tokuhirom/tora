@@ -16,15 +16,9 @@ static SharedPtr<Value> uri_unescape(VM *vm, Value *val) {
     return new StrValue(nu_unescape_uri(str->str_value()));
 }
 
-extern "C" {
-
 TORA_EXPORT
 void Init_URI_Escape(VM *vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, "URI::Escape");
-    klass->add_method(vm->symbol_table->get_id("uri_escape"), new CallbackFunction(uri_escape));
-    klass->add_method(vm->symbol_table->get_id("uri_unescape"), new CallbackFunction(uri_unescape));
-    vm->add_class(klass);
-}
-
+    vm->add_function("uri_escape",   new CallbackFunction(uri_escape));
+    vm->add_function("uri_unescape", new CallbackFunction(uri_unescape));
 }
 

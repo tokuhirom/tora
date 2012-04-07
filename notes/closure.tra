@@ -31,5 +31,5 @@ note('arguments.tra');
     is($x, 5963);
 }
 
-done_testing;
+done_testing();
 

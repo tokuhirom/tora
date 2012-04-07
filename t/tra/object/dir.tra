@@ -23,5 +23,5 @@ ok(!-d 't/tmp/foo');
 
 Dir.rmdir('t/tmp');
 
-done_testing;
+done_testing();
 

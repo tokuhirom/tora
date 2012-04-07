@@ -6,7 +6,6 @@
 #include <value/array.h>
 #include <value/hash.h>
 #include <value/tuple.h>
-#include <package.h>
 #include <shared_ptr.h>
 
 #define MAX_HEADER_NAME_LEN 1024
@@ -313,12 +312,11 @@ extern "C" {
 
 TORA_EXPORT
 void Init_HTTP_Parser(VM* vm) {
-    SharedPtr<Package> pkg = vm->find_package("HTTP::Parser");
-    pkg->add_method("parse_http_request", new CallbackFunction(HTTP_Parser_parse_http_request));
-    pkg->add_method("parse_http_response", new CallbackFunction(HTTP_Parser_parse_http_response));
-    pkg->add_constant("HEADERS_NONE", HEADERS_NONE);
-    pkg->add_constant("HEADERS_AS_HASHREF", HEADERS_AS_HASHREF);
-    pkg->add_constant("HEADERS_AS_ARRAYREF", HEADERS_AS_ARRAYREF);
+    vm->add_function("parse_http_request", new CallbackFunction(HTTP_Parser_parse_http_request));
+    vm->add_function("parse_http_response", new CallbackFunction(HTTP_Parser_parse_http_response));
+    vm->add_constant("HEADERS_NONE", HEADERS_NONE);
+    vm->add_constant("HEADERS_AS_HASHREF", HEADERS_AS_HASHREF);
+    vm->add_constant("HEADERS_AS_ARRAYREF", HEADERS_AS_ARRAYREF);
 }
 
 }

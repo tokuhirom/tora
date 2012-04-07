@@ -23,6 +23,7 @@
 #include "token.gen.h"
 #include "disasm.h"
 #include "config.h"
+#include "value/file_package.h"
 
 using namespace tora;
 
