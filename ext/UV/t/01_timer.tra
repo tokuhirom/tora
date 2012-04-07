@@ -1,0 +1,19 @@
+use UV *;
+use Test::More *;
+
+my $count = 3;
+my $loop = UV.default_loop();
+my $timer = UV::Timer.new();
+my $callback = -> $status {
+    note("count down $count");
+    if $count-- == 0 {
+        $loop.unref();
+    }
+};
+$timer.start($callback, 1000, 1000);
+$loop.run();
+
+ok(1);
+
+done_testing;
+
