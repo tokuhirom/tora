@@ -33,6 +33,7 @@ private:
     }
 public:
     ObjectValue(VM *v, const SharedPtr<ClassValue>& klass, const SharedPtr<Value>& data);
+    ObjectValue(VM *v, ID klass_id, const SharedPtr<Value>& data);
     ~ObjectValue();
     const SharedPtr<Value> data() const { return VAL().data_; }
     SharedPtr<Value> data() { return VAL().data_; }

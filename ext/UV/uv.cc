@@ -2,8 +2,8 @@
 #include <vm.h>
 #include <value/object.h>
 #include <value/pointer.h>
+#include <value/class.h>
 #include <value/code.h>
-#include <package.h>
 #include <shared_ptr.h>
 
 #include <uv.h>
@@ -407,45 +407,50 @@ extern "C" {
 TORA_EXPORT
 void Init_UV_(VM* vm) {
     {
-        SharedPtr<Package> pkg = vm->find_package("UV");
-        pkg->add_method(vm->symbol_table->get_id("run"), new CallbackFunction(_uv_run));
-        pkg->add_method(vm->symbol_table->get_id("default_loop"), new CallbackFunction(_uv_default_loop));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV");
+        klass->add_method("run", new CallbackFunction(_uv_run));
+        klass->add_method("default_loop", new CallbackFunction(_uv_default_loop));
+        vm->add_class(klass);
     }
     {
-        SharedPtr<Package> pkg = vm->find_package("UV::Loop");
-        pkg->add_method(vm->symbol_table->get_id("run"), new CallbackFunction(_uv_loop_run));
-        pkg->add_method(vm->symbol_table->get_id("run_once"), new CallbackFunction(_uv_loop_run_once));
-        pkg->add_method(vm->symbol_table->get_id("ref"), new CallbackFunction(_uv_loop_ref));
-        pkg->add_method(vm->symbol_table->get_id("unref"), new CallbackFunction(_uv_loop_unref));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Loop");
+        klass->add_method("run", new CallbackFunction(_uv_loop_run));
+        klass->add_method("run_once", new CallbackFunction(_uv_loop_run_once));
+        klass->add_method("ref", new CallbackFunction(_uv_loop_ref));
+        klass->add_method("unref", new CallbackFunction(_uv_loop_unref));
+        vm->add_class(klass);
     }
     {
-        SharedPtr<Package> pkg = vm->find_package("UV::Timer");
-        pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_timer_new));
-        pkg->add_method(vm->symbol_table->get_id("start"), new CallbackFunction(_uv_timer_start));
-        pkg->add_method(vm->symbol_table->get_id("stop"), new CallbackFunction(_uv_timer_stop));
-        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Timer");
+        klass->add_method("new", new CallbackFunction(_uv_timer_new));
+        klass->add_method("start", new CallbackFunction(_uv_timer_start));
+        klass->add_method("stop", new CallbackFunction(_uv_timer_stop));
+        klass->add_method("close", new CallbackFunction(_uv_close));
+        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        vm->add_class(klass);
     }
     {
-        SharedPtr<Package> pkg = vm->find_package("UV::TCP");
-        pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_tcp_new));
-        pkg->add_method(vm->symbol_table->get_id("nodelay"), new CallbackFunction(_uv_tcp_nodelay));
-        pkg->add_method(vm->symbol_table->get_id("connect"), new CallbackFunction(_uv_tcp_connect));
-        pkg->add_method(vm->symbol_table->get_id("write"), new CallbackFunction(_uv_write));
-        pkg->add_method(vm->symbol_table->get_id("read"), new CallbackFunction(_uv_read));
-        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
-        pkg->add_method(vm->symbol_table->get_id("bind"), new CallbackFunction(_uv_tcp_bind));
-        pkg->add_method(vm->symbol_table->get_id("listen"), new CallbackFunction(_uv_listen));
-        pkg->add_method(vm->symbol_table->get_id("accept"), new CallbackFunction(_uv_accept));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::TCP");
+        klass->add_method("new", new CallbackFunction(_uv_tcp_new));
+        klass->add_method("nodelay", new CallbackFunction(_uv_tcp_nodelay));
+        klass->add_method("connect", new CallbackFunction(_uv_tcp_connect));
+        klass->add_method("write", new CallbackFunction(_uv_write));
+        klass->add_method("read", new CallbackFunction(_uv_read));
+        klass->add_method("close", new CallbackFunction(_uv_close));
+        klass->add_method("bind", new CallbackFunction(_uv_tcp_bind));
+        klass->add_method("listen", new CallbackFunction(_uv_listen));
+        klass->add_method("accept", new CallbackFunction(_uv_accept));
+        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        vm->add_class(klass);
     }
     {
-        SharedPtr<Package> pkg = vm->find_package("UV::Idle");
-        pkg->add_method(vm->symbol_table->get_id("new"), new CallbackFunction(_uv_idle_new));
-        pkg->add_method(vm->symbol_table->get_id("start"), new CallbackFunction(_uv_idle_start));
-        pkg->add_method(vm->symbol_table->get_id("stop"), new CallbackFunction(_uv_idle_stop));
-        pkg->add_method(vm->symbol_table->get_id("close"), new CallbackFunction(_uv_close));
-        pkg->add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(_uv_DESTROY));
+        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Idle");
+        klass->add_method("new", new CallbackFunction(_uv_idle_new));
+        klass->add_method("start", new CallbackFunction(_uv_idle_start));
+        klass->add_method("stop", new CallbackFunction(_uv_idle_stop));
+        klass->add_method("close", new CallbackFunction(_uv_close));
+        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        vm->add_class(klass);
     }
 }
 

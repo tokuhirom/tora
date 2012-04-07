@@ -12,6 +12,10 @@ ObjectValue::ObjectValue(VM *v, const SharedPtr<ClassValue>& klass, const Shared
     object_value_ = new ObjectImpl(v, klass, data);
 }
 
+ObjectValue::ObjectValue(VM *v, ID klass_id, const SharedPtr<Value>& data) : Value(VALUE_TYPE_OBJECT) {
+    object_value_ = new ObjectImpl(v, v->get_class(klass_id), data);
+}
+
 ObjectValue::~ObjectValue() {
     delete object_value_;
 }
