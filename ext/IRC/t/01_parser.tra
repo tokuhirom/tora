@@ -1,0 +1,13 @@
+use IRC::Parser *;
+use Test::More *;
+
+is("\015", "\r");
+is("\012", "\n");
+
+my ($ret, $prefix, $command, $params) = parse_irc(":zelazny.freenode.net 372 take :- Thank you for using freenode!\015\012");
+is($ret, 65);
+is($prefix, "zelazny.freenode.net");
+is($command, "372");
+is($params.tora(), ['take', '- Thank you for using freenode!'].tora());
+
+done_testing;
