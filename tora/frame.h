@@ -26,7 +26,7 @@ typedef enum {
     FRAME_TYPE_FUNCTION,
     FRAME_TYPE_TRY,
     FRAME_TYPE_FOREACH,
-    FRAME_TYPE_PACKAGE,
+    FRAME_TYPE_FILE_PACKAGE,
     FRAME_TYPE_CLASS,
     FRAME_TYPE_WHILE,
     FRAME_TYPE_FOR,
@@ -112,11 +112,11 @@ public:
 };
 
 
-class PackageFrame : public LexicalVarsFrame {
+class FilePackageFrame : public LexicalVarsFrame {
     friend class LexicalVarsFrame;
 protected:
 public:
-    PackageFrame(VM *vm, size_t top) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_PACKAGE) { }
+    FilePackageFrame(VM *vm, size_t top) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_FILE_PACKAGE) { }
 };
 
 class ClassFrame : public LexicalVarsFrame {

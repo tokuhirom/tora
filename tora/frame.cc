@@ -76,8 +76,8 @@ const char *LexicalVarsFrame::type_str() const {
         return "while";
     case FRAME_TYPE_FOR:
         return "for";
-    default:
-        break;
+    case FRAME_TYPE_FILE_PACKAGE:
+        return "file_package";
     }
     abort();
 }

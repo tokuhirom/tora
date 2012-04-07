@@ -953,13 +953,13 @@ OP_NOT {
 
 OP_PACKAGE_ENTER {
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    PackageFrame* pframe = new PackageFrame(this, stack.size());
+    FilePackageFrame* pframe = new FilePackageFrame(this, stack.size());
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
 }
 
 OP_PACKAGE_LEAVE {
-    assert(this->frame_stack->back()->type == FRAME_TYPE_PACKAGE);
+    assert(this->frame_stack->back()->type == FRAME_TYPE_FILE_PACKAGE);
     this->frame_stack->pop_back();
 }
 
