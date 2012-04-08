@@ -98,7 +98,7 @@ public:
     void func_name_id(ID id) { func_name_id_ = id; }
 
     int lineno() const { return lineno_; }
-    const std::string & filename() { return filename_; }
+    const std::string & filename() const { return filename_; }
 
     void pad_list(const SharedPtr<PadList> & p) {
         pad_list_.reset(p.get());
