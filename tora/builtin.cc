@@ -319,35 +319,37 @@ static SharedPtr<Value> builtin_sprintf(VM *vm, const std::vector<SharedPtr<Valu
 }
 
 void tora::Init_builtins(VM *vm) {
-    vm->add_builtin_function("p", builtin_p);
-    vm->add_builtin_function("exit", builtin_exit);
-    vm->add_builtin_function("say", builtin_say);
-    vm->add_builtin_function("typeof",   builtin_typeof);
-    vm->add_builtin_function("open", builtin_open);
-    vm->add_builtin_function("print", builtin_print);
-    vm->add_builtin_function("require",   builtin_require);
-    vm->add_builtin_function("self",   builtin_self);
-    vm->add_builtin_function("opendir",   builtin_opendir);
-    vm->add_builtin_function("rand",   builtin_rand);
-    vm->add_builtin_function("caller",   builtin_caller);
-    vm->add_builtin_function("callee",   builtin_callee);
-    vm->add_builtin_function("getcwd",   builtin_getcwd);
-    vm->add_builtin_function("getpid",   builtin_getpid);
-    vm->add_builtin_function("getppid",   builtin_getppid);
-    vm->add_builtin_function("system",   builtin_system);
-    vm->add_builtin_function("printf",   builtin_printf);
-    vm->add_builtin_function("sprintf",   builtin_sprintf);
+#define ADD(name, cb) vm->add_builtin_function(name, new CallbackFunction(cb));
+    ADD("p",         builtin_p);
+    ADD("exit",      builtin_exit);
+    ADD("say",       builtin_say);
+    ADD("typeof",    builtin_typeof);
+    ADD("open",      builtin_open);
+    ADD("print",     builtin_print);
+    ADD("require",   builtin_require);
+    ADD("self",      builtin_self);
+    ADD("opendir",   builtin_opendir);
+    ADD("rand",      builtin_rand);
+    ADD("caller",    builtin_caller);
+    ADD("callee",    builtin_callee);
+    ADD("getcwd",    builtin_getcwd);
+    ADD("getpid",    builtin_getpid);
+    ADD("getppid",   builtin_getppid);
+    ADD("system",    builtin_system);
+    ADD("printf",    builtin_printf);
+    ADD("sprintf",   builtin_sprintf);
     
     // numeric functions
-    vm->add_builtin_function("sqrt",   builtin_sqrt);
-    vm->add_builtin_function("abs",   builtin_abs);
-    vm->add_builtin_function("atan2",   builtin_atan2);
-    vm->add_builtin_function("cos",   builtin_cos);
-    vm->add_builtin_function("exp",   builtin_exp);
-    vm->add_builtin_function("hex",   builtin_hex);
-    vm->add_builtin_function("int",   builtin_int);
-    vm->add_builtin_function("log",   builtin_log);
-    vm->add_builtin_function("oct",   builtin_oct);
-    vm->add_builtin_function("sin",   builtin_sin);
+    ADD("sqrt",    builtin_sqrt);
+    ADD("abs",     builtin_abs);
+    ADD("atan2",   builtin_atan2);
+    ADD("cos",     builtin_cos);
+    ADD("exp",     builtin_exp);
+    ADD("hex",     builtin_hex);
+    ADD("int",     builtin_int);
+    ADD("log",     builtin_log);
+    ADD("oct",     builtin_oct);
+    ADD("sin",     builtin_sin);
+#undef ADD
 }
 

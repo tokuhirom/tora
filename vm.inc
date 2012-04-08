@@ -258,9 +258,10 @@ OP_BUILTIN_FUNCALL {
     }
     ID id = funname->upcast<SymbolValue>()->id();
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
-    auto iter = this->builtin_functions.find(id);
-    assert(iter != this->builtin_functions.end());
-    this->call_native_func(iter->second, argcnt);
+    auto iter = this->builtin_functions_.find(id);
+    assert(iter->second->is_native());
+    assert(iter != this->builtin_functions_.end());
+    this->call_native_func(iter->second->callback(), argcnt);
 }
 
 OP_NEXTSTATE {
@@ -1043,7 +1044,18 @@ OP_INSTANCIATE_IDENTIFIER {
         if (iter != this->builtin_classes_.end()) {
             stack.push_back(iter->second);
         } else {
-            throw new ExceptionValue("There is no stuff named '%s'", id2name(id).c_str());
+            auto iter = this->builtin_functions_.find(id);
+            if (iter != this->builtin_functions_.end()) {
+                int argcnt = 0;
+                auto code = iter->second->upcast<CodeValue>();
+                if (code->is_native()) {
+                    this->call_native_func(code->callback(), argcnt);
+                } else {
+                    this->function_call(argcnt, iter->second->upcast<CodeValue>(), UndefValue::instance());
+                }
+            } else {
+                throw new ExceptionValue("There is no stuff named '%s'", id2name(id).c_str());
+            }
         }
     }
 }

@@ -347,10 +347,6 @@ expression(A) ::= DIE expression(B). {
     A = new Node(NODE_DIE, B);
 }
 expression(A) ::= use_expression(B).   { A = B; }
-expression(A) ::= identifier(B). {
-    B->type = NODE_INSTANCIATE_IDENTIFIER;
-    A = B;
-}
 use_expression(A) ::= USE identifier(B) MUL. {
     A = new BinaryNode(NODE_USE, B, new IntNode(NODE_INT, 1));
 }
@@ -510,6 +506,10 @@ unary_expression(A) ::= LAMBDA maybe_block(C). {
 }
 unary_expression(A) ::= MUL unary_expression(C). {
     A = new Node(NODE_EXTRACT_ARRAY, C);
+}
+unary_expression(A) ::= identifier(B). {
+    B->type = NODE_INSTANCIATE_IDENTIFIER;
+    A = B;
 }
 
 postfix_expression(A) ::= primary_expression(B). { A = B; }

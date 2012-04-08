@@ -47,6 +47,7 @@ class VM {
     boost::shared_ptr<file_scope_body_t> file_scope_;
     std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>> file_scope_map_;
     std::map<ID, SharedPtr<ClassValue>> builtin_classes_;
+    std::map<ID, SharedPtr<CodeValue>> builtin_functions_;
 public:
     int sp; // stack pointer
     int pc; // program counter
@@ -69,13 +70,7 @@ public:
     }
     void klass(const SharedPtr<Value>& k);
 
-    std::map<ID, CallbackFunction*> builtin_functions;
-
-    template <class T>
-    void add_builtin_function(const char *name, T func) {
-        ID id = this->symbol_table->get_id(std::string(name));
-        this->builtin_functions.insert(std::make_pair(id, new CallbackFunction(func)));
-    }
+    void add_builtin_function(const char *name, CallbackFunction* func);
 
     /*
      * stack for lexical variables.

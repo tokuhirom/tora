@@ -95,13 +95,15 @@ VM::~VM() {
     delete this->frame_stack;
     delete this->myrand;
 
+    /*
     {
-        // std::map<ID, CallbackFunction*> builtin_functions;
-        auto iter = builtin_functions.begin();
-        for (;iter != builtin_functions.end(); iter++) {
+        // std::map<ID, CallbackFunction*> builtin_functions_;
+        auto iter = builtin_functions_.begin();
+        for (;iter != builtin_functions_.end(); iter++) {
             delete iter->second;
         }
     }
+    */
 }
 
 void VM::init_globals(int argc, char**argv) {
@@ -436,8 +438,9 @@ void VM::register_standard_methods() {
     load_builtin_objects(this);
     Init_builtins(this);
 
-    this->add_builtin_function("eval", builtin_eval);
-    this->add_builtin_function("do",   builtin_do);
+    // TODO: move to Init_builtins.
+    this->add_builtin_function("eval", new CallbackFunction(builtin_eval));
+    this->add_builtin_function("do",   new CallbackFunction(builtin_do));
 }
 
 void VM::copy_all_public_symbols(ID srcid) {
@@ -871,5 +874,15 @@ std::string VM::id2name(ID id) const {
 
 ID VM::get_id(const std::string &name) const {
     return symbol_table->get_id(name);
+}
+
+void VM::add_builtin_function(const char *name, CallbackFunction* func) {
+    ID id = this->symbol_table->get_id(std::string(name));
+    this->builtin_functions_.insert(
+        std::make_pair(
+            id,
+            new CodeValue(0, id, func)
+        )
+    );
 }
 

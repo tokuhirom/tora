@@ -1,0 +1,12 @@
+use Test::More *;
+
+sub foo() {
+    my $code = callee;
+    p($code);
+    Internals.dump($code);
+    is($code.name, 'foo');
+}
+
+foo();
+
+done_testing;
