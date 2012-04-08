@@ -110,7 +110,7 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
 }
 
 /**
- * $string.split(Regexp $pattern) : Array[String]
+ * $string.split(Regexp $pattern[, Int $limit]) : Array[String]
  *
  * Examples:
  *   "foo".split(//) # => qw(f o o)
@@ -118,14 +118,23 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
  *
  * Split a string by regexp.
  */
-static SharedPtr<Value> str_split(VM *vm, Value *self, Value *re_v) {
+static SharedPtr<Value> str_split(VM *vm, Value *self, const std::vector<SharedPtr<Value>> &args) {
+    if (args.size() != 1 && args.size() != 2) {
+        throw new ArgumentExceptionValue("Usage: $str.split(//[, $limit])");
+    }
+    const SharedPtr<Value> &re_v = args[0];
     if (re_v->value_type != VALUE_TYPE_REGEXP) {
         throw new ExceptionValue("First argument of String#split must be regexp object.");
     }
 
+    int limit = 0;
+    if (args.size() == 2) {
+        limit = args[1]->to_int();
+    }
+
     assert(self->value_type == VALUE_TYPE_STR);
     return re_v->upcast<AbstractRegexpValue>()->split(
-        vm, self->upcast<StrValue>()->str_value()
+        vm, self->upcast<StrValue>()->str_value(), limit
     );
 }
 

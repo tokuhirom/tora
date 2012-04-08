@@ -14,6 +14,24 @@ note('split'); {
     is('foo'.split(//).tora(), qw(f o o).tora());
     is("x\nb\nc".split(/\n/).tora(), qw(x b c).tora());
     is('aaaXbbbXccc'.split(/X/).tora(), qw(aaa bbb ccc).tora());
+
+    # split with limit
+    is("x\nb\nc\nd".split(/\n/, 0).tora(), ["x", "b", "c", "d"].tora());
+    is("x\nb\nc\nd".split(/\n/, 1).tora(), ["x\nb\nc\nd"].tora());
+    is("x\nb\nc\nd".split(/\n/, 2).tora(), ["x", "b\nc\nd"].tora());
+    is("x\nb\nc\nd".split(/\n/, 3).tora(), ["x", "b", "c\nd"].tora());
+    is("x\nb\nc\nd".split(/\n/, 4).tora(), ["x", "b", "c", "d"].tora());
+    is("x\nb\nc\nd".split(/\n/, 5).tora(), ["x", "b", "c", "d"].tora());
+
+    # split with limit with empty pattern
+
+    is("12345".split(//, 0).tora(), qw(1 2 3 4 5).tora());
+    is("12345".split(//, 1).tora(), qw(12345).tora());
+    is("12345".split(//, 2).tora(), qw(1 2345).tora());
+    is("12345".split(//, 3).tora(), qw(1 2 345).tora());
+    is("12345".split(//, 4).tora(), qw(1 2 3 45).tora());
+    is("12345".split(//, 5).tora(), qw(1 2 3 4 5).tora());
+    is("12345".split(//, 6).tora(), qw(1 2 3 4 5).tora());
 };
 
 note("index"); {
