@@ -121,6 +121,8 @@ std::string Inspector::inspect(Value* v) const {
         return "#<Pointer>"; // TODO
     case VALUE_TYPE_REFERENCE:
         return "#<Reference>"; // TODO
+    case VALUE_TYPE_FILE_PACKAGE:
+        return "#<FilePackage>";
     }
     printf("[BUG] unknown value type");
     abort();
