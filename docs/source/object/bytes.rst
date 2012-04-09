@@ -17,3 +17,6 @@ Example:
 Get a substring from bytes.
  
 
+$bytes.decode(Str $type="utf-8") : Undef
+ 
+

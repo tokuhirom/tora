@@ -25,3 +25,7 @@ This method returns superclass in string.
 If the class does not have a superclass, it returns undef.
  
 
+$meta.bless(Any $data) : Object
+Create new instance with $data.
+ 
+

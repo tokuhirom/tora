@@ -18,6 +18,16 @@ Close directory.
 Normally, you don't need to close directory by hand since the destructor closes directory automtically.
  
 
+Dir.mkdir(Str $name[, Int $mode]) : Undef
+Create directory named $name. Default mode value is 0777.
+This method may throws ErrnoException if it's failed.
+ 
+
+Dir.rmdir(Str $name) : Undef
+Remove $name directory.
+This method may throws ErrnoException if it's failed.
+ 
+
 $dir.DESTROY() : undef
 This is a destructor, closes directory automatically.
  

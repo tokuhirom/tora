@@ -39,3 +39,19 @@ Get a character from $file.
 If EOF reached, returns undef.
  
 
+$file.seek(Int offset, Int $whence) : Undef
+Seek a file pointer position from $file.
+$whence must be one of File.SEEK_CUR, File.SEEK_END, File.SEEK_SET.
+maybe throw ErrnoException.
+ 
+
+$file.tell() : Int
+Get a file pointer position from $file.
+maybe throw ErrnoException.
+ 
+
+$file.sync() : Undef
+Syncs buffers and file.
+On win32, this method is not implementede yet.
+ 
+

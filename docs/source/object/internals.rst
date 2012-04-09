@@ -23,8 +23,3 @@ Internals.dump_symbol_table() : Undef
 Dump symbol table to stdout.
  
 
-Internals.package_map() : Undef
-
-Dump package map to stdout.
- 
-

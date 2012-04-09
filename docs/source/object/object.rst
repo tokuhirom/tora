@@ -17,3 +17,7 @@ $object.isa($target) : Boolean
 This method returns true if $object is-a $target, false otherwise.
  
 
+$object.bless(Any $data) : Object
+Create new instance with $data.
+ 
+

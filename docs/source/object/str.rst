@@ -33,10 +33,26 @@ $string.scan(Regexp $pattern) : Array[String]
 Scan the strings by regular expression.
  
 
-$string.split(Regexp $pattern) : Array[String]
+$string.split(Regexp $pattern[, Int $limit]) : Array[String]
 Examples:
   "foo".split(//) # => qw(f o o)
   "a\nb\nc".split(/\n/) # => qw(a b c)
 Split a string by regexp.
+ 
+
+$string.index(Str pattern) : Int
+$string.index(Str pattern, Int $position) : Int
+ 
+
+$string.upper() : Str
+Return a copy of s, but with upper case letters converted to upper case.
+ 
+
+$string.lower() : Str
+Return a copy of s, but with upper case letters converted to lower case.
+ 
+
+$str.encode(Str $encoding='utf-8') : Bytes
+Encode a string to bytes.
  
 
