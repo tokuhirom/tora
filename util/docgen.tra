@@ -3,12 +3,12 @@ use Path *;
 system("mkdir -p docs/source/object/");
 
 # my $files = [];
-for (my $e in opendir('tora/object/')) {
+for opendir('tora/object/') -> $e {
     if $e.match(/\.cc$/) {
         my $src = open("tora/object/" + $e).slurp();
         say('-- ' + $e);
         my $sections = [];
-        for (my $f in $src.scan(qr{/\*\*(.+?)\*/}s)) {
+        for $src.scan(qr{/\*\*(.+?)\*/}s) -> $f {
             my $section_src = $f[0].replace(/^\s*\*\s?/gsm, '');
             $sections.push($section_src);
         }
@@ -21,12 +21,12 @@ for (my $e in opendir('tora/object/')) {
             my $out = $title + "\n";
             # I want to write this by following:
             #     $out += "=" x $out.length;
-            for (my $c in 1..($out.length)) {
+            for 1..($out.length) -> $c {
                 $out += "=";
             }
             $out += "\n\n" + $titles.join("\n") + "\n\n";
 
-            for (my $section in $sections) {
+            for $sections -> $section {
                 $out += $section + "\n\n";
             }
             open("docs/source/object/" + $e.replace(/\.cc$/, '.rst'), 'wb').write($out);
