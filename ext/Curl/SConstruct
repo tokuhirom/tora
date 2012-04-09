@@ -17,6 +17,7 @@ env = Environment(
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
     LINKFLAGS=conf['LINKFLAGS'],
+    CPPPATH=conf['CPPPATH'],
     CC=conf['CC'],
     CXX=conf['CXX'],
     SHLIBPREFIX=conf['SHLIBPREFIX'],

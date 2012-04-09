@@ -53,9 +53,14 @@ else:
     env = Environment(
         LIBS=['re2', 'pthread', 'dl', 'icudata', 'icuuc'],
         LIBPATH=['./'],
-        CPPPATH=[],
         CXXFLAGS=['-std=c++0x'],
-        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-g', '-fPIC'
+        CPPPATH=[os.path.abspath(x) for x in ['vendor/boost_1_49_0/', 'vendor/re2/', 'tora/']],
+        CCFLAGS=[
+            '-Wall',
+            '-Wno-sign-compare',
+            '-fstack-protector',
+            '-g',
+            '-fPIC'
             # '-DPERLISH_CLOSURE'
             # '-march=native', 
         ],
@@ -63,7 +68,14 @@ else:
         tools=tools
     )
     re2_env = Environment(
-        CCFLAGS=['-pthread', '-Wno-sign-compare', '-O2', '-I./vendor/re2/', '-fPIC'],
+        CCFLAGS=[
+            '-pthread',
+            '-Wno-sign-compare',
+            '-O2',
+            '-I./vendor/re2/',
+            '-fPIC'
+        ],
+        CPPPATH=['vendor/re2/'],
         LIBS=['pthread'],
         tools=tools
     )

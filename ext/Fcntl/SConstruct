@@ -8,6 +8,7 @@ env = Environment(
     ENV={'PATH': conf['PATH']},
     CXXFLAGS=conf['CXXFLAGS'],
     CCFLAGS=conf['CCFLAGS'],
+    CPPPATH=conf['CPPPATH'],
     LINKFLAGS=conf['LINKFLAGS'],
     CC=conf['CC'],
     CXX=conf['CXX'],
