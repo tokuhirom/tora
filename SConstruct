@@ -51,10 +51,11 @@ if os.name == 'nt':
     ])
 else:
     env = Environment(
-        LIBS=['re2', 'pthread', 'dl'],
-        LIBPATH=['./'],
+        LIBS=['re2', 'pthread', 'dl', 'icuuc', 'icudata'],
+        LIBPATH=['./', 'vendor/icu/source/lib/'],
+        CPPPATH=['vendor/icu/source/common/'],
         CXXFLAGS=['-std=c++0x'],
-        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g', '-fPIC'
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
         ],
         PREFIX=GetOption('prefix'),
@@ -65,9 +66,10 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
-    env.MergeFlags([
-        '!icu-config --cppflags --ldflags'
-    ])
+
+#   env.MergeFlags([
+#       '!icu-config --cppflags --ldflags'
+#   ])
 
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
@@ -87,7 +89,9 @@ elif os.uname()[0]=='Darwin':
     env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
     env.Append(
-        CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T'],
+        CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T',
+            '-arch', 'x86_64', '-arch', 'i386',
+        ],
         CXXFLAGS=['-Wno-unneeded-internal-declaration'],
     )
 else:
@@ -186,13 +190,12 @@ env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("do
 ########
 # main programs
 
-preprocessed = []
-preprocessed += [env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h')]
-preprocessed += [env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl')]
-preprocessed += [env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc')]
-preprocessed += [env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl')]
-preprocessed += [env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl')]
-t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy');
+env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h')
+env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl')
+env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc')
+env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl')
+env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl')
+t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy')
 Clean(t, 'tora/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
@@ -244,19 +247,46 @@ with open('lib/Config.tra', 'w') as f:
     f.write("    $Config;\n")
     f.write("}\n")
 
-libtora = env.Library('tora', [
-    preprocessed,
-    libfiles,
-    libre2,
-])
+def build_icu():
+    environ = env.get('ENV')
+    if os.uname()[0] == 'Darwin':
+        environ['CCFLAGS'] = '-arch i386 -arch x86_64'
+        environ['LDFLAGS'] = '-arch i386 -arch x86_64'
+    return env.Command(
+        'vendor/icu/source/lib/libicudata' + env.get('LIBSUFFIX'), 'vendor/icu/APIChangeReport.html', "./configure --enable-static --enable-64bit-libs && make",
+        chdir='vendor/icu/source/',
+        ENV=environ
+    )
 
-tora = env.Program('bin/tora' + exe_suffix, [
-    ['tora/main.cc'],
-    libtora,
-    libre2
-])
-Default(tora)
+icu = build_icu()
 
+def build_tora():
+    if os.name == 'nt':
+        libtora = env.Library('tora', [
+            icu,
+            libfiles,
+            libre2,
+        ])
+
+        tora = env.Program('bin/tora' + exe_suffix, [
+            ['tora/main.cc'],
+            icu,
+            libtora,
+            libre2
+        ])
+        Default(tora)
+        return tora
+    else:
+        tora = env.Program('bin/tora' + exe_suffix, [
+            ['tora/main.cc'],
+            icu,
+            libfiles,
+            libre2
+        ])
+        Default(tora)
+        return tora
+
+tora = build_tora()
 
 # lemon
 lemon_env = Environment()

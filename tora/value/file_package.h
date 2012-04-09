@@ -5,7 +5,8 @@
 
 namespace tora {
 
-struct FilePackageImpl {
+class FilePackageImpl {
+public:
     ID name_id_;
     boost::shared_ptr<std::map<ID, SharedPtr<Value>>> data_;
 };
