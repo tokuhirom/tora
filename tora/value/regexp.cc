@@ -41,6 +41,18 @@ SharedPtr<Value> RE2RegexpValue::match(VM *vm, const std::string &str) {
     }
 }
 
+bool RE2RegexpValue::match_bool(VM *vm, const std::string &str) {
+    boost::shared_array<re2::StringPiece> res(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
+
+    if (VAL()->Match(
+        str, 0, str.size(), RE2::UNANCHORED, res.get(), VAL()->NumberOfCapturingGroups()+1
+        )) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
     boost::scoped_array<re2::StringPiece> buf(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
 
