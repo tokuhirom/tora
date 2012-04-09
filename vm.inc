@@ -424,6 +424,7 @@ OP_RETURN {
         if (frame->type == FRAME_TYPE_FUNCTION) {
             SharedPtr<FunctionFrame> fframe = static_cast<FunctionFrame*>(frame);
             pc = fframe->return_address;
+            assert(fframe->orig_ops);
             ops = fframe->orig_ops;
             // printf("RETURN :pc: %d\n", pc);
 
