@@ -257,7 +257,10 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
     }
     default:
         // TODO: support object comparation
-        throw new ExceptionValue("UNKNOWN MATCHING PATTERN\n");
+        std::string err ("UNKNOWN MATCHING PATTERN lhs = '");
+        err += lhs->type_str();
+        err += "'\n";
+        throw new ExceptionValue(err);
     }
     abort();
 }
