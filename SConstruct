@@ -69,7 +69,11 @@ else:
     )
     icu_config = 'icu-config'
     if os.uname()[0] == 'Darwin':
-        icu_config = Glob('/usr/local/Cellar/icu4c/*/bin/icu-config')[-1]
+        # workaround for homebrew's issue.
+        # see https://github.com/mxcl/homebrew/issues/issue/167
+        files = Glob('/usr/local/Cellar/icu4c/*/bin/icu-config')
+        if len(files) > 0:
+            icu_config = files[-1]
     env.MergeFlags([
         '!%s --cppflags --ldflags' % (icu_config)
     ])
