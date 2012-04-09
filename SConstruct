@@ -186,11 +186,12 @@ env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("do
 ########
 # main programs
 
-env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h');
-env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl');
-env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc');
-env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl');
-env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl');
+preprocessed = []
+preprocessed += [env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h')]
+preprocessed += [env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl')]
+preprocessed += [env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc')]
+preprocessed += [env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl')]
+preprocessed += [env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl')]
 t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy');
 Clean(t, 'tora/parser.out')
 
@@ -244,6 +245,7 @@ with open('lib/Config.tra', 'w') as f:
     f.write("}\n")
 
 libtora = env.Library('tora', [
+    preprocessed,
     libfiles,
     libre2,
 ])
