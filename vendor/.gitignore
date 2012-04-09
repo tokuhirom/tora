@@ -846,3 +846,7 @@ icu/source/tools/toolutil/writesrc.d
 icu/source/tools/toolutil/xmlparser.ao
 icu/source/tools/toolutil/xmlparser.d
 icu/source/tools/tzcode/Makefile
+*.dylib
+*.so
+*.d
+*.ao
