@@ -1,0 +1,5 @@
+use Test::More tests => 2;
+isn::t( $ENV{HARNESS_VERSION}, $], 'different perl' );
+
+my @twib = grep( /\btwib\b/, @INC );
+is( scalar(@twib), 1, 'got my twib lib' ) or warn "@INC";

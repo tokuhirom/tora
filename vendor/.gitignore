@@ -846,3 +846,10 @@ icu/source/tools/toolutil/writesrc.d
 icu/source/tools/toolutil/xmlparser.ao
 icu/source/tools/toolutil/xmlparser.d
 icu/source/tools/tzcode/Makefile
+*.dylib
+*.so
+*.d
+*.ao
+icu/source/extra/uconv/pkgdata.inc
+icu/source/extra/uconv/uconvmsg/
+icu/source/extra/uconv/uconv.1

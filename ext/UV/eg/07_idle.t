@@ -1,4 +1,4 @@
-use UV;
+use UV *;
 
 my $tick = 0;
 

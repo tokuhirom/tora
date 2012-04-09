@@ -1,3 +1,8 @@
+#ifdef _WIN32
+// http://gcc.gnu.org/bugzilla/show_bug.cgi?id=40278
+#undef __STRICT_ANSI__
+#endif
+
 #include <stdio.h>
 #include <wchar.h>
 #include <iostream>

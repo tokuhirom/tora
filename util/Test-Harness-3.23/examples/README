@@ -1,0 +1,54 @@
+=head1 EXAMPLES
+
+=head2 Running Tests in Multiple Languages
+
+If you have ruby installed in C</usr/bin/ruby>, and also have
+C<Test::WWW::Mechanize> installed, you can cd into C<examples/> (the directory
+where this README lives) and run the following command after installing the
+C<runtests> utility:
+
+ examples $ runtests --exec ./my_exec t -v - < test_urls.txt
+ t/10-stuff..............Failed 1/6 tests
+         (less 2 skipped tests: 3 okay)
+         (1 test unexpectedly succeeded)
+ t/ruby..................ok   
+ http://www.google.com/....ok   
+ http://www.yahoo.com/.....ok   
+ 
+ Test Summary Report
+ -------------------
+ t/10-stuff.t          (Wstat: 256 Tests: 6 Failed: 1)
+   Failed tests:  2
+   TODO passed:   6
+   uests skipped: 3-4
+ Files=4, Tests=10,  3 wallclock secs ( 0.92 cusr +  0.23 csys =  1.15 CPU)
+
+The C<my_exec> is a Perl program which tells the test harness how to execute
+any tests it encounters.
+
+The C<t> argument tells it to search in the C<t/> directory for any tests.
+One of the tests it finds is written in Ruby, but the C<my_exec> program tells
+it how to run this test.  If you have Ruby installed but the test fails, try
+changing the path.  If you don't have Ruby installed, you can simply comment
+out those lines in C<my_exec>, but the test will fail.
+
+The C<-> tells C<runtests> to read from C<STDIN> and C<test_urls.txt> is
+merely a list of URLs we wish to test.
+
+See the documentation for C<runtests> and C<TAP::Harness> for more
+information about how to use this.
+
+The C<-v> tells the harness to run in verbose mode.
+
+=head2 Custom Test Harnesses
+
+The C<tprove*> harnesses in the C<examples/bin/> directory are deprecated in
+favor of the new C<runtests>/C<TAP::Harness> tools.  They are left in primary
+for curiosity sake, though you may find the C<tprove_gtk> one useful as a
+reference for how to create a GUI interface for C<TAP::Parser>.
+
+Instead, simple override the desired methods in C<TAP::Harness> to create
+your own custom test harness.  Don't like how the summary report is formatted?
+Just override the C<&TAP::Harness::summary> method and use your new subclass:
+
+ runtests --harness TAP::Harness::MyHarness

@@ -51,11 +51,13 @@ if os.name == 'nt':
     ])
 else:
     env = Environment(
-        LIBS=['re2', 'pthread', 'dl'],
+        LIBS=['re2', 'pthread', 'dl', 'icudata', 'icuuc'],
         LIBPATH=['./'],
+        CPPPATH=[],
         CXXFLAGS=['-std=c++0x'],
-        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-march=native', '-g', '-fPIC'
+        CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
+            # '-march=native', 
         ],
         PREFIX=GetOption('prefix'),
         tools=tools
@@ -65,8 +67,15 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
+    icu_config = 'icu-config'
+    if os.uname()[0] == 'Darwin':
+        # workaround for homebrew's issue.
+        # see https://github.com/mxcl/homebrew/issues/issue/167
+        files = Glob('/usr/local/Cellar/icu4c/*/bin/icu-config')
+        if len(files) > 0:
+            icu_config = files[-1]
     env.MergeFlags([
-        '!icu-config --cppflags --ldflags'
+        '!%s --cppflags --ldflags' % (icu_config)
     ])
 
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
@@ -87,7 +96,9 @@ elif os.uname()[0]=='Darwin':
     env.Replace(CXX='clang++', CC='clang')
     # env.Append(CXXFLAGS=['-Werror'])
     env.Append(
-        CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T'],
+        CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T',
+            '-arch', 'x86_64',
+        ],
         CXXFLAGS=['-Wno-unneeded-internal-declaration'],
     )
 else:
@@ -162,7 +173,7 @@ for src in glob("tests/test_*.cc"):
 
 if 'test' in COMMAND_LINE_TARGETS:
     prefix = 'PERL5LIB=util/:$PERL5LIB '
-    prove_path = 'prove'
+    prove_path = 'perl -I util/Test-Harness-3.23/lib/ ./util/Test-Harness-3.23/bin/prove'
     try:
         os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
@@ -186,12 +197,12 @@ env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("do
 ########
 # main programs
 
-env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h');
-env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl');
-env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc');
-env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl');
-env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl');
-t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy');
+env.Command(['tora/nodes.gen.h', 'tora/nodes.gen.cc'], 'tora/nodes.gen.pl', 'perl tora/nodes.gen.pl > tora/nodes.gen.h')
+env.Command(['tora/token.gen.cc', 'tora/token.gen.h'], ['tora/token.gen.pl', 'tora/parser.h'], 'perl tora/token.gen.pl')
+env.Command(['tora/lexer.gen.cc'], 'tora/lexer.re', 're2c tora/lexer.re > tora/lexer.gen.cc')
+env.Command(['tora/vm.gen.cc', 'tora/ops.gen.h', 'tora/ops.gen.cc'], ['tora/vm.gen.pl', 'vm.inc'], 'perl -I misc/Text-MicroTemplate/ tora/vm.gen.pl')
+env.Command(['tora/symbols.gen.cc', 'tora/symbols.gen.h'], ['tora/symbols.gen.pl'], 'perl -I misc/Text-MicroTemplate/ tora/symbols.gen.pl')
+t = env.Command(['tora/parser.h', 'tora/parser.cc'], [lemon, 'tora/parser.yy', 'tora/lempar.c'], lemon + ' tora/parser.yy')
 Clean(t, 'tora/parser.out')
 
 libre2 = re2_env.Library('re2', re2files)
@@ -243,18 +254,30 @@ with open('lib/Config.tra', 'w') as f:
     f.write("    $Config;\n")
     f.write("}\n")
 
-libtora = env.Library('tora', [
-    libfiles,
-    libre2,
-])
+def build_tora():
+    if os.name == 'nt':
+        libtora = env.Library('tora', [
+            libfiles,
+            libre2,
+        ])
 
-tora = env.Program('bin/tora' + exe_suffix, [
-    ['tora/main.cc'],
-    libtora,
-    libre2
-])
-Default(tora)
+        tora = env.Program('bin/tora' + exe_suffix, [
+            ['tora/main.cc'],
+            libtora,
+            libre2
+        ])
+        Default(tora)
+        return tora
+    else:
+        tora = env.Program('bin/tora' + exe_suffix, [
+            ['tora/main.cc'],
+            libfiles,
+            libre2
+        ])
+        Default(tora)
+        return tora
 
+tora = build_tora()
 
 # lemon
 lemon_env = Environment()
@@ -273,10 +296,10 @@ test_exts()
 # ----------------------------------------------------------------------
 # instalation
 installs = []
-installs += [env.Install(env['PREFIX']+'/bin/', 'bin/tora' + exe_suffix)];
+installs += [env.Install(env['PREFIX']+'/bin/', tora)];
 installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
 exts = []
 for ext in os.listdir('ext'):
     exts += [env.Command(['ext/%s/_installed' % ext], Glob('ext/' + ext + "/*"), "cd ext/" + ext + " && scons install")]
-env.Alias('install', [exts, env['PREFIX']+'/bin/', installs])
+env.Alias('install', [tora, exts, env['PREFIX']+'/bin/', installs])
 

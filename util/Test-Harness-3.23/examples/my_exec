@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $url  = qr/^http/;
+my $prog = shift;
+if ( $prog !~ $url && !-e $prog ) {
+    die "Cannot find ($prog)";
+}
+my @exec;
+
+if ( 't/ruby.t' eq $prog ) {
+    push @exec => '/usr/bin/ruby', $prog;
+}
+elsif ( $prog =~ $url ) {
+    push @exec => 'bin/test_html.pl', $prog;
+}
+else {
+    push @exec, $prog;
+}
+exec @exec or die "Cannot (exec @exec): $!";

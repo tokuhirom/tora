@@ -41,9 +41,9 @@
 #define TODO() printf("This function is not implemented yet. %s at %d.\n", __FILE__, __LINE__); abort();
 
 #ifdef _WIN32
-#define TORA_EXPORT __declspec(dllexport) extern "C"
+#define TORA_EXPORT __declspec(dllexport)
 #else
-#define TORA_EXPORT extern "C"
+#define TORA_EXPORT
 #endif
 
 namespace tora {

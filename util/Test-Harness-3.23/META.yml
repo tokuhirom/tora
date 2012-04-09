@@ -1,0 +1,168 @@
+---
+abstract: 'Run Perl standard test scripts with statistics'
+author:
+  - 'Andy Armstrong  C<< <andy@hexten.net> >>'
+generated_by: 'Module::Build version 0.3607'
+keywords:
+  - TAP
+  - 'test harness'
+  - prove
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Test-Harness
+provides:
+  App::Prove:
+    file: lib/App/Prove.pm
+    version: 3.23
+  App::Prove::State:
+    file: lib/App/Prove/State.pm
+    version: 3.23
+  App::Prove::State::Result:
+    file: lib/App/Prove/State/Result.pm
+    version: 3.23
+  App::Prove::State::Result::Test:
+    file: lib/App/Prove/State/Result/Test.pm
+    version: 3.23
+  TAP::Base:
+    file: lib/TAP/Base.pm
+    version: 3.23
+  TAP::Formatter::Base:
+    file: lib/TAP/Formatter/Base.pm
+    version: 3.23
+  TAP::Formatter::Color:
+    file: lib/TAP/Formatter/Color.pm
+    version: 3.23
+  TAP::Formatter::Console:
+    file: lib/TAP/Formatter/Console.pm
+    version: 3.23
+  TAP::Formatter::Console::ParallelSession:
+    file: lib/TAP/Formatter/Console/ParallelSession.pm
+    version: 3.23
+  TAP::Formatter::Console::Session:
+    file: lib/TAP/Formatter/Console/Session.pm
+    version: 3.23
+  TAP::Formatter::File:
+    file: lib/TAP/Formatter/File.pm
+    version: 3.23
+  TAP::Formatter::File::Session:
+    file: lib/TAP/Formatter/File/Session.pm
+    version: 3.23
+  TAP::Formatter::Session:
+    file: lib/TAP/Formatter/Session.pm
+    version: 3.23
+  TAP::Harness:
+    file: lib/TAP/Harness.pm
+    version: 3.23
+  TAP::Object:
+    file: lib/TAP/Object.pm
+    version: 3.23
+  TAP::Parser:
+    file: lib/TAP/Parser.pm
+    version: 3.23
+  TAP::Parser::Aggregator:
+    file: lib/TAP/Parser/Aggregator.pm
+    version: 3.23
+  TAP::Parser::Grammar:
+    file: lib/TAP/Parser/Grammar.pm
+    version: 3.23
+  TAP::Parser::Iterator:
+    file: lib/TAP/Parser/Iterator.pm
+    version: 3.23
+  TAP::Parser::Iterator::Array:
+    file: lib/TAP/Parser/Iterator/Array.pm
+    version: 3.23
+  TAP::Parser::Iterator::Process:
+    file: lib/TAP/Parser/Iterator/Process.pm
+    version: 3.23
+  TAP::Parser::Iterator::Stream:
+    file: lib/TAP/Parser/Iterator/Stream.pm
+    version: 3.23
+  TAP::Parser::IteratorFactory:
+    file: lib/TAP/Parser/IteratorFactory.pm
+    version: 3.23
+  TAP::Parser::Multiplexer:
+    file: lib/TAP/Parser/Multiplexer.pm
+    version: 3.23
+  TAP::Parser::Result:
+    file: lib/TAP/Parser/Result.pm
+    version: 3.23
+  TAP::Parser::Result::Bailout:
+    file: lib/TAP/Parser/Result/Bailout.pm
+    version: 3.23
+  TAP::Parser::Result::Comment:
+    file: lib/TAP/Parser/Result/Comment.pm
+    version: 3.23
+  TAP::Parser::Result::Plan:
+    file: lib/TAP/Parser/Result/Plan.pm
+    version: 3.23
+  TAP::Parser::Result::Pragma:
+    file: lib/TAP/Parser/Result/Pragma.pm
+    version: 3.23
+  TAP::Parser::Result::Test:
+    file: lib/TAP/Parser/Result/Test.pm
+    version: 3.23
+  TAP::Parser::Result::Unknown:
+    file: lib/TAP/Parser/Result/Unknown.pm
+    version: 3.23
+  TAP::Parser::Result::Version:
+    file: lib/TAP/Parser/Result/Version.pm
+    version: 3.23
+  TAP::Parser::Result::YAML:
+    file: lib/TAP/Parser/Result/YAML.pm
+    version: 3.23
+  TAP::Parser::ResultFactory:
+    file: lib/TAP/Parser/ResultFactory.pm
+    version: 3.23
+  TAP::Parser::Scheduler:
+    file: lib/TAP/Parser/Scheduler.pm
+    version: 3.23
+  TAP::Parser::Scheduler::Job:
+    file: lib/TAP/Parser/Scheduler/Job.pm
+    version: 3.23
+  TAP::Parser::Scheduler::Spinner:
+    file: lib/TAP/Parser/Scheduler/Spinner.pm
+    version: 3.23
+  TAP::Parser::Source:
+    file: lib/TAP/Parser/Source.pm
+    version: 3.23
+  TAP::Parser::SourceHandler:
+    file: lib/TAP/Parser/SourceHandler.pm
+    version: 3.23
+  TAP::Parser::SourceHandler::Executable:
+    file: lib/TAP/Parser/SourceHandler/Executable.pm
+    version: 3.23
+  TAP::Parser::SourceHandler::File:
+    file: lib/TAP/Parser/SourceHandler/File.pm
+    version: 3.23
+  TAP::Parser::SourceHandler::Handle:
+    file: lib/TAP/Parser/SourceHandler/Handle.pm
+    version: 3.23
+  TAP::Parser::SourceHandler::Perl:
+    file: lib/TAP/Parser/SourceHandler/Perl.pm
+    version: 3.23
+  TAP::Parser::SourceHandler::RawTAP:
+    file: lib/TAP/Parser/SourceHandler/RawTAP.pm
+    version: 3.23
+  TAP::Parser::Utils:
+    file: lib/TAP/Parser/Utils.pm
+    version: 3.23
+  TAP::Parser::YAMLish::Reader:
+    file: lib/TAP/Parser/YAMLish/Reader.pm
+    version: 3.23
+  TAP::Parser::YAMLish::Writer:
+    file: lib/TAP/Parser/YAMLish/Writer.pm
+    version: 3.23
+  Test::Harness:
+    file: lib/Test/Harness.pm
+    version: 3.23
+recommends:
+  Pod::Usage: 1.12
+resources:
+  MailingList: mailto:<tapx-dev@hexten.net>
+  bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness
+  homepage: http://testanything.org/
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/AndyA/Test-Harness/tree/master
+version: 3.23
