@@ -55,7 +55,7 @@ static SharedPtr<Value> _uv_close(VM *vm, Value *self, Value *callback_v) {
 static SharedPtr<Value> _uv_DESTROY(VM *vm, Value *self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> handle_ = self->upcast<ObjectValue>()->data();
-    assert(handle_->value_type == VALUE_TYPE_INT);
+    assert(handle_->value_type == VALUE_TYPE_POINTER);
     uv_handle_t *handle = (uv_handle_t*) handle_->upcast<PointerValue>()->ptr();
     uv_close(handle, NULL);
     if (handle->data) delete ((_uv_data*) handle->data);
