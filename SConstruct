@@ -222,6 +222,9 @@ with open('tora/config.h', 'w') as f:
     f.write('#define TORA_VERSION_STR  "' + TORA_VERSION_STR + "\"\n")
 
 with open('config.json', 'w') as f:
+    libs = env.get('LIBS')
+    if os.name == 'nt':
+        libs += ['tora']
     f.write(json.dumps({
         'PATH':        os.environ['PATH'],
         'CC':          TORA_CC,
@@ -230,7 +233,7 @@ with open('config.json', 'w') as f:
         'CPPPATH':     env.get('CPPPATH') or [],
         'CXXFLAGS':    env.get('CXXFLAGS'),
         'PREFIX':      env.get('PREFIX'),
-        'LIBS':        ['tora'] + env.get('LIBS'),
+        'LIBS':        libs,
         'TOOLS':       tools,
         'SHLIBPREFIX': '',
         'LINKFLAGS':   ['' + x for x in env.get('LINKFLAGS')[1:]],
@@ -292,7 +295,7 @@ def test_exts():
     src = Split('Fcntl JSON Digest-MD5 Socket Path URI-Escape  UV Curl')
     src += Split('HTTP IRC') # depends on Socket
     for ext in src:
-        exts += [env.Command(['ext/%s/_tested' % ext], Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
+        exts += [env.Command(['ext/%s/_tested' % ext], [tora]+Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
     env.Command('test.ext', exts, 'echo ok')
 test_exts()
 
