@@ -20,9 +20,10 @@ public:
     void set(int index, const SharedPtr<Value> & val);
     SharedPtr<Value> get(int index) const;
     PadList *upper(int level) const;
-    void dump(VM *vm);
+    void dump(VM *vm) const;
     SharedPtr<Value> get_dynamic(int level, int index) const;
     void set_dynamic(int level, int index, const SharedPtr<Value> & val);
+    size_t size() const;
 };
 
 };

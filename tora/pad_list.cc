@@ -16,7 +16,7 @@ PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
     */
 }
 
-static std::string dump_array(VM *vm, PadList *n) {
+static std::string dump_array(VM *vm, const PadList *n) {
     Inspector ins(vm);
     std::string o = "[";
     for (auto iter = n->pad_.begin(); iter != n->pad_.end(); iter++) {
@@ -26,14 +26,24 @@ static std::string dump_array(VM *vm, PadList *n) {
     return o;
 }
 
-void PadList::dump(VM *vm) {
-    PadList *n = this;
+void PadList::dump(VM *vm) const {
+    const PadList *n = this;
     int i=0;
     while (n) {
         std::clog << i << " " << dump_array(vm, n) << std::endl;
         n = n->next_.get();
         i++;
     }
+}
+
+size_t PadList::size() const {
+    const PadList *n = this;
+    size_t i=0;
+    while (n) {
+        n = n->next_.get();
+       ++i;
+    }
+    return i;
 }
 
 void PadList::set(int i, const SharedPtr<Value> & v) {
