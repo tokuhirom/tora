@@ -26,6 +26,8 @@ static SharedPtr<Value> Curl_Easy_DESTROY(VM *vm, Value *self) {
     return UndefValue::instance();
 }
 
+extern "C" {
+
 TORA_EXPORT
 void Init_Curl(VM* vm) {
     SharedPtr<ClassValue> klass = new ClassValue(vm, "Curl::Easy");
@@ -35,3 +37,4 @@ void Init_Curl(VM* vm) {
     vm->add_class(klass);
 }
 
+}

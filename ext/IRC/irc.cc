@@ -23,8 +23,11 @@ static SharedPtr<Value> parse_irc(VM *vm, Value *val) {
     return t;
 }
 
+extern "C" {
+
 TORA_EXPORT
 void Init_IRC(VM *vm) {
     vm->add_function("parse_irc",   new CallbackFunction(parse_irc));
 }
 
+}

@@ -24,6 +24,8 @@ static SharedPtr<Value> Fcntl_flock(VM *vm, Value *fileno_v, Value *operation_v)
     }
 }
 
+extern "C" {
+
 TORA_EXPORT
 void Init_Fcntl(VM* vm) {
     vm->add_function("flock", new CallbackFunction(Fcntl_flock));
@@ -32,3 +34,4 @@ void Init_Fcntl(VM* vm) {
     vm->add_constant("LOCK_UN", LOCK_UN);
 }
 
+}

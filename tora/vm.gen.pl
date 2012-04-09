@@ -106,6 +106,7 @@ void VM::<?= $method ?>() {
 ? for my $k (@{$_[0]}) {
         CODE_<?= $k->[0] ?>: {
 ?       if ($with_trace) {
+            assert(ops);
             printf("[%03d] calling PP_<?= $k->[0] ?>(%d).", pc, ops->at(pc)->op_type);
             switch (ops->at(pc)->op_type) {
             case OP_PUSH_INT:

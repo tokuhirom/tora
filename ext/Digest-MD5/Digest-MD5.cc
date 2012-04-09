@@ -33,7 +33,11 @@ static SharedPtr<Value> Digest_MD5_md5_hex(VM *vm, Value *str) {
     return new StrValue(ret);
 }
 
+extern "C" {
+
 TORA_EXPORT
 void Init_Digest_MD5(VM* vm) {
     vm->add_function("md5_hex", new CallbackFunction(Digest_MD5_md5_hex));
+}
+
 }
