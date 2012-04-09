@@ -67,8 +67,11 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
+    icu_config = 'icu-config'
+    if os.uname()[0] == 'Darwin':
+        icu_config = Glob('/usr/local/Cellar/icu4c/*/bin/icu-config')[-1]
     env.MergeFlags([
-        '!icu-config --cppflags --ldflags'
+        '!%s --cppflags --ldflags' % (icu_config)
     ])
 
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
