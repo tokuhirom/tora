@@ -57,6 +57,7 @@ else:
         CXXFLAGS=['-std=c++0x'],
         CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
+            # '-march=native', 
         ],
         PREFIX=GetOption('prefix'),
         tools=tools
