@@ -51,9 +51,9 @@ if os.name == 'nt':
     ])
 else:
     env = Environment(
-        LIBS=['re2', 'pthread', 'dl'],
-        LIBPATH=['./', 'vendor/icu/source/lib/'],
-        CPPPATH=['vendor/icu/source/common/'],
+        LIBS=['re2', 'pthread', 'dl', 'icudata', 'icuuc'],
+        LIBPATH=['./'],
+        CPPPATH=[],
         CXXFLAGS=['-std=c++0x'],
         CCFLAGS=['-Wall', '-Wno-sign-compare', '-I' + os.getcwd() + '/vendor/boost_1_49_0/', '-I' + os.getcwd() + '/vendor/re2/', '-I' + os.getcwd() + "/tora/", '-fstack-protector', '-g', '-fPIC'
             # '-DPERLISH_CLOSURE'
@@ -67,10 +67,9 @@ else:
         LIBS=['pthread'],
         tools=tools
     )
-
-#   env.MergeFlags([
-#       '!icu-config --cppflags --ldflags'
-#   ])
+    env.MergeFlags([
+        '!icu-config --cppflags --ldflags'
+    ])
 
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
@@ -155,25 +154,6 @@ libfiles = [
     ''')
 ]
 
-def build_icu():
-    environ = env.get('ENV')
-    if os.uname()[0] == 'Darwin':
-        print "DARWIN"
-        environ['CFLAGS']  = '-arch x86_64'
-        environ['LDFLAGS'] = '-arch x86_64'
-    icuenv = Environment()
-    return icuenv.Command(
-        [
-            'vendor/icu/source/lib/libicudata' + env.get('LIBSUFFIX'),
-            'vendor/icu/source/lib/libicuuc' + env.get('LIBSUFFIX'),
-        ],
-        'vendor/icu/APIChangeReport.html', "./configure --enable-static --enable-threads --disable-samples && make",
-        chdir='vendor/icu/source/',
-        ENV=environ
-    )
-
-icu = build_icu()
-
 ########
 # tests.
 
@@ -181,7 +161,6 @@ programs = ['bin/tora' + exe_suffix]
 for src in glob("tests/test_*.cc"):
     programs.append(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
         libfiles,
-        icu,
         src,
     ]))
 
@@ -271,14 +250,12 @@ with open('lib/Config.tra', 'w') as f:
 def build_tora():
     if os.name == 'nt':
         libtora = env.Library('tora', [
-            icu,
             libfiles,
             libre2,
         ])
 
         tora = env.Program('bin/tora' + exe_suffix, [
             ['tora/main.cc'],
-            icu,
             libtora,
             libre2
         ])
@@ -287,7 +264,6 @@ def build_tora():
     else:
         tora = env.Program('bin/tora' + exe_suffix, [
             ['tora/main.cc'],
-            icu,
             libfiles,
             libre2
         ])
