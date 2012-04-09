@@ -1,0 +1,31 @@
+Test-Harness 3.23
+
+INSTALLATION
+
+To install Test::Harness using ExtUtils::MakeMaker do:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+To use Module::Build (preferred) do:
+
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
+
+This will install Test::Harness and the "prove" program. Type
+
+    prove --help
+
+for more information.
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2006, 2007 Curtis "Ovid" Poe
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+

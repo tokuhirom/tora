@@ -1,0 +1,28 @@
+[-CodeLayout::ProhibitParensWithBuiltins]
+[CodeLayout::ProhibitHardTabs]
+allow_leading_tabs = 0
+
+[-ControlStructures::ProhibitPostfixControls]
+
+[-Documentation::RequirePodAtEnd]
+[-Documentation::RequirePodSections]
+
+[-ErrorHandling::RequireCarping]
+
+[-InputOutput::ProhibitInteractiveTest]
+[-InputOutput::ProhibitBacktickOperators]
+
+[-Miscellanea::RequireRcsKeywords]
+
+[-Modules::RequireVersionVar]
+
+[-RegularExpressions::RequireExtendedFormatting]
+[-RegularExpressions::RequireLineBoundaryMatching]
+
+[-ValuesAndExpressions::ProhibitNoisyQuotes]
+[-ValuesAndExpressions::ProhibitEmptyQuotes]
+
+[Variables::ProhibitPackageVars]
+#add_packages = Test::Builder App::Ack File::Next
+
+[-Variables::ProhibitPunctuationVars]

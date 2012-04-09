@@ -1,0 +1,468 @@
+#!/usr/bin/perl -w
+use strict;
+
+use File::Find;
+use IO::Handle;
+
+die "Unsupported";
+
+##############################################################################
+
+=head1 NAME
+
+tprove_gtk - Simple proof of concept GUI for proving tests
+
+=head1 USAGE
+
+ tprove_gtk [ list of test files ]
+
+=head1 DESCRIPTION
+
+I've included this in the distribution.  It's a gtk interface by Torsten
+Schoenfeld.  I've not run it myself.
+
+C<tprove_gtk> is not installed on your system unless you explicitly copy it
+somewhere in your path.  The current incarnation B<must> be run in a directory
+with both C<t/> and C<lib/> (i.e., the standard "root" level directory in
+which CPAN style modules are developed).  This will probably change in the
+future.  As noted, this is a proof of concept.
+
+=head1 CAVEATS
+
+This is alpha code.  You've been warned.
+
+=cut
+
+my @tests;
+if (@ARGV) {
+    @tests = @ARGV;
+}
+else {
+    find(
+        sub { -f && /\.t$/ && push @tests => $File::Find::name },
+        "t"
+    );
+}
+
+pipe( my $reader, my $writer );
+
+# Unfortunately, autoflush-ing seems to be a big performance problem.  If you
+# don't care about "real-time" progress bars, turn this off.
+$writer->autoflush(1);
+
+if ( my $pid = fork ) {
+    close $writer;
+
+    my $gui = Gui->new( $pid, $reader );
+    $gui->add_tests(@tests);
+    $gui->run();
+}
+
+else {
+    die "Cannot fork: $!" unless defined $pid;
+    close $reader;
+
+    my $runner = TestRunner->new($writer);
+    $runner->add_tests(@tests);
+    $runner->run();
+
+    close $writer;
+}
+
+###############################################################################
+# --------------------------------------------------------------------------- #
+###############################################################################
+
+package Gui;
+
+use Glib qw(TRUE FALSE);
+use Gtk2 -init;
+
+use constant {
+    COLUMN_FILENAME => 0,
+    COLUMN_TOTAL    => 1,
+    COLUMN_RUN      => 2,
+    COLUMN_PASS     => 3,
+    COLUMN_FAIL     => 4,
+    COLUMN_SKIP     => 5,
+    COLUMN_TODO     => 6,
+};
+
+BEGIN {
+    if ( !Gtk2->CHECK_VERSION( 2, 6, 0 ) ) {
+        die("$0 needs gtk+ >= 2.6");
+    }
+}
+
+DESTROY {
+    my ($self) = @_;
+
+    if ( defined $self->{reader_source} ) {
+        Glib::Source->remove( $self->{reader_source} );
+    }
+}
+
+sub new {
+    my ( $class, $child_pid, $reader ) = @_;
+
+    my $self = bless {}, $class;
+
+    $self->create_window();
+    $self->create_menu();
+    $self->create_view();
+
+    $self->{child_pid}     = $child_pid;
+    $self->{child_running} = TRUE;
+
+    $self->{reader_source} = Glib::IO->add_watch(
+        fileno $reader, [qw(in pri hup)],
+        \&_callback_reader, $self
+    );
+
+    return $self;
+}
+
+sub add_tests {
+    my ( $self, @tests ) = @_;
+
+    my $model = $self->{_model};
+
+    $self->{_path_cache} = {};
+
+    foreach my $test (@tests) {
+        my $iter = $model->append();
+        $model->set( $iter, COLUMN_FILENAME, $test );
+        $self->{_path_cache}->{$test} = $model->get_path($iter);
+    }
+}
+
+sub create_window {
+    my ($self) = @_;
+
+    my $window = Gtk2::Window->new();
+    my $vbox = Gtk2::VBox->new( FALSE, 5 );
+
+    $window->add($vbox);
+    $window->set_title("Test Runner");
+    $window->set_default_size( 300, 600 );
+    $window->signal_connect( delete_event => \&_callback_quit, $self );
+
+    $self->{_window} = $window;
+    $self->{_vbox}   = $vbox;
+}
+
+sub create_menu {
+    my ($self) = @_;
+
+    my $window = $self->{_window};
+    my $vbox   = $self->{_vbox};
+
+    my $ui = <<"UI";
+<ui>
+  <menubar>
+    <menu action="test_menu">
+      <menuitem action="quit_item" />
+    </menu>
+  </menubar>
+</ui>
+UI
+
+    my $actions = [
+        [ "test_menu", undef, "_Tests" ],
+        [   "quit_item",
+            "gtk-quit",
+            "_Quit",
+            "<control>Q",
+            "Quit the test runner",
+            sub { _callback_quit( undef, undef, $self ) },
+        ],
+    ];
+
+    my $action_group = Gtk2::ActionGroup->new("main");
+    $action_group->add_actions($actions);
+
+    my $manager = Gtk2::UIManager->new();
+    $manager->insert_action_group( $action_group, 0 );
+    $manager->add_ui_from_string($ui);
+
+    my $menu_box = Gtk2::VBox->new( FALSE, 0 );
+    $manager->signal_connect(
+        add_widget => sub {
+            my ( $manager, $widget ) = @_;
+            $menu_box->pack_start( $widget, FALSE, FALSE, 0 );
+        }
+    );
+
+    $vbox->pack_start( $menu_box, FALSE, FALSE, 0 );
+    $window->add_accel_group( $manager->get_accel_group() );
+
+    $self->{_manager} = $manager;
+}
+
+sub create_view {
+    my ($self) = @_;
+
+    my $window = $self->{_window};
+    my $vbox   = $self->{_vbox};
+
+    my $scroller = Gtk2::ScrolledWindow->new();
+    $scroller->set_policy( "never", "automatic" );
+
+    my $model = Gtk2::ListStore->new(
+
+        #  filename     total     run       pass      fail      skip      todo
+        qw(Glib::String Glib::Int Glib::Int Glib::Int Glib::Int Glib::Int Glib::Int)
+    );
+    my $view = Gtk2::TreeView->new($model);
+
+ # ------------------------------------------------------------------------- #
+
+    my $column_filename = Gtk2::TreeViewColumn->new_with_attributes(
+        "Filename",
+        Gtk2::CellRendererText->new(),
+        text => COLUMN_FILENAME
+    );
+    $column_filename->set_sizing("autosize");
+    $column_filename->set_expand(TRUE);
+    $view->append_column($column_filename);
+
+ # ------------------------------------------------------------------------- #
+
+    my $renderer_progress = Gtk2::CellRendererProgress->new();
+    my $column_progress   = Gtk2::TreeViewColumn->new_with_attributes(
+        "Progress",
+        $renderer_progress
+    );
+    $column_progress->set_cell_data_func(
+        $renderer_progress,
+        sub {
+            my ( $column, $renderer, $model, $iter ) = @_;
+
+            my ( $total, $run )
+              = $model->get( $iter, COLUMN_TOTAL, COLUMN_RUN );
+
+            if ( $run == 0 ) {
+                $renderer->set(
+                    text  => "",
+                    value => 0
+                );
+                return;
+            }
+
+            if ( $total != 0 ) {
+                $renderer->set(
+                    text  => "$run/$total",
+                    value => $run / $total * 100
+                );
+            }
+            else {
+                $renderer->set(
+                    text  => $run,
+                    value => 0
+                );
+            }
+        }
+    );
+    $view->append_column($column_progress);
+
+ # ------------------------------------------------------------------------- #
+
+    my @count_columns = (
+        [ "Pass", COLUMN_PASS ],
+        [ "Fail", COLUMN_FAIL ],
+        [ "Skip", COLUMN_SKIP ],
+        [ "Todo", COLUMN_TODO ],
+    );
+
+    foreach (@count_columns) {
+        my ( $heading, $column_number ) = @{$_};
+
+        my $renderer = Gtk2::CellRendererText->new();
+        $renderer->set( xalign => 1.0 );
+
+        my $column = Gtk2::TreeViewColumn->new_with_attributes(
+            $heading,
+            $renderer,
+            text => $column_number
+        );
+
+        $view->append_column($column);
+    }
+
+ # ------------------------------------------------------------------------- #
+
+    $scroller->add($view);
+    $vbox->pack_start( $scroller, TRUE, TRUE, 0 );
+
+    $self->{_view}  = $view;
+    $self->{_model} = $model;
+}
+
+sub run {
+    my ($self) = @_;
+
+    $self->{_window}->show_all();
+
+    Gtk2->main();
+}
+
+# --------------------------------------------------------------------------- #
+
+sub _callback_reader {
+    my ( $fileno, $condition, $self ) = @_;
+
+    if ( $condition & "in" || $condition & "pri" ) {
+        my $data = <$reader>;
+
+        if ( $data !~ /^[^\t]+ \t \d+ \t \d+ \t \d+ \t \d+ \t \d+ \t \d+$/x )
+        {
+            return TRUE;
+        }
+
+        my ( $filename, $total, $run, $pass, $fail, $skip, $todo )
+          = split /\t/, $data;
+
+        my $view       = $self->{_view};
+        my $model      = $self->{_model};
+        my $path_cache = $self->{_path_cache};
+
+        if ( $path_cache->{$filename} ) {
+            my $iter = $model->get_iter( $path_cache->{$filename} );
+            $model->set(
+                $iter,
+                COLUMN_TOTAL, $total,
+                COLUMN_RUN,   $run,
+                COLUMN_PASS,  $pass,
+                COLUMN_FAIL,  $fail,
+                COLUMN_SKIP,  $skip,
+                COLUMN_TODO,  $todo
+            );
+            $view->scroll_to_cell( $path_cache->{$filename} );
+        }
+    }
+
+    elsif ( $condition & "hup" ) {
+        $self->{child_running} = FALSE;
+        return FALSE;
+    }
+
+    else {
+        warn "got unknown condition: $condition";
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+sub _callback_quit {
+    my ( $window, $event, $self ) = @_;
+
+    if ( $self->{child_running} ) {
+        kill "TERM", $self->{child_pid};
+    }
+
+    Gtk2->main_quit();
+}
+
+###############################################################################
+# --------------------------------------------------------------------------- #
+###############################################################################
+
+package TestRunner;
+
+use TAP::Parser;
+use TAP::Parser::Source::Perl;
+
+use constant {
+    INDEX_TOTAL => 0,
+    INDEX_RUN   => 1,
+    INDEX_PASS  => 2,
+    INDEX_FAIL  => 3,
+    INDEX_SKIP  => 4,
+    INDEX_TODO  => 5,
+};
+
+sub new {
+    my ( $class, $writer ) = @_;
+
+    my $self = bless {}, $class;
+
+    $self->{_writer} = $writer;
+
+    return $self;
+}
+
+sub add_tests {
+    my ( $self, @tests ) = @_;
+
+    $self->{_tests} = [@tests];
+
+    $self->{_results} = {};
+    foreach my $test ( @{ $self->{_tests} } ) {
+        $self->{_results}->{$test} = [ 0, 0, 0, 0, 0, 0 ];
+    }
+}
+
+sub run {
+    my ($self) = @_;
+
+    my $source = TAP::Parser::Source::Perl->new();
+
+    foreach my $test ( @{ $self->{_tests} } ) {
+        my $parser = TAP::Parser->new( { source => $test } );
+        $self->analyze( $test, $parser ) if $parser;
+    }
+
+    my $writer = $self->{_writer};
+    $writer->flush();
+    $writer->print("\n");
+}
+
+sub analyze {
+    my ( $self, $test, $parser ) = @_;
+
+    my $writer = $self->{_writer};
+    my $result = $self->{_results}->{$test};
+
+    while ( my $line = $parser->next() ) {
+        if ( $line->is_plan() ) {
+            $result->[INDEX_TOTAL] = $line->tests_planned();
+        }
+
+        elsif ( $line->is_test() ) {
+            $result->[INDEX_RUN]++;
+
+            if ( $line->has_skip() ) {
+                $result->[INDEX_SKIP]++;
+                next;
+            }
+
+            if ( $line->has_todo() ) {
+                $result->[INDEX_TODO]++;
+            }
+
+            if ( $line->is_ok() ) {
+                $result->[INDEX_PASS]++;
+            }
+            else {
+                $result->[INDEX_FAIL]++;
+            }
+        }
+
+        elsif ( $line->is_comment() ) {
+
+            # ignore
+        }
+
+        else {
+            warn "Unknown result type `"
+              . $line->type() . "´: "
+              . $line->as_string();
+        }
+
+        my $string = join "\t", $test, @{$result};
+        $writer->print("$string\n");
+    }
+
+    return $parser;
+}

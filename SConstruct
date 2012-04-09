@@ -51,7 +51,7 @@ if os.name == 'nt':
     ])
 else:
     env = Environment(
-        LIBS=['re2', 'pthread', 'dl', 'icuuc', 'icudata'],
+        LIBS=['re2', 'pthread', 'dl'],
         LIBPATH=['./', 'vendor/icu/source/lib/'],
         CPPPATH=['vendor/icu/source/common/'],
         CXXFLAGS=['-std=c++0x'],
@@ -91,7 +91,7 @@ elif os.uname()[0]=='Darwin':
     # env.Append(CXXFLAGS=['-Werror'])
     env.Append(
         CCFLAGS=['-Wno-unused-function', '-DBOOST_NO_CHAR16_T', '-DBOOST_NO_CHAR32_T',
-            '-arch', 'x86_64', '-arch', 'i386',
+            '-arch', 'x86_64',
         ],
         CXXFLAGS=['-Wno-unneeded-internal-declaration'],
     )
@@ -155,6 +155,25 @@ libfiles = [
     ''')
 ]
 
+def build_icu():
+    environ = env.get('ENV')
+    if os.uname()[0] == 'Darwin':
+        print "DARWIN"
+        environ['CFLAGS']  = '-arch x86_64'
+        environ['LDFLAGS'] = '-arch x86_64'
+    icuenv = Environment()
+    return icuenv.Command(
+        [
+            'vendor/icu/source/lib/libicudata' + env.get('LIBSUFFIX'),
+            'vendor/icu/source/lib/libicuuc' + env.get('LIBSUFFIX'),
+        ],
+        'vendor/icu/APIChangeReport.html', "./configure --enable-static --enable-threads --disable-samples && make",
+        chdir='vendor/icu/source/',
+        ENV=environ
+    )
+
+icu = build_icu()
+
 ########
 # tests.
 
@@ -162,12 +181,13 @@ programs = ['bin/tora' + exe_suffix]
 for src in glob("tests/test_*.cc"):
     programs.append(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
         libfiles,
+        icu,
         src,
     ]))
 
 if 'test' in COMMAND_LINE_TARGETS:
     prefix = 'PERL5LIB=util/:$PERL5LIB '
-    prove_path = 'prove'
+    prove_path = 'perl -I util/Test-Harness-3.23/lib/ ./util/Test-Harness-3.23/bin/prove'
     try:
         os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
         prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
@@ -247,19 +267,6 @@ with open('lib/Config.tra', 'w') as f:
     f.write("sub tora_config() {\n")
     f.write("    $Config;\n")
     f.write("}\n")
-
-def build_icu():
-    environ = env.get('ENV')
-    if os.uname()[0] == 'Darwin':
-        environ['CCFLAGS'] = '-arch i386 -arch x86_64'
-        environ['LDFLAGS'] = '-arch i386 -arch x86_64'
-    return env.Command(
-        'vendor/icu/source/lib/libicudata' + env.get('LIBSUFFIX'), 'vendor/icu/APIChangeReport.html', "./configure --enable-static --enable-64bit-libs && make",
-        chdir='vendor/icu/source/',
-        ENV=environ
-    )
-
-icu = build_icu()
 
 def build_tora():
     if os.name == 'nt':

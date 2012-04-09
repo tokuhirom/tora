@@ -850,3 +850,6 @@ icu/source/tools/tzcode/Makefile
 *.so
 *.d
 *.ao
+icu/source/extra/uconv/pkgdata.inc
+icu/source/extra/uconv/uconvmsg/
+icu/source/extra/uconv/uconv.1
