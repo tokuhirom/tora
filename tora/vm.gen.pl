@@ -107,8 +107,17 @@ void VM::<?= $method ?>() {
         CODE_<?= $k->[0] ?>: {
 ?       if ($with_trace) {
             printf("[%03d] calling PP_<?= $k->[0] ?>(%d).", pc, ops->at(pc)->op_type);
-            if (ops->at(pc)->op_type == OP_PUSH_INT) {
+            switch (ops->at(pc)->op_type) {
+            case OP_PUSH_INT:
                 printf(" INT:%d", ops->at(pc)->operand.int_value);
+                break;
+            case OP_GETCLOSURE:
+                printf(" LEVEL :%d", ops->at(pc)->int_operand_high());
+                printf(" NO :%d", ops->at(pc)->int_operand_low());
+                break;
+            default:
+                // I don't know how to explain this op code.
+                break;
             }
             printf("\n");
 ?       }
