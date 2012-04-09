@@ -26,8 +26,14 @@ public:
     OP(op_type_t type, int high, int low) :refcnt(0), op_type(type)  {
         operand.int_value = (((high)&0x0000ffff) << 16) | (low&0x0000ffff);
     }
-    // This is not a virtual destructor. Do not define destructor in child class.
     virtual ~OP() { }
+
+    int int_operand_high() const {
+        return (operand.int_value >> 16) & 0x0000FFFF;
+    }
+    int int_operand_low() const {
+        return operand.int_value & 0x0000ffff;
+    }
 
     template<class Y>
     Y* upcast() {
