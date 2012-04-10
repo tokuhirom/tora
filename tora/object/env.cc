@@ -1,4 +1,7 @@
-#include <stdlib.h>
+#ifdef _WIN32
+// http://gcc.gnu.org/bugzilla/show_bug.cgi?id=40278
+#undef __STRICT_ANSI__
+#endif
 
 #include "../object.h"
 #include "../vm.h"
@@ -6,13 +9,19 @@
 #include "../symbols.gen.h"
 
 #ifdef _WIN32
-#include <windows.h>
 static void unsetenv(const char* name) {
-	SetEnvironmentVariable(name, NULL);
+    if (!name) return;
+    std::string env = name;
+    env += "=";
+    putenv(env.c_str());
 }
 
 static void setenv(const char* name, const char* value, int /* overwrite */) {
-	SetEnvironmentVariable(name, value);
+    if (!name || !value) return;
+    std::string env = name;
+    env += "=";
+    env += value;
+    putenv(env.c_str());
 }
 #endif
 
