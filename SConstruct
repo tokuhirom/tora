@@ -229,7 +229,7 @@ TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS')).replace("\\", "/")
 
 # TORA_OS would compatible with Perl5.
 if os.name == 'nt':
-    TORA_OS       = 'Win32'
+    TORA_OS       = 'MSWin32'
 elif os.uname()[0] == 'Darwin':
     TORA_OS       = 'darwin'
 elif os.uname()[0] == 'linux':
