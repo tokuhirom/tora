@@ -127,15 +127,11 @@ if ARGUMENTS.get('profile', 0):
     env.Append(CXXFLAGS=['-pg', '-Dprofile'])
     env.Append(LINKFLAGS=['-pg'])
 
-if ARGUMENTS.get('ndebug', 1) != '0':
+if ARGUMENTS.get('debug', 0):
+    env.Append(CCFLAGS=['-O0'])
+else:
     env.Append(CCFLAGS=['-DNDEBUG'])
     env.Append(CCFLAGS=['-O2'])
-else:
-    env.Append(CCFLAGS=['-O0'])
-
-# scons debug=1
-if ARGUMENTS.get('debug', 0):
-    env.Append(CCFLAGS=['-g'])
 
 re2files = [
     Glob('vendor/re2/re2/*.cc'),
