@@ -61,7 +61,6 @@ else:
             '-fstack-protector',
             '-g',
             '-fPIC',
-            '-Weffc++',
             # '-DPERLISH_CLOSURE'
             # '-march=native', 
         ],
