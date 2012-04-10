@@ -20,7 +20,7 @@ env = Environment(
 shlib = env.SharedLibrary("lib/JSON" + conf['TORA_EXTSUFFIX'], ['json.cc'], LIBPATH=['../..'])
 Default(shlib)
 
-env.Command('test', shlib, conf['TORA_PROVE'] + ' --exec ../../bin/tora -I lib -I ../../lib/ t/*.tra')
+env.Command('test', shlib, conf['TORA_PROVE'] + ' --exec "../../bin/tora -I lib -I ../../lib/" t/*.tra')
 
 PREFIX=conf['PREFIX']
 
