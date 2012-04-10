@@ -174,10 +174,10 @@ libfiles = [
 
 programs = ['bin/tora' + exe_suffix]
 for src in glob("tests/test_*.cc"):
-    programs.append(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
+    programs.append(env.NoClean(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
         libfiles,
         src,
-    ]))
+    ])))
 
 sep = os.name == 'nt' and ';' or ':'
 prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + sep + os.path.abspath('util/Test-Simple-0.98/lib/')  + '$PERL5LIB '
@@ -226,6 +226,7 @@ TORA_CC       = env.get('CC')
 TORA_CXX      = env.get('CXX')
 TORA_CCFLAGS  = ' '.join(env.get('CCFLAGS')).replace("\\", "/")
 TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS')).replace("\\", "/")
+TORA_OS       = env.get('HOST_OS')
 # config.h
 with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
@@ -262,6 +263,7 @@ with open('lib/Config.tra', 'w') as f:
     f.write("  SHLIBSUFFIX      => '" + env.get("SHLIBSUFFIX") + "',\n")
     f.write("  TORA_PREFIX      => '" + TORA_PREFIX      + "',\n")
     f.write("  TORA_CC          => '" + TORA_CC          + "',\n")
+    f.write("  TORA_OS          => '" + TORA_OS          + "',\n")
     f.write("  TORA_CXX         => '" + TORA_CXX         + "',\n")
     f.write("  TORA_CCFLAGS     => '" + TORA_CCFLAGS     + "',\n")
     f.write("  TORA_CXXFLAGS    => '" + TORA_CXXFLAGS    + "',\n")

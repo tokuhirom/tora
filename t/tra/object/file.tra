@@ -1,16 +1,23 @@
 use Test::More *;
+use Config *;
+
+my $conf = tora_config();
+my $is_win = $conf['TORA_OS'] == 'win32';
 
 note('getc'); {
     my $f = open('t/dat/file/f1');
     is($f.getc(), 'H');
 };
 
+if !$is_win {
 note("sync"); {
     my $f = open("t/dat/file/f1");
     $f.sync();
     ok($f);
 };
+}
 
+if !$is_win {
 note("seek/tell"); {
     my $f = open("t/dat/file/f1");
     is($f.tell(), 0);
@@ -27,5 +34,6 @@ note("seek/tell"); {
     is($f.tell(), 10);
     is($f.getc(), "n");
 };
+}
 
 done_testing();
