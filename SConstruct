@@ -183,18 +183,19 @@ for src in glob("tests/test_*.cc"):
         src,
     ]))
 
+prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + ':$PERL5LIB '
+prove_path = 'perl -I ' + os.path.abspath('util/Test-Harness-3.23/lib/') + ' ' + os.path.abspath('util/Test-Harness-3.23/bin/prove')
+try:
+    os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
+    prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
+except: pass
+try:
+    os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove')
+    prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
+except: pass
+prove_command = prove_prefix + ' ' + prove_path
 if 'test' in COMMAND_LINE_TARGETS:
-    prefix = 'PERL5LIB=util/:$PERL5LIB '
-    prove_path = 'perl -I util/Test-Harness-3.23/lib/ ./util/Test-Harness-3.23/bin/prove'
-    try:
-        os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
-        prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove'
-    except: pass
-    try:
-        os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove')
-        prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
-    except: pass
-    env.Command('test', programs, prefix + " " + prove_path + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
+    env.Command('test', programs, prove_command + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
 
 env.Command('test.valgrind', ['bin/tora' + exe_suffix], 'perl misc/valgrind.pl');
 
@@ -253,6 +254,7 @@ with open('config.json', 'w') as f:
         'TORA_LIBPREFIX':      env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/",
         'TORA_EXESUFFIX':      exe_suffix,
         'TORA_EXTSUFFIX':      ext_suffix,
+        'TORA_PROVE':          prove_command,
     }))
 
 with open('lib/Config.tra', 'w') as f:
