@@ -183,7 +183,8 @@ for src in glob("tests/test_*.cc"):
         src,
     ]))
 
-prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + ':' + os.path.abspath('util/Test-Simple-0.98/lib/')  + '$PERL5LIB '
+sep = os.name == 'nt' and ';' or ':'
+prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + sep + os.path.abspath('util/Test-Simple-0.98/lib/')  + '$PERL5LIB '
 prove_path = 'perl -I ' + os.path.abspath('util/Test-Harness-3.23/lib/') + ' ' + os.path.abspath('util/Test-Harness-3.23/bin/prove')
 try:
     os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
@@ -193,7 +194,11 @@ try:
     os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove')
     prove_path = '/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.2/bin/prove'
 except: pass
-prove_command = prove_prefix + ' ' + prove_path
+if os.name == 'nt':
+    prove_prefix = prove_prefix.replace('\\', '/')
+    prove_command = "cmd /c set %s ^&^& %s" % (prove_prefix, prove_path)
+else:
+    prove_command = prove_prefix + ' ' + prove_path
 if 'test' in COMMAND_LINE_TARGETS:
     env.Command('test', programs, prove_command + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
 
