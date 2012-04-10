@@ -314,10 +314,15 @@ test_exts()
 # ----------------------------------------------------------------------
 # instalation
 installs = []
-installs += [env.Install(env['PREFIX']+'/bin/', tora)];
+installs += [env.Install(env['PREFIX']+'/bin/', source=[tora])];
 installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
 exts = []
 for ext in os.listdir('ext'):
     exts += [env.Command(['ext/%s/_installed' % ext], Glob('ext/' + ext + "/*"), "cd ext/" + ext + " && scons install")]
-env.Alias('install', [exts, env['PREFIX']+'/bin/', installs])
+env.Alias('install', [
+    Execute(Mkdir(env['PREFIX'] + '/lib/tora-'+TORA_VERSION_STR)),
+    exts,
+    env['PREFIX']+'/bin/',
+    installs
+])
 
