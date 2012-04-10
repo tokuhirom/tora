@@ -10,7 +10,7 @@
 #ifdef _WIN32
 #include <winerror.h>
 int flock(int fd, int ope) {
-    throw new ErrnoExceptionValue(ERROR_CALL_NOT_IMPLEMENTED);
+    throw new tora::ErrnoExceptionValue(ERROR_CALL_NOT_IMPLEMENTED);
     return -1;
 }
 #define   LOCK_SH   1

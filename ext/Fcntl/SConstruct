@@ -1,5 +1,6 @@
 import os
 import json
+from shlex import shlex
 from glob import glob
 
 conf = json.loads(open('../../config.json').read())
@@ -20,7 +21,8 @@ env = Environment(
 shlib = env.SharedLibrary("lib/Fcntl" + env['SHLIBSUFFIX'], ['fcntl.cc'], LIBPATH=['../..'])
 Default(shlib)
 
-env.Command('test', shlib, conf['TORA_PROVE'] + " --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+q = os.name == 'nt' and '"' or "'"
+env.Command('test', shlib, conf['TORA_PROVE'] + " --exec " + q + "../../bin/tora -I lib -I ../../lib/" + q + " t/*.tra")
 
 PREFIX=conf['PREFIX']
 
