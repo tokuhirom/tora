@@ -75,6 +75,8 @@ Digest::SHA1
 
 Text::Mecab
 
+Proc::Wait3
+
 syntax
 ------
 
