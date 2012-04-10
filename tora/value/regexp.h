@@ -26,6 +26,7 @@ public:
     virtual const std::string& error() const = 0;
     virtual const std::string& pattern() const = 0;
     virtual SharedPtr<Value> match(VM *vm, const std::string &str) = 0;
+    virtual bool match_bool(VM *vm, const std::string &str) = 0;
     virtual SharedPtr<Value> scan(VM *vm, const std::string &str) = 0;
     virtual SharedPtr<Value> split(VM *vm, const std::string &str, int limit) = 0;
     virtual std::string replace(const std::string &str, const std::string &rewrite, int &replacements) const = 0;
@@ -52,6 +53,7 @@ public:
         return VAL()->error();
     }
     SharedPtr<Value> match(VM *vm, const std::string &str);
+    bool match_bool(VM *vm, const std::string &str);
     SharedPtr<Value> scan(VM *vm, const std::string &str);
     SharedPtr<Value> split(VM *vm, const std::string &str, int limit);
     static std::string quotemeta(const std::string &str) {

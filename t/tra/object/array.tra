@@ -26,4 +26,11 @@ note("out-of-range"); {
     is($a[100], undef);
 };
 
+# grep
+note("grep"); {
+    my $a = [1,2,3,4,5];
+    is($a.grep(-> { $_ % 2 == 0 }).tora(), [2,4].tora());
+    is(["hoge", "fuga", "hage"].grep(/^h/).tora(), ["hoge", "hage"].tora());
+}
+
 done_testing();

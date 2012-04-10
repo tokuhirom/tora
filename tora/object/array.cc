@@ -3,6 +3,7 @@
 #include "../value/array.h"
 #include "../value/code.h"
 #include "../value/class.h"
+#include "../value/regexp.h"
 #include "../peek.h"
 #include "../frame.h"
 #include "../symbols.gen.h"
@@ -144,6 +145,43 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
 }
 
 /**
+ * $array.grep(Code $code) : Array
+ *
+ * Filter $array by $code.
+ */
+static SharedPtr<Value> av_grep(VM * vm, Value* self, Value *stuff_v) {
+    assert(self->value_type == VALUE_TYPE_ARRAY);
+    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
+    SharedPtr<ArrayValue> ret = new ArrayValue();
+    if (stuff_v->value_type == VALUE_TYPE_CODE) {
+        SharedPtr<CodeValue> code = stuff_v->upcast<CodeValue>();
+        for (auto iter=src->begin(); iter!=src->end(); ++iter) {
+            vm->stack.push_back(*iter);
+
+            vm->function_call_ex(1, code, UndefValue::instance());
+
+            if (vm->stack.back()->to_bool()) {
+                ret->push_back(*iter);
+            }
+            vm->stack.pop_back();
+        }
+        return ret;
+    } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
+        SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
+        for (auto iter=src->begin(); iter!=src->end(); ++iter) {
+            SharedPtr<StrValue> str = (*iter)->to_s();
+
+            if (re->match_bool(vm, str->str_value())) {
+                ret->push_back(*iter);
+            }
+        }
+        return ret;
+    } else {
+        throw new ExceptionValue("Second argument for Array#grep should be Code or Regexp");
+    }
+}
+
+/**
  * $array.capacity() : Int
  *
  * returns the number of elements that can be held in currently allocated storage
@@ -177,6 +215,7 @@ void tora::Init_Array(VM* vm) {
     klass->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
     klass->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
     klass->add_method(vm->symbol_table->get_id("map"), new CallbackFunction(av_map));
+    klass->add_method(vm->symbol_table->get_id("grep"), new CallbackFunction(av_grep));
     // klass->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
     // klass->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
     vm->add_builtin_class(klass);

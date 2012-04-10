@@ -92,8 +92,8 @@ else:
 
 env.Append(TORA_LIBPREFIX=env.get('PREFIX') + "/lib/tora-" + TORA_VERSION_STR + "/")
 
-exe_suffix = os.name == 'nt' and '.exe' or ''
-ext_suffix = os.name == 'nt' and '.dll' or '.so'
+exe_suffix = env.get('PROGSUFFIX')
+ext_suffix = env.get('SHLIBSUFFIX')
 lemon = os.name == 'nt' and '.\\tools\\lemon\\lemon.exe' or './tools/lemon/lemon'
 
 if os.name == 'nt':
