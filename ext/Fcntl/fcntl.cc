@@ -7,8 +7,6 @@
 #include <value/exception.h>
 #include <value/class.h>
 
-using namespace tora;
-
 #ifdef _WIN32
 #include <winerror.h>
 int flock(int fd, int ope) {
@@ -20,6 +18,8 @@ int flock(int fd, int ope) {
 #define   LOCK_NB   4
 #define   LOCK_UN   8
 #endif
+
+using namespace tora;
 
 static SharedPtr<Value> Fcntl_flock(VM *vm, Value *fileno_v, Value *operation_v) {
     if (fileno_v->value_type != VALUE_TYPE_INT) {

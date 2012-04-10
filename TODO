@@ -49,6 +49,8 @@ String#replace(regexp|str, code)
 my $a=[];
 $a[100]; # => undef
 
+Time.strftime() does not work correctly with %a.
+
 generate document
 
 Standard Libraries
