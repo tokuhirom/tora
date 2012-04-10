@@ -307,7 +307,7 @@ def test_exts():
     src = Split('Fcntl JSON Digest-MD5 Socket Path URI-Escape  UV Curl')
     src += Split('HTTP IRC') # depends on Socket
     for ext in src:
-        exts += [env.Command(['ext/%s/_tested' % ext], [tora]+Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
+        exts += [env.Command(['ext/%s/_tested' % ext], [tora]+exts+Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
     env.Command('test.ext', exts, 'echo ok')
 test_exts()
 
