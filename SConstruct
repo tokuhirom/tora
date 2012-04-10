@@ -309,7 +309,10 @@ lemon_env.Program(lemon, ['tools/lemon/lemon.c']);
 
 def test_exts():
     exts = []
-    src = Split('Fcntl JSON Digest-MD5 Socket Path URI-Escape  UV Curl')
+    src = []
+    if os.name == 'posix':
+        src += ['Fcntl']
+    src += Split('JSON Digest-MD5 Socket Path URI-Escape  UV Curl')
     src += Split('HTTP IRC') # depends on Socket
     for ext in src:
         exts += [env.Command(['ext/%s/_tested' % ext], [tora]+exts+Glob('ext/' + ext + '/*'), 'cd ext/%s/ && scons test' % ext)]
