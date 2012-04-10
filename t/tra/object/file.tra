@@ -2,7 +2,7 @@ use Test::More *;
 use Config *;
 
 my $conf = tora_config();
-my $is_win = $conf['TORA_OS'] == 'win32';
+my $is_win = $conf['TORA_OS'] == 'MSWin32';
 
 note('getc'); {
     my $f = open('t/dat/file/f1');

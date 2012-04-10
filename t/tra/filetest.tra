@@ -18,7 +18,7 @@ is(-s "t/dat/filetest/foo", 8);
 
 my $bin = './bin/tora';
 my $conf = tora_config();
-if $conf['TORA_OS'] == 'win32' {
+if $conf['TORA_OS'] == 'MSWin32' {
     $bin += '.exe';
 }
 is(-x $bin, true);
