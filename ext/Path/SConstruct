@@ -17,12 +17,22 @@ env = Environment(
     tools=conf['TOOLS'],
 )
 
+if os.name == 'nt':
+    extra = [
+        '../../vendor/boost_1_49_0/libs/filesystem/v3/src/path_traits.cpp',
+        '../../vendor/boost_1_49_0/libs/filesystem/v3/src/windows_file_codecvt.cpp',
+        '../../vendor/boost_1_49_0/libs/filesystem/v3/src/codecvt_error_category.cpp',
+    ]
+else:
+    extra = []
+
+
 shlib = env.SharedLibrary("lib/File/Path" + env['SHLIBSUFFIX'], [
     'path.cc',
     '../../vendor/boost_1_49_0/libs/system/src/error_code.cpp',
     '../../vendor/boost_1_49_0/libs/filesystem/v3/src/operations.cpp',
     '../../vendor/boost_1_49_0/libs/filesystem/v3/src/path.cpp',
-], LIBPATH=['../..'])
+] + extra, LIBPATH=['../..'])
 Default(shlib)
 
 env.Command('test', shlib, conf['TORA_PROVE'] + " --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
