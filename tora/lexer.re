@@ -42,11 +42,7 @@ bool Scanner::fill(int n) {
     // fill to buffer
     int read_size = m_buffer_size - restSize;
     ifs->read( m_limit, read_size );
-    int count = ifs->gcount();
-    if (count == 0) {
-        return false;
-    }
-    m_limit += count;
+    m_limit += ifs->gcount();
 
     return true;
 }
