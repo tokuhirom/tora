@@ -34,6 +34,15 @@ ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
 }
 
 /**
+ * Dir.new(Str $dirname) : Dir
+ *
+ * Create a new Dir class instance from $dirname.
+ */
+static SharedPtr<Value> dir_new(VM * vm, Value* self, Value* dirname_v) {
+    return tora::Dir_new(vm, dirname_v->to_s().get());
+}
+
+/**
  * $dir.read() : Maybe[String]
  *
  * Read a entitity from $dir.
@@ -166,6 +175,7 @@ static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
 void tora::Init_Dir(VM *vm) {
     {
         SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DIR_CLASS);
+        klass->add_method("new",      new CallbackFunction(dir_new));
         klass->add_method("read",     new CallbackFunction(dir_read));
         klass->add_method("close",    new CallbackFunction(dir_close));
         klass->add_method("mkdir",    new CallbackFunction(dir_mkdir));

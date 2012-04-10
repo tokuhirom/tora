@@ -12,6 +12,8 @@ ok(!-d 't/tmp/foo');
 
 Dir.mkdir("t/tmp/foo");
 
+ok(typeof(Dir.new('t/tmp/')), 'Dir');
+
 ok(-d 't/tmp/foo');
 
 my ($err) = try {
