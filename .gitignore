@@ -35,3 +35,4 @@ config.json
 *.o
 *.exe
 tags
+*.dylib
