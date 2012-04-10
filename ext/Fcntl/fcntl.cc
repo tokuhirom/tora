@@ -9,6 +9,18 @@
 
 using namespace tora;
 
+#ifdef _WIN32
+#include <winerror.h>
+int flock(int fd, int ope) {
+    throw new ErrnoExceptionValue(ERROR_CALL_NOT_IMPLEMENTED);
+    return -1;
+}
+#define   LOCK_SH   1
+#define   LOCK_EX   2
+#define   LOCK_NB   4
+#define   LOCK_UN   8
+#endif
+
 static SharedPtr<Value> Fcntl_flock(VM *vm, Value *fileno_v, Value *operation_v) {
     if (fileno_v->value_type != VALUE_TYPE_INT) {
         throw new ExceptionValue("You passed non-integer value for Fcntl.flock() argument 1 : %s", fileno_v->type_str());
