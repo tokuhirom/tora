@@ -31,7 +31,9 @@ sub import {
             (my $name = $code) =~ s/\n/ /g;
             waitpid($pid, 0);
             $ret =~ s!\r!!g; # TODO(mattn): remove workaround.
-            ::is($?, $exit_status, "exit status is $exit_status");
+            $err_ret =~ s!\r!!g; # TODO(mattn): remove workaround.
+			my $status = ($? >> 8);
+            ::is($status, $exit_status, "exit status is $exit_status");
             ::is($ret, $out_expected, $name);
             $err_expected = '' unless defined $err_expected;
             ::is($err_ret, $err_expected, "STDERR: $name");
