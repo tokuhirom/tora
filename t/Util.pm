@@ -20,9 +20,8 @@ sub import {
         my ($in, $out, $err);
         $err = gensym;
         if ($^O eq 'MSWin32') {
-            local $/;
             my $in = tmpnam();
-            open my $f, '>', $in;
+            open my $f, '>:raw', $in;
             print $f $code;
             close $f;
             my $pid = open3(undef, $out, $err, "type $in | .\\bin\\tora");
