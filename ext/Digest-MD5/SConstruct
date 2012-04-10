@@ -20,7 +20,7 @@ env = Environment(
 shlib = env.SharedLibrary("lib/Digest/MD5" + conf['TORA_EXTSUFFIX'], ['Digest-MD5.cc', 'md5.c'], SHLIBPREFIX='', LIBPATH=['../..'])
 Default(shlib)
 
-env.Command('test', shlib, '../../bin/tora -I lib -I ../../lib/ t/test.tra')
+env.Command('test', [shlib], conf['TORA_PROVE'] + ' -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
 
 installs = []
 for x in os.listdir('lib/'):
