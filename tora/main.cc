@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
     tora::Parser parser(filename);
     do {
         token_number = scanner->scan(&yylval);
-        // printf("TOKEn: %s(%d)\n", token_id2name[token_number], token_number);
+        // printf("TOKEN: %s(%d)\n", token_id2name[token_number], token_number);
         parser.set_lineno(scanner->lineno());
         parser.parse(token_number, yylval);
     } while (token_number != 0);
