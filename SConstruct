@@ -232,10 +232,10 @@ if os.name == 'nt':
     TORA_OS       = 'MSWin32'
 elif os.uname()[0] == 'Darwin':
     TORA_OS       = 'darwin'
-elif os.uname()[0] == 'linux':
+elif os.uname()[0] == 'Linux':
     TORA_OS       = 'linux'
 else:
-    exit("Oops. unknown operating system.")
+    exit("Oops. unknown operating system: %s,%s." % (os.name, os.uname()[0]))
 
 # config.h
 with open('tora/config.h', 'w') as f:
