@@ -226,7 +226,15 @@ TORA_CC       = env.get('CC')
 TORA_CXX      = env.get('CXX')
 TORA_CCFLAGS  = ' '.join(env.get('CCFLAGS')).replace("\\", "/")
 TORA_CXXFLAGS = ' '.join(env.get('CXXFLAGS')).replace("\\", "/")
-TORA_OS       = env.get('HOST_OS')
+if os.name == 'nt':
+    TORA_OS       = 'Win32'
+elif os.uname()[0] == 'Darwin':
+    TORA_OS       = 'darwin'
+elif os.uname()[0] == 'linux':
+    TORA_OS       = 'linux'
+else:
+    exit("Oops. unknown operating system.")
+
 # config.h
 with open('tora/config.h', 'w') as f:
     f.write("#pragma once\n")
