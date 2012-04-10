@@ -32,10 +32,10 @@ void Compiler::dump_localvars() {
     printf("-- dump_localvars --\n");
     printf("Levels: %ld\n", (long int) this->blocks->size());
     for (size_t level = 0; level < this->blocks->size(); ++level) {
-        SharedPtr<Block> block = this->blocks->at(level);
-        printf("[%ld] %d\n", (long int) level, block->type);
-        for (size_t i=0; i<block->vars.size(); i++) {
-            printf("    %s\n", block->vars.at(i)->c_str());
+        Block & block = this->blocks->at(level);
+        printf("[%ld] %d\n", (long int) level, block.type);
+        for (size_t i=0; i<block.vars.size(); i++) {
+            printf("    %s\n", block.vars.at(i).c_str());
         }
     }
     printf("--------------------\n");
@@ -80,7 +80,7 @@ inline static SharedPtr<Node> STRING_IF_BAREWORD(SharedPtr<Node>& node) {
 
 Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_, const std::string &filename) : filename_(filename), in_class_context(false) {
     error = 0;
-    blocks = new std::vector<SharedPtr<Block>>();
+    blocks = new std::vector<Block>();
     global_vars = new std::vector<std::string>();
     ops = new OPArray();
     in_try_block = false;
@@ -135,17 +135,17 @@ int tora::Compiler::find_localvar(std::string name, int &level, bool &need_closu
     need_closure = false;
     int seen_funcdef = -1;
     for (level = 0; level<this->blocks->size(); ++level) {
-        SharedPtr<Block> block = this->blocks->at(this->blocks->size()-1-level);
-        if (block->type == BLOCK_TYPE_FUNCDEF && seen_funcdef == -1) {
+        Block & block = this->blocks->at(this->blocks->size()-1-level);
+        if (block.type == BLOCK_TYPE_FUNCDEF && seen_funcdef == -1) {
             seen_funcdef = level;
         }
-        for (size_t i=0; i<block->vars.size(); i++) {
-            if (*(block->vars.at(i)) == name) {
+        for (size_t i=0; i<block.vars.size(); i++) {
+            if (block.vars.at(i) == name) {
                 if (seen_funcdef != -1 && seen_funcdef < level) {
                     funcdef_level = seen_funcdef;
                     need_closure = true;
                 }
-                if (block->type == BLOCK_TYPE_FUNCDEF) {
+                if (block.type == BLOCK_TYPE_FUNCDEF) {
                     is_arg = true;
                 } else {
                     is_arg = false;
@@ -354,7 +354,7 @@ public:
     ~OptimizableEnterScope() {
         if (enter) {
             compiler_->push_op(new OP(OP_LEAVE));
-            enter->operand.int_value = compiler_->blocks->back()->vars.size();
+            enter->operand.int_value = compiler_->blocks->back().vars.size();
             compiler_->pop_block();
         }
     }
@@ -427,7 +427,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         push_op(new OP(OP_END));
 
-        enter->operand.int_value = this->blocks->back()->vars.size();
+        enter->operand.int_value = this->blocks->back().vars.size();
         this->pop_block();
 
         push_op(new OP(OP_PACKAGE_LEAVE));
@@ -536,7 +536,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             funccomp.blocks = NULL;
         }
         funccomp.package(this->package());
-        funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
+        funccomp.blocks = new std::vector<Block>(*(this->blocks));
         if (funcdef_node->block()) {
             funccomp.compile(funcdef_node->block());
         }
@@ -640,7 +640,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             funccomp.blocks = NULL;
         }
         funccomp.package(package);
-        funccomp.blocks = new std::vector<SharedPtr<Block>>(*(this->blocks));
+        funccomp.blocks = new std::vector<Block>(*(this->blocks));
 
         boost::shared_ptr<std::vector<int>> defaults(new std::vector<int>());
         if (funcdef_node->have_params()) {
@@ -951,7 +951,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             this->compile(node->upcast<BinaryNode>()->right()); //body
 
         push_op(new OP(OP_LEAVE));
-        enter->operand.int_value = this->blocks->back()->vars.size();
+        enter->operand.int_value = this->blocks->back().vars.size();
         this->pop_block();
 
         push_op(new OP(OP_JUMP, label1));
@@ -1211,7 +1211,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         jump_label2->operand.int_value = label2;
 
         push_op(new OP(OP_LEAVE));
-        enter->operand.int_value = this->blocks->back()->vars.size();
+        enter->operand.int_value = this->blocks->back().vars.size();
         this->pop_block();
 
         BOOST_FOREACH(auto n, last_labels) {
@@ -1283,7 +1283,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         size_t label2 = ops->size();
         jump_label2->operand.int_value = label2;
 
-        enter_foreach->operand.int_value = this->blocks->back()->vars.size();
+        enter_foreach->operand.int_value = this->blocks->back().vars.size();
         this->pop_block();
 
         push_op(new OP(OP_LEAVE));
@@ -1407,7 +1407,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         push_op(op);
         push_op(new OP(OP_RETURN));
 
-        enter_op->operand.int_value = this->blocks->back()->vars.size();
+        enter_op->operand.int_value = this->blocks->back().vars.size();
 
         this->pop_block();
 

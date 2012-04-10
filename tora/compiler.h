@@ -27,16 +27,11 @@ enum block_type_t {
 };
 
 class Block {
-    PRIM_DECL()
 public:
     block_type_t type;
-    std::vector<std::string*> vars;
-    Block(block_type_t t) : refcnt(0), type(t) { }
-    ~Block() {
-        for (size_t i=0; i<vars.size(); i++) {
-            delete vars.at(i);
-        }
-    }
+    std::vector<std::string> vars;
+    Block(block_type_t t) : type(t) { }
+    ~Block() { }
 };
 
 class Compiler {
@@ -44,7 +39,7 @@ class Compiler {
     std::string filename_;
 public:
     SharedPtr<OPArray> ops;
-    std::vector<SharedPtr<Block>> *blocks;
+    std::vector<Block> *blocks;
     std::vector<std::string> *global_vars;
     boost::shared_ptr<std::vector<std::string>> closure_vars;
     SharedPtr<SymbolTable> symbol_table;
@@ -87,7 +82,7 @@ public:
     void init_globals();
     void compile(const SharedPtr<Node> & node);
     void push_block(block_type_t t) {
-        this->blocks->push_back(new Block(t));
+        this->blocks->push_back(Block(t));
     }
     void pop_block() {
         this->blocks->pop_back();
@@ -98,15 +93,15 @@ public:
     void define_localvar(const char* name) {
         this->define_localvar(std::string(name));
     }
-    void define_localvar(std::string name) {
-        SharedPtr<Block> block = this->blocks->back();
-        for (size_t i=0; i<block->vars.size(); i++) {
-            if (*(block->vars.at(i)) == name) {
-                fprintf(stderr, "Duplicated variable: %s\n", name.c_str());
+    void define_localvar(const std::string name) {
+        Block & block = this->blocks->back();
+        for (size_t i=0; i<block.vars.size(); i++) {
+            if (block.vars.at(i) == name) {
+                this->fail("Duplicated variable: %s\n", name.c_str());
                 return;
             }
         }
-        block->vars.push_back(new std::string(name));
+        block.vars.push_back(name);
     }
     void dump_localvars();
     void fail(const char *format, ...);
