@@ -204,7 +204,7 @@ if 'bench' in COMMAND_LINE_TARGETS:
 if 'op' in COMMAND_LINE_TARGETS:
     env.Command('op', [], 'git log --oneline | head -1 && scons && ./bin/tora -V ; sudo opcontrol --reset; sudo opcontrol --start && time ./bin/tora benchmark/fib/fib.tra 39 ; sudo opcontrol --stop')
 
-env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("docs/source/*")], './bin/tora util/docgen.tra && cd docs/ && make html')
+env.Command('docs', ['bin/tora' + exe_suffix, Glob("tora/object/*.cc"), Glob("docs/source/*")], './bin/tora -I vendor/Path/lib/ util/docgen.tra && cd docs/ && make html')
 
 ########
 # main programs
