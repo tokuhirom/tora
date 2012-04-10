@@ -25,7 +25,7 @@ shlib = env.SharedLibrary("lib/File/Path" + env['SHLIBSUFFIX'], [
 ], LIBPATH=['../..'])
 Default(shlib)
 
-env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+env.Command('test', shlib, conf['TORA_PROVE'] + " --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
 
 PREFIX=conf['PREFIX']
 

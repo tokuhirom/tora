@@ -41,7 +41,7 @@ env.Append(LIBPATH=['../../vendor/libuv/', '../../'])
 shlib = env.SharedLibrary("lib/UV_" + conf['TORA_EXTSUFFIX'], ['uv.cc', libuv])
 Default(shlib)
 
-env.Command('test', [shlib], 'prove -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
+env.Command('test', [shlib], conf['TORA_PROVE'] + ' -v --exec "../../bin/tora -I ../Socket/lib/ -I lib -I ../../lib/" t/*.tra')
 
 installs = []
 for x in os.listdir('lib/'):

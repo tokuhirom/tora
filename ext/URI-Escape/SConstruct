@@ -20,7 +20,7 @@ env = Environment(
 shlib = env.SharedLibrary("lib/URI/Escape" + conf['TORA_EXTSUFFIX'], ['URI-Escape.cc'], SHLIBPREFIX='', LIBPATH=['../..'])
 Default(shlib)
 
-env.Command('test', shlib, "prove --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
+env.Command('test', shlib, conf['TORA_PROVE'] + " --exec '../../bin/tora -I lib -I ../../lib/' t/*.tra")
 
 installs = []
 for x in os.listdir('lib/'):
