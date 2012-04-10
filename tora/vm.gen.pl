@@ -14,8 +14,7 @@ write_file('tora/vm.ops.inc.h', vm_ops_inc_h($dat));
 sub write_file {
     my ($fname, $body) = @_;
     unlink $fname if -f $fname;
-    open my $fh, '>', $fname;
-    binmode $fh;
+    open my $fh, '>:raw', $fname;
     print $fh $body;
     close $fh;
     chmod 0444, $fname if $^O ne 'MSWin32'; # win32 sucks.

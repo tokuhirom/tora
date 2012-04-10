@@ -7,7 +7,7 @@ use autodie;
 
 open my $fh, '<', 'tora/parser.h';
 
-open my $hhh, '>', 'tora/token.gen.h';
+open my $hhh, '>:raw', 'tora/token.gen.h';
 print $hhh <<'...';
 #ifndef TORA_TOKENGEN_H_
 #define TORA_TOKENGEN_H_
@@ -21,7 +21,7 @@ extern const char *token_id2name[];
 #endif
 ...
 
-open my $ofh, '>', 'tora/token.gen.cc';
+open my $ofh, '>:raw', 'tora/token.gen.cc';
 binmode $ofh;
 print $ofh qq!#include "token.gen.h"\n!;
 print $ofh qq!const char *tora::token_id2name[] = {"EOF",\n!;

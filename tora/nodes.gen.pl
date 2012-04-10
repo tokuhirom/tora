@@ -109,7 +109,7 @@ my @nodes = qw(
     NODE_OROR_ASSIGN
 );
 
-open my $cc, '>', 'tora/nodes.gen.cc';
+open my $cc, '>:raw', 'tora/nodes.gen.cc';
 binmode $cc;
 
 printf (<<'...', join(", ", @nodes));

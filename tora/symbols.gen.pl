@@ -46,7 +46,7 @@ my $dat = [
     [ 'SYMBOL___SET_ITEM__' => '__setitem__' ],
 ];
 
-open my $hfh, '>', 'tora/symbols.gen.h';
+open my $hfh, '>:raw', 'tora/symbols.gen.h';
 binmode $hfh;
 print $hfh render_mt(<<'...', $dat);
 #ifndef TORA_SYMBOLS_GEN_H_
@@ -66,7 +66,7 @@ const int <?= $_->[0] ?> = <?= $id++ ?>;
 close $hfh;
 
 
-open my $cfh, '>', 'tora/symbols.gen.cc';
+open my $cfh, '>:raw', 'tora/symbols.gen.cc';
 binmode $cfh;
 print $cfh render_mt(<<'...', $dat);
 #include "symbol_table.h"
