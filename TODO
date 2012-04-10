@@ -79,6 +79,8 @@ Text::Mecab
 
 Proc::Wait3
 
+Geo::GeoHash
+
 syntax
 ------
 
