@@ -14,7 +14,7 @@ struct tm * localtime_r (const time_t *timer, struct tm *res) {
    struct tm *lt;
    lt = localtime(timer);
    if (lt == NULL || res == NULL) return NULL;
-   memcpy(res, lt, sizeof(res));
+   memcpy(res, lt, sizeof(*res));
    return res;
 }
 #endif
