@@ -7,7 +7,9 @@ conf = json.loads(open('../../config.json').read())
 if os.name == 'nt':
     libs = conf['LIBS'] + ['uv', 'psapi', 'iphlpapi', 'pthread']
 else:
-    libs = conf['LIBS'] + ['m', 'rt', 'pthread']
+    libs = conf['LIBS'] + ['m', 'pthread']
+    if os.uname()[0] != 'Darwin':
+        libs += ['rt']
 
 env = Environment(
     ENV={'PATH': conf['PATH']},

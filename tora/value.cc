@@ -9,6 +9,7 @@
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>
+#include <errno.h>
 
 using namespace tora;
 

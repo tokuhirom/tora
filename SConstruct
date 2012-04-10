@@ -60,7 +60,8 @@ else:
             '-Wno-sign-compare',
             '-fstack-protector',
             '-g',
-            '-fPIC'
+            '-fPIC',
+            '-Weffc++',
             # '-DPERLISH_CLOSURE'
             # '-march=native', 
         ],
@@ -235,8 +236,7 @@ with open('tora/config.h', 'w') as f:
 
 with open('config.json', 'w') as f:
     libs = env.get('LIBS')
-    if os.name == 'nt':
-        libs += ['tora']
+    libs += ['tora']
     f.write(json.dumps({
         'PATH':        os.environ['PATH'],
         'CC':          TORA_CC,
@@ -270,12 +270,11 @@ with open('lib/Config.tra', 'w') as f:
     f.write("}\n")
 
 def build_tora():
+    libtora = env.Library('tora', [
+        libfiles,
+        libre2,
+    ])
     if os.name == 'nt':
-        libtora = env.Library('tora', [
-            libfiles,
-            libre2,
-        ])
-
         tora = env.Program('bin/tora' + exe_suffix, [
             ['tora/main.cc'],
             libtora,
@@ -286,7 +285,7 @@ def build_tora():
     else:
         tora = env.Program('bin/tora' + exe_suffix, [
             ['tora/main.cc'],
-            libfiles,
+            libtora,
             libre2
         ])
         Default(tora)
