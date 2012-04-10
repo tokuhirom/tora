@@ -11,12 +11,17 @@ authors tested following parts.
 Build Dependencies
 ------------------
 
- * boost 1.15.0+(header only)
-   * for supporting C++11 features
- * gcc 4.4.3 or later
+ * gcc 4.4.3+ or clang++ 3.0+
  * SConstruct
  * Perl5
- * Python 2.6 or later(for JSON library)
+ * Python 2.6 or later(to generate config.json)
+   * patches welcome to generate config.json by hand
+
+Build on OSX
+------------
+
+    brew install re2c icu4c
+    brew link icu4c
 
 Build Dependendies from git clone
 ---------------------------------
