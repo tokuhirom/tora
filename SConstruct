@@ -236,7 +236,7 @@ with open('tora/config.h', 'w') as f:
 
 with open('config.json', 'w') as f:
     libs = env.get('LIBS')
-    libs += ['tora']
+    libs = ['tora'] + libs
     f.write(json.dumps({
         'PATH':        os.environ['PATH'],
         'CC':          TORA_CC,
