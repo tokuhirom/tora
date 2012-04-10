@@ -183,7 +183,7 @@ for src in glob("tests/test_*.cc"):
         src,
     ]))
 
-prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + ':$PERL5LIB '
+prove_prefix = 'PERL5LIB=' + os.path.abspath('util/') + ':' + os.path.abspath('util/Test-Simple-0.98/lib/')  + '$PERL5LIB '
 prove_path = 'perl -I ' + os.path.abspath('util/Test-Harness-3.23/lib/') + ' ' + os.path.abspath('util/Test-Harness-3.23/bin/prove')
 try:
     os.stat('/Users/tokuhirom/perl5/perlbrew/perls/perl-5.15.3/bin/prove') # throws exception if not exists
