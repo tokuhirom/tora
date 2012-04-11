@@ -1,0 +1,8 @@
+use HTTP::Server::Simple *;
+
+my $server = HTTP::Server::Simple.new('0.0.0.0', 8080);
+$server.run(-> $env {
+    p($env);
+    return [200, ['Content-Type', 'text/plain'], ['OK']];
+});
+

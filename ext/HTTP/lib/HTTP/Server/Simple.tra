@@ -62,7 +62,7 @@ HTP::Server::Simple
 SYNOPSIS
 --------
 
-    use HTTP::Server::Simple;
+    use HTTP::Server::Simple *;
 
     my $httpd = HTTP::Server::Simple.new('127.0.0.1', 8080);
     $httpd.run(-> $env {
