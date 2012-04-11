@@ -3,9 +3,11 @@ use Test::More *;
 sub f() { { ok(true); } }
 sub e() { { 1 => 2 } } 
 sub g() { "YES" } 
+sub h() { return 3; }
 
 f();
 is(typeof(e()), 'Hash');
 is(g(), "YES");
+is(h(), 3);
 
 done_testing();
