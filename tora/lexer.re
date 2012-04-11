@@ -41,6 +41,7 @@ bool Scanner::fill(int n) {
 
     // fill to buffer
     int read_size = m_buffer_size - restSize;
+    *m_limit = 0;
     ifs->read( m_limit, read_size );
     m_limit += ifs->gcount();
 
