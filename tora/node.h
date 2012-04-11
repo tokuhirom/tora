@@ -24,7 +24,6 @@ class FuncallNode;
 class IntNode;
 class DoubleNode;
 class StrNode;
-class ListNode;
 class TryNode;
 
 class Node {
@@ -56,7 +55,7 @@ public:
     virtual void dump(int indent);
     void dump();
 
-    Node* at(int i) {
+    Node* at(int i) const {
         return list->at(i).get();
     }
 
@@ -76,6 +75,9 @@ public:
     reverse_iterator rbegin() { return list->rbegin(); }
     reverse_iterator rend() { return list->rend(); }
     void push_back(Node* n) { list->push_back(n); }
+    void push_back(const SharedPtr<Node>& n) { list->push_back(n); }
+    void pop_back() { list->pop_back(); }
+    const SharedPtr<Node>& back() { return list->back(); }
 };
 
 class StrNode : public Node {
@@ -119,8 +121,8 @@ class FuncallNode: public Node {
 public:
     bool is_bare;
     SharedPtr<Node>name() { return this->list->at(0); }
-    SharedPtr<ListNode> args() { return this->list->at(1)->upcast<ListNode>(); }
-    FuncallNode(SharedPtr<Node> name_, SharedPtr<ListNode> args_, bool bare=false) : Node(NODE_FUNCALL) {
+    SharedPtr<Node> args() { return this->list->at(1)->upcast<Node>(); }
+    FuncallNode(SharedPtr<Node> name_, SharedPtr<Node> args_, bool bare=false) : Node(NODE_FUNCALL) {
         this->list->push_back(name_);
         this->list->push_back(args_);
         is_bare = bare;
@@ -133,26 +135,13 @@ public:
     bool have_params() {
         return this->list->at(1).get() != NULL;
     }
-    SharedPtr<ListNode> params() { return this->list->at(1)->upcast<ListNode>(); }
+    SharedPtr<Node> params() { return this->list->at(1)->upcast<Node>(); }
     SharedPtr<Node>block() { return this->list->at(2); }
-    FuncdefNode(SharedPtr<Node> n, SharedPtr<ListNode> p, SharedPtr<Node> b):Node(NODE_FUNCDEF) {
+    FuncdefNode(SharedPtr<Node> n, SharedPtr<Node> p, SharedPtr<Node> b):Node(NODE_FUNCDEF) {
         this->list->push_back(n);
         this->list->push_back(p);
         this->list->push_back(b);
     }
-};
-
-class ListNode: public Node {
-public:
-    ListNode() : Node() { }
-    ListNode(node_type_t t) : Node(t) { }
-    void push_back(SharedPtr<Node> n) {
-        list->push_back(n);
-    }
-    size_t size() { return list->size(); }
-    SharedPtr<Node> at(int i) { return list->at(i); }
-    SharedPtr<Node> back() { return list->back(); }
-    void pop_back() { list->pop_back(); }
 };
 
 class ForNode: public Node {
@@ -197,9 +186,9 @@ class MethodCallNode: public Node {
 public:
     SharedPtr<Node>object () { return this->list->at(0); }
     SharedPtr<Node>method() { return this->list->at(1); }
-    SharedPtr<ListNode> args() { return this->list->at(2)->upcast<ListNode>(); }
+    SharedPtr<Node> args() { return this->list->at(2)->upcast<Node>(); }
 
-    MethodCallNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<ListNode> a) : Node(NODE_METHOD_CALL) {
+    MethodCallNode(SharedPtr<Node> o, SharedPtr<Node> m, SharedPtr<Node> a) : Node(NODE_METHOD_CALL) {
         this->list->push_back(o);
         this->list->push_back(m);
         this->list->push_back(a);
@@ -210,10 +199,10 @@ class ClassNode : public Node {
 public:
     SharedPtr<Node>     klass()  { return this->list->at(0); }
     SharedPtr<Node>     parent() { return this->list->at(1); }
-    SharedPtr<ListNode> roles()  { return this->list->at(2)->upcast<ListNode>(); }
+    SharedPtr<Node> roles()  { return this->list->at(2)->upcast<Node>(); }
     SharedPtr<Node>     block()  { return this->list->at(3); }
 
-    ClassNode(SharedPtr<Node> k, SharedPtr<Node>p, SharedPtr<ListNode>r, SharedPtr<Node> b) : Node(NODE_CLASS) {
+    ClassNode(SharedPtr<Node> k, SharedPtr<Node>p, SharedPtr<Node>r, SharedPtr<Node> b) : Node(NODE_CLASS) {
         this->list->push_back(k);
         this->list->push_back(p);
         this->list->push_back(r);

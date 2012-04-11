@@ -211,33 +211,33 @@ else_clause(A) ::= ELSE maybe_block(B). {
 }
 
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN sub_parameter_list(C) R_PAREN maybe_block(D). {
-    A = new FuncdefNode(B, C->upcast<ListNode>(), D);
+    A = new FuncdefNode(B, C->upcast<Node>(), D);
 }
 sub_stmt(A) ::= FUNCSUB identifier(B) L_PAREN R_PAREN maybe_block(C). {
     /* sub foo() { } */
-    A = new FuncdefNode(B, new ListNode(), C);
+    A = new FuncdefNode(B, new Node(), C);
 }
 sub_stmt(A) ::= FUNCSUB identifier(B) maybe_block(C). {
     A = new FuncdefNode(B, NULL, C);
 }
 
 lambda_parameter_list(A) ::= variable(B). {
-    A = new ListNode();
-    A->upcast<ListNode>()->push_back(B);
+    A = new Node();
+    A->upcast<Node>()->push_back(B);
 }
 lambda_parameter_list(A) ::= lambda_parameter_list(B) COMMA variable(C). {
     A = B;
-    A->upcast<ListNode>()->push_back(C);
+    A->upcast<Node>()->push_back(C);
 }
 
 /* the arguments in function/lambda definition. */
 sub_parameter_list(A) ::= parameter(B). {
-    A = new ListNode();
-    A->upcast<ListNode>()->push_back(B);
+    A = new Node();
+    A->upcast<Node>()->push_back(B);
 }
 sub_parameter_list(A) ::= sub_parameter_list(B) COMMA parameter(C). {
     A = B;
-    A->upcast<ListNode>()->push_back(C);
+    A->upcast<Node>()->push_back(C);
 }
 parameter(A) ::= variable(B). {
     Node *n = new Node();
@@ -260,7 +260,7 @@ array_creation(A) ::= L_BRACKET argument_list(B) R_BRACKET. {
     A = B;
 }
 array_creation(A) ::= L_BRACKET R_BRACKET. {
-    A = new ListNode(NODE_MAKE_ARRAY);
+    A = new Node(NODE_MAKE_ARRAY);
 }
 
 hash_creation(A) ::= L_BRACE pair_list(B) COMMA R_BRACE. {
@@ -272,28 +272,28 @@ hash_creation(A) ::= L_BRACE pair_list(B) R_BRACE. {
     A = B;
 }
 hash_creation(A) ::= L_BRACE R_BRACE. {
-    A = new ListNode(NODE_MAKE_HASH);
+    A = new Node(NODE_MAKE_HASH);
 }
 
 argument_list(A) ::= expression(B). {
-    A = new ListNode();
-    A->upcast<ListNode>()->push_back(B);
+    A = new Node();
+    A->upcast<Node>()->push_back(B);
 }
 argument_list(A) ::= argument_list(B) COMMA expression(C). {
     A = B;
-    A->upcast<ListNode>()->push_back(C);
+    A->upcast<Node>()->push_back(C);
 }
 
 /* B => C */
 pair_list(A) ::= expression(B) FAT_COMMA expression(C). {
-    A = new ListNode();
-    A->upcast<ListNode>()->push_back(B);
-    A->upcast<ListNode>()->push_back(C);
+    A = new Node();
+    A->upcast<Node>()->push_back(B);
+    A->upcast<Node>()->push_back(C);
 }
 pair_list(A) ::= pair_list(B) COMMA expression(C) FAT_COMMA expression(D). {
     A = B;
-    A->upcast<ListNode>()->push_back(C);
-    A->upcast<ListNode>()->push_back(D);
+    A->upcast<Node>()->push_back(C);
+    A->upcast<Node>()->push_back(D);
 }
 
 maybe_block(A) ::= block(B). {
@@ -306,7 +306,7 @@ block(A) ::= L_BRACE statement_list(B) R_BRACE. {
     A = new Node(NODE_BLOCK, B);
 }
 block(A) ::= L_BRACE expression(B) R_BRACE. {
-    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    Node* ln = new Node(NODE_STMTS_LIST);
     ln->push_back(B);
     A = new Node(NODE_BLOCK, ln);
 }
@@ -315,16 +315,16 @@ statement_list(A) ::= statement_list_inner(B).  {
     A = B;
 }
 statement_list(A) ::= statement_list_inner(B) expression(C).  {
-    B->upcast<ListNode>()->push_back(C);
+    B->upcast<Node>()->push_back(C);
     A = B;
 }
 statement_list_inner(A) ::= statement(B). {
-    ListNode* ln = new ListNode(NODE_STMTS_LIST);
+    Node* ln = new Node(NODE_STMTS_LIST);
     ln->push_back(B);
     A = ln;
 }
 statement_list_inner(A) ::= statement_list_inner(B) statement(C). {
-    B->upcast<ListNode>()->push_back(C);
+    B->upcast<Node>()->push_back(C);
     A = B;
 }
 
@@ -332,13 +332,13 @@ expression(A) ::= assignment_expression(B). {
     A = B;
 }
 expression(A) ::= LOCAL variable(B).   {
-    ListNode * ln = new ListNode(NODE_LOCAL);
+    Node * ln = new Node(NODE_LOCAL);
     ln->push_back(B);
     ln->push_back(NULL);
     A = ln;
 }
 expression(A) ::= LOCAL variable(B) ASSIGN expression(C).   {
-    ListNode * ln = new ListNode(NODE_LOCAL);
+    Node * ln = new Node(NODE_LOCAL);
     ln->push_back(B);
     ln->push_back(C);
     A = ln;
@@ -393,7 +393,7 @@ conditional_expression(A) ::= logical_or_expression(B) QUESTION expression(C) CO
     A = new IfNode(NODE_IF, B, C, D);
 }
 conditional_expression(A) ::= MY conditional_expression(B).   {
-    ListNode*nl = new ListNode(NODE_MY);
+    Node*nl = new Node(NODE_MY);
     nl->push_back(B);
     A = nl;
 }
@@ -497,11 +497,11 @@ unary_expression(A) ::= TRY maybe_block(B). {
     A = new Node(NODE_TRY, B);
 }
 unary_expression(A) ::= LAMBDA lambda_parameter_list(B) maybe_block(C). {
-    A = new FuncdefNode(NULL, B->upcast<ListNode>(), C);
+    A = new FuncdefNode(NULL, B->upcast<Node>(), C);
     A->type = NODE_LAMBDA;
 }
 unary_expression(A) ::= LAMBDA maybe_block(C). {
-    A = new FuncdefNode(NULL, new ListNode(), C);
+    A = new FuncdefNode(NULL, new Node(), C);
     A->type = NODE_LAMBDA;
 }
 unary_expression(A) ::= MUL unary_expression(C). {
@@ -517,42 +517,42 @@ postfix_expression(A) ::= primary_expression(B) L_BRACKET expression(C) R_BRACKE
     A = new BinaryNode(NODE_GET_ITEM, B, C);
 }
 postfix_expression(A) ::= identifier(B) L_PAREN R_PAREN. {
-    A = new FuncallNode(B, new ListNode());
+    A = new FuncallNode(B, new Node());
 }
 postfix_expression(A) ::= identifier(B) L_PAREN argument_list(C) R_PAREN. {
     // TODO: support vargs
-    A = new FuncallNode(B, C->upcast<ListNode>());
+    A = new FuncallNode(B, C->upcast<Node>());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
     B->type = NODE_INSTANCIATE_IDENTIFIER;
-    A = new MethodCallNode(B, C, D->upcast<ListNode>());
+    A = new MethodCallNode(B, C, D->upcast<Node>());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C) L_PAREN R_PAREN.  {
     B->type = NODE_INSTANCIATE_IDENTIFIER;
-    A = new MethodCallNode(B, C, new ListNode());
+    A = new MethodCallNode(B, C, new Node());
 }
 postfix_expression(A) ::= identifier(B) DOT identifier(C).  {
     B->type = NODE_INSTANCIATE_IDENTIFIER;
     // Foo.bar
-    A = new MethodCallNode(B, C, new ListNode());
+    A = new MethodCallNode(B, C, new Node());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN R_PAREN.  {
     // $foo.();
-    A = new MethodCallNode(B, NULL, new ListNode());
+    A = new MethodCallNode(B, NULL, new Node());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT L_PAREN argument_list(C) R_PAREN.  {
     // $foo.(1,2,3);
-    A = new MethodCallNode(B, NULL, C->upcast<ListNode>());
+    A = new MethodCallNode(B, NULL, C->upcast<Node>());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN argument_list(D) R_PAREN.  {
-    A = new MethodCallNode(B, C, D->upcast<ListNode>());
+    A = new MethodCallNode(B, C, D->upcast<Node>());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C) L_PAREN R_PAREN. {
-    A = new MethodCallNode(B, C, new ListNode());
+    A = new MethodCallNode(B, C, new Node());
 }
 postfix_expression(A) ::= postfix_expression(B) DOT identifier(C). {
     // $foo.bar
-    A = new MethodCallNode(B, C, new ListNode());
+    A = new MethodCallNode(B, C, new Node());
 }
 postfix_expression(A) ::= /* $i-- */ postfix_expression(B) MINUSMINUS. {
     A = new Node(NODE_POST_DECREMENT, B);
@@ -605,14 +605,14 @@ primary_expression(A) ::= L_PAREN expression(B) R_PAREN. {
     A = B;
 }
 tuple_list(A) ::= expression(B) COMMA expression(C). {
-    ListNode * n = new ListNode(NODE_TUPLE);
+    Node * n = new Node(NODE_TUPLE);
     n->push_back(B);
     n->push_back(C);
     A = n;
 }
 tuple_list(A) ::= tuple_list(B) COMMA expression(C). {
     A = B;
-    A->upcast<ListNode>()->push_back(C);
+    A->upcast<Node>()->push_back(C);
 }
 primary_expression(A) ::= UNDEF. {
     A = new Node(NODE_UNDEF);
@@ -624,10 +624,10 @@ primary_expression(A) ::= HEREDOC_START(B). {
     A = B;
 }
 primary_expression(A) ::= PACKAGE_LITERAL. {
-    A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new ListNode());
+    A = new FuncallNode(new StrNode(NODE_IDENTIFIER, "__PACKAGE__"), new Node());
 }
 primary_expression(A) ::= FUNCSUB L_PAREN R_PAREN maybe_block(B). {
-    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new ListNode(), B);
+    A = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "<anonymous>"), new Node(), B);
 }
 
 /* qw */
@@ -636,15 +636,15 @@ qw_creation(A) ::= QW_START qw_list(B) QW_END. {
     A = B;
 }
 qw_creation(A) ::= QW_START QW_END. {
-    A = new ListNode(NODE_MAKE_ARRAY);
+    A = new Node(NODE_MAKE_ARRAY);
 }
 qw_list(A) ::= QW_WORD(B). {
-    ListNode *n = new ListNode();
+    Node *n = new Node();
     n->push_back(B);
     A = n;
 }
 qw_list(A) ::= qw_list(B) QW_WORD(C). {
-    B->upcast<ListNode>()->push_back(C);
+    B->upcast<Node>()->push_back(C);
     A = B;
 }
 

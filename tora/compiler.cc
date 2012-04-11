@@ -46,7 +46,7 @@ void Compiler::dump_localvars() {
  */
 static int count_variable_declare(const SharedPtr<Node> &node) {
     if (node->type == NODE_MY) {
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        SharedPtr<Node>ln = node->upcast<Node>();
         return ln->size();
     } else if (node->type == NODE_LOCAL) {
         return 1;
@@ -102,7 +102,7 @@ void Compiler::push_op(OP * op) {
 }
 
 void Compiler::define_my(SharedPtr<Node> node) {
-    SharedPtr<ListNode>ln = node->upcast<ListNode>();
+    SharedPtr<Node>ln = node->upcast<Node>();
     for (size_t i=0; i < ln->size(); i++) {
         auto target = ln->at(i);
         switch (target->type) {
@@ -253,7 +253,7 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         break;
     }
     case NODE_TUPLE: { // ($a, $b, $c[0]) = $d
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        SharedPtr<Node>ln = node->upcast<Node>();
 
         // extract
         OP* op = new OP(OP_EXTRACT_TUPLE);
@@ -290,10 +290,10 @@ void tora::Compiler::set_lvalue(SharedPtr<Node> node) {
         break;
     }
     case NODE_MY: {
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        SharedPtr<Node>ln = node->upcast<Node>();
         for (size_t i=0; i < ln->size(); i++) {
             if (ln->at(i)->type == NODE_TUPLE) {
-                SharedPtr<ListNode> ln2 = ln->at(i)->upcast<ListNode>();
+                SharedPtr<Node> ln2 = ln->at(i)->upcast<Node>();
                 for (size_t i=0; i < ln2->size(); i++) {
                     std::string &name = ln2->at(i)->upcast<StrNode>()->str_value;
                     this->define_localvar(name);
@@ -856,7 +856,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_STMTS_LIST: {
-        SharedPtr<ListNode> ln = node->upcast<ListNode>();
+        SharedPtr<Node> ln = node->upcast<Node>();
         for (int i=0; i<ln->size(); i++) {
             push_op(new OP(OP_NEXTSTATE));
             this->compile(ln->at(i));
@@ -1066,7 +1066,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     case NODE_SETVARIABLE_MULTI: {
         this->compile(node->upcast<BinaryNode>()->right());
 
-        SharedPtr<ListNode>ln = node->upcast<BinaryNode>()->left()->upcast<ListNode>();
+        SharedPtr<Node>ln = node->upcast<BinaryNode>()->left()->upcast<Node>();
 
         // extract
         OP* op = new OP(OP_EXTRACT_TUPLE);
@@ -1104,7 +1104,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_MAKE_ARRAY: {
-        auto args = node->upcast<ListNode>();
+        auto args = node->upcast<Node>();
         int args_len = args->size();
         while (args->size() > 0) {
             this->compile(args->back());
@@ -1118,7 +1118,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_MAKE_HASH: {
-        auto args = node->upcast<ListNode>();
+        auto args = node->upcast<Node>();
         int args_len = args->size();
         for (int i=0; i<args_len; i+=2) {
             // val
@@ -1258,11 +1258,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
                 n = node->upcast<ForEachNode>()->vars();
                 n->type = NODE_TUPLE;
             }
-            SharedPtr<ListNode> nl = new ListNode(NODE_MY);
+            SharedPtr<Node> nl = new Node(NODE_MY);
             nl->push_back(n);
             this->set_lvalue(nl);
         } else {
-            SharedPtr<ListNode> nl = new ListNode(NODE_MY);
+            SharedPtr<Node> nl = new Node(NODE_MY);
             nl->push_back(new StrNode(NODE_GETVARIABLE, "$_"));
             this->set_lvalue(nl.get());
         }
@@ -1367,7 +1367,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_TUPLE: {
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
+        SharedPtr<Node>ln = node->upcast<Node>();
         for (size_t i=0; i < ln->size(); i++) {
             this->compile(ln->at(i));
         }

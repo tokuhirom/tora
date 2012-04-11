@@ -11,7 +11,7 @@ int main() {
     {
         SharedPtr<SymbolTable> st = new SymbolTable();
         Compiler compiler(st, "<eval>");
-        SharedPtr<Node> n = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "hoge"), new ListNode(), new Node(NODE_VOID));
+        SharedPtr<Node> n = new FuncdefNode(new StrNode(NODE_IDENTIFIER, "hoge"), new Node(), new Node(NODE_VOID));
         compiler.compile(n);
     }
 
