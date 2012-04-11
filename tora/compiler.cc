@@ -466,27 +466,21 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_RETURN: {
-        SharedPtr<ListNode>ln = node->upcast<ListNode>();
-
         if (this->in_try_block) {
-            ln->list->insert(ln->list->begin(), new Node(NODE_UNDEF));
+            node->list->insert(node->list->begin(), new Node(NODE_UNDEF));
         }
 
-        if (ln->size() == 1) {
-            this->compile(ln->at(0));
+        if (node->size() == 1) {
+            this->compile(node->at(0));
             push_op(new OP(OP_RETURN));
-        } else if (ln->size() == 0) {
+        } else if (node->size() == 0) {
             push_op(new OP(OP_PUSH_UNDEF));
             push_op(new OP(OP_RETURN));
         } else {
-            for (size_t i=0; i < ln->size(); i++) {
-                this->compile(ln->at(i));
+            for (size_t i=0; i < node->size(); i++) {
+                this->compile(node->at(i));
             }
-
-            SharedPtr<OP> op = new OP(OP_MAKE_TUPLE);
-            op->operand.int_value = ln->size();
-            push_op(op);
-
+            push_op(new OP(OP_MAKE_TUPLE, node->size()));
             push_op(new OP(OP_RETURN));
         }
 
