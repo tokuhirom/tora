@@ -333,12 +333,12 @@ test_exts()
 if 'install' in COMMAND_LINE_TARGETS:
     installs = []
     installs += [env.Install(env['PREFIX']+'/bin/', source=[tora])];
-    installs+=[env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/')]
     exts = []
     for ext in os.listdir('ext'):
         exts += [env.Command(['ext/%s/_installed' % ext], Glob('ext/' + ext + "/*"), "cd ext/" + ext + " && scons install")]
+    libs = []
     env.Alias('install', [
-        Execute(Mkdir(env['PREFIX'] + '/lib/tora-'+TORA_VERSION_STR)),
+        env.InstallAs(env['PREFIX']+'/lib/tora-'+TORA_VERSION_STR, 'lib/'),
         exts,
         env['PREFIX']+'/bin/',
         installs
