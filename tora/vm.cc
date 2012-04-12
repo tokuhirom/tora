@@ -766,7 +766,7 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<ClassValue>
             // TODO: vargs support
             // TODO: kwargs support
             // TODO: support code_defaults
-            if (argcnt != code->code_params()->size()) {
+            if (code->code_params() && argcnt != code->code_params()->size()) {
                 throw new ArgumentExceptionValue(
                     "%s::%s needs %d arguments but you passed %d arguments",
                     symbol_table->id2name(klass->name_id()).c_str(),
