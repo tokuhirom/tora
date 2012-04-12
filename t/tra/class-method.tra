@@ -1,0 +1,16 @@
+use Test::More *;
+
+# yappo says following code cause segv.
+
+# ---------------------------------------
+class Foo {
+    sub new {
+    }
+}
+Foo.new();
+# ---------------------------------------
+
+ok(1);
+
+done_testing;
+
