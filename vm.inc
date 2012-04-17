@@ -35,7 +35,7 @@ OP_GETARG {
     int index = mark_stack.back() - no - 1;
 #ifndef NDEBUG
     if (index >= stack.size()) {
-        fprintf(stderr, "[BUG] Invalid index in OP_GETARG. mark_stack.back(): %d, no: %d, stack.size(): %zd\n", mark_stack.back(), no, stack.size());
+        fprintf(stderr, "[BUG] Invalid index in OP_GETARG. mark_stack.back(): %d, no: %d, stack.size(): %d\n", mark_stack.back(), no, (int) stack.size());
         dump_stack();
         abort();
     }
@@ -254,7 +254,7 @@ OP_BUILTIN_FUNCALL {
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, (int) stack.size());
     }
     ID id = funname->upcast<SymbolValue>()->id();
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
@@ -283,7 +283,7 @@ OP_FUNCALL {
 #ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %zd items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, (int) stack.size());
     }
 #endif
     ID id = funname->upcast<SymbolValue>()->id();
@@ -318,7 +318,7 @@ OP_FUNCALL {
             int start_stack_size = stack.size() - argcnt;
             this->ops = code->code_opcodes();
 
-// printf("PARAM count: %zd\n", code->code_params->size());
+// printf("PARAM count: %d\n", (int) code->code_params->size());
             if (code->code_params().get()) {
                 for (size_t i=0; i<code->code_params()->size(); i++) {
                     if (argcnt <= i) {
@@ -407,7 +407,7 @@ OP_RETURN {
     assert(mark_stack.size() > 0);
     int top = mark_stack.back();
     SharedPtr<Value> retval;
-    // printf("TOP: %zd, %d, %zd\n", mark_stack.size(), top, stack.size());
+    // printf("TOP: %d, %d, %d\n", (int) mark_stack.size(), top, (int) stack.size());
     // dump_stack();
     if (top < stack.size()) {
         retval.reset(stack.back().get());
@@ -615,7 +615,7 @@ OP_GETDYNAMIC {
 
     // dump_frame();
     // frame_stack->back()->dump_pad(this);
-    //// printf("DUMP: %d, %d, %s, %zd\n", level, no, frame->type_str(), frame->vars.size());
+    //// printf("DUMP: %d, %d, %s, %d\n", level, no, frame->type_str(), (int) frame->vars.size());
     stack.push_back(v);
 }
 
@@ -697,7 +697,7 @@ OP_PRE_INCREMENT {
     // ++$i
     SharedPtr<Value> i = stack.back();
     stack.pop_back();
-    // printf("stack %zd\n", stack.size());
+    // printf("stack %d\n", (int) stack.size());
     if (i->value_type == VALUE_TYPE_INT) {
         i->upcast<IntValue>()->tora__incr__();
         stack.push_back(i);

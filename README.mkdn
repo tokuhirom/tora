@@ -7,6 +7,7 @@ authors tested following parts.
 
   * osx lion
   * ubuntu linux latest
+  * windows
 
 Build Dependencies
 ------------------
