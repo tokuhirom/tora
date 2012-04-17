@@ -1,44 +1,59 @@
-use t::Util;
-
-run_tora_is(<<'...', "true\n");
+===
+--- code
 if (true) {
     say(true);
 } else {
     say(false);
 }
-...
+--- stdout
+true
+--- stderr
 
-run_tora_is(<<'...', "false\n");
+===
+--- code
 if (false) {
     say(true);
 } else {
     say(false);
 }
-...
+--- stdout
+false
+--- stderr
 
-run_tora_is(<<'...', "IF\n");
+===
+--- code
 if (true) { say("IF"); }
 elsif (false) { say("ELSIF") }
 else { say("ELSE"); }
-...
+--- stdout
+IF
+--- stderr
 
-run_tora_is(<<'...', "ELSIF\n");
+===
+--- code
 if (false) { say("IF"); }
 elsif (true) { say("ELSIF") }
 else { say("ELSE"); }
-...
+--- stdout
+ELSIF
+--- stderr
 
-run_tora_is(<<'...', "ELSE\n");
+===
+--- code
 if (false) { say("IF"); }
 elsif (false) { say("ELSIF") }
 else { say("ELSE"); }
-...
+--- stdout
+ELSE
+--- stderr
 
-run_tora_is(<<'...', "60\n45\n");
+===
+--- code
 my $x = 45;
 if (my $x = 60) { say($x); }
 say($x);
-...
-
-done_testing;
+--- stdout
+60
+45
+--- stderr
 
