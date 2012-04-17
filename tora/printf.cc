@@ -53,6 +53,6 @@ std::string tora::tora_sprintf(const std::vector<SharedPtr<Value>> & args) {
 }
 
 void tora::tora_printf(const std::vector<SharedPtr<Value>> &args) {
-    std::cout << tora_sprintf(args) << std::endl;
+    std::cout << tora_sprintf(args);
 }
 
