@@ -1,0 +1,15 @@
+# This file is an index for the `test-less` facility.
+#
+# More information can be found at:
+#   http://search.cpan.org/search?query=Test-Less;mode=dist
+#
+filter t/append.t	Jun  6 00:32:41 2005 GMT -- ingy
+filter t/array.t	Jun  6 00:32:41 2005 GMT -- ingy
+filter t/base64.t	Jun  6 00:32:41 2005 GMT -- ingy
+filter t/chomp.t	Jun  6 00:32:42 2005 GMT -- ingy
+filter t/chop.t	Jun  6 00:35:08 2005 GMT -- ingy
+filter t/dumper.t	Jun  6 00:35:08 2005 GMT -- ingy
+filter t/eval.t	Jun  6 00:35:08 2005 GMT -- ingy
+filter t/eval_all.t	Jun  6 00:35:08 2005 GMT -- ingy
+filter t/eval_stderr.t	Jun  6 00:35:08 2005 GMT -- ingy
+filter t/eval_stdout.t	Jun  6 00:35:08 2005 GMT -- ingy

@@ -1,0 +1,133 @@
+---
+version: 0.30
+date:    Sun Jan 29 12:18:02 PST 2006
+changes:
+- Use faster runtime code in `field`.
+---
+version: 0.29
+date:    Thu Jan 19 08:12:06 PST 2006
+changes:
+- Squelch redefine warnings
+---
+version: 0.28
+date:    Thu Jan 19 07:39:30 PST 2006
+changes:
+- Test patch from Nicholas for older perls
+---
+version: 0.27
+date:    Wed Jan 18 14:14:52 PST 2006
+changes:
+- The check to make sure Spiffy is loaded before 'base' was flawed.
+  Added new tests, and commented out the flawed code until I can figure
+  out how to do the check properly. The check is just a helper so it
+  shouldn't hurt not to have it.
+---
+version: 0.26
+date:    Sat Jan 14 05:41:05 PST 2006
+changes:
+- Don't sign the distribution tarball
+---
+version: 0.25
+date:    Mon Jan  9 20:35:39 PST 2006
+changes:
+- Make Spiffy modules play nice with autouse
+---
+version: 0.24
+date:    Sat Apr 30 23:12:28 PDT 2005
+changes:
+- Refactored -Base to once and only once
+- Remove some cruft
+- Got export algorithm working better
+---
+version: 0.23
+date:    Sun Apr 17 19:01:11 PDT 2005
+changes:
+- Add a blank return to super
+- Add the mixin method
+---
+version: 0.22
+date:    Tue Jan 11 07:22:47 PST 2005
+changes:
+- allow new() to be called from object reference
+- make -weak and -init work together
+- add tests for -Base filtering
+---
+version: 0.21
+date:    Wed Dec 15 04:40:46 PST 2004
+changes:
+- Get rid of spiffy_constructor altogether
+- Don't use goto in super() anymore, due to irreversible changes in perl 5.8.6
+- Generate custom fields base on input. The field function returns the
+  generated code for debugging puposes. (Dave Rolsky)
+- field supports -weaken and -init flags.
+- Caching in all_my_bases to speed things up. (Chris Dent)
+- Filtering now does strict/warnings, '1;\n', and private subs defined with
+  'my sub ...'.
+- Add -filter_dump and -filter_save options for filter debugging
+---
+version: 0.20
+date:    Sat Jul 24 22:11:48 PDT 2004
+changes:
+- call super from eval
+- -XXX implies :XXX
+---
+version: 0.19
+date:    Sun Jul 11 01:41:38 PDT 2004
+changes:
+- mixin support
+- don't export spiffy_constructor by default
+- Don't export XXX stuff until -XXX used
+- add support for roles and import lists with mixins
+- super works with AUTOLOAD
+---
+version: 0.18
+date:    Wed Jun  2 15:05:05 PDT 2004
+changes:
+- Allow 'use base' to work with Spiffy and non-Spiffy
+- Allow DATA filehandle to work with source filtering
+- Support @EXPORT_BASE
+---
+version: 0.17
+date:    Tue May 11 17:09:00 PDT 2004
+changes:
+- Don't filter a file twice.
+- Make super nestable.
+- Data::Dumper support
+---
+version: 0.16
+date:    Fri May  7 00:57:06 PDT 2004
+changes:
+- Added filtering
+- fixed super
+- overhauled documentation
+---
+version: 0.15
+date:    Sun Mar 21 01:54:07 PST 2004
+changes:
+- Make parse_arguments work in scalar context
+---
+version: 0.14
+date:    Sun Mar 21 01:54:07 PST 2004
+changes:
+- add support for field and const
+- field -package Foo 'field1';
+---
+version: 0.13
+date:    Sat Mar 13 09:13:01 PST 2004
+changes:
+- Works with base.pm
+---
+version: 0.12
+date:    Mon Mar  8 11:34:57 PST 2004
+changes:
+- Foo::Bar->base;
+---
+version: 0.11
+date:    Tue Mar  2 09:16:30 PST 2004
+changes:
+- Add super powers
+---
+version: 0.11
+date:    Thu Feb 12 21:36:13 CST 2004
+changes:
+- Use Exporter to export things

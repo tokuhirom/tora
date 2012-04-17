@@ -1,0 +1,16 @@
+=== Test One
+--- Foo
+Line 1
+
+Line 2
+--- Bar chomp
+Line 3
+Line 4
+=== Test One
+--- Foo
+Line 5
+
+Line 6
+--- Bar chomp
+Line 7
+Line 8

@@ -1,0 +1,3 @@
+use Test::Base;
+
+$global_variable = 42;
