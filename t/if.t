@@ -1,6 +1,6 @@
 use t::Util;
 
-run_is(<<'...', "true\n");
+run_tora_is(<<'...', "true\n");
 if (true) {
     say(true);
 } else {
@@ -8,7 +8,7 @@ if (true) {
 }
 ...
 
-run_is(<<'...', "false\n");
+run_tora_is(<<'...', "false\n");
 if (false) {
     say(true);
 } else {
@@ -16,25 +16,25 @@ if (false) {
 }
 ...
 
-run_is(<<'...', "IF\n");
+run_tora_is(<<'...', "IF\n");
 if (true) { say("IF"); }
 elsif (false) { say("ELSIF") }
 else { say("ELSE"); }
 ...
 
-run_is(<<'...', "ELSIF\n");
+run_tora_is(<<'...', "ELSIF\n");
 if (false) { say("IF"); }
 elsif (true) { say("ELSIF") }
 else { say("ELSE"); }
 ...
 
-run_is(<<'...', "ELSE\n");
+run_tora_is(<<'...', "ELSE\n");
 if (false) { say("IF"); }
 elsif (false) { say("ELSIF") }
 else { say("ELSE"); }
 ...
 
-run_is(<<'...', "60\n45\n");
+run_tora_is(<<'...', "60\n45\n");
 my $x = 45;
 if (my $x = 60) { say($x); }
 say($x);

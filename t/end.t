@@ -4,7 +4,7 @@ use utf8;
 use Test::More;
 use t::Util;
 
-run_is(<<'...', "hello\n");
+run_tora_is(<<'...', "hello\n");
 say("hello");
 __END__
 say("YO");

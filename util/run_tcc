@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use utf8;
+use Pod::Usage;
+use Test::More;
+use Test::Base;
+use t::Util;
+
+my $src = shift or pod2usage;
+
+spec_file($src);
+run {
+    my $block = shift;
+    run_tora_is($block->code, $block->stdout, $block->stderr);
+};
+done_testing;
+
+__END__
+
+=head1 SYNOPSIS
+
+    $0 src.tcc

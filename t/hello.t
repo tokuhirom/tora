@@ -1,10 +1,10 @@
 use t::Util;
 
-run_is(<<'...', "Hello, world\n");
+run_tora_is(<<'...', "Hello, world\n");
 say("Hello, world");
 ...
 
-run_is(<<'...', "Hello\nworld\n");
+run_tora_is(<<'...', "Hello\nworld\n");
 say("Hello", "world");
 ...
 

@@ -12,7 +12,7 @@ sub import {
     strict->import;
     warnings->import;
     no strict 'refs';
-    *{caller(0) . "::run_is"} = sub {
+    *{caller(0) . "::run_tora_is"} = sub {
         note("L: " . (caller(0))[2]);
         my ($code, $out_expected, $err_expected, $exit_status) = @_;
         $exit_status ||= 0;

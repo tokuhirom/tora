@@ -4,7 +4,7 @@ use utf8;
 use Test::More;
 use t::Util;
 
-run_is(<<'...', "Hello world!: HOGE\n");
+run_tora_is(<<'...', "Hello world!: HOGE\n");
 class Hello {
     sub new() {
         self.bless(undef);

@@ -196,7 +196,7 @@ if os.name == 'nt':
 else:
     prove_command = prove_prefix + ' ' + prove_path
 if 'test' in COMMAND_LINE_TARGETS:
-    env.Command('test', programs, prove_command + ' --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra --source Perl t')
+    env.Command('test', programs, prove_command + ' --source TCC --source Tora --source Executable -r tests/ t/tra/*.tra t/tra/*/*.tra t/spec/*/*.tcc --source Perl t')
 
 env.Command('test.valgrind', ['bin/tora' + exe_suffix], 'perl misc/valgrind.pl');
 

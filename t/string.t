@@ -1,6 +1,6 @@
 use t::Util;
 
-run_is(<<'...', "hoge\n");
+run_tora_is(<<'...', "hoge\n");
 say("ho" + "ge");
 ...
 
