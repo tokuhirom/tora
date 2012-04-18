@@ -1,10 +1,5 @@
-use strict;
-use warnings;
-use utf8;
-use Test::More;
-use t::Util;
-
-run_tora_is(<<'...', "Hello world!: HOGE\n");
+===
+--- code
 class Hello {
     sub new() {
         self.bless(undef);
@@ -16,7 +11,5 @@ class Hello {
 
 my $h = Hello.new();
 $h.world("HOGE");
-...
-
-done_testing;
-
+--- stdout
+Hello world!: HOGE
