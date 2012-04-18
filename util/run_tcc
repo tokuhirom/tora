@@ -12,7 +12,7 @@ my $src = shift or pod2usage;
 spec_file($src);
 run {
     my $block = shift;
-    run_tora_is($block->code, $block->stdout, $block->stderr);
+    run_tora_is($block->code, $block->stdout, $block->stderr, $block->exit_status);
 };
 done_testing;
 
