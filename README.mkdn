@@ -15,6 +15,7 @@ Build Dependencies
  * gcc 4.4.3+ or clang++ 3.0+
  * SConstruct
  * Perl5
+ * libboost1.48-all-dev
  * Python 2.6 or later(to generate config.json)
    * patches welcome to generate config.json by hand
 
@@ -31,15 +32,12 @@ How to Build
 
 ### Install deps on OSX
 
-    brew install re2c icu4c scons
+    brew install re2c icu4c scons boost
     brew link icu4c
 
-### Install deps on CentOS
+### Install deps on ubuntu
 
-    sudo yum install scons
-    sudo yum install re2c
-    sudo yum install curl-devel
-    sudo yum install libicu-devel
+    sudo aptitude install libboost1.48-all-dev scons re2c libcurl4-dev libicu-dev
 
 ### Build
 
