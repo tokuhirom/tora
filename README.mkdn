@@ -30,6 +30,12 @@ If you want to build from git, nededs more softwares.
 How to Build
 ------------
 
+### Install re2
+
+    hg clone https://re2.googlecode.com/hg re2
+    cd re2
+    sudo make install
+
 ### Install deps on OSX
 
     brew install re2c icu4c scons boost
