@@ -36,3 +36,6 @@ config.json
 *.exe
 tags
 *.dylib
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake

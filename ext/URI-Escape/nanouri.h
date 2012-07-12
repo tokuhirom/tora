@@ -111,7 +111,7 @@ NANOURI_DECLARE std::string nu_unescape_uri(const std::string &src) {
     dst.reserve(src.size()*3+1);
     for (unsigned int i=0; i<src.size(); i++) {
         if (src[i] == '%') {
-            unsigned char c;
+            unsigned char c = 0;
             if (src[++i] != '\0') {
                 c = nu_unhex(src[i]) << 4;
             }
