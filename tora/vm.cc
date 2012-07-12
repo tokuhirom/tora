@@ -146,11 +146,11 @@ void VM::die(const char *format, ...) {
     throw new StrValue(s);
 }
 
-void VM::die(const SharedPtr<Value> & exception) {
-    throw SharedPtr<Value>(exception);
+void VM::die(const SharedPtr<tora::Value> & exception) {
+    throw SharedPtr<tora::Value>(exception);
 }
 
-SharedPtr<Value> VM::eval(std::istream* is, const std::string & fname) {
+SharedPtr<tora::Value> VM::eval(std::istream* is, const std::string & fname) {
     VM *vm = this;
 
     Scanner scanner(is, fname);
@@ -212,7 +212,7 @@ SharedPtr<Value> VM::eval(std::istream* is, const std::string & fname) {
     }
 
     if (orig_stack_size < vm->stack.size()) {
-        SharedPtr<Value> ret = vm->stack.back();
+        SharedPtr<tora::Value> ret = vm->stack.back();
         vm->stack.pop_back();
         while (orig_stack_size < vm->stack.size()) {
             vm->stack.pop_back();
@@ -223,7 +223,7 @@ SharedPtr<Value> VM::eval(std::istream* is, const std::string & fname) {
     }
 }
 
-static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
+static SharedPtr<tora::Value> builtin_eval(VM * vm, tora::Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
     std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
@@ -233,7 +233,7 @@ static SharedPtr<Value> builtin_eval(VM * vm, Value* v) {
 /**
  * do $file; => eval(open($file).read())
  */
-static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
+static SharedPtr<tora::Value> builtin_do(VM * vm, tora::Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
     SharedPtr<StrValue> fname = v->to_s();
     std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
@@ -244,7 +244,7 @@ static SharedPtr<Value> builtin_do(VM * vm, Value *v) {
     }
 }
 
-void VM::use(Value * package_v, bool need_copy) {
+void VM::use(tora::Value * package_v, bool need_copy) {
     ID package_id = package_v->upcast<SymbolValue>()->id();
     std::string package = symbol_table->id2name(package_id);
     this->require_package(package);
@@ -290,11 +290,11 @@ void VM::require_package(const std::string &package) {
         realfilename += s;
         struct stat stt;
         if (stat(realfilename.c_str(), &stt)==0) {
-            SharedPtr<Value> realfilename_value(new StrValue(realfilename));
+            SharedPtr<tora::Value> realfilename_value(new StrValue(realfilename));
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
-                boost::shared_ptr<std::map<ID, SharedPtr<Value>>> orig_file_scope(this->file_scope_);
-                boost::shared_ptr<std::map<ID, SharedPtr<Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
+                boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
+                boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
                 VM *vm = this;
                 BOOST_SCOPE_EXIT( (&vm) (&orig_file_scope) ) {
                     vm->file_scope_ = orig_file_scope;
@@ -451,7 +451,7 @@ void VM::copy_all_public_symbols(ID srcid) {
     }
 }
 
-SharedPtr<Value> VM::set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const {
+SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value>& container, const SharedPtr<tora::Value>& index, const SharedPtr<tora::Value>& rvalue) const {
     switch (container->value_type) {
     case VALUE_TYPE_OBJECT:
         return container->upcast<ObjectValue>()->set_item(index, rvalue);
@@ -502,7 +502,7 @@ void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
     }
 }
 
-SharedPtr<Value> VM::get_self() {
+SharedPtr<tora::Value> VM::get_self() {
     auto iter = this->frame_stack->rbegin();
     for (; iter!=this->frame_stack->rend(); ++iter) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {

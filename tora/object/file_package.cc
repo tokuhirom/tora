@@ -16,7 +16,7 @@ using namespace tora;
  * This is a FilePackage class.
  */
 
-inline static FilePackageValue* SELF(Value *self) {
+inline static FilePackageValue* SELF(tora::Value *self) {
     return self->upcast<FilePackageValue>();
 }
 

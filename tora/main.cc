@@ -15,9 +15,6 @@
 #include <memory>
 
 #include <boost/scoped_ptr.hpp>
-#ifdef ENABLE_GLOG
-#include <glog/logging.h>
-#endif
 
 #include "tora.h"
 #include "vm.h"
@@ -61,7 +58,7 @@ static void run_repl(int argc, char **argv, const std::vector<std::string> &libs
             std::cout << ">> ";
             std::getline(std::cin, buf, '\n');
             std::stringstream iss(buf + ";");
-            SharedPtr<Value> ret = vm.eval(&iss, "<repl>");
+            SharedPtr<tora::Value> ret = vm.eval(&iss, "<repl>");
             vm.dump_value(ret);
         } catch (ExceptionValue* e) {
             std::cerr << e->message() << std::endl;
@@ -150,9 +147,6 @@ int main(int argc, char **argv) {
     if (parse_trace) {
         fprintf(stderr, "Parsing trace is not supported on -DNDEBUG\n");
     }
-#endif
-
-#ifdef ENABLE_GLOG
 #endif
 
     Node *yylval = NULL;
