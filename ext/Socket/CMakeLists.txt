@@ -12,6 +12,10 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/../../tora/")
 ADD_LIBRARY(socket SHARED socket.cc)
 
 # test settings
+if (!TORA_VERSION)
+    
+endif(TORA_VERSION)
+message("tora: ${TORA_VERSION}")
 ADD_CUSTOM_TARGET(test COMMAND prove --exec "${PROJECT_SOURCE_DIR}/../../bin/tora -I lib -I ../../lib" t/*.tra DEPENDS socket)
-# INSTALL(TARGETS socket LIBRARY DESTINATION lib)
-# INSTALL(FILES unarray.h DESTINATION include)
+INSTALL(TARGETS socket LIBRARY DESTINATION "lib/tora-${TORA_VERSION}/")
+

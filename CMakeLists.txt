@@ -23,8 +23,7 @@ endif ()
 
 find_package(RE2C REQUIRED)
 
-SET(serial "0.0.0")
-SET(soserial "1")
+SET(TORA_VERSION "0.0.5")
 
 RE2C_TARGET(
     tora/lexer.re
