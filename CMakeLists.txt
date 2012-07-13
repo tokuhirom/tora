@@ -25,6 +25,8 @@ find_package(RE2C REQUIRED)
 
 SET(TORA_VERSION "0.0.5")
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tora/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tora/config.h)
+
 RE2C_TARGET(
     tora/lexer.re
     tora/lexer.gen.cc

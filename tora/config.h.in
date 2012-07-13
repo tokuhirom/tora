@@ -1,0 +1,7 @@
+#ifndef TORA_CONFIG_H_
+#define TORA_CONFIG_H_
+
+#cmakedefine TORA_VERSION "@TORA_VERSION@"
+
+#endif // TORA_CONFIG_H_
+
