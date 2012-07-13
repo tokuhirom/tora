@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 SET(CMAKE_CXX_COMPILER "clang++")
 SET(CMAKE_C_COMPILER "clang")
+SET(CMAKE_CC_FLAGS "-L.")
 SET(CMAKE_CXX_FLAGS "-std=c++0x -L.")
 SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-sign-compare -fstack-protector -fPIC -O2")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -23,7 +24,10 @@ endif ()
 
 find_package(RE2C REQUIRED)
 
-SET(TORA_VERSION "0.0.5")
+SET(TORA_VERSION_STR "0.0.5")
+SET(TORA_CCFLAGS "${CMAKE_CC_FLAGS}")
+SET(TORA_CXXFLAGS "${CMAKE_CXX_FLAGS}")
+SET(TORA_PREFIX      "${CMAKE_INSTALL_PREFIX}")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tora/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tora/config.h)
 
@@ -107,7 +111,7 @@ foreach(f ${TEST_CC_FILES})
         "${_output}"
         "${f}"
     )
-    TARGET_LINK_LIBRARIES("${_output}" "tora" ${libs} dl)
+    TARGET_LINK_LIBRARIES("${_output}" libtora_a ${libs} dl)
 endforeach(f)
 
 # test settings

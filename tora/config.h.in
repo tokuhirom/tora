@@ -1,7 +1,10 @@
 #ifndef TORA_CONFIG_H_
 #define TORA_CONFIG_H_
 
-#cmakedefine TORA_VERSION "@TORA_VERSION@"
+#cmakedefine TORA_VERSION_STR "@TORA_VERSION_STR@"
+#cmakedefine TORA_CCFLAGS     "@TORA_CCFLAGS@"
+#cmakedefine TORA_CXXFLAGS     "@TORA_CXXFLAGS@"
+#cmakedefine TORA_PREFIX      "@TORA_PREFIX@"
 
 #endif // TORA_CONFIG_H_
 
