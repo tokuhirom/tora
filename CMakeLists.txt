@@ -77,11 +77,20 @@ SET(TORA_SRCS
 )
 
 set(libs re2 pthread dl icudata icuuc boost_system)
-ADD_EXECUTABLE(toraexe ${TORA_SRCS} tora/main.cc)
-ADD_LIBRARY(libtora ${TORA_SRCS})
-SET_TARGET_PROPERTIES(libtora PROPERTIES OUTPUT_NAME "tora")
-TARGET_LINK_LIBRARIES(libtora ${libs})
-TARGET_LINK_LIBRARIES(toraexe "tora" ${libs})
+
+# libtora.a
+ADD_LIBRARY(libtora_a ${TORA_SRCS})
+SET_TARGET_PROPERTIES(libtora_a PROPERTIES OUTPUT_NAME "tora")
+TARGET_LINK_LIBRARIES(libtora_a ${libs})
+
+# libtora.so
+ADD_LIBRARY(libtora_so SHARED ${TORA_SRCS})
+SET_TARGET_PROPERTIES(libtora_so PROPERTIES OUTPUT_NAME "tora")
+TARGET_LINK_LIBRARIES(libtora_so ${libs})
+
+# bin/tora
+ADD_EXECUTABLE(toraexe tora/main.cc)
+TARGET_LINK_LIBRARIES(toraexe "tora" ${libs} libtora_a)
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
 
 #############################################################################
@@ -109,5 +118,7 @@ endforeach(f)
 # test settings
 ADD_CUSTOM_TARGET(test COMMAND "${PERL_EXECUTABLE}" util/test.pl DEPENDS tora)
 
-# TODO:  install
+INSTALL(TARGETS libtora_a ARCHIVE DESTINATION lib)
+INSTALL(TARGETS libtora_so LIBRARY DESTINATION lib)
+INSTALL(TARGETS toraexe DESTINATION bin)
 

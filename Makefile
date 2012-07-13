@@ -54,6 +54,47 @@ edit_cache:
 edit_cache/fast: edit_cache
 .PHONY : edit_cache/fast
 
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: install/local
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: install/strip
+.PHONY : install/strip/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -109,17 +150,30 @@ lemon/fast:
 .PHONY : lemon/fast
 
 #=============================================================================
-# Target rules for targets named libtora
+# Target rules for targets named libtora_a
 
 # Build rule for target.
-libtora: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 libtora
-.PHONY : libtora
+libtora_a: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 libtora_a
+.PHONY : libtora_a
 
 # fast build rule for target.
-libtora/fast:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/build
-.PHONY : libtora/fast
+libtora_a/fast:
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/build
+.PHONY : libtora_a/fast
+
+#=============================================================================
+# Target rules for targets named libtora_so
+
+# Build rule for target.
+libtora_so: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 libtora_so
+.PHONY : libtora_so
+
+# fast build rule for target.
+libtora_so/fast:
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/build
+.PHONY : libtora_so/fast
 
 #=============================================================================
 # Target rules for targets named test
@@ -583,8 +637,8 @@ tora/builtin.o: tora/builtin.cc.o
 
 # target to build an object file
 tora/builtin.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/builtin.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/builtin.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/builtin.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/builtin.cc.o
 .PHONY : tora/builtin.cc.o
 
 tora/builtin.i: tora/builtin.cc.i
@@ -592,8 +646,8 @@ tora/builtin.i: tora/builtin.cc.i
 
 # target to preprocess a source file
 tora/builtin.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/builtin.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/builtin.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/builtin.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/builtin.cc.i
 .PHONY : tora/builtin.cc.i
 
 tora/builtin.s: tora/builtin.cc.s
@@ -601,8 +655,8 @@ tora/builtin.s: tora/builtin.cc.s
 
 # target to generate assembly for a file
 tora/builtin.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/builtin.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/builtin.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/builtin.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/builtin.cc.s
 .PHONY : tora/builtin.cc.s
 
 tora/compiler.o: tora/compiler.cc.o
@@ -610,8 +664,8 @@ tora/compiler.o: tora/compiler.cc.o
 
 # target to build an object file
 tora/compiler.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/compiler.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/compiler.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/compiler.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/compiler.cc.o
 .PHONY : tora/compiler.cc.o
 
 tora/compiler.i: tora/compiler.cc.i
@@ -619,8 +673,8 @@ tora/compiler.i: tora/compiler.cc.i
 
 # target to preprocess a source file
 tora/compiler.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/compiler.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/compiler.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/compiler.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/compiler.cc.i
 .PHONY : tora/compiler.cc.i
 
 tora/compiler.s: tora/compiler.cc.s
@@ -628,8 +682,8 @@ tora/compiler.s: tora/compiler.cc.s
 
 # target to generate assembly for a file
 tora/compiler.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/compiler.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/compiler.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/compiler.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/compiler.cc.s
 .PHONY : tora/compiler.cc.s
 
 tora/disasm.o: tora/disasm.cc.o
@@ -637,8 +691,8 @@ tora/disasm.o: tora/disasm.cc.o
 
 # target to build an object file
 tora/disasm.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/disasm.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/disasm.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/disasm.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/disasm.cc.o
 .PHONY : tora/disasm.cc.o
 
 tora/disasm.i: tora/disasm.cc.i
@@ -646,8 +700,8 @@ tora/disasm.i: tora/disasm.cc.i
 
 # target to preprocess a source file
 tora/disasm.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/disasm.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/disasm.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/disasm.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/disasm.cc.i
 .PHONY : tora/disasm.cc.i
 
 tora/disasm.s: tora/disasm.cc.s
@@ -655,8 +709,8 @@ tora/disasm.s: tora/disasm.cc.s
 
 # target to generate assembly for a file
 tora/disasm.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/disasm.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/disasm.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/disasm.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/disasm.cc.s
 .PHONY : tora/disasm.cc.s
 
 tora/frame.o: tora/frame.cc.o
@@ -664,8 +718,8 @@ tora/frame.o: tora/frame.cc.o
 
 # target to build an object file
 tora/frame.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/frame.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/frame.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/frame.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/frame.cc.o
 .PHONY : tora/frame.cc.o
 
 tora/frame.i: tora/frame.cc.i
@@ -673,8 +727,8 @@ tora/frame.i: tora/frame.cc.i
 
 # target to preprocess a source file
 tora/frame.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/frame.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/frame.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/frame.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/frame.cc.i
 .PHONY : tora/frame.cc.i
 
 tora/frame.s: tora/frame.cc.s
@@ -682,8 +736,8 @@ tora/frame.s: tora/frame.cc.s
 
 # target to generate assembly for a file
 tora/frame.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/frame.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/frame.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/frame.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/frame.cc.s
 .PHONY : tora/frame.cc.s
 
 tora/inspector.o: tora/inspector.cc.o
@@ -691,8 +745,8 @@ tora/inspector.o: tora/inspector.cc.o
 
 # target to build an object file
 tora/inspector.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/inspector.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/inspector.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/inspector.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/inspector.cc.o
 .PHONY : tora/inspector.cc.o
 
 tora/inspector.i: tora/inspector.cc.i
@@ -700,8 +754,8 @@ tora/inspector.i: tora/inspector.cc.i
 
 # target to preprocess a source file
 tora/inspector.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/inspector.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/inspector.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/inspector.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/inspector.cc.i
 .PHONY : tora/inspector.cc.i
 
 tora/inspector.s: tora/inspector.cc.s
@@ -709,8 +763,8 @@ tora/inspector.s: tora/inspector.cc.s
 
 # target to generate assembly for a file
 tora/inspector.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/inspector.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/inspector.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/inspector.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/inspector.cc.s
 .PHONY : tora/inspector.cc.s
 
 tora/lexer.gen.o: tora/lexer.gen.cc.o
@@ -718,8 +772,8 @@ tora/lexer.gen.o: tora/lexer.gen.cc.o
 
 # target to build an object file
 tora/lexer.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/lexer.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/lexer.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/lexer.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/lexer.gen.cc.o
 .PHONY : tora/lexer.gen.cc.o
 
 tora/lexer.gen.i: tora/lexer.gen.cc.i
@@ -727,8 +781,8 @@ tora/lexer.gen.i: tora/lexer.gen.cc.i
 
 # target to preprocess a source file
 tora/lexer.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/lexer.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/lexer.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/lexer.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/lexer.gen.cc.i
 .PHONY : tora/lexer.gen.cc.i
 
 tora/lexer.gen.s: tora/lexer.gen.cc.s
@@ -736,8 +790,8 @@ tora/lexer.gen.s: tora/lexer.gen.cc.s
 
 # target to generate assembly for a file
 tora/lexer.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/lexer.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/lexer.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/lexer.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/lexer.gen.cc.s
 .PHONY : tora/lexer.gen.cc.s
 
 tora/main.o: tora/main.cc.o
@@ -769,8 +823,8 @@ tora/node.o: tora/node.cc.o
 
 # target to build an object file
 tora/node.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/node.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/node.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/node.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/node.cc.o
 .PHONY : tora/node.cc.o
 
 tora/node.i: tora/node.cc.i
@@ -778,8 +832,8 @@ tora/node.i: tora/node.cc.i
 
 # target to preprocess a source file
 tora/node.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/node.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/node.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/node.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/node.cc.i
 .PHONY : tora/node.cc.i
 
 tora/node.s: tora/node.cc.s
@@ -787,8 +841,8 @@ tora/node.s: tora/node.cc.s
 
 # target to generate assembly for a file
 tora/node.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/node.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/node.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/node.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/node.cc.s
 .PHONY : tora/node.cc.s
 
 tora/nodes.gen.o: tora/nodes.gen.cc.o
@@ -796,8 +850,8 @@ tora/nodes.gen.o: tora/nodes.gen.cc.o
 
 # target to build an object file
 tora/nodes.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/nodes.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/nodes.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/nodes.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/nodes.gen.cc.o
 .PHONY : tora/nodes.gen.cc.o
 
 tora/nodes.gen.i: tora/nodes.gen.cc.i
@@ -805,8 +859,8 @@ tora/nodes.gen.i: tora/nodes.gen.cc.i
 
 # target to preprocess a source file
 tora/nodes.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/nodes.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/nodes.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/nodes.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/nodes.gen.cc.i
 .PHONY : tora/nodes.gen.cc.i
 
 tora/nodes.gen.s: tora/nodes.gen.cc.s
@@ -814,8 +868,8 @@ tora/nodes.gen.s: tora/nodes.gen.cc.s
 
 # target to generate assembly for a file
 tora/nodes.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/nodes.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/nodes.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/nodes.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/nodes.gen.cc.s
 .PHONY : tora/nodes.gen.cc.s
 
 tora/object.o: tora/object.cc.o
@@ -823,8 +877,8 @@ tora/object.o: tora/object.cc.o
 
 # target to build an object file
 tora/object.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object.cc.o
 .PHONY : tora/object.cc.o
 
 tora/object.i: tora/object.cc.i
@@ -832,8 +886,8 @@ tora/object.i: tora/object.cc.i
 
 # target to preprocess a source file
 tora/object.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object.cc.i
 .PHONY : tora/object.cc.i
 
 tora/object.s: tora/object.cc.s
@@ -841,8 +895,8 @@ tora/object.s: tora/object.cc.s
 
 # target to generate assembly for a file
 tora/object.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object.cc.s
 .PHONY : tora/object.cc.s
 
 tora/object/array.o: tora/object/array.cc.o
@@ -850,8 +904,8 @@ tora/object/array.o: tora/object/array.cc.o
 
 # target to build an object file
 tora/object/array.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/array.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/array.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/array.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/array.cc.o
 .PHONY : tora/object/array.cc.o
 
 tora/object/array.i: tora/object/array.cc.i
@@ -859,8 +913,8 @@ tora/object/array.i: tora/object/array.cc.i
 
 # target to preprocess a source file
 tora/object/array.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/array.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/array.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/array.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/array.cc.i
 .PHONY : tora/object/array.cc.i
 
 tora/object/array.s: tora/object/array.cc.s
@@ -868,8 +922,8 @@ tora/object/array.s: tora/object/array.cc.s
 
 # target to generate assembly for a file
 tora/object/array.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/array.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/array.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/array.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/array.cc.s
 .PHONY : tora/object/array.cc.s
 
 tora/object/bytes.o: tora/object/bytes.cc.o
@@ -877,8 +931,8 @@ tora/object/bytes.o: tora/object/bytes.cc.o
 
 # target to build an object file
 tora/object/bytes.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/bytes.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/bytes.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/bytes.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/bytes.cc.o
 .PHONY : tora/object/bytes.cc.o
 
 tora/object/bytes.i: tora/object/bytes.cc.i
@@ -886,8 +940,8 @@ tora/object/bytes.i: tora/object/bytes.cc.i
 
 # target to preprocess a source file
 tora/object/bytes.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/bytes.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/bytes.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/bytes.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/bytes.cc.i
 .PHONY : tora/object/bytes.cc.i
 
 tora/object/bytes.s: tora/object/bytes.cc.s
@@ -895,8 +949,8 @@ tora/object/bytes.s: tora/object/bytes.cc.s
 
 # target to generate assembly for a file
 tora/object/bytes.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/bytes.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/bytes.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/bytes.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/bytes.cc.s
 .PHONY : tora/object/bytes.cc.s
 
 tora/object/caller.o: tora/object/caller.cc.o
@@ -904,8 +958,8 @@ tora/object/caller.o: tora/object/caller.cc.o
 
 # target to build an object file
 tora/object/caller.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/caller.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/caller.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/caller.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/caller.cc.o
 .PHONY : tora/object/caller.cc.o
 
 tora/object/caller.i: tora/object/caller.cc.i
@@ -913,8 +967,8 @@ tora/object/caller.i: tora/object/caller.cc.i
 
 # target to preprocess a source file
 tora/object/caller.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/caller.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/caller.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/caller.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/caller.cc.i
 .PHONY : tora/object/caller.cc.i
 
 tora/object/caller.s: tora/object/caller.cc.s
@@ -922,8 +976,8 @@ tora/object/caller.s: tora/object/caller.cc.s
 
 # target to generate assembly for a file
 tora/object/caller.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/caller.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/caller.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/caller.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/caller.cc.s
 .PHONY : tora/object/caller.cc.s
 
 tora/object/class.o: tora/object/class.cc.o
@@ -931,8 +985,8 @@ tora/object/class.o: tora/object/class.cc.o
 
 # target to build an object file
 tora/object/class.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/class.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/class.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/class.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/class.cc.o
 .PHONY : tora/object/class.cc.o
 
 tora/object/class.i: tora/object/class.cc.i
@@ -940,8 +994,8 @@ tora/object/class.i: tora/object/class.cc.i
 
 # target to preprocess a source file
 tora/object/class.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/class.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/class.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/class.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/class.cc.i
 .PHONY : tora/object/class.cc.i
 
 tora/object/class.s: tora/object/class.cc.s
@@ -949,8 +1003,8 @@ tora/object/class.s: tora/object/class.cc.s
 
 # target to generate assembly for a file
 tora/object/class.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/class.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/class.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/class.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/class.cc.s
 .PHONY : tora/object/class.cc.s
 
 tora/object/code.o: tora/object/code.cc.o
@@ -958,8 +1012,8 @@ tora/object/code.o: tora/object/code.cc.o
 
 # target to build an object file
 tora/object/code.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/code.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/code.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/code.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/code.cc.o
 .PHONY : tora/object/code.cc.o
 
 tora/object/code.i: tora/object/code.cc.i
@@ -967,8 +1021,8 @@ tora/object/code.i: tora/object/code.cc.i
 
 # target to preprocess a source file
 tora/object/code.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/code.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/code.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/code.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/code.cc.i
 .PHONY : tora/object/code.cc.i
 
 tora/object/code.s: tora/object/code.cc.s
@@ -976,8 +1030,8 @@ tora/object/code.s: tora/object/code.cc.s
 
 # target to generate assembly for a file
 tora/object/code.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/code.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/code.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/code.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/code.cc.s
 .PHONY : tora/object/code.cc.s
 
 tora/object/dir.o: tora/object/dir.cc.o
@@ -985,8 +1039,8 @@ tora/object/dir.o: tora/object/dir.cc.o
 
 # target to build an object file
 tora/object/dir.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dir.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dir.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dir.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dir.cc.o
 .PHONY : tora/object/dir.cc.o
 
 tora/object/dir.i: tora/object/dir.cc.i
@@ -994,8 +1048,8 @@ tora/object/dir.i: tora/object/dir.cc.i
 
 # target to preprocess a source file
 tora/object/dir.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dir.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dir.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dir.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dir.cc.i
 .PHONY : tora/object/dir.cc.i
 
 tora/object/dir.s: tora/object/dir.cc.s
@@ -1003,8 +1057,8 @@ tora/object/dir.s: tora/object/dir.cc.s
 
 # target to generate assembly for a file
 tora/object/dir.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dir.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dir.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dir.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dir.cc.s
 .PHONY : tora/object/dir.cc.s
 
 tora/object/double.o: tora/object/double.cc.o
@@ -1012,8 +1066,8 @@ tora/object/double.o: tora/object/double.cc.o
 
 # target to build an object file
 tora/object/double.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/double.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/double.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/double.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/double.cc.o
 .PHONY : tora/object/double.cc.o
 
 tora/object/double.i: tora/object/double.cc.i
@@ -1021,8 +1075,8 @@ tora/object/double.i: tora/object/double.cc.i
 
 # target to preprocess a source file
 tora/object/double.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/double.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/double.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/double.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/double.cc.i
 .PHONY : tora/object/double.cc.i
 
 tora/object/double.s: tora/object/double.cc.s
@@ -1030,8 +1084,8 @@ tora/object/double.s: tora/object/double.cc.s
 
 # target to generate assembly for a file
 tora/object/double.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/double.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/double.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/double.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/double.cc.s
 .PHONY : tora/object/double.cc.s
 
 tora/object/dynaloader.o: tora/object/dynaloader.cc.o
@@ -1039,8 +1093,8 @@ tora/object/dynaloader.o: tora/object/dynaloader.cc.o
 
 # target to build an object file
 tora/object/dynaloader.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dynaloader.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dynaloader.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dynaloader.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dynaloader.cc.o
 .PHONY : tora/object/dynaloader.cc.o
 
 tora/object/dynaloader.i: tora/object/dynaloader.cc.i
@@ -1048,8 +1102,8 @@ tora/object/dynaloader.i: tora/object/dynaloader.cc.i
 
 # target to preprocess a source file
 tora/object/dynaloader.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dynaloader.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dynaloader.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dynaloader.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dynaloader.cc.i
 .PHONY : tora/object/dynaloader.cc.i
 
 tora/object/dynaloader.s: tora/object/dynaloader.cc.s
@@ -1057,8 +1111,8 @@ tora/object/dynaloader.s: tora/object/dynaloader.cc.s
 
 # target to generate assembly for a file
 tora/object/dynaloader.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/dynaloader.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/dynaloader.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/dynaloader.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/dynaloader.cc.s
 .PHONY : tora/object/dynaloader.cc.s
 
 tora/object/env.o: tora/object/env.cc.o
@@ -1066,8 +1120,8 @@ tora/object/env.o: tora/object/env.cc.o
 
 # target to build an object file
 tora/object/env.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/env.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/env.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/env.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/env.cc.o
 .PHONY : tora/object/env.cc.o
 
 tora/object/env.i: tora/object/env.cc.i
@@ -1075,8 +1129,8 @@ tora/object/env.i: tora/object/env.cc.i
 
 # target to preprocess a source file
 tora/object/env.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/env.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/env.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/env.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/env.cc.i
 .PHONY : tora/object/env.cc.i
 
 tora/object/env.s: tora/object/env.cc.s
@@ -1084,8 +1138,8 @@ tora/object/env.s: tora/object/env.cc.s
 
 # target to generate assembly for a file
 tora/object/env.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/env.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/env.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/env.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/env.cc.s
 .PHONY : tora/object/env.cc.s
 
 tora/object/file.o: tora/object/file.cc.o
@@ -1093,8 +1147,8 @@ tora/object/file.o: tora/object/file.cc.o
 
 # target to build an object file
 tora/object/file.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file.cc.o
 .PHONY : tora/object/file.cc.o
 
 tora/object/file.i: tora/object/file.cc.i
@@ -1102,8 +1156,8 @@ tora/object/file.i: tora/object/file.cc.i
 
 # target to preprocess a source file
 tora/object/file.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file.cc.i
 .PHONY : tora/object/file.cc.i
 
 tora/object/file.s: tora/object/file.cc.s
@@ -1111,8 +1165,8 @@ tora/object/file.s: tora/object/file.cc.s
 
 # target to generate assembly for a file
 tora/object/file.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file.cc.s
 .PHONY : tora/object/file.cc.s
 
 tora/object/file_package.o: tora/object/file_package.cc.o
@@ -1120,8 +1174,8 @@ tora/object/file_package.o: tora/object/file_package.cc.o
 
 # target to build an object file
 tora/object/file_package.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file_package.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file_package.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file_package.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file_package.cc.o
 .PHONY : tora/object/file_package.cc.o
 
 tora/object/file_package.i: tora/object/file_package.cc.i
@@ -1129,8 +1183,8 @@ tora/object/file_package.i: tora/object/file_package.cc.i
 
 # target to preprocess a source file
 tora/object/file_package.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file_package.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file_package.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file_package.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file_package.cc.i
 .PHONY : tora/object/file_package.cc.i
 
 tora/object/file_package.s: tora/object/file_package.cc.s
@@ -1138,8 +1192,8 @@ tora/object/file_package.s: tora/object/file_package.cc.s
 
 # target to generate assembly for a file
 tora/object/file_package.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/file_package.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/file_package.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/file_package.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/file_package.cc.s
 .PHONY : tora/object/file_package.cc.s
 
 tora/object/hash.o: tora/object/hash.cc.o
@@ -1147,8 +1201,8 @@ tora/object/hash.o: tora/object/hash.cc.o
 
 # target to build an object file
 tora/object/hash.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/hash.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/hash.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/hash.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/hash.cc.o
 .PHONY : tora/object/hash.cc.o
 
 tora/object/hash.i: tora/object/hash.cc.i
@@ -1156,8 +1210,8 @@ tora/object/hash.i: tora/object/hash.cc.i
 
 # target to preprocess a source file
 tora/object/hash.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/hash.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/hash.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/hash.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/hash.cc.i
 .PHONY : tora/object/hash.cc.i
 
 tora/object/hash.s: tora/object/hash.cc.s
@@ -1165,8 +1219,8 @@ tora/object/hash.s: tora/object/hash.cc.s
 
 # target to generate assembly for a file
 tora/object/hash.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/hash.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/hash.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/hash.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/hash.cc.s
 .PHONY : tora/object/hash.cc.s
 
 tora/object/int.o: tora/object/int.cc.o
@@ -1174,8 +1228,8 @@ tora/object/int.o: tora/object/int.cc.o
 
 # target to build an object file
 tora/object/int.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/int.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/int.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/int.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/int.cc.o
 .PHONY : tora/object/int.cc.o
 
 tora/object/int.i: tora/object/int.cc.i
@@ -1183,8 +1237,8 @@ tora/object/int.i: tora/object/int.cc.i
 
 # target to preprocess a source file
 tora/object/int.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/int.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/int.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/int.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/int.cc.i
 .PHONY : tora/object/int.cc.i
 
 tora/object/int.s: tora/object/int.cc.s
@@ -1192,8 +1246,8 @@ tora/object/int.s: tora/object/int.cc.s
 
 # target to generate assembly for a file
 tora/object/int.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/int.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/int.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/int.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/int.cc.s
 .PHONY : tora/object/int.cc.s
 
 tora/object/internals.o: tora/object/internals.cc.o
@@ -1201,8 +1255,8 @@ tora/object/internals.o: tora/object/internals.cc.o
 
 # target to build an object file
 tora/object/internals.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/internals.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/internals.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/internals.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/internals.cc.o
 .PHONY : tora/object/internals.cc.o
 
 tora/object/internals.i: tora/object/internals.cc.i
@@ -1210,8 +1264,8 @@ tora/object/internals.i: tora/object/internals.cc.i
 
 # target to preprocess a source file
 tora/object/internals.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/internals.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/internals.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/internals.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/internals.cc.i
 .PHONY : tora/object/internals.cc.i
 
 tora/object/internals.s: tora/object/internals.cc.s
@@ -1219,8 +1273,8 @@ tora/object/internals.s: tora/object/internals.cc.s
 
 # target to generate assembly for a file
 tora/object/internals.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/internals.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/internals.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/internals.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/internals.cc.s
 .PHONY : tora/object/internals.cc.s
 
 tora/object/metaclass.o: tora/object/metaclass.cc.o
@@ -1228,8 +1282,8 @@ tora/object/metaclass.o: tora/object/metaclass.cc.o
 
 # target to build an object file
 tora/object/metaclass.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/metaclass.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/metaclass.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/metaclass.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/metaclass.cc.o
 .PHONY : tora/object/metaclass.cc.o
 
 tora/object/metaclass.i: tora/object/metaclass.cc.i
@@ -1237,8 +1291,8 @@ tora/object/metaclass.i: tora/object/metaclass.cc.i
 
 # target to preprocess a source file
 tora/object/metaclass.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/metaclass.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/metaclass.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/metaclass.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/metaclass.cc.i
 .PHONY : tora/object/metaclass.cc.i
 
 tora/object/metaclass.s: tora/object/metaclass.cc.s
@@ -1246,8 +1300,8 @@ tora/object/metaclass.s: tora/object/metaclass.cc.s
 
 # target to generate assembly for a file
 tora/object/metaclass.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/metaclass.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/metaclass.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/metaclass.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/metaclass.cc.s
 .PHONY : tora/object/metaclass.cc.s
 
 tora/object/object.o: tora/object/object.cc.o
@@ -1255,8 +1309,8 @@ tora/object/object.o: tora/object/object.cc.o
 
 # target to build an object file
 tora/object/object.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/object.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/object.cc.o
 .PHONY : tora/object/object.cc.o
 
 tora/object/object.i: tora/object/object.cc.i
@@ -1264,8 +1318,8 @@ tora/object/object.i: tora/object/object.cc.i
 
 # target to preprocess a source file
 tora/object/object.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/object.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/object.cc.i
 .PHONY : tora/object/object.cc.i
 
 tora/object/object.s: tora/object/object.cc.s
@@ -1273,8 +1327,8 @@ tora/object/object.s: tora/object/object.cc.s
 
 # target to generate assembly for a file
 tora/object/object.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/object.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/object.cc.s
 .PHONY : tora/object/object.cc.s
 
 tora/object/re2_regexp_matched.o: tora/object/re2_regexp_matched.cc.o
@@ -1282,8 +1336,8 @@ tora/object/re2_regexp_matched.o: tora/object/re2_regexp_matched.cc.o
 
 # target to build an object file
 tora/object/re2_regexp_matched.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/re2_regexp_matched.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/re2_regexp_matched.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/re2_regexp_matched.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/re2_regexp_matched.cc.o
 .PHONY : tora/object/re2_regexp_matched.cc.o
 
 tora/object/re2_regexp_matched.i: tora/object/re2_regexp_matched.cc.i
@@ -1291,8 +1345,8 @@ tora/object/re2_regexp_matched.i: tora/object/re2_regexp_matched.cc.i
 
 # target to preprocess a source file
 tora/object/re2_regexp_matched.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/re2_regexp_matched.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/re2_regexp_matched.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/re2_regexp_matched.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/re2_regexp_matched.cc.i
 .PHONY : tora/object/re2_regexp_matched.cc.i
 
 tora/object/re2_regexp_matched.s: tora/object/re2_regexp_matched.cc.s
@@ -1300,8 +1354,8 @@ tora/object/re2_regexp_matched.s: tora/object/re2_regexp_matched.cc.s
 
 # target to generate assembly for a file
 tora/object/re2_regexp_matched.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/re2_regexp_matched.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/re2_regexp_matched.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/re2_regexp_matched.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/re2_regexp_matched.cc.s
 .PHONY : tora/object/re2_regexp_matched.cc.s
 
 tora/object/regexp.o: tora/object/regexp.cc.o
@@ -1309,8 +1363,8 @@ tora/object/regexp.o: tora/object/regexp.cc.o
 
 # target to build an object file
 tora/object/regexp.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/regexp.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/regexp.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/regexp.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/regexp.cc.o
 .PHONY : tora/object/regexp.cc.o
 
 tora/object/regexp.i: tora/object/regexp.cc.i
@@ -1318,8 +1372,8 @@ tora/object/regexp.i: tora/object/regexp.cc.i
 
 # target to preprocess a source file
 tora/object/regexp.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/regexp.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/regexp.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/regexp.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/regexp.cc.i
 .PHONY : tora/object/regexp.cc.i
 
 tora/object/regexp.s: tora/object/regexp.cc.s
@@ -1327,8 +1381,8 @@ tora/object/regexp.s: tora/object/regexp.cc.s
 
 # target to generate assembly for a file
 tora/object/regexp.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/regexp.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/regexp.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/regexp.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/regexp.cc.s
 .PHONY : tora/object/regexp.cc.s
 
 tora/object/stat.o: tora/object/stat.cc.o
@@ -1336,8 +1390,8 @@ tora/object/stat.o: tora/object/stat.cc.o
 
 # target to build an object file
 tora/object/stat.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/stat.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/stat.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/stat.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/stat.cc.o
 .PHONY : tora/object/stat.cc.o
 
 tora/object/stat.i: tora/object/stat.cc.i
@@ -1345,8 +1399,8 @@ tora/object/stat.i: tora/object/stat.cc.i
 
 # target to preprocess a source file
 tora/object/stat.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/stat.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/stat.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/stat.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/stat.cc.i
 .PHONY : tora/object/stat.cc.i
 
 tora/object/stat.s: tora/object/stat.cc.s
@@ -1354,8 +1408,8 @@ tora/object/stat.s: tora/object/stat.cc.s
 
 # target to generate assembly for a file
 tora/object/stat.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/stat.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/stat.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/stat.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/stat.cc.s
 .PHONY : tora/object/stat.cc.s
 
 tora/object/str.o: tora/object/str.cc.o
@@ -1363,8 +1417,8 @@ tora/object/str.o: tora/object/str.cc.o
 
 # target to build an object file
 tora/object/str.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/str.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/str.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/str.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/str.cc.o
 .PHONY : tora/object/str.cc.o
 
 tora/object/str.i: tora/object/str.cc.i
@@ -1372,8 +1426,8 @@ tora/object/str.i: tora/object/str.cc.i
 
 # target to preprocess a source file
 tora/object/str.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/str.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/str.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/str.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/str.cc.i
 .PHONY : tora/object/str.cc.i
 
 tora/object/str.s: tora/object/str.cc.s
@@ -1381,8 +1435,8 @@ tora/object/str.s: tora/object/str.cc.s
 
 # target to generate assembly for a file
 tora/object/str.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/str.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/str.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/str.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/str.cc.s
 .PHONY : tora/object/str.cc.s
 
 tora/object/symbol.o: tora/object/symbol.cc.o
@@ -1390,8 +1444,8 @@ tora/object/symbol.o: tora/object/symbol.cc.o
 
 # target to build an object file
 tora/object/symbol.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/symbol.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/symbol.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/symbol.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/symbol.cc.o
 .PHONY : tora/object/symbol.cc.o
 
 tora/object/symbol.i: tora/object/symbol.cc.i
@@ -1399,8 +1453,8 @@ tora/object/symbol.i: tora/object/symbol.cc.i
 
 # target to preprocess a source file
 tora/object/symbol.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/symbol.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/symbol.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/symbol.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/symbol.cc.i
 .PHONY : tora/object/symbol.cc.i
 
 tora/object/symbol.s: tora/object/symbol.cc.s
@@ -1408,8 +1462,8 @@ tora/object/symbol.s: tora/object/symbol.cc.s
 
 # target to generate assembly for a file
 tora/object/symbol.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/symbol.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/symbol.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/symbol.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/symbol.cc.s
 .PHONY : tora/object/symbol.cc.s
 
 tora/object/time.o: tora/object/time.cc.o
@@ -1417,8 +1471,8 @@ tora/object/time.o: tora/object/time.cc.o
 
 # target to build an object file
 tora/object/time.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/time.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/time.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/time.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/time.cc.o
 .PHONY : tora/object/time.cc.o
 
 tora/object/time.i: tora/object/time.cc.i
@@ -1426,8 +1480,8 @@ tora/object/time.i: tora/object/time.cc.i
 
 # target to preprocess a source file
 tora/object/time.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/time.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/time.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/time.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/time.cc.i
 .PHONY : tora/object/time.cc.i
 
 tora/object/time.s: tora/object/time.cc.s
@@ -1435,8 +1489,8 @@ tora/object/time.s: tora/object/time.cc.s
 
 # target to generate assembly for a file
 tora/object/time.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/object/time.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/object/time.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/object/time.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/object/time.cc.s
 .PHONY : tora/object/time.cc.s
 
 tora/op.o: tora/op.cc.o
@@ -1444,8 +1498,8 @@ tora/op.o: tora/op.cc.o
 
 # target to build an object file
 tora/op.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/op.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/op.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/op.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/op.cc.o
 .PHONY : tora/op.cc.o
 
 tora/op.i: tora/op.cc.i
@@ -1453,8 +1507,8 @@ tora/op.i: tora/op.cc.i
 
 # target to preprocess a source file
 tora/op.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/op.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/op.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/op.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/op.cc.i
 .PHONY : tora/op.cc.i
 
 tora/op.s: tora/op.cc.s
@@ -1462,8 +1516,8 @@ tora/op.s: tora/op.cc.s
 
 # target to generate assembly for a file
 tora/op.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/op.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/op.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/op.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/op.cc.s
 .PHONY : tora/op.cc.s
 
 tora/operator.o: tora/operator.cc.o
@@ -1471,8 +1525,8 @@ tora/operator.o: tora/operator.cc.o
 
 # target to build an object file
 tora/operator.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/operator.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/operator.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/operator.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/operator.cc.o
 .PHONY : tora/operator.cc.o
 
 tora/operator.i: tora/operator.cc.i
@@ -1480,8 +1534,8 @@ tora/operator.i: tora/operator.cc.i
 
 # target to preprocess a source file
 tora/operator.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/operator.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/operator.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/operator.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/operator.cc.i
 .PHONY : tora/operator.cc.i
 
 tora/operator.s: tora/operator.cc.s
@@ -1489,8 +1543,8 @@ tora/operator.s: tora/operator.cc.s
 
 # target to generate assembly for a file
 tora/operator.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/operator.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/operator.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/operator.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/operator.cc.s
 .PHONY : tora/operator.cc.s
 
 tora/ops.gen.o: tora/ops.gen.cc.o
@@ -1498,8 +1552,8 @@ tora/ops.gen.o: tora/ops.gen.cc.o
 
 # target to build an object file
 tora/ops.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/ops.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/ops.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/ops.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/ops.gen.cc.o
 .PHONY : tora/ops.gen.cc.o
 
 tora/ops.gen.i: tora/ops.gen.cc.i
@@ -1507,8 +1561,8 @@ tora/ops.gen.i: tora/ops.gen.cc.i
 
 # target to preprocess a source file
 tora/ops.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/ops.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/ops.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/ops.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/ops.gen.cc.i
 .PHONY : tora/ops.gen.cc.i
 
 tora/ops.gen.s: tora/ops.gen.cc.s
@@ -1516,8 +1570,8 @@ tora/ops.gen.s: tora/ops.gen.cc.s
 
 # target to generate assembly for a file
 tora/ops.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/ops.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/ops.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/ops.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/ops.gen.cc.s
 .PHONY : tora/ops.gen.cc.s
 
 tora/pad_list.o: tora/pad_list.cc.o
@@ -1525,8 +1579,8 @@ tora/pad_list.o: tora/pad_list.cc.o
 
 # target to build an object file
 tora/pad_list.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/pad_list.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/pad_list.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/pad_list.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/pad_list.cc.o
 .PHONY : tora/pad_list.cc.o
 
 tora/pad_list.i: tora/pad_list.cc.i
@@ -1534,8 +1588,8 @@ tora/pad_list.i: tora/pad_list.cc.i
 
 # target to preprocess a source file
 tora/pad_list.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/pad_list.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/pad_list.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/pad_list.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/pad_list.cc.i
 .PHONY : tora/pad_list.cc.i
 
 tora/pad_list.s: tora/pad_list.cc.s
@@ -1543,8 +1597,8 @@ tora/pad_list.s: tora/pad_list.cc.s
 
 # target to generate assembly for a file
 tora/pad_list.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/pad_list.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/pad_list.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/pad_list.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/pad_list.cc.s
 .PHONY : tora/pad_list.cc.s
 
 tora/parser.o: tora/parser.cc.o
@@ -1552,8 +1606,8 @@ tora/parser.o: tora/parser.cc.o
 
 # target to build an object file
 tora/parser.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/parser.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/parser.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/parser.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/parser.cc.o
 .PHONY : tora/parser.cc.o
 
 tora/parser.i: tora/parser.cc.i
@@ -1561,8 +1615,8 @@ tora/parser.i: tora/parser.cc.i
 
 # target to preprocess a source file
 tora/parser.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/parser.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/parser.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/parser.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/parser.cc.i
 .PHONY : tora/parser.cc.i
 
 tora/parser.s: tora/parser.cc.s
@@ -1570,8 +1624,8 @@ tora/parser.s: tora/parser.cc.s
 
 # target to generate assembly for a file
 tora/parser.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/parser.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/parser.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/parser.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/parser.cc.s
 .PHONY : tora/parser.cc.s
 
 tora/peek.o: tora/peek.cc.o
@@ -1579,8 +1633,8 @@ tora/peek.o: tora/peek.cc.o
 
 # target to build an object file
 tora/peek.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/peek.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/peek.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/peek.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/peek.cc.o
 .PHONY : tora/peek.cc.o
 
 tora/peek.i: tora/peek.cc.i
@@ -1588,8 +1642,8 @@ tora/peek.i: tora/peek.cc.i
 
 # target to preprocess a source file
 tora/peek.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/peek.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/peek.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/peek.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/peek.cc.i
 .PHONY : tora/peek.cc.i
 
 tora/peek.s: tora/peek.cc.s
@@ -1597,8 +1651,8 @@ tora/peek.s: tora/peek.cc.s
 
 # target to generate assembly for a file
 tora/peek.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/peek.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/peek.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/peek.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/peek.cc.s
 .PHONY : tora/peek.cc.s
 
 tora/printf.o: tora/printf.cc.o
@@ -1606,8 +1660,8 @@ tora/printf.o: tora/printf.cc.o
 
 # target to build an object file
 tora/printf.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/printf.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/printf.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/printf.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/printf.cc.o
 .PHONY : tora/printf.cc.o
 
 tora/printf.i: tora/printf.cc.i
@@ -1615,8 +1669,8 @@ tora/printf.i: tora/printf.cc.i
 
 # target to preprocess a source file
 tora/printf.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/printf.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/printf.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/printf.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/printf.cc.i
 .PHONY : tora/printf.cc.i
 
 tora/printf.s: tora/printf.cc.s
@@ -1624,8 +1678,8 @@ tora/printf.s: tora/printf.cc.s
 
 # target to generate assembly for a file
 tora/printf.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/printf.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/printf.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/printf.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/printf.cc.s
 .PHONY : tora/printf.cc.s
 
 tora/symbol_table.o: tora/symbol_table.cc.o
@@ -1633,8 +1687,8 @@ tora/symbol_table.o: tora/symbol_table.cc.o
 
 # target to build an object file
 tora/symbol_table.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbol_table.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbol_table.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbol_table.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbol_table.cc.o
 .PHONY : tora/symbol_table.cc.o
 
 tora/symbol_table.i: tora/symbol_table.cc.i
@@ -1642,8 +1696,8 @@ tora/symbol_table.i: tora/symbol_table.cc.i
 
 # target to preprocess a source file
 tora/symbol_table.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbol_table.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbol_table.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbol_table.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbol_table.cc.i
 .PHONY : tora/symbol_table.cc.i
 
 tora/symbol_table.s: tora/symbol_table.cc.s
@@ -1651,8 +1705,8 @@ tora/symbol_table.s: tora/symbol_table.cc.s
 
 # target to generate assembly for a file
 tora/symbol_table.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbol_table.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbol_table.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbol_table.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbol_table.cc.s
 .PHONY : tora/symbol_table.cc.s
 
 tora/symbols.gen.o: tora/symbols.gen.cc.o
@@ -1660,8 +1714,8 @@ tora/symbols.gen.o: tora/symbols.gen.cc.o
 
 # target to build an object file
 tora/symbols.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbols.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbols.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbols.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbols.gen.cc.o
 .PHONY : tora/symbols.gen.cc.o
 
 tora/symbols.gen.i: tora/symbols.gen.cc.i
@@ -1669,8 +1723,8 @@ tora/symbols.gen.i: tora/symbols.gen.cc.i
 
 # target to preprocess a source file
 tora/symbols.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbols.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbols.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbols.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbols.gen.cc.i
 .PHONY : tora/symbols.gen.cc.i
 
 tora/symbols.gen.s: tora/symbols.gen.cc.s
@@ -1678,8 +1732,8 @@ tora/symbols.gen.s: tora/symbols.gen.cc.s
 
 # target to generate assembly for a file
 tora/symbols.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/symbols.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/symbols.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/symbols.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/symbols.gen.cc.s
 .PHONY : tora/symbols.gen.cc.s
 
 tora/token.gen.o: tora/token.gen.cc.o
@@ -1687,8 +1741,8 @@ tora/token.gen.o: tora/token.gen.cc.o
 
 # target to build an object file
 tora/token.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/token.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/token.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/token.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/token.gen.cc.o
 .PHONY : tora/token.gen.cc.o
 
 tora/token.gen.i: tora/token.gen.cc.i
@@ -1696,8 +1750,8 @@ tora/token.gen.i: tora/token.gen.cc.i
 
 # target to preprocess a source file
 tora/token.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/token.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/token.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/token.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/token.gen.cc.i
 .PHONY : tora/token.gen.cc.i
 
 tora/token.gen.s: tora/token.gen.cc.s
@@ -1705,8 +1759,8 @@ tora/token.gen.s: tora/token.gen.cc.s
 
 # target to generate assembly for a file
 tora/token.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/token.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/token.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/token.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/token.gen.cc.s
 .PHONY : tora/token.gen.cc.s
 
 tora/util.o: tora/util.cc.o
@@ -1714,8 +1768,8 @@ tora/util.o: tora/util.cc.o
 
 # target to build an object file
 tora/util.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/util.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/util.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/util.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/util.cc.o
 .PHONY : tora/util.cc.o
 
 tora/util.i: tora/util.cc.i
@@ -1723,8 +1777,8 @@ tora/util.i: tora/util.cc.i
 
 # target to preprocess a source file
 tora/util.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/util.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/util.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/util.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/util.cc.i
 .PHONY : tora/util.cc.i
 
 tora/util.s: tora/util.cc.s
@@ -1732,8 +1786,8 @@ tora/util.s: tora/util.cc.s
 
 # target to generate assembly for a file
 tora/util.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/util.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/util.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/util.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/util.cc.s
 .PHONY : tora/util.cc.s
 
 tora/value.o: tora/value.cc.o
@@ -1741,8 +1795,8 @@ tora/value.o: tora/value.cc.o
 
 # target to build an object file
 tora/value.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value.cc.o
 .PHONY : tora/value.cc.o
 
 tora/value.i: tora/value.cc.i
@@ -1750,8 +1804,8 @@ tora/value.i: tora/value.cc.i
 
 # target to preprocess a source file
 tora/value.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value.cc.i
 .PHONY : tora/value.cc.i
 
 tora/value.s: tora/value.cc.s
@@ -1759,8 +1813,8 @@ tora/value.s: tora/value.cc.s
 
 # target to generate assembly for a file
 tora/value.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value.cc.s
 .PHONY : tora/value.cc.s
 
 tora/value/array.o: tora/value/array.cc.o
@@ -1768,8 +1822,8 @@ tora/value/array.o: tora/value/array.cc.o
 
 # target to build an object file
 tora/value/array.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/array.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/array.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/array.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/array.cc.o
 .PHONY : tora/value/array.cc.o
 
 tora/value/array.i: tora/value/array.cc.i
@@ -1777,8 +1831,8 @@ tora/value/array.i: tora/value/array.cc.i
 
 # target to preprocess a source file
 tora/value/array.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/array.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/array.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/array.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/array.cc.i
 .PHONY : tora/value/array.cc.i
 
 tora/value/array.s: tora/value/array.cc.s
@@ -1786,8 +1840,8 @@ tora/value/array.s: tora/value/array.cc.s
 
 # target to generate assembly for a file
 tora/value/array.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/array.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/array.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/array.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/array.cc.s
 .PHONY : tora/value/array.cc.s
 
 tora/value/bool.o: tora/value/bool.cc.o
@@ -1795,8 +1849,8 @@ tora/value/bool.o: tora/value/bool.cc.o
 
 # target to build an object file
 tora/value/bool.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bool.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bool.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bool.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bool.cc.o
 .PHONY : tora/value/bool.cc.o
 
 tora/value/bool.i: tora/value/bool.cc.i
@@ -1804,8 +1858,8 @@ tora/value/bool.i: tora/value/bool.cc.i
 
 # target to preprocess a source file
 tora/value/bool.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bool.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bool.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bool.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bool.cc.i
 .PHONY : tora/value/bool.cc.i
 
 tora/value/bool.s: tora/value/bool.cc.s
@@ -1813,8 +1867,8 @@ tora/value/bool.s: tora/value/bool.cc.s
 
 # target to generate assembly for a file
 tora/value/bool.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bool.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bool.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bool.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bool.cc.s
 .PHONY : tora/value/bool.cc.s
 
 tora/value/bytes.o: tora/value/bytes.cc.o
@@ -1822,8 +1876,8 @@ tora/value/bytes.o: tora/value/bytes.cc.o
 
 # target to build an object file
 tora/value/bytes.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bytes.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bytes.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bytes.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bytes.cc.o
 .PHONY : tora/value/bytes.cc.o
 
 tora/value/bytes.i: tora/value/bytes.cc.i
@@ -1831,8 +1885,8 @@ tora/value/bytes.i: tora/value/bytes.cc.i
 
 # target to preprocess a source file
 tora/value/bytes.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bytes.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bytes.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bytes.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bytes.cc.i
 .PHONY : tora/value/bytes.cc.i
 
 tora/value/bytes.s: tora/value/bytes.cc.s
@@ -1840,8 +1894,8 @@ tora/value/bytes.s: tora/value/bytes.cc.s
 
 # target to generate assembly for a file
 tora/value/bytes.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/bytes.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/bytes.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/bytes.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/bytes.cc.s
 .PHONY : tora/value/bytes.cc.s
 
 tora/value/class.o: tora/value/class.cc.o
@@ -1849,8 +1903,8 @@ tora/value/class.o: tora/value/class.cc.o
 
 # target to build an object file
 tora/value/class.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/class.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/class.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/class.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/class.cc.o
 .PHONY : tora/value/class.cc.o
 
 tora/value/class.i: tora/value/class.cc.i
@@ -1858,8 +1912,8 @@ tora/value/class.i: tora/value/class.cc.i
 
 # target to preprocess a source file
 tora/value/class.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/class.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/class.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/class.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/class.cc.i
 .PHONY : tora/value/class.cc.i
 
 tora/value/class.s: tora/value/class.cc.s
@@ -1867,8 +1921,8 @@ tora/value/class.s: tora/value/class.cc.s
 
 # target to generate assembly for a file
 tora/value/class.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/class.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/class.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/class.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/class.cc.s
 .PHONY : tora/value/class.cc.s
 
 tora/value/code.o: tora/value/code.cc.o
@@ -1876,8 +1930,8 @@ tora/value/code.o: tora/value/code.cc.o
 
 # target to build an object file
 tora/value/code.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/code.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/code.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/code.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/code.cc.o
 .PHONY : tora/value/code.cc.o
 
 tora/value/code.i: tora/value/code.cc.i
@@ -1885,8 +1939,8 @@ tora/value/code.i: tora/value/code.cc.i
 
 # target to preprocess a source file
 tora/value/code.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/code.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/code.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/code.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/code.cc.i
 .PHONY : tora/value/code.cc.i
 
 tora/value/code.s: tora/value/code.cc.s
@@ -1894,8 +1948,8 @@ tora/value/code.s: tora/value/code.cc.s
 
 # target to generate assembly for a file
 tora/value/code.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/code.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/code.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/code.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/code.cc.s
 .PHONY : tora/value/code.cc.s
 
 tora/value/exception.o: tora/value/exception.cc.o
@@ -1903,8 +1957,8 @@ tora/value/exception.o: tora/value/exception.cc.o
 
 # target to build an object file
 tora/value/exception.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/exception.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/exception.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/exception.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/exception.cc.o
 .PHONY : tora/value/exception.cc.o
 
 tora/value/exception.i: tora/value/exception.cc.i
@@ -1912,8 +1966,8 @@ tora/value/exception.i: tora/value/exception.cc.i
 
 # target to preprocess a source file
 tora/value/exception.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/exception.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/exception.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/exception.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/exception.cc.i
 .PHONY : tora/value/exception.cc.i
 
 tora/value/exception.s: tora/value/exception.cc.s
@@ -1921,8 +1975,8 @@ tora/value/exception.s: tora/value/exception.cc.s
 
 # target to generate assembly for a file
 tora/value/exception.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/exception.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/exception.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/exception.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/exception.cc.s
 .PHONY : tora/value/exception.cc.s
 
 tora/value/hash.o: tora/value/hash.cc.o
@@ -1930,8 +1984,8 @@ tora/value/hash.o: tora/value/hash.cc.o
 
 # target to build an object file
 tora/value/hash.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/hash.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/hash.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/hash.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/hash.cc.o
 .PHONY : tora/value/hash.cc.o
 
 tora/value/hash.i: tora/value/hash.cc.i
@@ -1939,8 +1993,8 @@ tora/value/hash.i: tora/value/hash.cc.i
 
 # target to preprocess a source file
 tora/value/hash.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/hash.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/hash.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/hash.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/hash.cc.i
 .PHONY : tora/value/hash.cc.i
 
 tora/value/hash.s: tora/value/hash.cc.s
@@ -1948,8 +2002,8 @@ tora/value/hash.s: tora/value/hash.cc.s
 
 # target to generate assembly for a file
 tora/value/hash.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/hash.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/hash.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/hash.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/hash.cc.s
 .PHONY : tora/value/hash.cc.s
 
 tora/value/int.o: tora/value/int.cc.o
@@ -1957,8 +2011,8 @@ tora/value/int.o: tora/value/int.cc.o
 
 # target to build an object file
 tora/value/int.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/int.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/int.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/int.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/int.cc.o
 .PHONY : tora/value/int.cc.o
 
 tora/value/int.i: tora/value/int.cc.i
@@ -1966,8 +2020,8 @@ tora/value/int.i: tora/value/int.cc.i
 
 # target to preprocess a source file
 tora/value/int.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/int.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/int.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/int.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/int.cc.i
 .PHONY : tora/value/int.cc.i
 
 tora/value/int.s: tora/value/int.cc.s
@@ -1975,8 +2029,8 @@ tora/value/int.s: tora/value/int.cc.s
 
 # target to generate assembly for a file
 tora/value/int.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/int.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/int.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/int.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/int.cc.s
 .PHONY : tora/value/int.cc.s
 
 tora/value/object.o: tora/value/object.cc.o
@@ -1984,8 +2038,8 @@ tora/value/object.o: tora/value/object.cc.o
 
 # target to build an object file
 tora/value/object.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/object.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/object.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/object.cc.o
 .PHONY : tora/value/object.cc.o
 
 tora/value/object.i: tora/value/object.cc.i
@@ -1993,8 +2047,8 @@ tora/value/object.i: tora/value/object.cc.i
 
 # target to preprocess a source file
 tora/value/object.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/object.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/object.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/object.cc.i
 .PHONY : tora/value/object.cc.i
 
 tora/value/object.s: tora/value/object.cc.s
@@ -2002,8 +2056,8 @@ tora/value/object.s: tora/value/object.cc.s
 
 # target to generate assembly for a file
 tora/value/object.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/object.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/object.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/object.cc.s
 .PHONY : tora/value/object.cc.s
 
 tora/value/range.o: tora/value/range.cc.o
@@ -2011,8 +2065,8 @@ tora/value/range.o: tora/value/range.cc.o
 
 # target to build an object file
 tora/value/range.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/range.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/range.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/range.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/range.cc.o
 .PHONY : tora/value/range.cc.o
 
 tora/value/range.i: tora/value/range.cc.i
@@ -2020,8 +2074,8 @@ tora/value/range.i: tora/value/range.cc.i
 
 # target to preprocess a source file
 tora/value/range.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/range.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/range.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/range.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/range.cc.i
 .PHONY : tora/value/range.cc.i
 
 tora/value/range.s: tora/value/range.cc.s
@@ -2029,8 +2083,8 @@ tora/value/range.s: tora/value/range.cc.s
 
 # target to generate assembly for a file
 tora/value/range.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/range.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/range.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/range.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/range.cc.s
 .PHONY : tora/value/range.cc.s
 
 tora/value/regexp.o: tora/value/regexp.cc.o
@@ -2038,8 +2092,8 @@ tora/value/regexp.o: tora/value/regexp.cc.o
 
 # target to build an object file
 tora/value/regexp.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/regexp.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/regexp.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/regexp.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/regexp.cc.o
 .PHONY : tora/value/regexp.cc.o
 
 tora/value/regexp.i: tora/value/regexp.cc.i
@@ -2047,8 +2101,8 @@ tora/value/regexp.i: tora/value/regexp.cc.i
 
 # target to preprocess a source file
 tora/value/regexp.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/regexp.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/regexp.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/regexp.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/regexp.cc.i
 .PHONY : tora/value/regexp.cc.i
 
 tora/value/regexp.s: tora/value/regexp.cc.s
@@ -2056,8 +2110,8 @@ tora/value/regexp.s: tora/value/regexp.cc.s
 
 # target to generate assembly for a file
 tora/value/regexp.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/regexp.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/regexp.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/regexp.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/regexp.cc.s
 .PHONY : tora/value/regexp.cc.s
 
 tora/value/str.o: tora/value/str.cc.o
@@ -2065,8 +2119,8 @@ tora/value/str.o: tora/value/str.cc.o
 
 # target to build an object file
 tora/value/str.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/str.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/str.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/str.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/str.cc.o
 .PHONY : tora/value/str.cc.o
 
 tora/value/str.i: tora/value/str.cc.i
@@ -2074,8 +2128,8 @@ tora/value/str.i: tora/value/str.cc.i
 
 # target to preprocess a source file
 tora/value/str.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/str.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/str.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/str.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/str.cc.i
 .PHONY : tora/value/str.cc.i
 
 tora/value/str.s: tora/value/str.cc.s
@@ -2083,8 +2137,8 @@ tora/value/str.s: tora/value/str.cc.s
 
 # target to generate assembly for a file
 tora/value/str.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/value/str.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/value/str.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/value/str.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/value/str.cc.s
 .PHONY : tora/value/str.cc.s
 
 tora/vm.o: tora/vm.cc.o
@@ -2092,8 +2146,8 @@ tora/vm.o: tora/vm.cc.o
 
 # target to build an object file
 tora/vm.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.cc.o
 .PHONY : tora/vm.cc.o
 
 tora/vm.i: tora/vm.cc.i
@@ -2101,8 +2155,8 @@ tora/vm.i: tora/vm.cc.i
 
 # target to preprocess a source file
 tora/vm.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.cc.i
 .PHONY : tora/vm.cc.i
 
 tora/vm.s: tora/vm.cc.s
@@ -2110,8 +2164,8 @@ tora/vm.s: tora/vm.cc.s
 
 # target to generate assembly for a file
 tora/vm.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.cc.s
 .PHONY : tora/vm.cc.s
 
 tora/vm.gen.o: tora/vm.gen.cc.o
@@ -2119,8 +2173,8 @@ tora/vm.gen.o: tora/vm.gen.cc.o
 
 # target to build an object file
 tora/vm.gen.cc.o:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.gen.cc.o
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.gen.cc.o
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.gen.cc.o
 .PHONY : tora/vm.gen.cc.o
 
 tora/vm.gen.i: tora/vm.gen.cc.i
@@ -2128,8 +2182,8 @@ tora/vm.gen.i: tora/vm.gen.cc.i
 
 # target to preprocess a source file
 tora/vm.gen.cc.i:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.gen.cc.i
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.gen.cc.i
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.gen.cc.i
 .PHONY : tora/vm.gen.cc.i
 
 tora/vm.gen.s: tora/vm.gen.cc.s
@@ -2137,8 +2191,8 @@ tora/vm.gen.s: tora/vm.gen.cc.s
 
 # target to generate assembly for a file
 tora/vm.gen.cc.s:
-	$(MAKE) -f CMakeFiles/libtora.dir/build.make CMakeFiles/libtora.dir/tora/vm.gen.cc.s
-	$(MAKE) -f CMakeFiles/toraexe.dir/build.make CMakeFiles/toraexe.dir/tora/vm.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_a.dir/build.make CMakeFiles/libtora_a.dir/tora/vm.gen.cc.s
+	$(MAKE) -f CMakeFiles/libtora_so.dir/build.make CMakeFiles/libtora_so.dir/tora/vm.gen.cc.s
 .PHONY : tora/vm.gen.cc.s
 
 # Help Target
@@ -2148,8 +2202,13 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
 	@echo "... lemon"
-	@echo "... libtora"
+	@echo "... libtora_a"
+	@echo "... libtora_so"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... tests/test_compiler.t"
