@@ -90,7 +90,7 @@ TARGET_LINK_LIBRARIES(libtora_so ${libs})
 
 # bin/tora
 ADD_EXECUTABLE(toraexe tora/main.cc)
-TARGET_LINK_LIBRARIES(toraexe "tora" ${libs} libtora_a)
+TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a)
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
 
 #############################################################################
@@ -123,4 +123,5 @@ INSTALL(TARGETS toraexe DESTINATION bin)
 # And libraries
 #############################################################################
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Socket/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Curl/)
 
