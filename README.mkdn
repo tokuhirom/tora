@@ -38,12 +38,12 @@ How to Build
 
 ### Install deps on OSX
 
-    brew install re2c icu4c scons boost
+    brew install re2c icu4c scons boost cmake
     brew link icu4c
 
 ### Install deps on ubuntu
 
-    sudo aptitude install libboost1.48-all-dev scons re2c libcurl4-dev libicu-dev
+    sudo aptitude install libboost1.48-all-dev re2c libcurl4-dev libicu-dev cmake clang
 
 ### Build
 
@@ -51,7 +51,7 @@ How to Build
     cd tora
     git submodule init
     git submodule update
-    scons
-    scons test
-    sudo scons install
+    cmake .
+    make
+    sudo make install
 
