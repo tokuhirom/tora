@@ -89,7 +89,7 @@ TARGET_LINK_LIBRARIES(libtora_so ${libs})
 
 # bin/tora
 ADD_EXECUTABLE(toraexe tora/main.cc)
-TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a)
+TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a "boost_program_options-mt")
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
 
 #############################################################################

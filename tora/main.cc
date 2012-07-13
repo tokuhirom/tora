@@ -15,6 +15,7 @@
 #include <memory>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/program_options.hpp>
 
 #include "tora.h"
 #include "vm.h"
@@ -28,6 +29,8 @@
 #include "value/file_package.h"
 
 using namespace tora;
+
+namespace po = boost::program_options;
 
 static void show_configuration() {
     printf("Tora %s\n", TORA_VERSION_STR);
@@ -67,55 +70,73 @@ static void run_repl(int argc, char **argv, const std::vector<std::string> &libs
 }
 
 int main(int argc, char **argv) {
-    char opt;
     bool dump_ops = false;
     bool dump_ast = false;
     bool compile_only = false;
     bool parse_trace = false;
     bool exec_trace = false;
     std::vector< std::string > libs;
-    char *code = NULL;
-    while ((opt = getopt(argc, argv, "Vyvdtcqe:I:")) != -1) {
-        switch (opt) {
-        case 'v':
+    std::string code;
+
+    try {
+        po::options_description desc("Allowed options");
+        desc.add_options()
+            ("help", "produce help message")
+            ("vernum", "show version number")
+            ("version,v", "show version information")
+            ("version-full,V", "show full version information")
+            ("Dtree,t", "dump abstract syntax tree")
+            ("Dops,d", "dump ops")
+            ("eval,e", po::value<std::string>(&code), "evaluate one liner")
+            ("include,I", po::value< std::vector<std::string> >(&libs), "library include path")
+            ("compile-only,c", "only compile")
+            ("parse-trace,y", "parse trace")
+            ("exec-trace,q", "exec trace")
+        ;
+        po::variables_map varmap;
+        po::store(po::parse_command_line(argc, argv, desc), varmap);
+        po::notify(varmap);
+
+        if (varmap.count("help")) {
+            std::cerr << desc << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (varmap.count("vernum")) {
+            std::cout << TORA_VERSION_STR << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (varmap.count("version")) {
             printf("tora version %s\n", TORA_VERSION_STR);
             exit(EXIT_SUCCESS);
-        case 't':
-            dump_ast = true;
-            break;
-        case 'd':
-            dump_ops = true;
-            break;
-        case 'e':
-            code = optarg;
-            break;
-        case 'I':
-            libs.push_back(std::string(optarg));
-            break;
-        case 'c':
-            compile_only = true;
-            break;
-        case 'y':
-            parse_trace = true;
-            break;
-        case 'V':
+        }
+        if (varmap.count("version-full")) {
             show_configuration();
             exit(EXIT_SUCCESS);
-            break;
-        case 'q':
-            exec_trace = true;
-            break;
-        default:
-            fprintf(stderr, "Usage: %s [-v] [srcfile]\n", argv[0]);
-            exit(EXIT_FAILURE);
         }
+        if (varmap.count("Dtree")) {
+            dump_ast = true;
+        }
+        if (varmap.count("Dops")) {
+            dump_ops = true;
+        }
+        if (varmap.count("compile-only")) {
+            compile_only = true;
+        }
+        if (varmap.count("parse-trace")) {
+            parse_trace = true;
+        }
+        if (varmap.count("exec-trace")) {
+            exec_trace = true;
+        }
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
     }
 
     boost::scoped_ptr<std::ifstream> ifs;
     boost::scoped_ptr<std::stringstream> ss;
     SharedPtr<Scanner> scanner;
     std::string filename;
-    if (code) {
+    if (code.length()) {
         ss.reset(new std::stringstream(std::string(code) + ";"));
         filename = "<eval>";
         scanner = new Scanner(ss.get(), "<eval>");
