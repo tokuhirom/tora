@@ -109,16 +109,18 @@ foreach(f ${TEST_CC_FILES})
     TARGET_LINK_LIBRARIES("${_output}" "tora" ${libs} dl)
 endforeach(f)
 
-#   for src in glob("tests/test_*.cc"):
-#       programs.append(env.NoClean(env.Program(src.rstrip(".cc") + '.t' + exe_suffix, [
-#           libfiles,
-#           src,
-#       ])))
-
 # test settings
 ADD_CUSTOM_TARGET(test COMMAND "${PERL_EXECUTABLE}" util/test.pl DEPENDS tora)
 
+#############################################################################
+# installation settings
+#############################################################################
 INSTALL(TARGETS libtora_a ARCHIVE DESTINATION lib)
 INSTALL(TARGETS libtora_so LIBRARY DESTINATION lib)
 INSTALL(TARGETS toraexe DESTINATION bin)
+
+#############################################################################
+# And libraries
+#############################################################################
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Socket/)
 
