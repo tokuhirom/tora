@@ -38,7 +38,7 @@ static void show_configuration() {
     printf("Install prefix: %s\n", TORA_PREFIX);
 }
 
-static void run_repl(int argc, char **argv, const std::vector<std::string> &libs) {
+static void run_repl(const std::vector<std::string>& args, const std::vector<std::string> &libs) {
     bool dump_ops = false;
 
     SharedPtr<Scanner> scanner = new Scanner(&std::cin, "<stdin>");
@@ -49,7 +49,7 @@ static void run_repl(int argc, char **argv, const std::vector<std::string> &libs
 
     tora::VM vm(compiler.ops, symbol_table, dump_ops);
     vm.register_standard_methods();
-    vm.init_globals(argc-optind, argv+optind);
+    vm.init_globals(args);
     for (auto iter = libs.begin(); iter != libs.end(); iter++) {
         vm.add_library_path(*iter);
     }
@@ -76,6 +76,7 @@ int main(int argc, char **argv) {
     bool parse_trace = false;
     bool exec_trace = false;
     std::vector< std::string > libs;
+    std::vector< std::string > args;
     std::string code;
 
     try {
@@ -93,8 +94,17 @@ int main(int argc, char **argv) {
             ("parse-trace,y", "parse trace")
             ("exec-trace,q", "exec trace")
         ;
+        po::options_description positional_desc;
+        positional_desc.add_options()
+            ("positional", po::value<std::vector<std::string> >(&args))
+        ;
+        po::options_description all_desc;
+        all_desc.add(desc).add(positional_desc);
+        po::positional_options_description posops;
+        posops.add("positional", -1);
+
         po::variables_map varmap;
-        po::store(po::parse_command_line(argc, argv, desc), varmap);
+        po::store(po::command_line_parser(argc, argv).options(all_desc).positional(posops).run(), varmap);
         po::notify(varmap);
 
         if (varmap.count("help")) {
@@ -140,19 +150,18 @@ int main(int argc, char **argv) {
         ss.reset(new std::stringstream(std::string(code) + ";"));
         filename = "<eval>";
         scanner = new Scanner(ss.get(), "<eval>");
-    } else if (optind < argc) { // source code
-        ifs.reset(new std::ifstream(argv[optind], std::ios::in));
+    } else if (args.size() > 0) { // source code
+        filename = args[0];
+        ifs.reset(new std::ifstream(filename, std::ios::in));
         assert(ifs);
         if (!ifs->is_open()) {
-            perror(argv[optind]);
+            fprintf(stderr, "Cannot open source file '%s': %s\n", filename.c_str(), strerror(errno));
             exit(EXIT_FAILURE);
         }
-        scanner = new Scanner(ifs.get(), argv[optind]);
-        filename = argv[optind];
-        optind++;
+        scanner = new Scanner(ifs.get(), filename);
     } else {
         if (isatty(fileno(stdin)) && isatty(fileno(stdout))) {
-            run_repl(argc, argv, libs);
+            run_repl(args, libs);
             return 0;
         } else {
             filename = "<stdin>";
@@ -213,7 +222,7 @@ int main(int argc, char **argv) {
 
     tora::VM vm(compiler.ops, symbol_table, dump_ops);
     vm.register_standard_methods();
-    vm.init_globals(argc-optind, argv+optind);
+    vm.init_globals(args);
     for (auto iter = libs.begin(); iter != libs.end(); iter++) {
         vm.add_library_path(*iter);
     }

@@ -89,7 +89,7 @@ public:
     void execute_trace();
 
 
-    void init_globals(int argc, char**argv);
+    void init_globals(const std::vector<std::string> & args);
 
     void dump_frame();
     void dump_stack();

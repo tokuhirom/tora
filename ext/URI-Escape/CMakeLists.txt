@@ -1,7 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
 SET(CMAKE_CXX_FLAGS "-std=c++0x")
-SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -O2")
+SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-sign-compare -fstack-protector -fPIC -O2 -g")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
+SET(CMAKE_LINK_FLAGS_DEBUG "-Wl,-E' '-Wl,-Bsymbolic' '-rdynamic")
 SET(CMAKE_BUILD_TYPE Release)
 
 PROJECT(URI-Escape)

@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "vm.h"
 #include "value.h"
 #include "tora.h"
@@ -106,11 +108,11 @@ VM::~VM() {
     */
 }
 
-void VM::init_globals(int argc, char**argv) {
+void VM::init_globals(const std::vector<std::string> & args) {
     // $ARGV
     SharedPtr<ArrayValue> avalue = new ArrayValue();
-    for (int i=0; i<argc; i++) {
-        avalue->push_back(new StrValue(argv[i]));
+    for (auto arg=args.begin(); arg!=args.end(); ++arg) {
+        avalue->push_back(new StrValue(*arg));
     }
     this->global_vars->push_back(avalue);
 

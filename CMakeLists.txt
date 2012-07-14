@@ -1,9 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
-SET(CMAKE_CXX_COMPILER "clang++")
-SET(CMAKE_C_COMPILER "clang")
-SET(CMAKE_CC_FLAGS "-L.")
+# SET(CMAKE_CXX_COMPILER "clang++")
+# SET(CMAKE_C_COMPILER "clang")
+SET(CMAKE_CC_FLAGS " ")
 SET(CMAKE_CXX_FLAGS "-std=c++0x -L.")
-SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-sign-compare -fstack-protector -fPIC -O2")
+SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-sign-compare -fstack-protector -fPIC -O2 -g")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 SET(CMAKE_LINK_FLAGS_DEBUG "-Wl,-E' '-Wl,-Bsymbolic' '-rdynamic")
 SET(CMAKE_BUILD_TYPE Release)
@@ -25,11 +25,15 @@ endif ()
 find_package(RE2C REQUIRED)
 
 SET(TORA_VERSION_STR "0.0.5")
-SET(TORA_CCFLAGS "${CMAKE_CC_FLAGS}")
-SET(TORA_CXXFLAGS "${CMAKE_CXX_FLAGS}")
+SET(TORA_OS          "${CMAKE_SYSTEM_NAME}")
+SET(TORA_CC          "${CMAKE_C_COMPILER}")
+SET(TORA_CXX         "${CMAKE_CXX_COMPILER}")
+SET(TORA_CCFLAGS     "${CMAKE_CC_FLAGS}")
+SET(TORA_CXXFLAGS    "${CMAKE_CXX_FLAGS}")
 SET(TORA_PREFIX      "${CMAKE_INSTALL_PREFIX}")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tora/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tora/config.h)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/Config.tra.in ${CMAKE_CURRENT_BINARY_DIR}/lib/Config.tra)
 
 RE2C_TARGET(
     tora/lexer.re
@@ -84,19 +88,22 @@ SET(TORA_SRCS
 set(libs re2 pthread dl icudata icuuc boost_system)
 
 # libtora.a
-ADD_LIBRARY(libtora_a ${TORA_SRCS})
-SET_TARGET_PROPERTIES(libtora_a PROPERTIES OUTPUT_NAME "tora")
-TARGET_LINK_LIBRARIES(libtora_a ${libs})
+# ADD_LIBRARY(libtora_a ${TORA_SRCS})
+# SET_TARGET_PROPERTIES(libtora_a PROPERTIES OUTPUT_NAME "tora")
+# TARGET_LINK_LIBRARIES(libtora_a ${libs})
 
 # libtora.so
-ADD_LIBRARY(libtora_so SHARED ${TORA_SRCS})
-SET_TARGET_PROPERTIES(libtora_so PROPERTIES OUTPUT_NAME "tora")
-TARGET_LINK_LIBRARIES(libtora_so ${libs})
+#   ADD_LIBRARY(libtora_so SHARED ${TORA_SRCS})
+#   SET_TARGET_PROPERTIES(libtora_so PROPERTIES OUTPUT_NAME "tora")
+#   TARGET_LINK_LIBRARIES(libtora_so ${libs})
 
 # bin/tora
-ADD_EXECUTABLE(toraexe tora/main.cc)
-TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a "boost_program_options-mt")
+ADD_EXECUTABLE(toraexe tora/main.cc ${TORA_SRCS})
+TARGET_LINK_LIBRARIES(toraexe ${libs} "boost_program_options-mt")
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
+ADD_DEPENDENCIES(
+    toraexe tora/ops.gen.h
+)
 
 #############################################################################
 # test settings
@@ -110,8 +117,12 @@ foreach(f ${TEST_CC_FILES})
     ADD_EXECUTABLE(
         "${_output}"
         "${f}"
+        ${TORA_SRCS}
     )
-    TARGET_LINK_LIBRARIES("${_output}" libtora_a ${libs} dl)
+    TARGET_LINK_LIBRARIES("${_output}" ${libs} dl)
+    ADD_DEPENDENCIES(
+        "${_output}" toraexe
+    )
 endforeach(f)
 
 # test settings
@@ -120,13 +131,13 @@ ADD_CUSTOM_TARGET(test COMMAND "${PERL_EXECUTABLE}" util/test.pl DEPENDS tora)
 #############################################################################
 # installation settings
 #############################################################################
-INSTALL(TARGETS libtora_a ARCHIVE DESTINATION lib)
-INSTALL(TARGETS libtora_so LIBRARY DESTINATION lib)
+# INSTALL(TARGETS libtora_a ARCHIVE DESTINATION lib)
+# INSTALL(TARGETS libtora_so LIBRARY DESTINATION lib)
 INSTALL(TARGETS toraexe DESTINATION bin)
 
 #############################################################################
 # And libraries
 #############################################################################
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Socket/)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Curl/)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Socket/)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/Curl/)
 

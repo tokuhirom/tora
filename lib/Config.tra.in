@@ -1,0 +1,12 @@
+my $Config = {
+  TORA_PREFIX      => '@TORA_PREFIX@',
+  TORA_CC          => '@TORA_CC@',
+  TORA_OS          => '@TORA_OS@',
+  TORA_CXX         => '@TORA_CXX@',
+  TORA_CCFLAGS     => '@TORA_CCFLAGS@',
+  TORA_CXXFLAGS    => '@TORA_CXXFLAGS@',
+  TORA_VERSION_STR => '@TORA_VERSION_STR@',
+};
+sub tora_config() {
+    $Config;
+}
