@@ -2,11 +2,17 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 # SET(CMAKE_CXX_COMPILER "clang++")
 # SET(CMAKE_C_COMPILER "clang")
 SET(CMAKE_CC_FLAGS " ")
-SET(CMAKE_CXX_FLAGS "-std=c++0x -L.")
-SET(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wno-sign-compare -fstack-protector -fPIC -O2 -g")
+SET(CMAKE_CXX_FLAGS "-std=c++0x -D_REENTRANT -Wall -Wno-sign-compare -fstack-protector -fPIC")
+SET(CMAKE_CXX_FLAGS_RELEASE " -O2 -g -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
-SET(CMAKE_LINK_FLAGS_DEBUG "-Wl,-E' '-Wl,-Bsymbolic' '-rdynamic")
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-E -Wl,-Bsymbolic -rdynamic -L.")
 SET(CMAKE_BUILD_TYPE Release)
+
+# operating specific settings
+# see http://www.vtk.org/Wiki/CMake_Useful_Variables
+if (WIN32)
+    # win32 settings here
+endif(WIN32)
 
 PROJECT(tora CXX C)
 
@@ -31,6 +37,7 @@ SET(TORA_CXX         "${CMAKE_CXX_COMPILER}")
 SET(TORA_CCFLAGS     "${CMAKE_CC_FLAGS}")
 SET(TORA_CXXFLAGS    "${CMAKE_CXX_FLAGS}")
 SET(TORA_PREFIX      "${CMAKE_INSTALL_PREFIX}")
+SET(TORA_BUILD_TYPE  "${CMAKE_BUILD_TYPE}")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tora/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tora/config.h)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/Config.tra.in ${CMAKE_CURRENT_BINARY_DIR}/lib/Config.tra)
@@ -88,9 +95,9 @@ SET(TORA_SRCS
 set(libs re2 pthread dl icudata icuuc boost_system)
 
 # libtora.a
-# ADD_LIBRARY(libtora_a ${TORA_SRCS})
-# SET_TARGET_PROPERTIES(libtora_a PROPERTIES OUTPUT_NAME "tora")
-# TARGET_LINK_LIBRARIES(libtora_a ${libs})
+ADD_LIBRARY(libtora_a ${TORA_SRCS})
+SET_TARGET_PROPERTIES(libtora_a PROPERTIES OUTPUT_NAME "tora")
+TARGET_LINK_LIBRARIES(libtora_a ${libs})
 
 # libtora.so
 #   ADD_LIBRARY(libtora_so SHARED ${TORA_SRCS})
@@ -98,8 +105,8 @@ set(libs re2 pthread dl icudata icuuc boost_system)
 #   TARGET_LINK_LIBRARIES(libtora_so ${libs})
 
 # bin/tora
-ADD_EXECUTABLE(toraexe tora/main.cc ${TORA_SRCS})
-TARGET_LINK_LIBRARIES(toraexe ${libs} "boost_program_options-mt")
+ADD_EXECUTABLE(toraexe tora/main.cc)
+TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a "boost_program_options")
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
 ADD_DEPENDENCIES(
     toraexe tora/ops.gen.h
@@ -117,12 +124,8 @@ foreach(f ${TEST_CC_FILES})
     ADD_EXECUTABLE(
         "${_output}"
         "${f}"
-        ${TORA_SRCS}
     )
-    TARGET_LINK_LIBRARIES("${_output}" ${libs} dl)
-    ADD_DEPENDENCIES(
-        "${_output}" toraexe
-    )
+    TARGET_LINK_LIBRARIES("${_output}" ${libs} dl libtora_a)
 endforeach(f)
 
 # test settings

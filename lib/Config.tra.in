@@ -6,6 +6,7 @@ my $Config = {
   TORA_CCFLAGS     => '@TORA_CCFLAGS@',
   TORA_CXXFLAGS    => '@TORA_CXXFLAGS@',
   TORA_VERSION_STR => '@TORA_VERSION_STR@',
+  TORA_BUILD_TYPE  => '@TORA_BUILD_TYPE@',
 };
 sub tora_config() {
     $Config;

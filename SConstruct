@@ -51,7 +51,7 @@ if os.name == 'nt':
     ])
 else:
     env = Environment(
-        LIBS=['re2', 'pthread', 'dl', 'icudata', 'icuuc'],
+        LIBS=['re2', 'pthread', 'dl', 'icudata', 'icuuc', 'boost_program_options'],
         LIBPATH=['./'],
         CXXFLAGS=['-std=c++0x'],
         CPPPATH=[os.path.abspath(x) for x in ['vendor/boost_1_49_0/', 'vendor/re2/', 'tora/']],
