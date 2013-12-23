@@ -24,9 +24,6 @@
 
 #include "builtin.h"
 
-#include <boost/scope_exit.hpp>
-#include <boost/foreach.hpp>
-
 #include "lexer.h"
 #include "parser.class.h"
 #include "compiler.h"
@@ -296,11 +293,6 @@ void VM::require_package(const std::string &package) {
                 boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
                 boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
                 VM *vm = this;
-                BOOST_SCOPE_EXIT( (&vm) (&orig_file_scope) ) {
-                    vm->file_scope_ = orig_file_scope;
-                }
-                BOOST_SCOPE_EXIT_END
-                ;
 
                 this->file_scope_map_.insert(
                     std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
@@ -308,6 +300,8 @@ void VM::require_package(const std::string &package) {
                 this->file_scope_ = file_scope_tmp;
                 (void)vm->eval(&ifs, realfilename);
                 required->set_item(new StrValue(s), realfilename_value);
+
+                vm->file_scope_ = orig_file_scope;
                 return;
             } else {
                 required->set_item(new StrValue(s), UndefValue::instance());
