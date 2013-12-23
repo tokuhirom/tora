@@ -3,7 +3,6 @@
 #include "../tora/nodes.gen.h"
 #include "../tora/parser.h"
 #include "../tora/value/regexp.h"
-#include <boost/scoped_ptr.hpp>
 #include <stdarg.h>
 
 using namespace tora;
