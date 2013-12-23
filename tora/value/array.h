@@ -21,7 +21,7 @@ public:
     typedef std::deque<SharedPtr<Value>>::const_iterator const_iterator;
 
     ArrayValue() : Value(VALUE_TYPE_ARRAY) {
-        this->array_value_ = new boost::shared_ptr<std::deque<SharedPtr<Value>>>(new std::deque<SharedPtr<Value>>());
+        this->array_value_ = new std::shared_ptr<std::deque<SharedPtr<Value>>>(new std::deque<SharedPtr<Value>>());
     }
     ArrayValue(const ArrayValue & a);
     ~ArrayValue() {

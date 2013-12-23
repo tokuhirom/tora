@@ -86,7 +86,7 @@ protected:
     }
 };
 
-typedef boost::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
+typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 typedef boost::shared_ptr<std::string> StringImpl;
 

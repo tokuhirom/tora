@@ -6,7 +6,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1 -std=c++11 -D_REENTRANT 
 SET(CMAKE_CXX_FLAGS_RELEASE " -O2 -g -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-E -Wl,-Bsymbolic -rdynamic -L.")
-SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE Debug)
 
 # operating specific settings
 # see http://www.vtk.org/Wiki/CMake_Useful_Variables
