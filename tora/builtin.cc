@@ -93,7 +93,7 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
     } else if (args.size() == 1) {
         SharedPtr<Value> v = args.at(0);
         if (v->value_type == VALUE_TYPE_DOUBLE) {
-            std::uniform_real_distribution<double> dist(-1.0, v->upcast<DoubleValue>()->double_value());
+            std::uniform_real_distribution<double> dist(-0.0, v->upcast<DoubleValue>()->double_value());
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
             std::uniform_int_distribution<int> dist(0, v->upcast<IntValue>()->int_value());
