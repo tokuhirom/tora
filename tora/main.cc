@@ -14,7 +14,6 @@
 #include <sstream>
 #include <memory>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/program_options.hpp>
 
 #include "tora.h"
@@ -142,8 +141,8 @@ int main(int argc, char **argv) {
         std::cerr << e.what() << std::endl;
     }
 
-    boost::scoped_ptr<std::ifstream> ifs;
-    boost::scoped_ptr<std::stringstream> ss;
+    std::unique_ptr<std::ifstream> ifs;
+    std::unique_ptr<std::stringstream> ss;
     SharedPtr<Scanner> scanner;
     std::string filename;
     if (code.length()) {
