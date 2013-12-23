@@ -3,10 +3,6 @@
 
 #include "../value.h"
 
-#ifdef ENABLE_OBJECT_POOL
-#include <boost/pool/object_pool.hpp>
-#endif
-
 namespace tora {
 
 class BoolValue: public Value {
@@ -24,13 +20,6 @@ public:
         return b ? BoolValue::true_instance() : BoolValue::false_instance();
     }
     bool bool_value() const { return this->bool_value_; }
-#ifdef ENABLE_OBJECT_POOL
-public:
-	void* operator new(size_t size) { return pool_.malloc(); }
-	void operator delete(void* doomed, size_t) { pool_.free((BoolValue*)doomed); }
-private:
-    static boost::object_pool<BoolValue> pool_;
-#endif
 };
 
 };

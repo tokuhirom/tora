@@ -3,10 +3,6 @@
 
 #include "../value.h"
 
-#ifdef ENABLE_OBJECT_POOL
-#include <boost/pool/object_pool.hpp>
-#endif
-
 namespace tora {
 
 class IntValue: public Value {
@@ -39,13 +35,6 @@ public:
     void int_value(int n) {
         VAL() = n;
     }
-#ifdef ENABLE_OBJECT_POOL
-public:
-	void* operator new(size_t size) { return pool_.malloc(); }
-	void operator delete(void* doomed, size_t) { pool_.free((IntValue*)doomed); }
-private:
-    static boost::object_pool<IntValue> pool_;
-#endif
 };
 
 };
