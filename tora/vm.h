@@ -20,8 +20,6 @@ int swprintf (wchar_t *, size_t, const wchar_t *, ...);
 #include "op_array.h"
 #include "callback.h"
 
-#include <boost/random.hpp>
-
 namespace tora {
 
 const int GLOBAL_VAR_ARGV     = 0;
@@ -126,7 +124,7 @@ public:
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
     void extract_tuple(const SharedPtr<TupleValue> &t);
 
-    boost::mt19937 *myrand;
+    std::mt19937 *myrand;
 
     /**
      * Call a function.

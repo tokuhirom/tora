@@ -80,7 +80,8 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dum
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
     this->global_vars = new std::vector<SharedPtr<Value>>();
-    this->myrand = new boost::mt19937(time(NULL));
+    std::random_device rd;
+    this->myrand = new std::mt19937(rd());
     this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
     this->file_scope_.reset(new std::map<ID, SharedPtr<Value>>());
 }

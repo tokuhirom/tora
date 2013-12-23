@@ -87,18 +87,16 @@ static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
  * rand($n :Int) returns [0, $n) in Int value.
  */
 static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>& args) {
-    // TODO: use std::mt19937 in c++11.
-    // in 2012, I use g++ 4.4.3. It does not support uniform_real_distribution
     if (args.size() == 0) {
-        boost::uniform_real<double> dist(0.0, 1.0);
+        std::uniform_real_distribution<double> dist(0.0, 1.0);
         return new DoubleValue(dist(*(vm->myrand)));
     } else if (args.size() == 1) {
         SharedPtr<Value> v = args.at(0);
         if (v->value_type == VALUE_TYPE_DOUBLE) {
-            boost::uniform_real<double> dist(0.0, v->upcast<DoubleValue>()->double_value());
+            std::uniform_real_distribution<double> dist(-1.0, v->upcast<DoubleValue>()->double_value());
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
-            boost::uniform_int<int> dist(0, v->upcast<IntValue>()->int_value());
+            std::uniform_int_distribution<int> dist(0, v->upcast<IntValue>()->int_value());
             return new IntValue(dist(*(vm->myrand)));
         } else {
             // support to_int?

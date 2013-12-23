@@ -3,6 +3,7 @@
 #include "vm.h"
 #include "peek.h"
 #include "value/code.h"
+#include <iostream>
 
 using namespace tora;
 
