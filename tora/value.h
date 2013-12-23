@@ -82,7 +82,7 @@ protected:
 
 typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
-typedef std::shared_ptr<std::string> StringImpl;
+typedef std::string StringImpl;
 
 // TODO: remove virtual from this class for performance.
 /**

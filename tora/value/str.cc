@@ -5,7 +5,7 @@ using namespace tora;
 
 int StrValue::length() {
     int len = 0;
-    const std::string &str = **str_value_;
+    const std::string &str = *str_value_;
 
     for (int i=0; i<str.size(); ++i) {
         if ((str.at(i) & 0x80) == 0) { // 1 byte

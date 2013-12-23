@@ -197,7 +197,7 @@ Value& tora::Value::operator=(const Value&lhs) {
     case VALUE_TYPE_STR: {
         this->value_type = lhs.value_type;
         // printf("# COPY!\n");
-        this->str_value_ = new std::shared_ptr<std::string>(*(lhs.str_value_));
+        this->str_value_ = lhs.str_value_;
         return *this;
     }
     case VALUE_TYPE_ARRAY: {
