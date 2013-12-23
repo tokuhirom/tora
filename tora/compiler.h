@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "value/bytes.h"
 
 namespace tora {
 

@@ -4,6 +4,7 @@
 #include "../shared_ptr.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
+#include "../value/bytes.h"
 #include "../symbols.gen.h"
 #include <re2/re2.h>
 #include <unicode/unistr.h>

@@ -6,6 +6,7 @@
 #include "value/range.h"
 #include "value/object.h"
 #include "value/regexp.h"
+#include "value/bytes.h"
 
 using namespace tora;
 
