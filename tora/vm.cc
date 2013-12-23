@@ -40,10 +40,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
-// #include <random>
-
-#include <boost/random.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <random>
 
 #ifdef _WIN32
 #include <windows.h>
