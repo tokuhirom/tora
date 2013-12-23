@@ -36,7 +36,7 @@ void Disasm::disasm(const SharedPtr<OPArray>& ops) {
     printf("-- OP DUMP    --\n");
     for (size_t i=0; i<ops->size(); i++) {
         const OP* op = ops->at(i);
-        printf("[%03d] %s", i, opcode2name[op->op_type]);
+        printf("[%03zu] %s", i, opcode2name[op->op_type]);
         switch (op->op_type) {
         case OP_GETDYNAMIC: {
             int level = (op->operand.int_value >> 16) & 0x0000FFFF;

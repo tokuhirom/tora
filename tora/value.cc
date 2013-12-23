@@ -6,6 +6,7 @@
 #include "value/double.h"
 #include "value/object.h"
 #include "value/symbol.h"
+#include "value/bytes.h"
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>

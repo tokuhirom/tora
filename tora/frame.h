@@ -3,12 +3,6 @@
 
 #include <vector>
 
-#ifdef ENABLE_OBJECT_POOL
-#include <boost/pool/object_pool.hpp>
-#endif
-
-#include <boost/shared_ptr.hpp>
-
 #include "shared_ptr.h"
 #include "inspector.h"
 #include "value.h"
@@ -100,13 +94,6 @@ public:
         this->type = FRAME_TYPE_FUNCTION;
     }
     FunctionFrame(VM *vm, int vars_cnt, size_t top, const SharedPtr<Value>& self_) : LexicalVarsFrame(vm, vars_cnt, top), self(self_) { }
-#ifdef ENABLE_OBJECT_POOL
-public:
-	void* operator new(size_t size) { return pool_.malloc(); }
-	void operator delete(void* doomed, size_t) { pool_.free((FunctionFrame*)doomed); }
-private:
-    static boost::object_pool<FunctionFrame> pool_;
-#endif
 };
 
 class ForeachFrame : public LexicalVarsFrame {

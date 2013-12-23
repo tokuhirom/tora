@@ -1,5 +1,5 @@
-#ifndef VALUE_H_
-#define VALUE_H_
+#ifndef TORA_VALUE_H_
+#define TORA_VALUE_H_
 
 #include <sstream>
 #include <cstdlib>
@@ -13,9 +13,6 @@
 
 #include "tora.h"
 #include "shared_ptr.h"
-#include "prim.h"
-#include "util.h"
-#include "op_array.h"
 #include "exception.h"
 
 namespace tora {
@@ -57,7 +54,6 @@ class ClassImpl;
 class FilePackageImpl;
 
 class CallbackFunction;
-class OPArray;
 
 class RangeImpl {
     friend class RangeValue;
@@ -156,10 +152,9 @@ public:
 
 #include "value/undef.h"
 #include "value/str.h"
-#include "value/bytes.h"
 #include "value/bool.h"
 #include "value/int.h"
 #include "value/double.h"
 #include "value/exception.h"
 
-#endif // VALUE_H_
+#endif // TORA_VALUE_H_

@@ -86,7 +86,3 @@ void LexicalVarsFrame::dump_pad(VM *vm) {
     pad_list->dump(vm);
 }
 
-#ifdef ENABLE_OBJECT_POOL
-boost::object_pool<FunctionFrame> FunctionFrame::pool_;
-#endif
-

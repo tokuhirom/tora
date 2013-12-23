@@ -21,14 +21,14 @@ using namespace tora;
 class RE2RegexpMatched {
 private:
     SharedPtr<RE2RegexpValue> re_;
-    boost::shared_array<re2::StringPiece> matches_;
+    std::shared_ptr<std::vector<re2::StringPiece>> matches_;
 public:
-    RE2RegexpMatched(RE2RegexpValue* re, const boost::shared_array<re2::StringPiece> & matches) : re_(re), matches_(matches) {
+    RE2RegexpMatched(RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches) : re_(re), matches_(matches) {
     }
     const SharedPtr<RE2RegexpValue>& re() const {
         return re_;
     }
-    boost::shared_array<re2::StringPiece> matches() const {
+    const std::shared_ptr<std::vector<re2::StringPiece>>& matches() const {
         return matches_;
     }
 };
@@ -56,8 +56,8 @@ static SharedPtr<Value> RE2_Regexp_Matched_to_array(VM * vm, Value* self) {
     SharedPtr<ArrayValue> ary = new ArrayValue();
     const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
     for (int i=0; i<re->number_of_capturing_groups(); i++) {
-        re2::StringPiece* res = &(SELF(self)->matches()[i]);
-        ary->push_back(new StrValue(std::string(res->data(), res->length())));
+        const re2::StringPiece& res = SELF(self)->matches()->at(i);
+        ary->push_back(new StrValue(std::string(res.data(), res.length())));
     }
     return ary;
 }
@@ -76,9 +76,9 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM * vm, Value* self, Value *
         if (index->to_int() > re->number_of_capturing_groups()) {
             return UndefValue::instance();
         }
-        re2::StringPiece* res = &(SELF(self)->matches()[index->to_int()]);
-        if(res->data()) {
-            return new StrValue(std::string(res->data(), res->length()));
+        const re2::StringPiece& res = SELF(self)->matches()->at(index->to_int());
+        if(res.data()) {
+            return new StrValue(std::string(res.data(), res.length()));
         } else {
             return UndefValue::instance();
         }
@@ -95,7 +95,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM * vm, Value* self) {
     return UndefValue::instance();
 }
 
-SharedPtr<Value> tora::RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const boost::shared_array<re2::StringPiece> & matches) {
+SharedPtr<Value> tora::RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches) {
     return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_RE2_REGEXP_MATCHED_CLASS).get(), new PointerValue(new RE2RegexpMatched(re, matches)));
 }
 

@@ -75,7 +75,6 @@ sub vm_gen_cc {
 #include <algorithm>
 #include <functional>
 #include <sys/stat.h>
-#include <boost/scoped_ptr.hpp>
 
 using namespace tora;
 ? for my $k (@{$_[0]}) {

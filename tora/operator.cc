@@ -4,6 +4,7 @@
 #include "value/object.h"
 #include "value/array.h"
 #include "ops.gen.h"
+#include "value/bytes.h"
 #include <math.h>
 
 using namespace tora;

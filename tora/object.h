@@ -3,7 +3,7 @@
 
 #include "shared_ptr.h"
 #include <vector>
-#include <boost/shared_array.hpp>
+#include <memory>
 #include <re2/re2.h>
 
 namespace tora {
@@ -40,7 +40,7 @@ void Init_FilePackage(VM *vm);
 SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
 ObjectValue* Dir_new(VM *vm, StrValue *dirname);
 SharedPtr<Value> File_open(VM *vm, Value *fname, Value *mode);
-SharedPtr<Value> RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const boost::shared_array<re2::StringPiece> & matches);
+SharedPtr<Value> RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches);
 
 void load_builtin_objects(VM *vm);
 

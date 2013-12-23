@@ -1,8 +1,6 @@
 #include "regexp.h"
 #include "array.h"
 #include "../object.h"
-#include <boost/shared_array.hpp>
-#include <boost/scoped_array.hpp>
 
 using namespace tora;
 
@@ -30,10 +28,10 @@ RE2RegexpValue::~RE2RegexpValue() {
 }
 
 SharedPtr<Value> RE2RegexpValue::match(VM *vm, const std::string &str) {
-    boost::shared_array<re2::StringPiece> res(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
+    std::shared_ptr<std::vector<re2::StringPiece>> res(new std::vector<re2::StringPiece>(VAL()->NumberOfCapturingGroups() + 1));
 
     if (VAL()->Match(
-        str, 0, str.size(), RE2::UNANCHORED, res.get(), VAL()->NumberOfCapturingGroups()+1
+        str, 0, str.size(), RE2::UNANCHORED, res->data(), VAL()->NumberOfCapturingGroups()+1
         )) {
         return tora::RE2_Regexp_Matched_new(vm, this, res);
     } else {
@@ -42,10 +40,10 @@ SharedPtr<Value> RE2RegexpValue::match(VM *vm, const std::string &str) {
 }
 
 bool RE2RegexpValue::match_bool(VM *vm, const std::string &str) {
-    boost::shared_array<re2::StringPiece> res(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
+    std::vector<re2::StringPiece> res(VAL()->NumberOfCapturingGroups() + 1);
 
     if (VAL()->Match(
-        str, 0, str.size(), RE2::UNANCHORED, res.get(), VAL()->NumberOfCapturingGroups()+1
+        str, 0, str.size(), RE2::UNANCHORED, res.data(), VAL()->NumberOfCapturingGroups()+1
         )) {
         return true;
     } else {
@@ -54,13 +52,13 @@ bool RE2RegexpValue::match_bool(VM *vm, const std::string &str) {
 }
 
 SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
-    boost::scoped_array<re2::StringPiece> buf(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
+    std::vector<re2::StringPiece> buf(VAL()->NumberOfCapturingGroups() + 1);
 
     int start = 0;
     int end = str.size();
     SharedPtr<ArrayValue> res = new ArrayValue();
 
-    while (VAL()->Match(str, start, end, RE2::UNANCHORED, buf.get(), VAL()->NumberOfCapturingGroups()+1)) {
+    while (VAL()->Match(str, start, end, RE2::UNANCHORED, buf.data(), VAL()->NumberOfCapturingGroups()+1)) {
         if (VAL()->NumberOfCapturingGroups() != 0) {
             SharedPtr<ArrayValue> av = new ArrayValue();
             for (int i=1; i< VAL()->NumberOfCapturingGroups()+1; i++) {

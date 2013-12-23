@@ -92,7 +92,7 @@ SET(TORA_SRCS
     tora/object/env.cc         tora/object/regexp.cc              tora/value/code.cc
 )
 
-set(libs re2 pthread dl icudata icuuc boost_system)
+set(libs re2 pthread dl icudata icuuc)
 
 # libtora.a
 ADD_LIBRARY(libtora_a ${TORA_SRCS})
