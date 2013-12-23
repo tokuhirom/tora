@@ -51,9 +51,9 @@ static int count_variable_declare(const SharedPtr<Node> &node) {
     } else if (node->type == NODE_LOCAL) {
         return 1;
     } else {
-        auto iter = node->list->begin();
+        auto iter = node->children().begin();
         int ret = 0;
-        for (; iter!=node->list->end(); iter++) {
+        for (; iter!=node->children().end(); iter++) {
             if ((*iter).get()) {
                 ret += count_variable_declare(*iter);
             }
@@ -467,7 +467,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
     }
     case NODE_RETURN: {
         if (this->in_try_block) {
-            node->list->insert(node->list->begin(), new Node(NODE_UNDEF));
+            node->children().insert(node->children().begin(), new Node(NODE_UNDEF));
         }
 
         if (node->size() == 1) {
