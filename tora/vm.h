@@ -20,8 +20,6 @@ int swprintf (wchar_t *, size_t, const wchar_t *, ...);
 #include "op_array.h"
 #include "callback.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace tora {
 
 const int GLOBAL_VAR_ARGV     = 0;
@@ -44,8 +42,8 @@ class VM {
     SharedPtr<ClassValue> klass_;
     bool dump_ops_;
     typedef std::map<ID, SharedPtr<Value>> file_scope_body_t;
-    boost::shared_ptr<file_scope_body_t> file_scope_;
-    std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>> file_scope_map_;
+    std::shared_ptr<file_scope_body_t> file_scope_;
+    std::map<ID, std::shared_ptr<std::map<ID, SharedPtr<Value>>>> file_scope_map_;
     std::map<ID, SharedPtr<ClassValue>> builtin_classes_;
     std::map<ID, SharedPtr<CodeValue>> builtin_functions_;
 public:

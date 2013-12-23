@@ -290,12 +290,12 @@ void VM::require_package(const std::string &package) {
             SharedPtr<tora::Value> realfilename_value(new StrValue(realfilename));
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
-                boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
-                boost::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
+                std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
+                std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
                 VM *vm = this;
 
                 this->file_scope_map_.insert(
-                    std::map<ID, boost::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
+                    std::map<ID, std::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
                 );
                 this->file_scope_ = file_scope_tmp;
                 (void)vm->eval(&ifs, realfilename);
@@ -438,7 +438,7 @@ void VM::register_standard_methods() {
 }
 
 void VM::copy_all_public_symbols(ID srcid) {
-    boost::shared_ptr<std::map<ID, SharedPtr<Value>>> src(this->file_scope_map_[srcid]);
+    std::shared_ptr<std::map<ID, SharedPtr<Value>>> src(this->file_scope_map_[srcid]);
 
     for (auto iter = src->begin(); iter != src->end(); iter++) {
         this->file_scope_->insert(file_scope_body_t::value_type(iter->first, iter->second));
