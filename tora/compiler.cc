@@ -7,8 +7,6 @@
 #include "value/regexp.h"
 #include "symbol_table.h"
 #include "disasm.h"
-#include <boost/scope_exit.hpp>
-#include <boost/shared_ptr.hpp>
 #include <iostream>
 
 using namespace tora;
