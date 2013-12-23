@@ -512,7 +512,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         // function name
 
         this->push_block(BLOCK_TYPE_FUNCDEF);
-        boost::shared_ptr<std::vector<std::string>> params(new std::vector<std::string>());
+        std::shared_ptr<std::vector<std::string>> params(new std::vector<std::string>());
         if (funcdef_node->params() && funcdef_node->params()->size() > 0) {
             for (size_t i=0; i<funcdef_node->params()->size(); i++) {
                 params->push_back(funcdef_node->params()->at(i)->upcast<StrNode>()->str_value);
@@ -606,7 +606,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         this->push_block(BLOCK_TYPE_FUNCDEF);
 
         // setup parameters
-        boost::shared_ptr<std::vector<std::string>> params;
+        std::shared_ptr<std::vector<std::string>> params;
         if (funcdef_node->have_params()) {
             // 'sub foo () { }' form.
             params.reset(new std::vector<std::string>());
@@ -636,7 +636,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         funccomp.package(package);
         funccomp.blocks = new std::vector<Block>(*(this->blocks));
 
-        boost::shared_ptr<std::vector<int>> defaults(new std::vector<int>());
+        std::shared_ptr<std::vector<int>> defaults(new std::vector<int>());
         if (funcdef_node->have_params()) {
             // process default values.
             funccomp.current_node.reset(node.get());

@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 using namespace tora;
 
@@ -13,7 +12,7 @@ int main() {
         SharedPtr<SymbolTable> symbol_table = new SymbolTable();
         std::string filename_("<eval>");
         int lineno = 3;
-        boost::shared_ptr<std::vector<std::string>> params(new std::vector<std::string>());
+        std::shared_ptr<std::vector<std::string>> params = std::make_shared<std::vector<std::string>>();
 
         SharedPtr<CodeValue> code = new CodeValue(
             symbol_table->get_id("HOGE"), // package id
