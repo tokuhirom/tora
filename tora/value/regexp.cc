@@ -30,10 +30,10 @@ RE2RegexpValue::~RE2RegexpValue() {
 }
 
 SharedPtr<Value> RE2RegexpValue::match(VM *vm, const std::string &str) {
-    boost::shared_array<re2::StringPiece> res(new re2::StringPiece[VAL()->NumberOfCapturingGroups() + 1]);
+    std::shared_ptr<std::vector<re2::StringPiece>> res(new std::vector<re2::StringPiece>(VAL()->NumberOfCapturingGroups() + 1));
 
     if (VAL()->Match(
-        str, 0, str.size(), RE2::UNANCHORED, res.get(), VAL()->NumberOfCapturingGroups()+1
+        str, 0, str.size(), RE2::UNANCHORED, res->data(), VAL()->NumberOfCapturingGroups()+1
         )) {
         return tora::RE2_Regexp_Matched_new(vm, this, res);
     } else {
