@@ -7,8 +7,6 @@
 #include "value/object.h"
 #include "value/regexp.h"
 
-#include <boost/format.hpp>
-
 using namespace tora;
 
 Inspector::Inspector(VM *vm) : vm_(vm) {

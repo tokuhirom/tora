@@ -10,8 +10,6 @@
 #include <fstream>
 #include <queue>
 
-#include <boost/shared_ptr.hpp>
-
 #include "node.h"
 #include "prim.h"
 

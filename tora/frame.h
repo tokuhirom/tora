@@ -7,8 +7,6 @@
 #include <boost/pool/object_pool.hpp>
 #endif
 
-#include <boost/shared_ptr.hpp>
-
 #include "shared_ptr.h"
 #include "inspector.h"
 #include "value.h"
