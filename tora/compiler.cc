@@ -8,7 +8,6 @@
 #include "symbol_table.h"
 #include "disasm.h"
 #include <boost/scope_exit.hpp>
-#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 
@@ -953,7 +952,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         int label2 = ops->size();
         jump_if_false->operand.int_value = label2;
 
-        BOOST_FOREACH(auto n, last_labels) {
+        for (auto n: last_labels) {
             *n = label2 - 1;
         }
         last_labels.clear();
@@ -1208,7 +1207,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         enter->operand.int_value = this->blocks->back().vars.size();
         this->pop_block();
 
-        BOOST_FOREACH(auto n, last_labels) {
+        for (auto n: last_labels) {
             *n = label2;
         }
         last_labels.clear();
@@ -1282,7 +1281,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         push_op(new OP(OP_LEAVE));
 
-        BOOST_FOREACH(auto n, last_labels) {
+        for (auto n: last_labels) {
             *n = label2;
         }
         last_labels.clear();
