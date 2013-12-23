@@ -611,7 +611,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             // 'sub foo () { }' form.
             params.reset(new std::vector<std::string>());
             for (size_t i=0; i<funcdef_node->params()->size(); i++) {
-                assert(funcdef_node->params()->at(i)->list->size() == 2);
+                assert(funcdef_node->params()->at(i)->children().size() == 2);
                 const SharedPtr<Node>& param_name = funcdef_node->params()->at(i)->at(0);
 
                 params->push_back(param_name->upcast<StrNode>()->str_value);
@@ -643,7 +643,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             OP * skip_defvars = new OP(OP_JUMP);
             funccomp.push_op(skip_defvars);
             for (size_t i=0; i<funcdef_node->params()->size(); i++) {
-                assert(funcdef_node->params()->at(i)->list->size() == 2);
+                assert(funcdef_node->params()->at(i)->children().size() == 2);
                 const SharedPtr<Node>& default_node = funcdef_node->params()->at(i)->at(1);
                 if (default_node.get()) {
                     // printf("FOUND DEFAULT VALUE: %ld\n", (long int) i);
