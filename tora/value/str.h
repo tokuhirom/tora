@@ -12,16 +12,16 @@ private:
     }
 public:
     StrValue(): Value(VALUE_TYPE_STR) {
-        str_value_ = new boost::shared_ptr<std::string>(new std::string(""));
+        str_value_ = new std::shared_ptr<std::string>(new std::string(""));
     }
     StrValue(const char *str): Value(VALUE_TYPE_STR) {
-        str_value_ = new boost::shared_ptr<std::string>(new std::string(str));
+        str_value_ = new std::shared_ptr<std::string>(new std::string(str));
     }
     StrValue(const char *str, size_t t): Value(VALUE_TYPE_STR) {
-        str_value_ = new boost::shared_ptr<std::string>(new std::string(str, t));
+        str_value_ = new std::shared_ptr<std::string>(new std::string(str, t));
     }
     StrValue(const std::string &str): Value(VALUE_TYPE_STR) {
-        str_value_ = new boost::shared_ptr<std::string>(new std::string(str));
+        str_value_ = new std::shared_ptr<std::string>(new std::string(str));
     }
     ~StrValue() { delete str_value_; }
     const char * c_str() {

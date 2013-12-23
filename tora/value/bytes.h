@@ -14,13 +14,13 @@ public:
     BytesValue(): Value(VALUE_TYPE_BYTES) {
     }
     BytesValue(const char *str): Value(VALUE_TYPE_BYTES) {
-        this->str_value_ = new boost::shared_ptr<std::string>(new std::string(str));
+        this->str_value_ = new std::shared_ptr<std::string>(new std::string(str));
     }
     BytesValue(const char *str, size_t len): Value(VALUE_TYPE_BYTES) {
-        this->str_value_ = new boost::shared_ptr<std::string>(new std::string(str, len));
+        this->str_value_ = new std::shared_ptr<std::string>(new std::string(str, len));
     }
     BytesValue(const std::string &str): Value(VALUE_TYPE_BYTES) {
-        this->str_value_ = new boost::shared_ptr<std::string>(new std::string(str));
+        this->str_value_ = new std::shared_ptr<std::string>(new std::string(str));
     }
     ~BytesValue() { delete str_value_; }
     std::string str_value() const {

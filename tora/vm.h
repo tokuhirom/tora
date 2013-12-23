@@ -20,6 +20,8 @@ int swprintf (wchar_t *, size_t, const wchar_t *, ...);
 #include "op_array.h"
 #include "callback.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace tora {
 
 const int GLOBAL_VAR_ARGV     = 0;

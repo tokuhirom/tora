@@ -11,8 +11,6 @@
 #include <memory>
 #include <deque>
 
-#include <boost/shared_ptr.hpp>
-
 #include "tora.h"
 #include "shared_ptr.h"
 #include "prim.h"
@@ -88,7 +86,7 @@ protected:
 
 typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
-typedef boost::shared_ptr<std::string> StringImpl;
+typedef std::shared_ptr<std::string> StringImpl;
 
 // TODO: remove virtual from this class for performance.
 /**
