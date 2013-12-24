@@ -59,9 +59,9 @@ bool Value::to_bool() const {
 double Value::to_double() const {
     switch (value_type) {
     case VALUE_TYPE_INT:
-        return static_cast<double>(static_cast<const IntValue*>(this)->int_value());
+        return static_cast<double>(get_int_value(*this));
     case VALUE_TYPE_DOUBLE:
-        return static_cast<double>(static_cast<const DoubleValue*>(this)->double_value());
+        return static_cast<double>(get_double_value(*this));
     case VALUE_TYPE_OBJECT:
         TODO();
     case VALUE_TYPE_BOOL:
@@ -98,12 +98,12 @@ SharedPtr<StrValue> Value::to_s() {
         return new StrValue(static_cast<BytesValue*>(this)->str_value());
     case VALUE_TYPE_INT: {
         std::ostringstream os;
-        os << this->upcast<IntValue>()->int_value();
+        os << get_int_value(*this);
         return new StrValue(os.str());
     }
     case VALUE_TYPE_DOUBLE: {
         std::ostringstream os;
-        os << this->upcast<DoubleValue>()->double_value();
+        os << get_double_value(*this);
         return new StrValue(os.str());
     }
     case VALUE_TYPE_BOOL: {
@@ -118,9 +118,9 @@ SharedPtr<StrValue> Value::to_s() {
     }
     case VALUE_TYPE_RANGE: {
         std::ostringstream os;
-        os << this->upcast<RangeValue>()->left()->int_value();
+        os << get_int_value(this->upcast<RangeValue>()->left());
         os << "..";
-        os << this->upcast<RangeValue>()->right()->int_value();
+        os <<get_int_value(this->upcast<RangeValue>()->right());
         return new StrValue(os.str());
     }
     default: {
@@ -131,7 +131,7 @@ SharedPtr<StrValue> Value::to_s() {
 
 int Value::to_int() const {
     if (value_type == VALUE_TYPE_INT) {
-        return static_cast<const IntValue*>(this)->int_value();
+        return get_int_value(*this);
     } else if (value_type == VALUE_TYPE_DOUBLE) {
         return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
@@ -185,9 +185,7 @@ Value& tora::Value::operator=(const Value&lhs) {
 
     switch (lhs.value_type) {
     case VALUE_TYPE_INT: {
-        const IntValue *vp = static_cast<const IntValue*>(&lhs);
-        this->value_type = VALUE_TYPE_INT;
-        this->upcast<IntValue>()->int_value(vp->int_value());
+        set_int_value(*this, get_int_value(lhs));
         return *this;
     }
     case VALUE_TYPE_UNDEF: {

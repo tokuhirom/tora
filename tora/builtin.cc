@@ -93,10 +93,10 @@ static SharedPtr<Value> builtin_rand(VM *vm, const std::vector<SharedPtr<Value>>
     } else if (args.size() == 1) {
         SharedPtr<Value> v = args.at(0);
         if (v->value_type == VALUE_TYPE_DOUBLE) {
-            std::uniform_real_distribution<double> dist(-0.0, v->upcast<DoubleValue>()->double_value());
+            std::uniform_real_distribution<double> dist(-0.0, get_double_value(*v));
             return new DoubleValue(dist(*(vm->myrand)));
         } else if (v->value_type == VALUE_TYPE_INT) {
-            std::uniform_int_distribution<int> dist(0, v->upcast<IntValue>()->int_value());
+            std::uniform_int_distribution<int> dist(0, get_int_value(*v));
             return new IntValue(dist(*(vm->myrand)));
         } else {
             // support to_int?

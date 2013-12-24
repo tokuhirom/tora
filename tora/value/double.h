@@ -10,12 +10,6 @@ public:
     DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
         this->double_value_ = d;
     }
-    double double_value() const {
-        return this->double_value_;
-    }
-    void double_value(double n) {
-        this->double_value_ = n;
-    }
 };
 
 };

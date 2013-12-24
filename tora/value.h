@@ -102,6 +102,11 @@ public:
         ++refcnt;
     }
 protected:
+
+    Value(value_type_t t) : refcnt(0), value_type(t) { }
+    virtual ~Value() { }
+    Value(const Value&) = delete;
+public:
     union {
         int int_value_;
         double double_value_;
@@ -120,11 +125,6 @@ protected:
         ExceptionImpl* exception_value_;
         FilePackageImpl* file_package_value_;
     };
-
-    Value(value_type_t t) : refcnt(0), value_type(t) { }
-    virtual ~Value() { }
-    Value(const Value&) = delete;
-public:
     value_type_t value_type;
     Value& operator=(const Value&v);
 
@@ -147,6 +147,47 @@ public:
         return value_type == VALUE_TYPE_EXCEPTION;
     }
 };
+
+static value_type_t type(const Value &v)
+{
+  return v.value_type;
+}
+
+
+static int get_int_value(const Value& v)
+{
+  assert(type(v) == VALUE_TYPE_INT);
+  return v.int_value_;
+}
+
+static void set_int_value(Value* v, int i)
+{
+  v->value_type = VALUE_TYPE_INT;
+  v->int_value_ = i;
+}
+
+static void set_int_value(Value& v, int i)
+{
+  return set_int_value(&v, i);
+}
+
+static double get_double_value(const Value& v)
+{
+  assert(type(v) == VALUE_TYPE_DOUBLE);
+  return v.double_value_;
+}
+
+static double get_double_value(const SharedPtr<Value> v)
+{
+  // REMOVE ME.
+  return get_double_value(*v);
+}
+
+static int get_int_value(const SharedPtr<Value>& v)
+{
+  // REMOVE ME.
+  return get_int_value(*v);
+}
 
 };
 

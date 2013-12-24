@@ -25,7 +25,7 @@ public:
         SharedPtr<RangeValue> parent;
         Iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
             parent  = parent_;
-            counter = parent->left()->int_value();
+            counter = get_int_value(*(parent->left()));
         }
     };
 };

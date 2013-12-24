@@ -29,12 +29,6 @@ public:
     void tora__incr__() {
         VAL()++;
     }
-    int int_value() const {
-        return VAL();
-    }
-    void int_value(int n) {
-        VAL() = n;
-    }
 };
 
 };

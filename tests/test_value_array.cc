@@ -15,9 +15,9 @@ int main() {
     is(av->size(), (size_t) 1UL);
     SharedPtr<Value> v = new IntValue(55);
     av->set_item(1, v);
-    is(av->at(1)->upcast<IntValue>()->int_value(), 55);
+    is(get_int_value(av->at(1)), 55);
     av->set_item(1, new IntValue(88));
-    is(av->at(1)->upcast<IntValue>()->int_value(), 88);
+    is(get_int_value(av->at(1)), 88);
     // is((void*)v.get(), (void*)av->at(1).get());
     is(av->size(), (size_t) 2UL);
 

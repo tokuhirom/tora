@@ -19,7 +19,7 @@ Value * tora::op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) {
             return new DoubleValue(lhs->to_double() + rhs->to_double());
         } else {
             int i = rhs->to_int();
-            return new IntValue(lhs->upcast<IntValue>()->int_value() + i);
+            return new IntValue(get_int_value(*lhs) + i);
         }
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         SharedPtr<Value> s(rhs->to_s());
@@ -47,7 +47,7 @@ Value * tora::op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value> & rhs) 
         if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
             return new DoubleValue(lhs->to_double() - rhs->to_double());
         } else {
-            return new IntValue(lhs->upcast<IntValue>()->int_value() - rhs->to_int());
+            return new IntValue(get_int_value(*lhs) - rhs->to_int());
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
@@ -75,7 +75,7 @@ Value * tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
             if (rhs_int == 0) {
                 throw new ZeroDividedExceptionExceptionValue();
             }
-            return new IntValue(lhs->upcast<IntValue>()->int_value() / rhs_int);
+            return new IntValue(get_int_value(*lhs) / rhs_int);
         }
     } else { 
         SharedPtr<Value> s(lhs->to_s());
@@ -91,7 +91,7 @@ Value * tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
         if (rhs->value_type == VALUE_TYPE_DOUBLE) { // upgrade
             return new DoubleValue(lhs->to_double() * rhs->to_double());
         } else {
-            return new IntValue(lhs->upcast<IntValue>()->int_value() * rhs->upcast<IntValue>()->int_value());
+            return new IntValue(get_int_value(*lhs) * get_int_value(*rhs));
         }
     } else if (lhs->value_type == VALUE_TYPE_STR) {
         std::ostringstream buf;
@@ -188,9 +188,9 @@ Value * tora::op_modulo(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs
 Value* tora::op_unary_negative(const SharedPtr<Value> & v) {
     switch (v->value_type) {
     case VALUE_TYPE_INT:
-        return new IntValue(-(v->upcast<IntValue>()->int_value()));
+        return new IntValue(-(get_int_value(*v)));
     case VALUE_TYPE_DOUBLE:
-        return new DoubleValue(-(v->upcast<DoubleValue>()->double_value()));
+        return new DoubleValue(-get_double_value(*v));
     case VALUE_TYPE_OBJECT:
         TODO();
     default:
@@ -223,7 +223,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
     switch (lhs->value_type) {
     case VALUE_TYPE_INT: {
         int ie2 = rhs->to_int();
-        return operation_i(lhs->upcast<IntValue>()->int_value(), ie2);
+        return operation_i(get_int_value(*lhs), ie2);
     }
     case VALUE_TYPE_STR: {
         SharedPtr<Value> s2(rhs->to_s());
@@ -239,10 +239,10 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
     case VALUE_TYPE_DOUBLE: {
         switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value(), (double)rhs->upcast<IntValue>()->int_value()));
+            return (operation_d(get_double_value(*lhs), (double)get_int_value(*rhs)));
         }
         case VALUE_TYPE_DOUBLE: {
-            return (operation_d(lhs->upcast<DoubleValue>()->double_value(), rhs->upcast<DoubleValue>()->double_value()));
+            return (operation_d(get_double_value(*lhs), get_double_value(*rhs)));
         }
         default: {
             TODO(); // throw exception
