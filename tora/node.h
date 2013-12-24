@@ -31,9 +31,6 @@ class Node {
 public:
     node_type_t type;
     std::vector<SharedPtr<Node>> children_;
-    typedef std::vector<SharedPtr<Node>>::iterator iterator;
-    typedef std::vector<SharedPtr<Node>>::const_iterator const_iterator;
-    typedef std::vector<SharedPtr<Node>>::reverse_iterator reverse_iterator;
     int lineno;
 
     Node(node_type_t n=NODE_UNKNOWN) :refcnt(0) {
@@ -72,12 +69,6 @@ public:
         return static_cast<Y*>(this);
     }
 
-    iterator begin() { return children_.begin(); }
-    iterator end() { return children_.end(); }
-    const_iterator begin() const { return children_.begin(); }
-    const_iterator end()  const { return children_.end(); }
-    reverse_iterator rbegin() { return children_.rbegin(); }
-    reverse_iterator rend() { return children_.rend(); }
     void push_back(Node* n) { children_.push_back(n); }
     void push_back(const SharedPtr<Node>& n) { children_.push_back(n); }
     void pop_back() { children_.pop_back(); }

@@ -780,7 +780,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
         auto args = node->upcast<FuncallNode>()->args();
         int args_len = args->size();
-        for (auto iter=args->rbegin(); iter!=args->rend(); iter++) {
+        for (auto iter=args->children().rbegin(); iter!=args->children().rend(); iter++) {
             this->compile(*iter);
         }
 
