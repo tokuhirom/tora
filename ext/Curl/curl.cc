@@ -23,7 +23,7 @@ static SharedPtr<Value> Curl_Easy_new(VM *vm, Value *klass) {
 
 static SharedPtr<Value> Curl_Easy_DESTROY(VM *vm, Value *self) {
     curl_easy_cleanup(SELF(self));
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 extern "C" {

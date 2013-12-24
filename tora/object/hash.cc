@@ -51,7 +51,7 @@ static SharedPtr<Value> Hash_values(VM * vm, Value* self) {
 static SharedPtr<Value> Hash_delete(VM * vm, Value* self, Value *key) {
     assert(self->value_type == VALUE_TYPE_HASH);
     self->upcast<HashValue>()->delete_key(key->to_s());
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**

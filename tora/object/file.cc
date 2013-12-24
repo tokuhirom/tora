@@ -89,7 +89,7 @@ static SharedPtr<Value> file_slurp(VM * vm, Value* self) {
 static SharedPtr<Value> file_close(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
     self->upcast<FileValue>()->close();
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -102,7 +102,7 @@ static SharedPtr<Value> file_write(VM * vm, Value* self, Value *str_v) {
     const std::string & str = str_v->to_s()->str_value();
     size_t ret = fwrite(str.c_str(), sizeof(char), str.size(), FP(self));
     if (ret==str.size()) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ExceptionValue("Cannot write a text for file(%ld < %ld).", (long int) ret, (long int) str.size());
     }
@@ -116,7 +116,7 @@ static SharedPtr<Value> file_write(VM * vm, Value* self, Value *str_v) {
 static SharedPtr<Value> file_flush(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
     fflush(FP(self));
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -142,7 +142,7 @@ static SharedPtr<Value> file_getc(VM * vm, Value* self) {
         return new StrValue(std::string(1, (char)c));
     } else {
         if (feof(FP(self))) {
-            return UndefValue::instance();
+            return new_undef_value();
         } else {
             throw new ErrnoExceptionValue(get_errno());
         }
@@ -159,7 +159,7 @@ static SharedPtr<Value> file_getc(VM * vm, Value* self) {
  */
 static SharedPtr<Value> file_seek(VM * vm, Value* self, Value *offset, Value *whence) {
     if (fseek(FP(self), offset->to_int(), whence->to_int()) == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
@@ -194,7 +194,7 @@ static SharedPtr<Value> file_sync(VM * vm, Value* self) {
 #else
     // fsync: POSIX.1-2001.
     if (fsync(fileno(FP(self))) == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }

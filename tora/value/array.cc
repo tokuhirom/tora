@@ -31,7 +31,7 @@ void ArrayValue::sort() {
 SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
     int i = index->to_int();
     if (i >= (int)VAL()->size()) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         return this->at(i);
     }
@@ -40,7 +40,7 @@ SharedPtr<Value> ArrayValue::get_item(const SharedPtr<Value>& index) {
 void ArrayValue::set_item(int i, const SharedPtr<Value> &v) {
     if ((int)VAL()->size()-1 < i) {
         for (int j=VAL()->size()-1; j<i-1; j++) {
-            this->push_back(UndefValue::instance());
+            this->push_back(new_undef_value());
         }
         VAL()->insert(VAL()->begin()+i, v);
     } else {

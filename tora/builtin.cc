@@ -29,7 +29,7 @@ static SharedPtr<Value> builtin_p(VM *vm, Value* arg1) {
     assert(vm);
     assert(vm->symbol_table);
     printf("%s\n", ins.inspect(arg1).c_str());
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> & args) {
@@ -41,7 +41,7 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
         fwrite(s->upcast<StrValue>()->str_value().c_str(), sizeof(char), s->upcast<StrValue>()->str_value().size(), stdout);
         fputc('\n', stdout);
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
@@ -66,7 +66,7 @@ static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>
         SharedPtr<Value> s(v->to_s());
         printf("%s", s->upcast<StrValue>()->str_value().c_str());
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
@@ -117,7 +117,7 @@ static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
     ID id = v->upcast<SymbolValue>()->id();
     std::string name = vm->symbol_table->id2name(id);
     vm->require_package(name);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -133,7 +133,7 @@ static SharedPtr<Value> builtin_callee(VM *vm) {
             return fframe->code;
         }
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -170,7 +170,7 @@ static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value
                 ++seen;
             }
         }
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ExceptionValue("Too many arguments for caller.");
     }
@@ -308,7 +308,7 @@ static SharedPtr<Value> builtin_sin(VM *vm, Value *v) {
 
 static SharedPtr<Value> builtin_printf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
     tora_printf(args);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_sprintf(VM *vm, const std::vector<SharedPtr<Value>> & args) {

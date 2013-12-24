@@ -77,7 +77,7 @@ static SharedPtr<Value> code_call(VM * vm, const std::vector<SharedPtr<Value>> &
             vm->stack.push_back(values[i]);
         }
         vm->function_call(argcnt, code, code);
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 

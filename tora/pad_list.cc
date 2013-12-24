@@ -11,7 +11,7 @@ PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
 // printf("VARS: %d\n", vars_cnt);
    /*
     for (int i=0; i<vars_cnt; i++) {
-        SharedPtr<Value> v = UndefValue::instance();
+        SharedPtr<Value> v = new_undef_value();
         pad_.push_back(v);
     }
     */
@@ -60,7 +60,7 @@ void PadList::set(int i, const SharedPtr<Value> & v) {
 
     if ((int)pad_.size()-1 < i) {
         for (int j=pad_.size()-1; j<i-1; j++) {
-            pad_.push_back(UndefValue::instance());
+            pad_.push_back(new_undef_value());
         }
         pad_.insert(pad_.begin()+i, v);
     } else {
@@ -89,7 +89,7 @@ SharedPtr<Value> PadList::get(int index) const {
         return pad_.at(index);
     } else {
 // printf("UNDEF:: %d, %ld\n", index, (long int) pad_.size());
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 

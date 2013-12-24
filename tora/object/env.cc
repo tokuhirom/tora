@@ -50,7 +50,7 @@ static SharedPtr<Value> env_set(VM * vm, Value* self, Value*k, Value*v) {
             1 // overwrite
         );
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -63,7 +63,7 @@ static SharedPtr<Value> env_get(VM * vm, Value* self, Value*k) {
     if (v) {
         return new StrValue(v);
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 

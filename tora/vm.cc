@@ -111,7 +111,7 @@ void VM::init_globals(const std::vector<std::string> & args) {
     this->global_vars->push_back(avalue);
 
     // $ENV
-    SharedPtr<ObjectValue> env = new ObjectValue(this, this->get_builtin_class(SYMBOL_ENV_CLASS), UndefValue::instance());
+    SharedPtr<ObjectValue> env = new ObjectValue(this, this->get_builtin_class(SYMBOL_ENV_CLASS), new_undef_value());
     this->global_vars->push_back(env);
 
     // $LIBPATH : Array
@@ -215,7 +215,7 @@ SharedPtr<tora::Value> VM::eval(std::istream* is, const std::string & fname) {
         }
         return ret;
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 
@@ -303,7 +303,7 @@ void VM::require_package(const std::string &package) {
                 vm->file_scope_ = orig_file_scope;
                 return;
             } else {
-                required->set_item(new StrValue(s), UndefValue::instance());
+                required->set_item(new StrValue(s), new_undef_value());
                 throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
             }
         }
@@ -450,10 +450,10 @@ SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value>& container, con
         return container->upcast<ObjectValue>()->set_item(index, rvalue);
     case VALUE_TYPE_HASH:
         container->upcast<HashValue>()->set_item(index, rvalue);
-        return UndefValue::instance();
+        return new_undef_value();
     case VALUE_TYPE_ARRAY:
         container->upcast<ArrayValue>()->set_item(index, rvalue);
-        return UndefValue::instance();
+        return new_undef_value();
     default:
         throw new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
     }
@@ -502,7 +502,7 @@ SharedPtr<tora::Value> VM::get_self() {
             if ((*iter)->upcast<FunctionFrame>()->self) {
                 return (*iter)->upcast<FunctionFrame>()->self;
             } else {
-                return UndefValue::instance();
+                return new_undef_value();
             }
         }
     }
@@ -548,7 +548,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
 
             stack.resize(frame->top);
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push_back(UndefValue::instance());
+            t->push_back(new_undef_value());
             t->push_back(exception.get());
 
             frame_stack->pop_back();

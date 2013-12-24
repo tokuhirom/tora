@@ -13,7 +13,7 @@ OP_PUSH_SELF {
 }
 
 OP_PUSH_UNDEF {
-    stack.push_back(UndefValue::instance());
+    stack.push_back(new_undef_value());
 }
 
 OP_PUSH_INT {
@@ -413,7 +413,7 @@ OP_RETURN {
         retval.reset(stack.back().get());
         stack.pop_back();
     } else {
-        retval.reset(UndefValue::instance());
+        retval.reset(new_undef_value());
     }
     mark_stack.pop_back();
 
@@ -765,7 +765,7 @@ OP_FILE_TEST {
         if (stat(fname->c_str(), &buf) == 0) {
             stack.push_back(new IntValue(buf.st_size));
         } else {
-            stack.push_back(UndefValue::instance());
+            stack.push_back(new_undef_value());
         }
         break;
     default:
@@ -944,7 +944,7 @@ OP_USE {
 
     bool is_copy_all = include->value_type == VALUE_TYPE_INT && get_int_value(include) == 1;
     this->use(mod_name.get(), is_copy_all);
-    stack.push_back(UndefValue::instance());
+    stack.push_back(new_undef_value());
 }
 
 OP_NOT {
@@ -1035,7 +1035,7 @@ OP_INSTANCIATE_IDENTIFIER {
             if (code->is_native()) {
                 this->call_native_func(code->callback(), argcnt);
             } else {
-                this->function_call(argcnt, iter->second->upcast<CodeValue>(), UndefValue::instance());
+                this->function_call(argcnt, iter->second->upcast<CodeValue>(), new_undef_value());
             }
         } else {
             stack.push_back(iter->second);
@@ -1052,7 +1052,7 @@ OP_INSTANCIATE_IDENTIFIER {
                 if (code->is_native()) {
                     this->call_native_func(code->callback(), argcnt);
                 } else {
-                    this->function_call(argcnt, iter->second->upcast<CodeValue>(), UndefValue::instance());
+                    this->function_call(argcnt, iter->second->upcast<CodeValue>(), new_undef_value());
                 }
             } else {
                 throw new ExceptionValue("There is no stuff named '%s'", id2name(id).c_str());
@@ -1071,7 +1071,7 @@ OP_GET_PACKAGE_VARIABLE {
     int vid = get_int_operand();
     Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id());
     auto iter = pkg->find(vid);
-    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
+    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : new_undef_value());
     stack.push_back(ret);
     */
 }
@@ -1098,9 +1098,9 @@ OP_LOCAL {
     Package *pkg = find_package(pkgid);
     auto iter = pkg->find(vid);
 
-    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : UndefValue::instance());
+    SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : new_undef_value());
     frame_stack->back()->push_dynamic_scope_var(pkg, vid, ret);
-    pkg->set_variable(vid, UndefValue::instance());
+    pkg->set_variable(vid, new_undef_value());
 
     stack.pop_back();
     */

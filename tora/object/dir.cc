@@ -58,7 +58,7 @@ static SharedPtr<Value> dir_read(VM * vm, Value* self) {
     if (ent) {
         return new StrValue(ent->d_name);
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 
@@ -75,7 +75,7 @@ static SharedPtr<Value> dir_close(VM * vm, Value* self) {
     DIR * dp = static_cast<DIR*>(get_ptr_value(v));
     assert(dp);
     closedir(dp);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -101,7 +101,7 @@ static SharedPtr<Value> dir_mkdir(VM * vm, const std::vector<SharedPtr<Value>> &
 	ret = mkdir(args[1]->to_s()->str_value().c_str(), mode);
 #endif
     if (ret == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(errno);
     }
@@ -121,7 +121,7 @@ static SharedPtr<Value> dir_rmdir(VM * vm, const std::vector<SharedPtr<Value>> &
     }
 
     if (rmdir(args[1]->to_s()->str_value().c_str()) == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(errno);
     }
@@ -135,9 +135,9 @@ static SharedPtr<Value> dir_rmdir(VM * vm, const std::vector<SharedPtr<Value>> &
 static SharedPtr<Value> dir_DESTROY(VM * vm, Value* self) {
     dir_close(vm, self);
 #ifndef NDEBUG
-    // self->upcast<ObjectValue>()->data().reset(UndefValue::instance());
+    // self->upcast<ObjectValue>()->data().reset(new_undef_value());
 #endif
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**

@@ -73,13 +73,13 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM * vm, Value* self, Value *
     if (index->value_type == VALUE_TYPE_INT) {
         const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
         if (index->to_int() > re->number_of_capturing_groups()) {
-            return UndefValue::instance();
+            return new_undef_value();
         }
         const re2::StringPiece& res = SELF(self)->matches()->at(index->to_int());
         if(res.data()) {
             return new StrValue(std::string(res.data(), res.length()));
         } else {
-            return UndefValue::instance();
+            return new_undef_value();
         }
         // TODO: check out of range
     } else if (index->value_type == VALUE_TYPE_STR) {
@@ -91,7 +91,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM * vm, Value* self, Value *
 
 static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM * vm, Value* self) {
     delete SELF(self);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 SharedPtr<Value> tora::RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches) {

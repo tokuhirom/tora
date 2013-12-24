@@ -31,7 +31,7 @@ static SharedPtr<Value> stack_size(VM *vm, Value* self) {
  */
 static SharedPtr<Value> dump_stack(VM *vm) {
     vm->dump_stack();
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -41,7 +41,7 @@ static SharedPtr<Value> dump_stack(VM *vm) {
  */
 static SharedPtr<Value> dump_dump(VM *vm, Value *self, Value *obj) {
     peek(vm, obj);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -51,7 +51,7 @@ static SharedPtr<Value> dump_dump(VM *vm, Value *self, Value *obj) {
  */
 static SharedPtr<Value> dump_dump_symbol_table(VM *vm, Value *self) {
     vm->symbol_table->dump();
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 void tora::Init_Internals(VM* vm) {

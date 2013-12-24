@@ -25,7 +25,7 @@ static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v, 
     SharedPtr<StrValue> filename_s = filename_v->to_s();
     SharedPtr<StrValue> endpoint_s = endpoint_v->to_s();
     vm->load_dynamic_library(filename_s->str_value(), endpoint_s->str_value());
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 void tora::Init_DynaLoader(VM *vm) {

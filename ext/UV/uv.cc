@@ -32,7 +32,7 @@ static void __uv_close_cb(uv_handle_t* handle) {
     VM *vm = ((_uv_data*) handle->data)->vm;
     SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->close_cb;
     if (callback != NULL) {
-        vm->function_call_ex(0, callback, UndefValue::instance());
+        vm->function_call_ex(0, callback, new_undef_value());
     }
 }
 
@@ -49,7 +49,7 @@ static SharedPtr<Value> _uv_close(VM *vm, Value *self, Value *callback_v) {
     }
 
     uv_close(handle, __uv_close_cb);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_DESTROY(VM *vm, Value *self) {
@@ -60,7 +60,7 @@ static SharedPtr<Value> _uv_DESTROY(VM *vm, Value *self) {
     uv_close(handle, NULL);
     if (handle->data) delete ((_uv_data*) handle->data);
     delete handle;
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_default_loop(VM * vm, Value* self) {
@@ -84,13 +84,13 @@ static SharedPtr<Value> _uv_loop_run_once(VM * vm, Value* self) {
 static SharedPtr<Value> _uv_loop_ref(VM * vm, Value* self) {
     uv_loop_t* loop = static_cast<uv_loop_t*>(self->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     uv_ref(loop);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_loop_unref(VM * vm, Value* self) {
     uv_loop_t* loop = static_cast<uv_loop_t*>(self->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
     uv_unref(loop);
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_timer_new(VM * vm, const std::vector<SharedPtr<Value>>& args) {
@@ -116,7 +116,7 @@ void __uv_timer_cb(uv_timer_t* timer, int status) {
     SharedPtr<CodeValue> callback = ((_uv_data*) timer->data)->timer_cb;
     if (callback != NULL) {
         vm->stack.push_back(new IntValue(status));
-        vm->function_call_ex(1, callback, UndefValue::instance());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -137,7 +137,7 @@ static SharedPtr<Value> _uv_timer_start(VM * vm, Value* self, Value* callback_v,
     if (uv_timer_start(timer, __uv_timer_cb, timeout_v->to_int(), repeat_v->to_int()) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) timer->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_timer_stop(VM * vm, Value* self) {
@@ -149,7 +149,7 @@ static SharedPtr<Value> _uv_timer_stop(VM * vm, Value* self) {
     if (uv_timer_stop(timer) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) timer->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_tcp_new(VM * vm, const std::vector<SharedPtr<Value>>& args) {
@@ -181,7 +181,7 @@ static SharedPtr<Value> _uv_tcp_nodelay(VM * vm, Value* self, Value* enable_v) {
     if (uv_tcp_nodelay(tcp, enable_v->to_bool()) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static void __uv_tcp_connect_cb(uv_connect_t* req, int status) {
@@ -189,7 +189,7 @@ static void __uv_tcp_connect_cb(uv_connect_t* req, int status) {
     SharedPtr<CodeValue> callback = ((_uv_data*) req->handle->data)->connect_cb;
     if (callback != NULL) {
         vm->stack.push_back(new IntValue(status));
-        vm->function_call_ex(1, callback, UndefValue::instance());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -211,7 +211,7 @@ static SharedPtr<Value> _uv_tcp_connect(VM * vm, Value* self, Value* addr_v, Val
     if (uv_tcp_connect(&req, tcp, *(const sockaddr_in*)addr_s.c_str(), __uv_tcp_connect_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static void __uv_write_cb(uv_write_t* req, int status) {
@@ -219,7 +219,7 @@ static void __uv_write_cb(uv_write_t* req, int status) {
     SharedPtr<CodeValue> callback = ((_uv_data*) req->handle->data)->write_cb;
     if (callback != NULL) {
         vm->stack.push_back(new IntValue(status));
-        vm->function_call_ex(1, callback, UndefValue::instance());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -243,7 +243,7 @@ static SharedPtr<Value> _uv_write(VM * vm, Value* self, Value* src_v, Value* cal
     if (uv_write(&req, (uv_stream_t*) tcp, &buf, 1, __uv_write_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static uv_buf_t __uv_alloc_cb(uv_handle_t* handle, size_t suggested_size) {
@@ -257,8 +257,8 @@ static void __uv_read_cb(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
         if (nread >= 0)
             vm->stack.push_back(new BytesValue(buf.base, nread));
         else
-            vm->stack.push_back(UndefValue::instance());
-        vm->function_call_ex(1, callback, UndefValue::instance());
+            vm->stack.push_back(new_undef_value());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -277,7 +277,7 @@ static SharedPtr<Value> _uv_read(VM * vm, Value* self, Value* callback_v) {
     if (uv_read_start((uv_stream_t*) tcp, __uv_alloc_cb, __uv_read_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_tcp_bind(VM * vm, Value* self, Value* addr_v) {
@@ -292,7 +292,7 @@ static SharedPtr<Value> _uv_tcp_bind(VM * vm, Value* self, Value* addr_v) {
     if (uv_tcp_bind(tcp, *(const sockaddr_in*)addr_s.c_str()) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static void __uv_connection_cb(uv_stream_t* handle, int status) {
@@ -300,7 +300,7 @@ static void __uv_connection_cb(uv_stream_t* handle, int status) {
     SharedPtr<CodeValue> callback = ((_uv_data*) handle->data)->connection_cb;
     if (callback != NULL) {
         vm->stack.push_back(new IntValue(status));
-        vm->function_call_ex(1, callback, UndefValue::instance());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -320,7 +320,7 @@ static SharedPtr<Value> _uv_listen(VM * vm, Value* self, Value* backlog_v, Value
     if (uv_listen((uv_stream_t*) tcp, backlog_v->to_int(), __uv_connection_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) tcp->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_accept(VM * vm, Value* self) {
@@ -368,7 +368,7 @@ void __uv_idle_cb(uv_idle_t* idle, int status) {
     SharedPtr<CodeValue> callback = ((_uv_data*) idle->data)->idle_cb;
     if (callback != NULL) {
         vm->stack.push_back(new IntValue(status));
-        vm->function_call_ex(1, callback, UndefValue::instance());
+        vm->function_call_ex(1, callback, new_undef_value());
     }
 }
 
@@ -387,7 +387,7 @@ static SharedPtr<Value> _uv_idle_start(VM * vm, Value* self, Value* callback_v) 
     if (uv_idle_start(idle, __uv_idle_cb) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) idle->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> _uv_idle_stop(VM * vm, Value* self) {
@@ -399,7 +399,7 @@ static SharedPtr<Value> _uv_idle_stop(VM * vm, Value* self) {
     if (uv_idle_stop(idle) != 0) {
         throw new ExceptionValue(uv_strerror(uv_last_error(((_uv_data*) idle->data)->loop)));
     }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 extern "C" {

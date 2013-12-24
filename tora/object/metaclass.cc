@@ -66,7 +66,7 @@ static SharedPtr<Value> mc_superclass(VM * vm, Value* self) {
     if (super.get()) {
         return super;
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 

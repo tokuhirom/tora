@@ -78,7 +78,7 @@ static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
     self->upcast<ArrayValue>()->push_front(
         v
     );
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 /**
@@ -92,7 +92,7 @@ static SharedPtr<Value> av_shift(VM * vm, Value* self) {
         self->upcast<ArrayValue>()->pop_front();
         return ret;
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 
@@ -136,7 +136,7 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
     for (auto iter=src->begin(); iter!=src->end(); ++iter) {
         vm->stack.push_back(*iter);
 
-        vm->function_call_ex(1, code, UndefValue::instance());
+        vm->function_call_ex(1, code, new_undef_value());
 
         ret->push_back(vm->stack.back());
         vm->stack.pop_back();
@@ -158,7 +158,7 @@ static SharedPtr<Value> av_grep(VM * vm, Value* self, Value *stuff_v) {
         for (auto iter=src->begin(); iter!=src->end(); ++iter) {
             vm->stack.push_back(*iter);
 
-            vm->function_call_ex(1, code, UndefValue::instance());
+            vm->function_call_ex(1, code, new_undef_value());
 
             if (vm->stack.back()->to_bool()) {
                 ret->push_back(*iter);
@@ -200,7 +200,7 @@ static SharedPtr<Value> av_capacity(VM * vm, Value* self) {
 /*
 static SharedPtr<Value> av_reserve(VM * vm, Value* self, Value * v) {
     self->upcast<ArrayValue>()->values->reserve(v->to_int());
-    return UndefValue::instance();
+    return new_undef_value();
 }
 */
 

@@ -16,7 +16,7 @@ using namespace tora;
 static SharedPtr<Value> File_Path_mkpath(VM *vm, Value *name) {
     try {
         boost::filesystem::create_directories(name->to_s()->c_str());
-        return UndefValue::instance();
+        return new_undef_value();
     } catch (boost::filesystem::filesystem_error& ex) {
         throw new ExceptionValue(ex.what());
     };
@@ -28,7 +28,7 @@ static SharedPtr<Value> File_Path_mkpath(VM *vm, Value *name) {
 static SharedPtr<Value> File_Path_rmtree(VM *vm, Value *name) {
     try {
         boost::filesystem::remove_all(name->to_s()->c_str());
-        return UndefValue::instance();
+        return new_undef_value();
     } catch (boost::filesystem::filesystem_error& ex) {
         throw new ExceptionValue(ex.what());
     };

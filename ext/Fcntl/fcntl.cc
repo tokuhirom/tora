@@ -30,7 +30,7 @@ static SharedPtr<Value> Fcntl_flock(VM *vm, Value *fileno_v, Value *operation_v)
     }
 
     if (flock(fileno_v->to_int(), operation_v->to_int()) == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }

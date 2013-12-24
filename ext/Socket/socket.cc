@@ -67,7 +67,7 @@ static SharedPtr<Value> sock_sock_DESTROY(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
     if (v.get()) { v.get()->upcast<IntValue>(); }
-    return UndefValue::instance();
+    return new_undef_value();
 }
 
 static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
@@ -77,7 +77,7 @@ static SharedPtr<Value> sock_sock_connect(VM * vm, Value* self, Value*addr_v) {
     const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = connect(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         return new ErrnoExceptionValue(get_errno());
     }
@@ -141,7 +141,7 @@ static SharedPtr<Value> sock_inet_aton(VM * vm, Value*klass, Value* host_v) {
             std::string ret((const char*)phe->h_addr, phe->h_length);
             return new StrValue(ret);
         } else {
-            return UndefValue::instance();
+            return new_undef_value();
         }
     }
 }
@@ -229,7 +229,7 @@ static SharedPtr<Value> sock_sock_bind(VM * vm, Value* self, Value*addr_v) {
     const std::string & addr_s = addr_v->upcast<StrValue>()->str_value();
     int ret = bind(GETFD(vm, self), (const sockaddr*)addr_s.c_str(), addr_s.size());
     if (ret==0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
@@ -240,7 +240,7 @@ static SharedPtr<Value> sock_sock_listen(VM * vm, Value* self, Value* queue_v) {
 
     int ret = listen(GETFD(vm, self), queue);
     if (ret == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         return new ErrnoExceptionValue(get_errno());
     }
@@ -272,7 +272,7 @@ static SharedPtr<Value> sock_sock_setsockopt(VM * vm, Value* self, Value* level_
 	ret = setsockopt(GETFD(vm, self), level, optname, optval, optlen);
 #endif
     if (ret == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         return new ErrnoExceptionValue(get_errno());
     }
@@ -286,7 +286,7 @@ static SharedPtr<Value> sock_sock_close(VM * vm, Value* self) {
     ret = close(GETFD(vm, self));
 #endif
     if (ret == 0) {
-        return UndefValue::instance();
+        return new_undef_value();
     } else {
         return new ErrnoExceptionValue(get_errno());
     }

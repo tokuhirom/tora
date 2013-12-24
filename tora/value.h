@@ -203,9 +203,12 @@ static int get_int_value(const SharedPtr<Value>& v)
   return get_int_value(*v);
 }
 
+static Value* new_undef_value() {
+    return new Value(VALUE_TYPE_UNDEF);
+}
+
 };
 
-#include "value/undef.h"
 #include "value/str.h"
 #include "value/bool.h"
 #include "value/int.h"

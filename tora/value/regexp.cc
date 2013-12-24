@@ -35,7 +35,7 @@ SharedPtr<Value> RE2RegexpValue::match(VM *vm, const std::string &str) {
         )) {
         return tora::RE2_Regexp_Matched_new(vm, this, res);
     } else {
-        return UndefValue::instance();
+        return new_undef_value();
     }
 }
 
@@ -65,7 +65,7 @@ SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
                 if (buf[i].data()) {
                     av->push_back(new StrValue(buf[i].as_string()));
                 } else {
-                    av->push_back(UndefValue::instance());
+                    av->push_back(new_undef_value());
                 }
             }
             res->push_back(av);
