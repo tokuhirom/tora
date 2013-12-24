@@ -103,17 +103,17 @@ public:
     }
 protected:
 
-    Value(value_type_t t) : refcnt(0), value_type(t) { }
     virtual ~Value() { }
     Value(const Value&) = delete;
 public:
+    Value(value_type_t t) : refcnt(0), value_type(t) { }
     union {
         int int_value_;
         double double_value_;
         bool bool_value_;
         ID id_value_;
-
         void * ptr_value_;
+
         StringImpl* str_value_;
         RangeImpl* range_value_;
         ArrayImpl* array_value_;
@@ -177,10 +177,27 @@ static double get_double_value(const Value& v)
   return v.double_value_;
 }
 
+static SharedPtr<Value> new_ptr_value(void* p)
+{
+  SharedPtr<Value> v(new Value(VALUE_TYPE_POINTER));
+  v->ptr_value_ = p;
+  return v;
+}
+
 static double get_double_value(const SharedPtr<Value> v)
 {
   // REMOVE ME.
   return get_double_value(*v);
+}
+
+static void* get_ptr_value(Value* v)
+{
+  return v->ptr_value_;
+}
+
+static void* get_ptr_value(const SharedPtr<Value>& v)
+{
+  return get_ptr_value(v.get());
 }
 
 static int get_int_value(const SharedPtr<Value>& v)

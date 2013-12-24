@@ -8,7 +8,6 @@
 #include "frame.h"
 #include "value/file.h"
 #include "value/object.h"
-#include "value/pointer.h"
 #include "value/array.h"
 #include "value/symbol.h"
 #include "value/str.h"

@@ -4,7 +4,6 @@
 #include "../symbols.gen.h"
 #include "../value/code.h"
 #include "../symbols.gen.h"
-#include "../value/pointer.h"
 #include "../value/object.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
@@ -35,7 +34,7 @@ public:
 
 static inline RE2RegexpMatched * SELF(Value *self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
-    return static_cast<RE2RegexpMatched*>(self->upcast<ObjectValue>()->data()->upcast<PointerValue>()->ptr());
+    return static_cast<RE2RegexpMatched*>(get_ptr_value(self->upcast<ObjectValue>()->data()));
 }
 
 /**
@@ -96,7 +95,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM * vm, Value* self) {
 }
 
 SharedPtr<Value> tora::RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches) {
-    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_RE2_REGEXP_MATCHED_CLASS).get(), new PointerValue(new RE2RegexpMatched(re, matches)));
+    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_RE2_REGEXP_MATCHED_CLASS).get(), new_ptr_value(new RE2RegexpMatched(re, matches)));
 }
 
 void tora::Init_RE2_Regexp_Matched(VM* vm) {

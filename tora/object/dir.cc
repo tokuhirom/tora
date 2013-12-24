@@ -6,7 +6,6 @@
 #include "../shared_ptr.h"
 #include "../vm.h"
 #include "../value/object.h"
-#include "../value/pointer.h"
 #include "../value/class.h"
 #include "../value.h"
 #include "../symbols.gen.h"
@@ -27,7 +26,7 @@ using namespace tora;
 ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
     DIR * dp = opendir(dirname->c_str());
     if (dp) {
-        return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_CLASS).get(), new PointerValue(dp));
+        return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_CLASS).get(), new_ptr_value(dp));
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
@@ -52,7 +51,7 @@ static SharedPtr<Value> dir_read(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
     assert(v->value_type = VALUE_TYPE_POINTER);
-    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
+    DIR * dp = (DIR*)get_ptr_value(v);
     assert(dp);
     // TODO: support readdir_r
     struct dirent * ent = readdir(dp);
@@ -73,7 +72,7 @@ static SharedPtr<Value> dir_close(VM * vm, Value* self) {
     SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
     assert(v->value_type = VALUE_TYPE_POINTER);
 
-    DIR * dp = (DIR*)v->upcast<PointerValue>()->ptr();
+    DIR * dp = static_cast<DIR*>(get_ptr_value(v));
     assert(dp);
     closedir(dp);
     return UndefValue::instance();

@@ -5,7 +5,6 @@
 #include "../vm.h"
 #include "../value/object.h"
 #include "../value/symbol.h"
-#include "../value/pointer.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
 
@@ -52,7 +51,7 @@ static SharedPtr<Value> time_new(VM* vm, const std::vector<SharedPtr<Value>> &ar
         delete buf;
         throw new ExceptionValue("Error in localtime_r: %s", get_strerror(get_errno()).c_str());
     }
-    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_TIME_CLASS).get(), new PointerValue(buf));
+    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_TIME_CLASS).get(), new_ptr_value(buf));
 }
 
 static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
@@ -60,7 +59,7 @@ static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
 
     SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
     assert(t->value_type == VALUE_TYPE_POINTER);
-    delete static_cast<struct tm*>(t->upcast<PointerValue>()->ptr());
+    delete static_cast<struct tm*>(get_ptr_value(t));
     return UndefValue::instance();
 }
 
@@ -72,7 +71,7 @@ static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
 static SharedPtr<Value> time_epoch(VM* vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
-    std::time_t ret = std::mktime(static_cast<struct tm*>(t->upcast<PointerValue>()->ptr()));
+    std::time_t ret = std::mktime(static_cast<struct tm*>(get_ptr_value(t)));
     return new IntValue(ret);
 }
 
@@ -92,7 +91,7 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
 
     char out[256];
 
-    void * tm = t->upcast<PointerValue>()->ptr();
+    void * tm = get_ptr_value(t);
     size_t r = strftime(out, sizeof(out), format_s->upcast<StrValue>()->str_value().c_str(), static_cast<const struct tm*>(tm));
     if (r == sizeof(out)) {
         // should be retry?
@@ -105,7 +104,7 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
 static struct tm* GET_TM(Value *self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
-    return static_cast<struct tm*>(t->upcast<PointerValue>()->ptr());
+    return static_cast<struct tm*>(get_ptr_value(t));
 }
 
 /**
@@ -170,7 +169,7 @@ static SharedPtr<Value> time_second(VM* vm, Value* self) {
 static SharedPtr<Value> time_wday(VM* vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
-    int ret = static_cast<struct tm*>(t->upcast<PointerValue>()->ptr())->tm_wday;
+    int ret = static_cast<struct tm*>(get_ptr_value(t))->tm_wday;
     return new IntValue(ret + 1);
 }
 

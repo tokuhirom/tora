@@ -13,7 +13,6 @@
 #include "value/regexp.h"
 #include "value/file.h"
 #include "value/symbol.h"
-#include "value/pointer.h"
 #include "value/array.h"
 #include "value/tuple.h"
 #include "value/object.h"
