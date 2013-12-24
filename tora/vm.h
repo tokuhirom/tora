@@ -18,7 +18,6 @@ int swprintf (wchar_t *, size_t, const wchar_t *, ...);
 #include "shared_ptr.h"
 #include "symbol_table.h"
 #include "op_array.h"
-#include "callback.h"
 
 namespace tora {
 
@@ -33,6 +32,7 @@ class TupleValue;
 class FunctionFrame;
 class CodeValue;
 class ClassValue;
+class Callback;
 
 class VM;
 

@@ -168,7 +168,7 @@ sub ops_gen_h {
 
 namespace tora {
 
-typedef enum {%s,OP_END} op_type_t;
+enum op_type_t {%s,OP_END};
 
 extern const char*opcode2name[];
 
