@@ -1,7 +1,6 @@
 #ifndef TORA_H_
 #define TORA_H_
 
-#include <vector>
 #include "config.h"
 
 // Debug Macro

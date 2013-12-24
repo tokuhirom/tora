@@ -1,11 +1,8 @@
 #include <ctime>
-#include <iomanip>
 
 #include "../object.h"
 #include "../vm.h"
 #include "../value/object.h"
-#include "../value/symbol.h"
-#include "../value/class.h"
 #include "../symbols.gen.h"
 
 #ifdef _WIN32

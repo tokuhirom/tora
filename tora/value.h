@@ -2,11 +2,8 @@
 #define TORA_VALUE_H_
 
 #include <sstream>
-#include <cstdlib>
-#include <cstring>
 #include <cstdio>
 #include <cassert>
-#include <vector>
 #include <map>
 #include <memory>
 #include <deque>
