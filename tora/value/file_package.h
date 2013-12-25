@@ -5,24 +5,11 @@
 
 namespace tora {
 
-class FilePackageImpl {
+class MortalFilePackageValue : public MortalValue {
+  static Value* new_file_package_value(ID name_id, const std::shared_ptr<std::map<ID, SharedValue>> & src);
 public:
-    ID name_id_;
-    std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> data_;
-};
-
-class FilePackageValue : public tora::Value {
-public:
-    typedef std::map<ID, SharedPtr<tora::Value>>::const_iterator const_iterator;
-
-    FilePackageValue(ID name_id, const std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> & src) : tora::Value(VALUE_TYPE_FILE_PACKAGE) {
-        this->file_package_value_ = new FilePackageImpl();
-        this->file_package_value_->name_id_ = name_id;
-        this->file_package_value_->data_ = src;
-    }
-    ~FilePackageValue() {
-        delete this->file_package_value_;
-    }
+  MortalFilePackageValue(ID name_id, const std::shared_ptr<std::map<ID, SharedValue>> & src)
+    : MortalValue(new_file_package_value(name_id, src)) { }
 };
 
 Value* file_package_find(Value * v, ID id);

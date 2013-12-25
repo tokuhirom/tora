@@ -16,10 +16,6 @@ using namespace tora;
  * This is a FilePackage class.
  */
 
-inline static FilePackageValue* SELF(tora::Value *self) {
-    return self->upcast<FilePackageValue>();
-}
-
 void tora::Init_FilePackage(VM* vm) {
     SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILEPACKAGE_CLASS);
     vm->add_builtin_class(klass);

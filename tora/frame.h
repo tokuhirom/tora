@@ -114,9 +114,9 @@ public:
 class ClassFrame : public LexicalVarsFrame {
     friend class LexicalVarsFrame;
 protected:
-    SharedPtr<Value> klass_;
+    SharedValue klass_;
 public:
-    ClassFrame(VM *vm, size_t top, const SharedPtr<Value> &klass) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_CLASS), klass_(klass) { }
+    ClassFrame(VM *vm, size_t top, Value* klass) : LexicalVarsFrame(vm, 0, top, FRAME_TYPE_CLASS), klass_(klass) { }
 };
 
 };

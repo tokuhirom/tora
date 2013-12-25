@@ -77,7 +77,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dum
     std::random_device rd;
     this->myrand = new std::mt19937(rd());
     this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
-    this->file_scope_.reset(new std::map<ID, SharedPtr<Value>>());
+    this->file_scope_.reset(new std::map<ID, SharedValue>());
 
     MortalTrueValue t;
     this->true_value_ = t.get();
@@ -253,11 +253,11 @@ void VM::use(tora::Value * package_v, bool need_copy) {
     if (need_copy) {
         this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id());
     } else {
-        SharedPtr<FilePackageValue> fpv = new FilePackageValue(package_id, file_scope_map_[package_id]);
-        this->file_scope_->insert(file_scope_body_t::value_type(
-            package_id,
-            fpv
-        ));
+      MortalFilePackageValue fpv(package_id, file_scope_map_[package_id]);
+      this->file_scope_->insert(file_scope_body_t::value_type(
+          package_id,
+          fpv.get()
+      ));
     }
 }
 
@@ -294,12 +294,12 @@ void VM::require_package(const std::string &package) {
         if (stat(realfilename.c_str(), &stt)==0) {
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
-                std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
-                std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> file_scope_tmp(new std::map<ID, SharedPtr<Value>>);
+                std::shared_ptr<std::map<ID, SharedValue>> orig_file_scope(this->file_scope_);
+                std::shared_ptr<std::map<ID, SharedValue>> file_scope_tmp(new std::map<ID, SharedValue>);
                 VM *vm = this;
 
                 this->file_scope_map_.insert(
-                    std::map<ID, std::shared_ptr<std::map<ID, SharedPtr<Value>>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
+                    std::map<ID, std::shared_ptr<std::map<ID, SharedValue>>>::value_type(symbol_table->get_id(package), file_scope_tmp)
                 );
                 this->file_scope_ = file_scope_tmp;
                 (void)vm->eval(&ifs, realfilename);
@@ -446,7 +446,7 @@ void VM::register_standard_methods() {
 }
 
 void VM::copy_all_public_symbols(ID srcid) {
-    std::shared_ptr<std::map<ID, SharedPtr<Value>>> src(this->file_scope_map_[srcid]);
+    std::shared_ptr<std::map<ID, SharedValue>> src(this->file_scope_map_[srcid]);
 
     for (auto iter = src->begin(); iter != src->end(); iter++) {
         this->file_scope_->insert(file_scope_body_t::value_type(iter->first, iter->second));
@@ -819,13 +819,13 @@ void VM::add_function(ID id, const CallbackFunction *cb) {
 void VM::add_function(const SharedPtr<CodeValue> & code) {
     this->file_scope_->insert(file_scope_body_t::value_type(
         code->func_name_id(),
-        code
+        code.get()
     ));
 }
 
 void VM::add_class(const SharedPtr<ClassValue> & klass) {
     assert(klass->value_type == VALUE_TYPE_CLASS);
-    this->file_scope_->insert(file_scope_body_t::value_type(klass->upcast<ClassValue>()->name_id(), klass));
+    this->file_scope_->insert(file_scope_body_t::value_type(klass->upcast<ClassValue>()->name_id(), klass.get()));
 }
 
 

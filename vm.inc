@@ -969,16 +969,16 @@ OP_PACKAGE_LEAVE {
 OP_CLASS_ENTER {
     ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    SharedPtr<Value> klass(new ClassValue(this, package_id));
+    MortalValue klass(new ClassValue(this, package_id));
 
-    ClassFrame* cframe = new ClassFrame(this, stack.size(), klass);
+    ClassFrame* cframe = new ClassFrame(this, stack.size(), klass.get());
     cframe->top = stack.size();
     this->frame_stack->push_back(cframe);
     this->klass_.reset(klass->upcast<ClassValue>());
 
-    this->file_scope_->insert(file_scope_body_t::value_type(package_id, klass));
+    this->file_scope_->insert(file_scope_body_t::value_type(package_id, klass.get()));
 
-    stack.push_back(klass);
+    stack.push_back(klass.get());
 }
 
 OP_CLASS_LEAVE {
@@ -1039,7 +1039,7 @@ OP_INSTANCIATE_IDENTIFIER {
                 this->function_call(argcnt, iter->second->upcast<CodeValue>(), new_undef_value());
             }
         } else {
-            stack.push_back(iter->second);
+            stack.push_back(iter->second.get());
         }
     } else {
         auto iter = this->builtin_classes_.find(id);
