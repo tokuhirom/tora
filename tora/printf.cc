@@ -11,8 +11,7 @@ std::string tora::tora_sprintf(const std::vector<SharedPtr<Value>> & args) {
     }
 
     int param_i = 1;
-    SharedPtr<StrValue> pattern_sv = args[0]->to_s();
-    const std::string pattern = pattern_sv->str_value();
+    const std::string pattern = args[0]->to_s();
     std::string ret;
     for (int i=0; i<pattern.size(); i++) {
         if (pattern[i] == '%') {
@@ -26,7 +25,7 @@ std::string tora::tora_sprintf(const std::vector<SharedPtr<Value>> & args) {
                     throw new ExceptionValue("Bad printf pattern: '%s'", pattern.c_str());
                 }
                 // if (param_i>=
-                ret += args[param_i++]->to_s()->str_value();
+                ret += args[param_i++]->to_s();
                 break;
             case 'd': {
                 if (param_i>=args.size()) {

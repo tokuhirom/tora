@@ -54,9 +54,9 @@ int main() {
         f1->set_variable(0, new IntValue(5));
         is(f2->get_variable(0)->to_int(), 4);
         is(f2->get_variable_dynamic(1, 0)->to_int(), 5);
-        SharedPtr<Value> v = new StrValue("OOO");
+        SharedPtr<Value> v = new_str_value("OOO");
         f2->set_variable_dynamic(1, 0, v);
-        is(f2->get_variable_dynamic(1, 0)->to_s()->str_value(), v->to_s()->str_value());
+        is(f2->get_variable_dynamic(1, 0)->to_s(), v->to_s());
     }
 
     done_testing();

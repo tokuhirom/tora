@@ -31,7 +31,7 @@ public:
     FILE *fp() {
         return VAL();
     }
-    SharedPtr<StrValue> read() {
+    std::string read() {
         // slurp
         std::string s;
         const int bufsiz = 4096;
@@ -41,7 +41,7 @@ public:
             s.append(buffer, n);
         }
         if (feof(VAL())) {
-            return new StrValue(s);
+            return s;
         } else {
             // err?
             throw new ErrnoExceptionValue(tora::get_errno());

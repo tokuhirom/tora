@@ -80,7 +80,7 @@ static SharedPtr<Value> time_epoch(VM* vm, Value* self) {
  * Limitation: Result string must be smaller than 256-1 bytes.(patches welcome)
  */
 static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
-    SharedPtr<Value> format_s = format->to_s();
+    std::string format_s = format->to_s();
 
     assert(self->value_type == VALUE_TYPE_OBJECT);
     SharedPtr<Value> t = self->upcast<ObjectValue>()->data();
@@ -89,13 +89,13 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value *format) {
     char out[256];
 
     void * tm = get_ptr_value(t);
-    size_t r = strftime(out, sizeof(out), format_s->upcast<StrValue>()->str_value().c_str(), static_cast<const struct tm*>(tm));
+    size_t r = strftime(out, sizeof(out), format_s.c_str(), static_cast<const struct tm*>(tm));
     if (r == sizeof(out)) {
         // should be retry?
         return new ExceptionValue("strftime overflow: %ld", (long int) sizeof(r));
     }
 
-    return new StrValue(out);
+    return new_str_value(out);
 }
 
 static struct tm* GET_TM(Value *self) {

@@ -21,10 +21,10 @@ std::string Inspector::inspect(Value* v) const {
     case VALUE_TYPE_INT:
     case VALUE_TYPE_BOOL:
     case VALUE_TYPE_DOUBLE:
-        return v->to_s()->str_value();
+        return v->to_s();
     case VALUE_TYPE_STR: {
         std::string ret("\"");
-        ret += v->to_s()->str_value();
+        ret += v->to_s();
         ret += '"';
         return ret;
     }

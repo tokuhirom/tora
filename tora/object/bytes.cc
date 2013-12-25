@@ -4,7 +4,6 @@
 #include "../object.h"
 #include "../value/bytes.h"
 #include "../value.h"
-#include "../value/str.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
 #include <unicode/unistr.h>
@@ -72,14 +71,14 @@ static SharedPtr<Value> Bytes_decode(VM *vm, Value *self_v, const std::vector<Sh
     }
     BytesValue *self = static_cast<BytesValue*>(self_v);
     if (args.size() == 0) { // "foobar".decode()
-        return new StrValue(self->str_value());
+        return new_str_value(self->str_value());
     } else if (args.size() == 1) {
         // convert to utf-8.
-        const char *srccharset = args[0]->to_s()->str_value().c_str();
-        icu::UnicodeString src(self->str_value().c_str(), self->str_value().length(), srccharset);
+        std::string srccharset = args[0]->to_s();
+        icu::UnicodeString src(self->str_value().c_str(), self->str_value().length(), srccharset.c_str());
         std::string buf;
         src.toUTF8String(buf);
-        return new StrValue(buf);
+        return new_str_value(buf);
     } else {
         throw new ArgumentExceptionValue("Bytes#decode requires 0 or 1 arguments. but you passed %d.", args.size());
     }

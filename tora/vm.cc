@@ -106,7 +106,7 @@ void VM::init_globals(const std::vector<std::string> & args) {
     // $ARGV
     SharedPtr<ArrayValue> avalue = new ArrayValue();
     for (auto arg=args.begin(); arg!=args.end(); ++arg) {
-        avalue->push_back(new StrValue(*arg));
+        avalue->push_back(new_str_value(*arg));
     }
     this->global_vars->push_back(avalue);
 
@@ -116,7 +116,7 @@ void VM::init_globals(const std::vector<std::string> & args) {
 
     // $LIBPATH : Array
     SharedPtr<ArrayValue> libpath = new ArrayValue();
-    libpath->push_back(new StrValue("lib"));
+    libpath->push_back(new_str_value("lib"));
     this->global_vars->push_back(libpath);
 
     // $REQUIRED : Hash
@@ -139,7 +139,7 @@ void VM::die(const char *format, ...) {
     vsnprintf(p, 4096, format, ap);
     va_end(ap);
     std::string s = p;
-    throw new StrValue(s);
+    throw new_str_value(s);
 }
 
 void VM::die(const SharedPtr<tora::Value> & exception) {
@@ -222,7 +222,7 @@ SharedPtr<tora::Value> VM::eval(std::istream* is, const std::string & fname) {
 static SharedPtr<tora::Value> builtin_eval(VM * vm, tora::Value* v) {
     assert(v->value_type == VALUE_TYPE_STR);
 
-    std::stringstream ss(v->upcast<StrValue>()->str_value() + ";");
+    std::stringstream ss(*get_str_value(v) + ";");
     return vm->eval(&ss, "<eval>");
 }
 
@@ -231,12 +231,12 @@ static SharedPtr<tora::Value> builtin_eval(VM * vm, tora::Value* v) {
  */
 static SharedPtr<tora::Value> builtin_do(VM * vm, tora::Value *v) {
     assert(v->value_type == VALUE_TYPE_STR);
-    SharedPtr<StrValue> fname = v->to_s();
-    std::ifstream ifs(fname->str_value().c_str(), std::ios::in);
+    std::string fname = v->to_s();
+    std::ifstream ifs(fname.c_str(), std::ios::in);
     if (ifs.is_open()) {
-        return vm->eval(&ifs, fname->str_value());
+        return vm->eval(&ifs, fname);
     } else {
-        throw new ExceptionValue(v->upcast<StrValue>()->str_value() + " : " + get_strerror(get_errno()));
+        throw new ExceptionValue(*get_str_value(v) + " : " + get_strerror(get_errno()));
     }
 }
 
@@ -272,7 +272,7 @@ void VM::require_package(const std::string &package) {
     // inc check
     if (required->has_key(s)) {
         if (required->get(s)->value_type == VALUE_TYPE_UNDEF) {
-            throw new StrValue("Compilation failed in require");
+            throw new_str_value("Compilation failed in require");
         } else {
             return;
         }
@@ -281,12 +281,11 @@ void VM::require_package(const std::string &package) {
     // load
     for (int i=0; i<libpath->size(); i++) {
         std::string realfilename;
-        realfilename = libpath->at(i)->to_s()->str_value();
+        realfilename = libpath->at(i)->to_s();
         realfilename += "/";
         realfilename += s;
         struct stat stt;
         if (stat(realfilename.c_str(), &stt)==0) {
-            SharedPtr<tora::Value> realfilename_value(new StrValue(realfilename));
             std::ifstream ifs(realfilename.c_str());
             if (ifs.is_open()) {
                 std::shared_ptr<std::map<ID, SharedPtr<tora::Value>>> orig_file_scope(this->file_scope_);
@@ -298,13 +297,17 @@ void VM::require_package(const std::string &package) {
                 );
                 this->file_scope_ = file_scope_tmp;
                 (void)vm->eval(&ifs, realfilename);
-                required->set_item(new StrValue(s), realfilename_value);
+
+                MortalStrValue realfilename_sv(realfilename);
+                required->set(s, realfilename_sv.get());
 
                 vm->file_scope_ = orig_file_scope;
                 return;
             } else {
-                required->set_item(new StrValue(s), new_undef_value());
-                throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
+              MortalStrValue ss(s);
+              MortalUndefValue undef;
+              required->set_item(ss, undef);
+              throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
             }
         }
     }
@@ -312,7 +315,7 @@ void VM::require_package(const std::string &package) {
     // not found...
     std::string message = std::string("Cannot find ") + s + " in $LIBPATH\n";
     for (int i=0; i<libpath->size(); i++) {
-        message += "  " + libpath->at(i)->to_s()->str_value();
+        message += "  " + libpath->at(i)->to_s();
     }
     throw new ExceptionValue(message);
 }
@@ -517,7 +520,7 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
     while (1) {
         if (frame_stack->size() == 1) {
             if (exception->value_type == VALUE_TYPE_STR) {
-                fprintf(stderr, "%s line %d.\n", exception->upcast<StrValue>()->str_value().c_str(), lineno);
+                fprintf(stderr, "%s line %d.\n", get_str_value(exception)->c_str(), lineno);
             } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
                 if (exception->upcast<ExceptionValue>()->exception_type() == EXCEPTION_TYPE_GENERAL) {
                     fprintf(stderr, "%s line %d\n", exception->upcast<ExceptionValue>()->message().c_str(), lineno);
@@ -670,7 +673,8 @@ void VM::load_dynamic_library(const std::string &filename, const std::string &en
 
 void VM::add_library_path(const std::string &dir) {
     SharedPtr<Value> libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
-    libpath->upcast<ArrayValue>()->push_back(new StrValue(dir));
+    MortalStrValue dir_s(dir);
+    libpath->upcast<ArrayValue>()->push_back(dir_s.get());
 }
 
 /**

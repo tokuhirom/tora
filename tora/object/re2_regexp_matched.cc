@@ -56,7 +56,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_to_array(VM * vm, Value* self) {
     const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
     for (int i=0; i<re->number_of_capturing_groups(); i++) {
         const re2::StringPiece& res = SELF(self)->matches()->at(i);
-        ary->push_back(new StrValue(std::string(res.data(), res.length())));
+        ary->push_back(new_str_value(std::string(res.data(), res.length())));
     }
     return ary;
 }
@@ -77,7 +77,7 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM * vm, Value* self, Value *
         }
         const re2::StringPiece& res = SELF(self)->matches()->at(index->to_int());
         if(res.data()) {
-            return new StrValue(std::string(res.data(), res.length()));
+            return new_str_value(std::string(res.data(), res.length()));
         } else {
             return new_undef_value();
         }

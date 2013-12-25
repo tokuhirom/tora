@@ -17,13 +17,40 @@ using namespace tora;
  * The string class.
  */
 
+static int utf8_length(const std::string* str_value) {
+    int len = 0;
+    const std::string &str = *str_value;
+
+    for (int i=0; i<str.size(); ++i) {
+        if ((str.at(i) & 0x80) == 0) { // 1 byte
+            // printf("1 byte: %d\n", i);
+            len++;
+        } else {
+            // printf("mutli byte! %d\n", i);
+            len++;
+            ++i;
+            for (;  i<str.size() && (((unsigned char)str.at(i)) &0x80) ==0x80 && (str.at(i)&0x40) == 0; ++i) {
+                /*
+                printf("mutli byte: %d %x%x\n", i,
+                    (unsigned char)this->str_value.at(i)&0x80,
+                    (unsigned char)this->str_value.at(i)&0x40
+                );
+                */
+                // skip
+            }
+        }
+    }
+    // printf("LEN: %d\n", len);
+    return len;
+}
+
 /**
  * $string.length() : Int
  *
  * Get a String length.
  */
 static SharedPtr<Value> str_length(VM *vm, Value* self) {
-    return new IntValue(self->upcast<StrValue>()->length());
+    return new IntValue(utf8_length(get_str_value(self)));
 }
 
 /**
@@ -35,12 +62,11 @@ static SharedPtr<Value> str_length(VM *vm, Value* self) {
  */
 static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
     if (arg1->value_type == VALUE_TYPE_STR) {
-        StrValue *self_sv = static_cast<StrValue*>(self_v);
-        StrValue *pattern = static_cast<StrValue*>(arg1);
-        return new BoolValue(self_sv->str_value().find(pattern->str_value()) != std::string::npos);
+        Value *pattern = arg1;
+        return new BoolValue(get_str_value(self_v)->find(*get_str_value(pattern)) != std::string::npos);
     } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
-        return regex->match(vm, static_cast<StrValue*>(self_v)->str_value());
+        return regex->match(vm, *get_str_value(self_v));
     } else {
         throw new ArgumentExceptionValue("String.match() requires string or regexp object for first argument, but you passed '%s'.", arg1->type_str());
     }
@@ -55,16 +81,16 @@ static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
  */
 static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rewrite_v) {
     if (arg1->value_type == VALUE_TYPE_STR) {
-        StrValue* pattern_sv = static_cast<StrValue*>(arg1);
-        std::string pattern = RE2::QuoteMeta(pattern_sv->str_value());
-        std::string ret(self->upcast<StrValue>()->str_value()); 
-        RE2::GlobalReplace(&ret, pattern, rewrite_v->to_s()->str_value());
-        return new StrValue(ret);
+        std::string *pattern_sv = get_str_value(arg1);
+        std::string pattern = RE2::QuoteMeta(*pattern_sv);
+        std::string ret(*get_str_value(self)); 
+        RE2::GlobalReplace(&ret, pattern, rewrite_v->to_s());
+        return new_str_value(ret);
     } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
         int replacements;
-        std::string ret = regex->replace(self->upcast<StrValue>()->str_value(), rewrite_v->to_s()->str_value(), replacements);
-        return new StrValue(ret);
+        std::string ret = regex->replace(*get_str_value(self), rewrite_v->to_s(), replacements);
+        return new_str_value(ret);
     } else {
         throw new ArgumentExceptionValue("String.replace requires string or regexp object for first argument, but you passed '%s'.", arg1->type_str());
     }
@@ -84,11 +110,11 @@ static SharedPtr<Value> str_replace(VM *vm, Value* self, Value* arg1, Value *rew
  */
 static SharedPtr<Value> str_substr(VM *vm, const std::vector<SharedPtr<Value>>& args) {
     assert(args[0]->value_type == VALUE_TYPE_STR);
-    const std::string & str = args[0]->upcast<StrValue>()->str_value();
+    const std::string * str = get_str_value(args[0]);
     if (args.size()-1 == 1) { // "foobar".substr(3)
-        return new StrValue(str.substr(args[1]->to_int()));
+        return new_str_value(str->substr(args[1]->to_int()));
     } else if (args.size()-1 == 2) { // "foobar".substr(3,2)
-        return new StrValue(str.substr(args[1]->to_int(), args[2]->to_int()));
+        return new_str_value(str->substr(args[1]->to_int(), args[2]->to_int()));
     } else {
         throw new ArgumentExceptionValue("String#substr requires 1 or 2 arguments");
     }
@@ -106,7 +132,7 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
 
     assert(self->value_type == VALUE_TYPE_STR);
     return re_v->upcast<AbstractRegexpValue>()->scan(
-        vm, self->upcast<StrValue>()->str_value()
+        vm, *get_str_value(self)
     );
 }
 
@@ -135,7 +161,7 @@ static SharedPtr<Value> str_split(VM *vm, Value *self, const std::vector<SharedP
 
     assert(self->value_type == VALUE_TYPE_STR);
     return re_v->upcast<AbstractRegexpValue>()->split(
-        vm, self->upcast<StrValue>()->str_value(), limit
+        vm, *get_str_value(self), limit
     );
 }
 
@@ -154,8 +180,8 @@ static SharedPtr<Value> str_index(VM *vm, const std::vector<SharedPtr<Value>>& a
         throw new ArgumentExceptionValue("Arguments must be 1 or 2 for Str#index");
     }
 
-    StrValue * v = args.at(0)->upcast<StrValue>();
-    size_t ret = v->str_value().find(args.at(1)->to_s()->str_value(), pos);
+    Value * v = args.at(0).get();
+    size_t ret = get_str_value(v)->find(args.at(1)->to_s(), pos);
     return new IntValue(ret == std::string::npos ? -1 : ret);
 }
 
@@ -168,7 +194,7 @@ static SharedPtr<Value> str_upper(VM *vm, Value *self) {
     if (self->value_type != VALUE_TYPE_STR) {
         throw new ExceptionValue("This is a method for string object.");
     }
-    std::string s = static_cast<StrValue*>(self)->str_value();
+    std::string s(*get_str_value(self));
     std::string ret;
     std::string::iterator i = s.begin();
     std::string::iterator end = s.end();
@@ -176,7 +202,7 @@ static SharedPtr<Value> str_upper(VM *vm, Value *self) {
         ret += std::toupper((unsigned char)*i);
         ++i;
     }
-    return new StrValue(ret);
+    return new_str_value(ret);
 }
 
 /**
@@ -188,7 +214,7 @@ static SharedPtr<Value> str_lower(VM *vm, Value *self) {
     if (self->value_type != VALUE_TYPE_STR) {
         throw new ExceptionValue("This is a method for string object.");
     }
-    std::string s = static_cast<StrValue*>(self)->str_value();
+    std::string s = *get_str_value(self);
     std::string ret;
     std::string::iterator i = s.begin();
     std::string::iterator end = s.end();
@@ -196,7 +222,7 @@ static SharedPtr<Value> str_lower(VM *vm, Value *self) {
         ret += std::tolower((unsigned char)*i);
         ++i;
     }
-    return new StrValue(ret);
+    return new_str_value(ret);
 }
 
 /**
@@ -208,17 +234,16 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v, const std::vector<Shar
     if (self_v->value_type != VALUE_TYPE_STR) {
         throw new ArgumentExceptionValue("This is not a string value.");
     }
-    StrValue *self = static_cast<StrValue*>(self_v);
     if (args.size() == 0) { // "foobar".decode()
-        return new BytesValue(self->str_value());
+        return new BytesValue(*get_str_value(self_v));
     } else if (args.size() == 1) {
         // convert to utf-8.
-        icu::UnicodeString src(self->str_value().c_str(), "utf8");
-        const char *dstcharset = args[0]->to_s()->str_value().c_str();
-        int length = src.extract(0, src.length(), NULL, dstcharset);
+        icu::UnicodeString src(get_str_value(self_v)->c_str(), "utf8");
+        std::string dstcharset = args[0]->to_s();
+        int length = src.extract(0, src.length(), NULL, dstcharset.c_str());
 
         std::vector<char> result(length + 1);
-        src.extract(0, src.length(), &result[0], dstcharset);
+        src.extract(0, src.length(), &result[0], dstcharset.c_str());
 
         return new BytesValue(std::string(result.begin(), result.end() - 1));
     } else {

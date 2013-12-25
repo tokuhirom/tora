@@ -1,6 +1,5 @@
 #include "../value.h"
 #include "array.h"
-#include "str.h"
 #include <algorithm>
 
 using namespace tora;
@@ -12,7 +11,7 @@ using namespace tora;
 class LessValue {
 public:
     bool operator()(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs) const {
-        return lhs->to_s()->str_value() < rhs->to_s()->str_value();
+        return lhs->to_s() < rhs->to_s();
     }
 };
 

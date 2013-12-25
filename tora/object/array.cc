@@ -111,15 +111,15 @@ static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
 static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
     assert(self->value_type == VALUE_TYPE_ARRAY);
     SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
-    SharedPtr<StrValue> str = inner->to_s();
+    std::string str = inner->to_s();
     std::string ret;
     for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-        ret += (*iter)->to_s()->str_value();
+        ret += (*iter)->to_s();
         if (iter+1 != src->end()) {
-            ret += str.get()->str_value();
+            ret += str;
         }
     }
-    return new StrValue(ret);
+    return new_str_value(ret);
 }
 
 /**
@@ -169,9 +169,9 @@ static SharedPtr<Value> av_grep(VM * vm, Value* self, Value *stuff_v) {
     } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
         for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-            SharedPtr<StrValue> str = (*iter)->to_s();
+            std::string str = (*iter)->to_s();
 
-            if (re->match_bool(vm, str->str_value())) {
+            if (re->match_bool(vm, str)) {
                 ret->push_back(*iter);
             }
         }

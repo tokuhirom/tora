@@ -63,14 +63,14 @@ SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
             SharedPtr<ArrayValue> av = new ArrayValue();
             for (int i=1; i< VAL()->NumberOfCapturingGroups()+1; i++) {
                 if (buf[i].data()) {
-                    av->push_back(new StrValue(buf[i].as_string()));
+                    av->push_back(new_str_value(buf[i].as_string()));
                 } else {
                     av->push_back(new_undef_value());
                 }
             }
             res->push_back(av);
         } else {
-            res->push_back(new StrValue(buf[0].as_string()));
+            res->push_back(new_str_value(buf[0].as_string()));
         }
         start = buf[0].data() - str.c_str() + (buf[0].length() > 0 ? buf[0].length() : 1);
     }
@@ -84,9 +84,9 @@ SharedPtr<Value> RE2RegexpValue::split(VM *vm, const std::string &str, int limit
         size_t i = 0;
         for (; i<str.size(); i++) {
             if (limit==0 || res->size()+1 < limit) {
-                res->push_back(new StrValue(str.substr(i, 1)));
+                res->push_back(new_str_value(str.substr(i, 1)));
             } else {
-                res->push_back(new StrValue(str.substr(i)));
+                res->push_back(new_str_value(str.substr(i)));
                 break;
             }
         }
@@ -101,14 +101,14 @@ SharedPtr<Value> RE2RegexpValue::split(VM *vm, const std::string &str, int limit
 
         while (VAL()->Match(src, 0, src.length(), RE2::UNANCHORED, buf, 1)) {
             if (limit==0 || res->size()+1 < limit) {
-                res->push_back(new StrValue(src.substr(start, buf[0].data() - src.c_str())));
+                res->push_back(new_str_value(src.substr(start, buf[0].data() - src.c_str())));
             } else {
                 break;
             }
             src = src.substr((buf[0].data()-src.c_str())+buf[0].length());
         }
         if (src.size() > 0) {
-            res->push_back(new StrValue(src));
+            res->push_back(new_str_value(src));
         }
         return res;
     }

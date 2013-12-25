@@ -4,6 +4,7 @@
 #include "ops.gen.h"
 #include "shared_ptr.h"
 #include "prim.h"
+#include "value.h"
 
 namespace tora {
 
@@ -54,6 +55,10 @@ public:
     ValueOP(op_type_t type, Value* v)
         : OP(type)
         , value(v) {
+    }
+    ValueOP(op_type_t type, local& v)
+        : OP(type)
+        , value(v.get()) {
     }
 };
 

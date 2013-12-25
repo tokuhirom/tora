@@ -14,7 +14,7 @@ int main() {
         std::string filename("HOGE");
         int lineno = 3;
         std::shared_ptr<std::vector<std::string>> params(new std::vector<std::string>());
-        SharedPtr<CodeValue> code(new CodeValue(
+        MortalValue code(new CodeValue(
             symbol_table->get_id("hgoe"), // package id
             symbol_table->get_id("fuga"),        // func name id
             filename,

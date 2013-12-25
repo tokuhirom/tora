@@ -10,7 +10,6 @@
 #include "value/object.h"
 #include "value/array.h"
 #include "value/symbol.h"
-#include "value/str.h"
 #include "value/exception.h"
 #include "value.h"
 #include "object.h"
@@ -36,16 +35,16 @@ static SharedPtr<Value> builtin_say(VM *vm, const std::vector<SharedPtr<Value>> 
     auto iter = args.begin();
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
+        std::string s = v->to_s();
         // printf("%s\n", s->upcast<StrValue>()->str_value().c_str());
-        fwrite(s->upcast<StrValue>()->str_value().c_str(), sizeof(char), s->upcast<StrValue>()->str_value().size(), stdout);
+        fwrite(s.c_str(), sizeof(char), s.size(), stdout);
         fputc('\n', stdout);
     }
     return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_typeof(VM *vm, Value *v) {
-    return new StrValue(v->type_str());
+    return new_str_value(v->type_str());
 }
 
 /**
@@ -63,15 +62,15 @@ static SharedPtr<Value> builtin_print(VM *vm, const std::vector<SharedPtr<Value>
     auto iter = args.begin();
     for (; iter!=args.end(); iter++) {
         SharedPtr<Value> v(*iter);
-        SharedPtr<Value> s(v->to_s());
-        printf("%s", s->upcast<StrValue>()->str_value().c_str());
+        std::string s(v->to_s());
+        printf("%s", s.c_str());
     }
     return new_undef_value();
 }
 
 static SharedPtr<Value> builtin_opendir(VM * vm, Value* s) {
-    SharedPtr<StrValue> dirname = s->to_s();
-    return Dir_new(vm, dirname.get());
+    std::string dirname = s->to_s();
+    return Dir_new(vm, dirname);
 }
 
 /**
@@ -186,7 +185,7 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
     if (getcwd(ptr, MAXPATHLEN)) {
         std::string ptr_s(ptr);
         delete ptr;
-        return new StrValue(ptr_s);
+        return new_str_value(ptr_s);
     } else {
         throw new ErrnoExceptionValue(get_errno());
     }
@@ -223,7 +222,7 @@ static SharedPtr<Value> builtin_getppid(VM *vm) {
  */
 static SharedPtr<Value> builtin_system(VM *vm, Value * command) {
     // system(3) conforming to: C89, C99, POSIX.1-2001.
-    return new IntValue(system(command->to_s()->str_value().c_str()));
+    return new IntValue(system(command->to_s().c_str()));
 }
 
 static SharedPtr<Value> builtin_abs(VM *vm, Value *v) {
@@ -264,7 +263,7 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     if (v->value_type != VALUE_TYPE_STR) {
         throw new ExceptionValue("hex() requires string value.");
     }
-    const std::string s = v->upcast<StrValue>()->c_str();
+    const std::string s = get_str_value(v)->c_str();
     char *endp;
     set_errno(0);
     long n = strtol(s.c_str(), &endp, 16);
@@ -272,7 +271,7 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
         throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
-        throw new ExceptionValue("The value is not hexadecimal: %s.", v->upcast<StrValue>()->c_str());
+        throw new ExceptionValue("The value is not hexadecimal: %s.", get_str_value(v)->c_str());
     }
     return new IntValue(n);
 }
@@ -281,7 +280,7 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     if (v->value_type != VALUE_TYPE_STR) {
         throw new ExceptionValue("oct() requires string value.");
     }
-    const std::string s = v->upcast<StrValue>()->c_str();
+    const std::string s = get_str_value(v)->c_str();
     char *endp;
     set_errno(0);
     long n = strtol(s.c_str(), &endp, 8);
@@ -289,7 +288,7 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
         throw new ErrnoExceptionValue(get_errno());
     }
     if (endp != s.c_str()+s.size()) {
-        throw new ExceptionValue("The value is not oct: %s.", v->upcast<StrValue>()->c_str());
+        throw new ExceptionValue("The value is not oct: %s.", get_str_value(v)->c_str());
     }
     return new IntValue(n);
 }
@@ -312,7 +311,7 @@ static SharedPtr<Value> builtin_printf(VM *vm, const std::vector<SharedPtr<Value
 }
 
 static SharedPtr<Value> builtin_sprintf(VM *vm, const std::vector<SharedPtr<Value>> & args) {
-    return new StrValue(tora_sprintf(args));
+    return new_str_value(tora_sprintf(args));
 }
 
 void tora::Init_builtins(VM *vm) {

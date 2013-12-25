@@ -60,7 +60,7 @@ bool ClassValue::has_method(ID target_id) const {
 SharedPtr<ArrayValue> ClassValue::get_method_list() const {
     SharedPtr<ArrayValue> av = new ArrayValue();
     for (auto iter=VAL().methods_.begin(); iter!=VAL().methods_.end(); ++iter) {
-        av->push_back(new StrValue(VAL().vm_->symbol_table->id2name(iter->first)));
+        av->push_back(new_str_value(VAL().vm_->symbol_table->id2name(iter->first)));
     }
     return av;
 }

@@ -25,7 +25,7 @@ inline static ClassValue* SELF(Value *self) {
  * Get a name of class.
  */
 static SharedPtr<Value> Class_name(VM * vm, Value* self) {
-    return new StrValue(SELF(self)->name());
+    return new_str_value(SELF(self)->name());
 }
 
 void tora::Init_Class(VM* vm) {

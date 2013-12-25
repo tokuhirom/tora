@@ -446,8 +446,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             break;
         }
 
-        SharedPtr<StrValue> sv = new StrValue(node->at(0)->upcast<StrNode>()->str_value);
-        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
+        tora::local sv(new_str_value(node->at(0)->upcast<StrNode>()->str_value));
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv.get());
         push_op(tmp);
         push_op(new OP(OP_LOCAL));
 
@@ -678,7 +678,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         code->code_opcodes(funccomp.ops);
         code->closure_var_names(funccomp.closure_vars);
 
-        SharedPtr<StrValue> funcname_value = new StrValue(funcname);
+        // SharedPtr<StrValue> funcname_value = new StrValue(funcname);
         if (1 && funccomp.closure_vars->size() > 0) {
             // create closure
             // push variables  to stack.
@@ -703,8 +703,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_STRING: {
-        SharedPtr<StrValue> sv = new StrValue(node->upcast<StrNode>()->str_value);
-        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv);
+        local sv(new_str_value(node->upcast<StrNode>()->str_value));
+        SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv.get());
         push_op(tmp);
         break;
     }

@@ -89,7 +89,7 @@ SET(TORA_SRCS
     tora/object/class.cc       tora/object/int.cc                    tora/value/object.cc
     tora/object/code.cc        tora/object/internals.cc           tora/value/array.cc    tora/value/range.cc
     tora/object/dir.cc         tora/object/metaclass.cc           tora/value/bool.cc     tora/value/regexp.cc
-    tora/object/double.cc      tora/object/object.cc              tora/value/bytes.cc    tora/value/str.cc
+    tora/object/double.cc      tora/object/object.cc              tora/value/bytes.cc
     tora/object/dynaloader.cc  tora/object/re2_regexp_matched.cc  tora/value/class.cc
     tora/object/env.cc         tora/object/regexp.cc              tora/value/code.cc
 )

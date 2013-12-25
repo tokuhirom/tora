@@ -31,8 +31,8 @@ inline static ClassValue* SELF(Value *self) {
  * It does not include methods inherited from parent classes.
  */
 static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) {
-    SharedPtr<StrValue> methname = methname_v->to_s();
-    bool ret = SELF(self)->has_method(vm->symbol_table->get_id(methname->str_value()));
+    std::string methname = methname_v->to_s();
+    bool ret = SELF(self)->has_method(vm->symbol_table->get_id(methname));
     return BoolValue::instance(ret);
 }
 
@@ -52,7 +52,7 @@ static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
  * Get a name of class.
  */
 static SharedPtr<Value> mc_name(VM * vm, Value* self) {
-    return new StrValue(SELF(self)->name());
+    return new_str_value(SELF(self)->name());
 }
 
 /**

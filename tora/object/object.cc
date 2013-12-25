@@ -25,7 +25,7 @@ using namespace tora;
  */
 static SharedPtr<Value> object_tora(VM *vm, Value *self) {
     Inspector ins(vm);
-    return new StrValue(ins.inspect(self));
+    return new_str_value(ins.inspect(self));
 }
 
 /**
@@ -53,8 +53,8 @@ static SharedPtr<Value> object_meta(VM *vm, Value *self) {
  */
 static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
     if (self->value_type == VALUE_TYPE_OBJECT) {
-        SharedPtr<StrValue> target = target_v->to_s();
-        ID target_id = vm->symbol_table->get_id(target->str_value());
+        StringImpl target = target_v->to_s();
+        ID target_id = vm->symbol_table->get_id(target);
         return BoolValue::instance(self->upcast<ObjectValue>()->isa(target_id));
     } else {
         TODO();

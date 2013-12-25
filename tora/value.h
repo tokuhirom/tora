@@ -43,7 +43,6 @@ typedef enum {
 class Value;
 class IntValue;
 class DoubleValue;
-class StrValue;
 class BoolValue;
 class RangeValue;
 class ObjectImpl;
@@ -80,6 +79,7 @@ protected:
 typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 typedef std::string StringImpl;
+typedef std::string BytesImpl;
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -100,10 +100,14 @@ public:
     }
 protected:
 
-    virtual ~Value() { }
+    virtual ~Value() {
+      if (value_type == VALUE_TYPE_STR) {
+        delete static_cast<StringImpl*>(ptr_value_);
+      }
+    }
     Value(const Value&) = delete;
 public:
-    Value(value_type_t t) : refcnt(0), value_type(t) { }
+    Value(value_type_t t) : refcnt(1), value_type(t) { }
     union {
         int int_value_;
         double double_value_;
@@ -111,7 +115,9 @@ public:
         ID id_value_;
         void * ptr_value_;
 
-        StringImpl* str_value_;
+        // TODO: remove me.
+        std::string* str_value_;
+
         RangeImpl* range_value_;
         ArrayImpl* array_value_;
         HashImpl*hash_value_;
@@ -125,7 +131,7 @@ public:
     value_type_t value_type;
     Value& operator=(const Value&v);
 
-    SharedPtr<StrValue> to_s();
+    StringImpl to_s();
     int to_int() const;
     double to_double() const;
     bool to_bool() const;
@@ -148,6 +154,11 @@ public:
 static value_type_t type(const Value &v)
 {
   return v.value_type;
+}
+
+static value_type_t type(const Value *v)
+{
+  return v->value_type;
 }
 
 
@@ -197,6 +208,37 @@ static void* get_ptr_value(const SharedPtr<Value>& v)
   return get_ptr_value(v.get());
 }
 
+static BytesImpl* get_bytes_value(const Value* v)
+{
+  assert(type(v) == VALUE_TYPE_BYTES);
+  return static_cast<BytesImpl*>(v->ptr_value_);
+}
+
+static std::string* get_str_value(const Value* v)
+{
+  assert(type(v) == VALUE_TYPE_STR);
+  return static_cast<std::string*>(v->ptr_value_);
+}
+
+static Value* new_str_value(const StringImpl& s)
+{
+  Value * v = new Value(VALUE_TYPE_STR);
+  v->ptr_value_ = new std::string(s);
+  return v;
+}
+
+static BytesImpl* get_bytes_value(const SharedPtr<Value>& v)
+{
+  // remove me
+  return get_bytes_value(v.get());
+}
+
+static StringImpl* get_str_value(const SharedPtr<Value>& v)
+{
+  // remove me
+  return get_str_value(v.get());
+}
+
 static int get_int_value(const SharedPtr<Value>& v)
 {
   // REMOVE ME.
@@ -207,9 +249,81 @@ static Value* new_undef_value() {
     return new Value(VALUE_TYPE_UNDEF);
 }
 
+class AutoPtrValue {
+protected:
+  Value* v_;
+public:
+  AutoPtrValue(Value* v) :v_(v) {
+    v->retain();
+  }
+  AutoPtrValue(const AutoPtrValue& mv) = delete;
+  ~AutoPtrValue() {
+    v_->release();
+  }
+  Value& operator*() const {
+    return *v_;
+  }
+  Value * operator->() const {
+    assert(v_ != NULL);
+    return v_;
+  }
+  Value *get() const {
+    return v_;
+  }
 };
 
-#include "value/str.h"
+/**
+ * Hold local variable.
+ *
+ * This class does not retain the value.
+ * But release it.
+ */
+class MortalValue {
+protected:
+  Value* v_;
+public:
+  MortalValue(Value* v) :v_(v) {
+  }
+  MortalValue(const MortalValue& mv) = delete;
+  ~MortalValue() {
+    v_->release();
+  }
+  Value& operator*() const {
+    return *v_;
+  }
+  Value * operator->() const {
+    assert(v_ != NULL);
+    return v_;
+  }
+  Value *get() const {
+    return v_;
+  }
+};
+/**
+ * MortalStrValue
+ *
+ * Shorthand to create mortal string value.
+ */
+class MortalStrValue : public MortalValue {
+public:
+  MortalStrValue(const std::string& s) : MortalValue(new_str_value(s)) {
+  }
+};
+/**
+ * MortalStrValue
+ *
+ * Shorthand to create mortal undef value.
+ */
+class MortalUndefValue : public MortalValue {
+public:
+  MortalUndefValue() : MortalValue(new_undef_value()) {
+  }
+};
+
+typedef MortalValue local; // remove me
+
+};
+
 #include "value/bool.h"
 #include "value/int.h"
 #include "value/double.h"

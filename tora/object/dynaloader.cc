@@ -22,9 +22,9 @@ using namespace tora;
  * This method loads $filename by dlopen(3) and find symbol named $endpoint, and call it.
  */
 static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v, Value *endpoint_v) {
-    SharedPtr<StrValue> filename_s = filename_v->to_s();
-    SharedPtr<StrValue> endpoint_s = endpoint_v->to_s();
-    vm->load_dynamic_library(filename_s->str_value(), endpoint_s->str_value());
+    std::string filename_s = filename_v->to_s();
+    std::string endpoint_s = endpoint_v->to_s();
+    vm->load_dynamic_library(filename_s, endpoint_s);
     return new_undef_value();
 }
 

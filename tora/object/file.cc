@@ -32,8 +32,7 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
 
     std::string mode;
     if (mode_v) {
-        SharedPtr<StrValue> mode_s =  mode_v->to_s();
-        mode = mode_s->str_value().c_str();
+      mode = mode_v->to_s();
     } else {
         mode = "rb";
     }
@@ -41,12 +40,12 @@ SharedPtr<Value> tora::File_open(VM *vm, Value *fname, Value *mode_v) {
     // TODO: check \0
     SharedPtr<FileValue> file = new FileValue();
     if (file->open(
-        fname->to_s()->str_value(),
+        fname->to_s(),
         mode
     )) {
         return file;
     } else {
-        throw new ExceptionValue("Cannot open file: %s: %s", fname->upcast<StrValue>()->str_value().c_str(), get_strerror(get_errno()).c_str());
+        throw new ExceptionValue("Cannot open file: %s: %s", get_str_value(fname)->c_str(), get_strerror(get_errno()).c_str());
     }
 }
 
@@ -78,7 +77,7 @@ static SharedPtr<Value> file_open_method(VM *vm, const std::vector<SharedPtr<Val
  */
 static SharedPtr<Value> file_slurp(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
-    return self->upcast<FileValue>()->read();
+    return new_str_value(self->upcast<FileValue>()->read());
 }
 
 /**
@@ -99,7 +98,7 @@ static SharedPtr<Value> file_close(VM * vm, Value* self) {
  */
 static SharedPtr<Value> file_write(VM * vm, Value* self, Value *str_v) {
     assert(self->value_type == VALUE_TYPE_FILE);
-    const std::string & str = str_v->to_s()->str_value();
+    const std::string str = str_v->to_s();
     size_t ret = fwrite(str.c_str(), sizeof(char), str.size(), FP(self));
     if (ret==str.size()) {
         return new_undef_value();
@@ -139,7 +138,7 @@ static SharedPtr<Value> file_getc(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_FILE);
     int c = fgetc(FP(self));
     if (c>=0) {
-        return new StrValue(std::string(1, (char)c));
+        return new_str_value(std::string(1, (char)c));
     } else {
         if (feof(FP(self))) {
             return new_undef_value();

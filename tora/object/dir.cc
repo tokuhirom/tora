@@ -23,8 +23,8 @@ using namespace tora;
  *
  * Open directory named $directory and returns Dir object.
  */
-ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
-    DIR * dp = opendir(dirname->c_str());
+ObjectValue* tora::Dir_new(VM *vm, const std::string& dirname) {
+    DIR * dp = opendir(dirname.c_str());
     if (dp) {
         return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_CLASS).get(), new_ptr_value(dp));
     } else {
@@ -38,7 +38,7 @@ ObjectValue* tora::Dir_new(VM *vm, StrValue *dirname) {
  * Create a new Dir class instance from $dirname.
  */
 static SharedPtr<Value> dir_new(VM * vm, Value* self, Value* dirname_v) {
-    return tora::Dir_new(vm, dirname_v->to_s().get());
+    return tora::Dir_new(vm, dirname_v->to_s());
 }
 
 /**
@@ -56,7 +56,7 @@ static SharedPtr<Value> dir_read(VM * vm, Value* self) {
     // TODO: support readdir_r
     struct dirent * ent = readdir(dp);
     if (ent) {
-        return new StrValue(ent->d_name);
+        return new_str_value(ent->d_name);
     } else {
         return new_undef_value();
     }
@@ -94,11 +94,11 @@ static SharedPtr<Value> dir_mkdir(VM * vm, const std::vector<SharedPtr<Value>> &
     int mode = args.size() == 2 ? 0777 : args[2]->to_int();
     int ret;
 #ifdef _WIN32
-	ret = mkdir(args[1]->to_s()->str_value().c_str());
+	ret = mkdir(args[1]->to_s().c_str());
     if (ret == 0)
-	    chmod(args[1]->to_s()->str_value().c_str(), mode);
+	    chmod(args[1]->to_s().c_str(), mode);
 #else
-	ret = mkdir(args[1]->to_s()->str_value().c_str(), mode);
+	ret = mkdir(args[1]->to_s().c_str(), mode);
 #endif
     if (ret == 0) {
         return new_undef_value();
@@ -120,7 +120,7 @@ static SharedPtr<Value> dir_rmdir(VM * vm, const std::vector<SharedPtr<Value>> &
         throw new ArgumentExceptionValue("You passed %d arguments, but usage: Dir.rmdir(Str $name)", args.size()-1);
     }
 
-    if (rmdir(args[1]->to_s()->str_value().c_str()) == 0) {
+    if (rmdir(args[1]->to_s().c_str()) == 0) {
         return new_undef_value();
     } else {
         throw new ErrnoExceptionValue(errno);

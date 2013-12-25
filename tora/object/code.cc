@@ -22,7 +22,7 @@ using namespace tora;
  */
 static SharedPtr<Value> code_package(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->package_id()));
+    return new_str_value(vm->symbol_table->id2name(self->upcast<CodeValue>()->package_id()));
 }
 
 /**
@@ -32,7 +32,7 @@ static SharedPtr<Value> code_package(VM * vm, Value* self) {
  */
 static SharedPtr<Value> code_name(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(vm->symbol_table->id2name(self->upcast<CodeValue>()->func_name_id()));
+    return new_str_value(vm->symbol_table->id2name(self->upcast<CodeValue>()->func_name_id()));
 }
 
 /**
@@ -52,7 +52,7 @@ static SharedPtr<Value> code_line(VM * vm, Value* self) {
  */
 static SharedPtr<Value> code_filename(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new StrValue(self->upcast<CodeValue>()->filename());
+    return new_str_value(self->upcast<CodeValue>()->filename());
 }
 
 // undocumented.

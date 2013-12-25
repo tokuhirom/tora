@@ -659,10 +659,10 @@ OP_MAKE_HASH {
     SharedPtr<HashValue> h = new HashValue();
     int size = get_int_operand();
     for (int i=0; i<size; i+=2) {
-        SharedPtr<StrValue> k = stack.back()->to_s();
+        std::string k = stack.back()->to_s();
         stack.pop_back();
         SharedPtr<Value> v = stack.back(); stack.pop_back();
-        h->set(k->str_value(), v);
+        h->set(k, v);
     }
     stack.push_back(h);
 }
@@ -745,24 +745,24 @@ OP_POST_DECREMENT {
 
 OP_FILE_TEST {
     // -f $file
-    SharedPtr<StrValue> fname = stack.back()->to_s();
+    std::string fname = stack.back()->to_s();
     stack.pop_back();
     struct stat buf;
     switch (get_int_operand()) {
     case 'f':
-        stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFREG));
+        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFREG));
         break;
     case 'd':
-        stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
+        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
         break;
     case 'x':
-        stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0 && buf.st_mode & S_IXUSR));
+        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IXUSR));
         break;
     case 'e':
-        stack.push_back(new BoolValue(stat(fname->c_str(), &buf)==0));
+        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0));
         break;
     case 's':
-        if (stat(fname->c_str(), &buf) == 0) {
+        if (stat(fname.c_str(), &buf) == 0) {
             stack.push_back(new IntValue(buf.st_size));
         } else {
             stack.push_back(new_undef_value());

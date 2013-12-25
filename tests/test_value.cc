@@ -3,10 +3,11 @@
 
 using namespace tora;
 
-inline void X(const char *src, int expected) {
-    SharedPtr<StrValue> v = new StrValue(src);
-    int iev = v->to_int();
-    is(iev, expected);
+static inline void X(const char *src, int expected) {
+  std::string src_s(src);
+  MortalStrValue v( src_s );
+  int iev = v->to_int();
+  is(iev, expected);
 }
 
 int main() {

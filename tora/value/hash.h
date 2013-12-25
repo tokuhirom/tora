@@ -3,7 +3,6 @@
 
 #include "../value.h"
 #include "../shared_ptr.h"
-#include "str.h"
 
 namespace tora {
 
@@ -33,31 +32,38 @@ public:
     void set(const std::string & key , const SharedPtr<Value>&val) {
         VAL()[key] = val;
     }
+    void set(const std::string & key , Value* val) {
+        VAL()[key] = val;
+    }
 
     iter begin() { return VAL().begin(); }
     iter end()   { return VAL().end(); }
 
     void set_item(SharedPtr<Value>index, SharedPtr<Value>v) {
-        SharedPtr<StrValue> s = index->to_s();
-        this->set(s->str_value(), v);
+        std::string s = index->to_s();
+        this->set(s, v);
+    }
+    void set_item(const MortalValue& index, const MortalValue& v) {
+        std::string s = index->to_s();
+        this->set(s, v.get());
     }
     SharedPtr<Value> get_item(SharedPtr<Value> index) {
-        SharedPtr<StrValue> s = index->to_s();
-        return this->VAL()[s->str_value()];
+        std::string s = index->to_s();
+        return this->VAL()[s];
     }
     size_t size() {
         return VAL().size();
     }
     bool has_key(const SharedPtr<Value> & key) const {
-        SharedPtr<StrValue> k = key->to_s();
-        return this->has_key(k->str_value());
+        std::string k = key->to_s();
+        return this->has_key(k);
     }
     bool has_key(const std::string & key) const {
         return this->VAL().find(key) != this->VAL().end();
     }
     void delete_key(const SharedPtr<Value> &key) {
-        SharedPtr<StrValue> k = key->to_s();
-        this->delete_key(k->str_value());
+        std::string k = key->to_s();
+        this->delete_key(k);
     }
     void delete_key(const std::string &key) {
         auto iter = this->VAL().find(key);
@@ -78,7 +84,7 @@ public:
             return iter == parent->VAL().end();
         }
         SharedPtr<Value> getkey() {
-            return new StrValue(iter->first);
+            return new_str_value(iter->first);
         }
         SharedPtr<Value> getval() {
             return iter->second;

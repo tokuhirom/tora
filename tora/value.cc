@@ -89,39 +89,39 @@ double Value::to_double() const {
     abort();
 }
 
-SharedPtr<StrValue> Value::to_s() {
+std::string Value::to_s() {
     switch (value_type) {
     case VALUE_TYPE_STR:
-        return static_cast<StrValue*>(this);
+        return *get_str_value(this);
     case VALUE_TYPE_BYTES:
         // TODO: utf8 validation?
-        return new StrValue(static_cast<BytesValue*>(this)->str_value());
+        return (static_cast<BytesValue*>(this)->str_value());
     case VALUE_TYPE_INT: {
         std::ostringstream os;
         os << get_int_value(*this);
-        return new StrValue(os.str());
+        return os.str();
     }
     case VALUE_TYPE_DOUBLE: {
         std::ostringstream os;
         os << get_double_value(*this);
-        return new StrValue(os.str());
+        return os.str();
     }
     case VALUE_TYPE_BOOL: {
-        return new StrValue(this->upcast<BoolValue>()->bool_value() ? "true" : "false");
+        return this->upcast<BoolValue>()->bool_value() ? "true" : "false";
     }
     case VALUE_TYPE_UNDEF: {
-        return new StrValue("undef");
+        return "undef";
     }
     case VALUE_TYPE_EXCEPTION: {
         ExceptionValue * e = this->upcast<ExceptionValue>();
-        return new StrValue(e->message());
+        return e->message();
     }
     case VALUE_TYPE_RANGE: {
         std::ostringstream os;
         os << get_int_value(this->upcast<RangeValue>()->left());
         os << "..";
         os <<get_int_value(this->upcast<RangeValue>()->right());
-        return new StrValue(os.str());
+        return os.str();
     }
     default: {
         throw new ExceptionValue("%s don't support stringification.", this->type_str());
@@ -141,14 +141,14 @@ int Value::to_int() const {
             throw new ExceptionValue("Cannot coerce tuple to integer");
         }
     } else if (value_type == VALUE_TYPE_STR) {
-        const StrValue *s = static_cast<const StrValue*>(this);
+        std::string *s = get_str_value(this);
         set_errno(0);
-        char *endptr = (char*)(s->str_value().c_str()+s->str_value().size());
-        long ret = strtol(s->str_value().c_str(), &endptr, 10);
+        char *endptr = (char*)(s->c_str()+s->size());
+        long ret = strtol(s->c_str(), &endptr, 10);
         if (get_errno() == 0) {
             return ret;
         } else if (get_errno() == EINVAL) {
-            throw new ExceptionValue("String contains non numeric character: %s", s->str_value().c_str());
+            throw new ExceptionValue("String contains non numeric character: %s", s->c_str());
         } else if (get_errno() == ERANGE) {
             // try to the bigint?
             TODO();

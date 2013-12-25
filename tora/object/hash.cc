@@ -24,7 +24,7 @@ static SharedPtr<Value> Hash_keys(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_HASH);
     SharedPtr<ArrayValue> av = new ArrayValue();
     for (auto iter=self->upcast<HashValue>()->begin(); iter!=self->upcast<HashValue>()->end(); ++iter) {
-        av->push_back(new StrValue(iter->first));
+        av->push_back(new_str_value(iter->first));
     }
     return av;
 }
