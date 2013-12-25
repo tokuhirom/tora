@@ -9,100 +9,99 @@
 using namespace tora;
 
 PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
-// printf("VARS: %d\n", vars_cnt);
-   /*
-    for (int i=0; i<vars_cnt; i++) {
-        SharedPtr<Value> v = new_undef_value();
-        pad_.push_back(v);
-    }
-    */
+  // printf("VARS: %d\n", vars_cnt);
+  /*
+   for (int i=0; i<vars_cnt; i++) {
+       SharedPtr<Value> v = new_undef_value();
+       pad_.push_back(v);
+   }
+   */
 }
 
 static std::string dump_array(VM *vm, const PadList *n) {
-    Inspector ins(vm);
-    std::string o = "[";
-    for (auto iter = n->pad_.begin(); iter != n->pad_.end(); iter++) {
-        o += ins.inspect(*iter);
-    }
-    o += "]";
-    return o;
+  Inspector ins(vm);
+  std::string o = "[";
+  for (auto iter = n->pad_.begin(); iter != n->pad_.end(); iter++) {
+    o += ins.inspect(*iter);
+  }
+  o += "]";
+  return o;
 }
 
 void PadList::dump(VM *vm) const {
-    const PadList *n = this;
-    int i=0;
-    while (n) {
-        std::clog << i << " " << dump_array(vm, n) << std::endl;
-        n = n->next_.get();
-        i++;
-    }
+  const PadList *n = this;
+  int i = 0;
+  while (n) {
+    std::clog << i << " " << dump_array(vm, n) << std::endl;
+    n = n->next_.get();
+    i++;
+  }
 }
 
 size_t PadList::size() const {
-    const PadList *n = this;
-    size_t i=0;
-    while (n) {
-        n = n->next_.get();
-       ++i;
-    }
-    return i;
+  const PadList *n = this;
+  size_t i = 0;
+  while (n) {
+    n = n->next_.get();
+    ++i;
+  }
+  return i;
 }
 
-void PadList::set(int i, const SharedPtr<Value> & v) {
-    assert(v.get());
+void PadList::set(int i, const SharedPtr<Value> &v) {
+  assert(v.get());
 
-    // This retain is required?????????????????????????
-    //
-    // val->retain();
-    //
-    //
-    //
-    //
+  // This retain is required?????????????????????????
+  //
+  // val->retain();
+  //
+  //
+  //
+  //
 
-    if ((int)pad_.size()-1 < i) {
-        for (int j=pad_.size()-1; j<i-1; j++) {
-            pad_.push_back(new_undef_value());
-        }
-        pad_.insert(pad_.begin()+i, v);
-    } else {
-        if (1) {
-            pad_.erase(pad_.begin()+i);
-            pad_.insert(pad_.begin()+i, v);
-        } else {
-            // fprintf(stderr, "# OK: %ld, %d\n", (long int) pad_.size(), i);
-            *(pad_.at(i).get()) = *v;
-        }
-        // pad_->insert(pad_->begin()+i, v);
+  if ((int)pad_.size() - 1 < i) {
+    for (int j = pad_.size() - 1; j < i - 1; j++) {
+      pad_.push_back(new_undef_value());
     }
+    pad_.insert(pad_.begin() + i, v);
+  } else {
+    if (1) {
+      pad_.erase(pad_.begin() + i);
+      pad_.insert(pad_.begin() + i, v);
+    } else {
+      // fprintf(stderr, "# OK: %ld, %d\n", (long int) pad_.size(), i);
+      *(pad_.at(i).get()) = *v;
+    }
+    // pad_->insert(pad_->begin()+i, v);
+  }
 
-    assert(pad_.at(i)->value_type == v->value_type);
+  assert(pad_.at(i)->value_type == v->value_type);
 }
 
 SharedPtr<Value> PadList::get_dynamic(int level, int index) const {
-    PadList * pl = upper(level);
-    assert(pl);
-    return pl->get(index);
+  PadList *pl = upper(level);
+  assert(pl);
+  return pl->get(index);
 }
 
 SharedPtr<Value> PadList::get(int index) const {
-// printf("GET:: %d, %ld\n", index, (long int) pad_.size());
-    if (index < pad_.size()) {
-        return pad_.at(index);
-    } else {
-// printf("UNDEF:: %d, %ld\n", index, (long int) pad_.size());
-        return new_undef_value();
-    }
+  // printf("GET:: %d, %ld\n", index, (long int) pad_.size());
+  if (index < pad_.size()) {
+    return pad_.at(index);
+  } else {
+    // printf("UNDEF:: %d, %ld\n", index, (long int) pad_.size());
+    return new_undef_value();
+  }
 }
 
-void PadList::set_dynamic(int level, int index, const SharedPtr<Value> & val) {
-    upper(level)->set(index, val);
+void PadList::set_dynamic(int level, int index, const SharedPtr<Value> &val) {
+  upper(level)->set(index, val);
 }
 
 PadList *PadList::upper(int level) const {
-    PadList * n = next_.get();
-    for (int i=1; i<level; i++) {
-        n = n->next_.get();
-    }
-    return n;
+  PadList *n = next_.get();
+  for (int i = 1; i < level; i++) {
+    n = n->next_.get();
+  }
+  return n;
 }
-

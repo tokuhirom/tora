@@ -6,10 +6,10 @@
 #include "shared_ptr.h"
 
 namespace tora {
-    class Value;
+class Value;
 
-    std::string tora_sprintf(const std::vector<SharedPtr<Value>> & args);
-    void tora_printf(const std::vector<SharedPtr<Value>> & args);
+std::string tora_sprintf(const std::vector<SharedPtr<Value>>& args);
+void tora_printf(const std::vector<SharedPtr<Value>>& args);
 };
 
-#endif // TORA_PRINTF_H_
+#endif  // TORA_PRINTF_H_

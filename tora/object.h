@@ -36,13 +36,14 @@ void Init_Int(VM *vm);
 void Init_Double(VM *vm);
 void Init_FilePackage(VM *vm);
 
-SharedPtr<Value> Symbol_bless(VM * vm, Value* self, Value *data);
-ObjectValue* Dir_new(VM *vm, const std::string &dirname);
+SharedPtr<Value> Symbol_bless(VM *vm, Value *self, Value *data);
+ObjectValue *Dir_new(VM *vm, const std::string &dirname);
 SharedPtr<Value> File_open(VM *vm, Value *fname, Value *mode);
-SharedPtr<Value> RE2_Regexp_Matched_new(VM *vm, RE2RegexpValue* re, const std::shared_ptr<std::vector<re2::StringPiece>> & matches);
+SharedPtr<Value> RE2_Regexp_Matched_new(
+    VM *vm, RE2RegexpValue *re,
+    const std::shared_ptr<std::vector<re2::StringPiece>> &matches);
 
 void load_builtin_objects(VM *vm);
-
 };
 
-#endif // TORA_OBJECT_H_
+#endif  // TORA_OBJECT_H_

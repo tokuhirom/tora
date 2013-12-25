@@ -19,9 +19,9 @@ using namespace tora;
  *
  * Return the flags.
  */
-static SharedPtr<Value> Regexp_flags(VM * vm, Value* self) {
-    assert(self->value_type == VALUE_TYPE_REGEXP);
-    return new IntValue(self->upcast<AbstractRegexpValue>()->flags());
+static SharedPtr<Value> Regexp_flags(VM* vm, Value* self) {
+  assert(self->value_type == VALUE_TYPE_REGEXP);
+  return new IntValue(self->upcast<AbstractRegexpValue>()->flags());
 }
 
 /**
@@ -29,8 +29,8 @@ static SharedPtr<Value> Regexp_flags(VM * vm, Value* self) {
  *
  * quote meta character in $val and return escaped string.
  */
-static SharedPtr<Value> Regexp_quotemeta(VM * vm, Value* self, Value *val) {
-    return new_str_value(RE2RegexpValue::quotemeta(val->to_s()));
+static SharedPtr<Value> Regexp_quotemeta(VM* vm, Value* self, Value* val) {
+  return new_str_value(RE2RegexpValue::quotemeta(val->to_s()));
 }
 
 /**
@@ -38,8 +38,8 @@ static SharedPtr<Value> Regexp_quotemeta(VM * vm, Value* self, Value *val) {
  *
  * multiline flag.
  */
-static SharedPtr<Value> Regexp_MULTILINE(VM * vm, Value* self) {
-    return new IntValue(REGEXP_MULTILINE);
+static SharedPtr<Value> Regexp_MULTILINE(VM* vm, Value* self) {
+  return new IntValue(REGEXP_MULTILINE);
 }
 
 /**
@@ -47,8 +47,8 @@ static SharedPtr<Value> Regexp_MULTILINE(VM * vm, Value* self) {
  *
  * case insensitive flag.
  */
-static SharedPtr<Value> Regexp_IGNORECASE(VM * vm, Value* self) {
-    return new IntValue(REGEXP_IGNORECASE);
+static SharedPtr<Value> Regexp_IGNORECASE(VM* vm, Value* self) {
+  return new IntValue(REGEXP_IGNORECASE);
 }
 
 /**
@@ -56,18 +56,17 @@ static SharedPtr<Value> Regexp_IGNORECASE(VM * vm, Value* self) {
  *
  * //x flag.
  */
-static SharedPtr<Value> Regexp_EXPANDED(VM * vm, Value* self) {
-    return new IntValue(REGEXP_EXPANDED);
+static SharedPtr<Value> Regexp_EXPANDED(VM* vm, Value* self) {
+  return new IntValue(REGEXP_EXPANDED);
 }
 
-void tora::Init_Regexp(VM *vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_REGEXP_CLASS);
-    klass->add_method("flags",      new CallbackFunction(Regexp_flags));
-    klass->add_method("quotemeta",  new CallbackFunction(Regexp_quotemeta));
+void tora::Init_Regexp(VM* vm) {
+  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_REGEXP_CLASS);
+  klass->add_method("flags", new CallbackFunction(Regexp_flags));
+  klass->add_method("quotemeta", new CallbackFunction(Regexp_quotemeta));
 
-    klass->add_method("MULTILINE",  new CallbackFunction(Regexp_MULTILINE));
-    klass->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
-    klass->add_method("EXPANDED",   new CallbackFunction(Regexp_EXPANDED));
-    vm->add_builtin_class(klass);
+  klass->add_method("MULTILINE", new CallbackFunction(Regexp_MULTILINE));
+  klass->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
+  klass->add_method("EXPANDED", new CallbackFunction(Regexp_EXPANDED));
+  vm->add_builtin_class(klass);
 }
-

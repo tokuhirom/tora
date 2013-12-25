@@ -14,7 +14,7 @@ using namespace tora;
  * class Array
  *
  * Array class is an array class.
- * 
+ *
  * You can construct an Array instance from array literal like:
  * <pre>[1,2,3, "hoge"]</pre>
  * Array can contains any objects.
@@ -22,39 +22,40 @@ using namespace tora;
 
 /**
  * Array#size()
- * 
+ *
  * Get the number of elements in an array.
  */
-static SharedPtr<Value> av_size(VM *vm, Value* self) {
-    SharedPtr<IntValue> size = new IntValue(array_size(self));
-    return size;
+static SharedPtr<Value> av_size(VM* vm, Value* self) {
+  SharedPtr<IntValue> size = new IntValue(array_size(self));
+  return size;
 }
 
 /**
  * Array#sort()
- * 
- * Get a sorted array. This method is stable sort(Because Perl5's sort function is stable).
+ *
+ * Get a sorted array. This method is stable sort(Because Perl5's sort function
+ *is stable).
  */
 static SharedPtr<Value> av_sort(VM* vm, Value* self) {
-    assert(self->value_type == VALUE_TYPE_ARRAY);
-    // copy and sort.
-    SharedValue av(array_stable_sort(self));
-    return av.get();
+  assert(self->value_type == VALUE_TYPE_ARRAY);
+  // copy and sort.
+  SharedValue av(array_stable_sort(self));
+  return av.get();
 }
 
 /**
  * Array#push($elem)
- * 
+ *
  * Push a object to the array. $elem put at end of array.
  *
  * Perl5: push(@array, $elem);
  */
-static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
-    // Inspector ins(vm);
-    // printf("# ARRY PUSH: %p\n", v);
-    array_set_item(self, array_size(self)-1+1, v);
-    // self->upcast<ArrayValue>()->push_back(v);
-    return self;
+static SharedPtr<Value> av_push(VM* vm, Value* self, Value* v) {
+  // Inspector ins(vm);
+  // printf("# ARRY PUSH: %p\n", v);
+  array_set_item(self, array_size(self) - 1 + 1, v);
+  // self->upcast<ArrayValue>()->push_back(v);
+  return self;
 }
 
 /**
@@ -62,10 +63,10 @@ static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
  *
  * Pop a object from array.
  */
-static SharedPtr<Value> av_pop(VM * vm, Value* self) {
-    SharedValue v = array_back(self);
-    array_pop_back(self);
-    return v.get();
+static SharedPtr<Value> av_pop(VM* vm, Value* self) {
+  SharedValue v = array_back(self);
+  array_pop_back(self);
+  return v.get();
 }
 
 /**
@@ -73,9 +74,9 @@ static SharedPtr<Value> av_pop(VM * vm, Value* self) {
  *
  * push $v to front.
  */
-static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
-    array_push_front(self, v);
-    return new_undef_value();
+static SharedPtr<Value> av_unshift(VM* vm, Value* self, Value* v) {
+  array_push_front(self, v);
+  return new_undef_value();
 }
 
 /**
@@ -83,17 +84,17 @@ static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
  *
  * pop value from front.
  */
-static SharedPtr<Value> av_shift(VM * vm, Value* self) {
-    if (array_size(self) > 0) {
-      SharedValue ret = array_get_item(self, 0);
-      array_pop_front(self);
-      return ret.get();
-    } else {
-      return new_undef_value();
-    }
+static SharedPtr<Value> av_shift(VM* vm, Value* self) {
+  if (array_size(self) > 0) {
+    SharedValue ret = array_get_item(self, 0);
+    array_pop_front(self);
+    return ret.get();
+  } else {
+    return new_undef_value();
+  }
 }
 
-static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
+static SharedPtr<Value> av_reverse(VM* vm, Value* self) {
   return array_reverse(self).get();
 }
 
@@ -102,13 +103,13 @@ static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
  *
  * concatenete strings in array.
  */
-static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
+static SharedPtr<Value> av_join(VM* vm, Value* self, Value* inner) {
   assert(self->value_type == VALUE_TYPE_ARRAY);
   std::string str = inner->to_s();
   std::string ret;
-  for (tra_int i=0, l=array_size(self); i<l; ++i) {
+  for (tra_int i = 0, l = array_size(self); i < l; ++i) {
     ret += array_get_item(self, i)->to_s();
-    if (i != l-1) {
+    if (i != l - 1) {
       ret += str;
     }
   }
@@ -118,14 +119,14 @@ static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
 /**
  * [1,2,3].map(-> $n { say($n) })
  */
-static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
+static SharedPtr<Value> av_map(VM* vm, Value* self, Value* code_v) {
   assert(self->value_type == VALUE_TYPE_ARRAY);
   MortalArrayValue ret;
   if (code_v->value_type != VALUE_TYPE_CODE) {
     throw new ExceptionValue("Code is not a foo");
   }
   SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-  for (tra_int i=0, l=array_size(self); i<l; ++i) {
+  for (tra_int i = 0, l = array_size(self); i < l; ++i) {
     vm->stack.push_back(array_get_item(self, i));
 
     vm->function_call_ex(1, code, new_undef_value());
@@ -141,41 +142,43 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
  *
  * Filter $array by $code.
  */
-static SharedPtr<Value> av_grep(VM * vm, Value* self, Value *stuff_v) {
-    assert(self->value_type == VALUE_TYPE_ARRAY);
-    MortalArrayValue ret;
-    if (stuff_v->value_type == VALUE_TYPE_CODE) {
-        SharedPtr<CodeValue> code = stuff_v->upcast<CodeValue>();
-        for (tra_int i=0, l=array_size(self); i<l; ++i) {
-            vm->stack.push_back(array_get_item(self, i));
+static SharedPtr<Value> av_grep(VM* vm, Value* self, Value* stuff_v) {
+  assert(self->value_type == VALUE_TYPE_ARRAY);
+  MortalArrayValue ret;
+  if (stuff_v->value_type == VALUE_TYPE_CODE) {
+    SharedPtr<CodeValue> code = stuff_v->upcast<CodeValue>();
+    for (tra_int i = 0, l = array_size(self); i < l; ++i) {
+      vm->stack.push_back(array_get_item(self, i));
 
-            vm->function_call_ex(1, code, new_undef_value());
+      vm->function_call_ex(1, code, new_undef_value());
 
-            if (vm->stack.back()->to_bool()) {
-                array_push_back(ret.get(), array_get_item(self, i));
-            }
-            vm->stack.pop_back();
-        }
-        return ret.get();
-    } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
-        SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
-        for (tra_int i=0, l=array_size(self); i<l; ++i) {
-            std::string str = array_get_item(self, i)->to_s();
-
-            if (re->match_bool(vm, str)) {
-              array_push_back(ret.get(), array_get_item(self, i));
-            }
-        }
-        return ret.get();
-    } else {
-        throw new ExceptionValue("Second argument for Array#grep should be Code or Regexp");
+      if (vm->stack.back()->to_bool()) {
+        array_push_back(ret.get(), array_get_item(self, i));
+      }
+      vm->stack.pop_back();
     }
+    return ret.get();
+  } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
+    SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
+    for (tra_int i = 0, l = array_size(self); i < l; ++i) {
+      std::string str = array_get_item(self, i)->to_s();
+
+      if (re->match_bool(vm, str)) {
+        array_push_back(ret.get(), array_get_item(self, i));
+      }
+    }
+    return ret.get();
+  } else {
+    throw new ExceptionValue(
+        "Second argument for Array#grep should be Code or Regexp");
+  }
 }
 
 /**
  * $array.capacity() : Int
  *
- * returns the number of elements that can be held in currently allocated storage
+ * returns the number of elements that can be held in currently allocated
+ *storage
  */
 /*
 static SharedPtr<Value> av_capacity(VM * vm, Value* self) {
@@ -196,19 +199,30 @@ static SharedPtr<Value> av_reserve(VM * vm, Value* self, Value * v) {
 */
 
 void tora::Init_Array(VM* vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ARRAY_CLASS);
-    klass->add_method(vm->symbol_table->get_id("size"), new CallbackFunction(av_size));
-    klass->add_method(vm->symbol_table->get_id("sort"), new CallbackFunction(av_sort));
-    klass->add_method(vm->symbol_table->get_id("push"), new CallbackFunction(av_push));
-    klass->add_method(vm->symbol_table->get_id("pop"), new CallbackFunction(av_pop));
-    klass->add_method(vm->symbol_table->get_id("unshift"), new CallbackFunction(av_unshift));
-    klass->add_method(vm->symbol_table->get_id("shift"), new CallbackFunction(av_shift));
-    klass->add_method(vm->symbol_table->get_id("reverse"), new CallbackFunction(av_reverse));
-    klass->add_method(vm->symbol_table->get_id("join"), new CallbackFunction(av_join));
-    klass->add_method(vm->symbol_table->get_id("map"), new CallbackFunction(av_map));
-    klass->add_method(vm->symbol_table->get_id("grep"), new CallbackFunction(av_grep));
-    // klass->add_method(vm->symbol_table->get_id("capacity"), new CallbackFunction(av_capacity));
-    // klass->add_method(vm->symbol_table->get_id("reserve"), new CallbackFunction(av_reserve));
-    vm->add_builtin_class(klass);
+  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ARRAY_CLASS);
+  klass->add_method(vm->symbol_table->get_id("size"),
+                    new CallbackFunction(av_size));
+  klass->add_method(vm->symbol_table->get_id("sort"),
+                    new CallbackFunction(av_sort));
+  klass->add_method(vm->symbol_table->get_id("push"),
+                    new CallbackFunction(av_push));
+  klass->add_method(vm->symbol_table->get_id("pop"),
+                    new CallbackFunction(av_pop));
+  klass->add_method(vm->symbol_table->get_id("unshift"),
+                    new CallbackFunction(av_unshift));
+  klass->add_method(vm->symbol_table->get_id("shift"),
+                    new CallbackFunction(av_shift));
+  klass->add_method(vm->symbol_table->get_id("reverse"),
+                    new CallbackFunction(av_reverse));
+  klass->add_method(vm->symbol_table->get_id("join"),
+                    new CallbackFunction(av_join));
+  klass->add_method(vm->symbol_table->get_id("map"),
+                    new CallbackFunction(av_map));
+  klass->add_method(vm->symbol_table->get_id("grep"),
+                    new CallbackFunction(av_grep));
+  // klass->add_method(vm->symbol_table->get_id("capacity"), new
+  // CallbackFunction(av_capacity));
+  // klass->add_method(vm->symbol_table->get_id("reserve"), new
+  // CallbackFunction(av_reserve));
+  vm->add_builtin_class(klass);
 }
-

@@ -13,32 +13,32 @@
 
 namespace tora {
 
-  typedef int tra_int;
+typedef int tra_int;
 
 typedef enum {
-    VALUE_TYPE_UNDEF = 0,
-    VALUE_TYPE_INT = 1,
-    VALUE_TYPE_BOOL = 2,
-    VALUE_TYPE_STR = 3,
-    VALUE_TYPE_CODE = 4,
-    VALUE_TYPE_ARRAY = 5,
-    VALUE_TYPE_DOUBLE = 6,
-    VALUE_TYPE_REGEXP,
-    VALUE_TYPE_TUPLE,
-    VALUE_TYPE_FILE,
-    VALUE_TYPE_RANGE,
-    VALUE_TYPE_ARRAY_ITERATOR,
-    VALUE_TYPE_RANGE_ITERATOR,
-    VALUE_TYPE_EXCEPTION,
-    VALUE_TYPE_SYMBOL,
-    VALUE_TYPE_HASH,
-    VALUE_TYPE_HASH_ITERATOR,
-    VALUE_TYPE_OBJECT,
-    VALUE_TYPE_CLASS,
-    VALUE_TYPE_POINTER,
-    VALUE_TYPE_BYTES,
-    VALUE_TYPE_REFERENCE,
-    VALUE_TYPE_FILE_PACKAGE,
+  VALUE_TYPE_UNDEF = 0,
+  VALUE_TYPE_INT = 1,
+  VALUE_TYPE_BOOL = 2,
+  VALUE_TYPE_STR = 3,
+  VALUE_TYPE_CODE = 4,
+  VALUE_TYPE_ARRAY = 5,
+  VALUE_TYPE_DOUBLE = 6,
+  VALUE_TYPE_REGEXP,
+  VALUE_TYPE_TUPLE,
+  VALUE_TYPE_FILE,
+  VALUE_TYPE_RANGE,
+  VALUE_TYPE_ARRAY_ITERATOR,
+  VALUE_TYPE_RANGE_ITERATOR,
+  VALUE_TYPE_EXCEPTION,
+  VALUE_TYPE_SYMBOL,
+  VALUE_TYPE_HASH,
+  VALUE_TYPE_HASH_ITERATOR,
+  VALUE_TYPE_OBJECT,
+  VALUE_TYPE_CLASS,
+  VALUE_TYPE_POINTER,
+  VALUE_TYPE_BYTES,
+  VALUE_TYPE_REFERENCE,
+  VALUE_TYPE_FILE_PACKAGE,
 } value_type_t;
 
 class Value;
@@ -52,19 +52,19 @@ class MortalValue;
 class CallbackFunction;
 
 class ExceptionImpl {
-    friend class ExceptionValue;
-    friend class ErrnoExceptionValue;
-    friend class ArgumentExceptionValue;
-protected:
-    exception_type_t type_;
-    int errno_;
-    std::string message_;
-    explicit ExceptionImpl(exception_type_t type) :type_(type) {
-    }
-    explicit ExceptionImpl(int err, exception_type_t type=EXCEPTION_TYPE_ERRNO) :type_(type), errno_(err) {
-    }
-    ExceptionImpl(const std::string &msg, exception_type_t type) :type_(type), message_(msg) {
-    }
+  friend class ExceptionValue;
+  friend class ErrnoExceptionValue;
+  friend class ArgumentExceptionValue;
+
+ protected:
+  exception_type_t type_;
+  int errno_;
+  std::string message_;
+  explicit ExceptionImpl(exception_type_t type) : type_(type) {}
+  explicit ExceptionImpl(int err, exception_type_t type = EXCEPTION_TYPE_ERRNO)
+      : type_(type), errno_(err) {}
+  ExceptionImpl(const std::string& msg, exception_type_t type)
+      : type_(type), message_(msg) {}
 };
 
 typedef std::string StringImpl;
@@ -75,76 +75,75 @@ typedef std::string BytesImpl;
  * The value class
  */
 class Value {
-protected:
+ protected:
   int refcnt_;
-public:
-    int refcnt() const {
-      assert(refcnt_ >= 0);
-      return refcnt_;
+
+ public:
+  int refcnt() const {
+    assert(refcnt_ >= 0);
+    return refcnt_;
+  }
+  virtual void release() {
+    assert(refcnt_ > 0);
+    --refcnt_;
+    if (refcnt_ == 0) {
+      delete this;
     }
-    virtual void release() {
-      assert(refcnt_ > 0);
-      --refcnt_;
-      if (refcnt_ == 0) {
-        delete this;
-      }
-    }
-    void retain() {
-      assert(refcnt_ >= 0);
-      ++refcnt_;
-    }
-protected:
+  }
+  void retain() {
+    assert(refcnt_ >= 0);
+    ++refcnt_;
+  }
 
-    virtual ~Value();
-    Value(const Value&) = delete;
-public:
-    Value(value_type_t t) : refcnt_(1), value_type(t) { }
-    union {
-        int int_value_;
-        double double_value_;
-        bool bool_value_;
-        ID id_value_;
-        void * ptr_value_;
+ protected:
+  virtual ~Value();
+  Value(const Value&) = delete;
 
-        // TODO: remove me.
-        std::string* str_value_;
+ public:
+  Value(value_type_t t) : refcnt_(1), value_type(t) {}
+  union {
+    int int_value_;
+    double double_value_;
+    bool bool_value_;
+    ID id_value_;
+    void* ptr_value_;
 
-        Value * value_value_;
-        FILE *file_value_;
-        ObjectImpl* object_value_;
-        ClassImpl* class_value_;
-        ExceptionImpl* exception_value_;
-        FilePackageImpl* file_package_value_;
-    };
-    value_type_t value_type;
-    Value& operator=(const Value&v);
+    // TODO: remove me.
+    std::string* str_value_;
 
-    StringImpl to_s();
-    int to_int();
-    double to_double() const;
-    bool to_bool() const;
+    Value* value_value_;
+    FILE* file_value_;
+    ObjectImpl* object_value_;
+    ClassImpl* class_value_;
+    ExceptionImpl* exception_value_;
+    FilePackageImpl* file_package_value_;
+  };
+  value_type_t value_type;
+  Value& operator=(const Value& v);
 
-    template<class Y>
-    Y* upcast() {
-        return static_cast<Y*>(this);
-    }
+  StringImpl to_s();
+  int to_int();
+  double to_double() const;
+  bool to_bool() const;
 
-    // GET type name in const char*
-    const char *type_str() const;
+  template <class Y>
+  Y* upcast() {
+    return static_cast<Y*>(this);
+  }
 
-    ID object_package_id() const;
+  // GET type name in const char*
+  const char* type_str() const;
 
-    bool is_exception() const {
-        return value_type == VALUE_TYPE_EXCEPTION;
-    }
+  ID object_package_id() const;
+
+  bool is_exception() const { return value_type == VALUE_TYPE_EXCEPTION; }
 };
 class SharedValue {
-  Value *v_;
-public:
-  SharedValue(Value* v) : v_(v) {
-    v_->retain();
-  }
-  SharedValue() : v_(NULL) { }
+  Value* v_;
+
+ public:
+  SharedValue(Value* v) : v_(v) { v_->retain(); }
+  SharedValue() : v_(NULL) {}
   ~SharedValue();
   SharedValue(const SharedValue& sv) : v_(sv.get()) {
     if (v_) {
@@ -152,7 +151,7 @@ public:
     }
   }
   SharedValue(const MortalValue& sv);
-  SharedValue & operator=(Value* rhs) {
+  SharedValue& operator=(Value* rhs) {
     rhs->retain();
     v_ = rhs;
     return *this;
@@ -165,108 +164,79 @@ public:
     assert(v_);
     return v_;
   }
-  Value* get() const {
-    return v_;
-  }
+  Value* get() const { return v_; }
 };
 
-static value_type_t type(const Value &v)
-{
-  return v.value_type;
-}
+static value_type_t type(const Value& v) { return v.value_type; }
 
-static value_type_t type(const Value *v)
-{
-  return v->value_type;
-}
+static value_type_t type(const Value* v) { return v->value_type; }
 
-
-static int get_int_value(const Value& v)
-{
+static int get_int_value(const Value& v) {
   assert(type(v) == VALUE_TYPE_INT);
   return v.int_value_;
 }
 
-static void set_int_value(Value* v, int i)
-{
+static void set_int_value(Value* v, int i) {
   v->value_type = VALUE_TYPE_INT;
   v->int_value_ = i;
 }
 
-static void set_int_value(Value& v, int i)
-{
-  return set_int_value(&v, i);
-}
+static void set_int_value(Value& v, int i) { return set_int_value(&v, i); }
 
-static double get_double_value(const Value& v)
-{
+static double get_double_value(const Value& v) {
   assert(type(v) == VALUE_TYPE_DOUBLE);
   return v.double_value_;
 }
 
-static SharedPtr<Value> new_ptr_value(void* p)
-{
+static SharedPtr<Value> new_ptr_value(void* p) {
   SharedPtr<Value> v(new Value(VALUE_TYPE_POINTER));
   v->ptr_value_ = p;
   return v;
 }
 
-static double get_double_value(const SharedPtr<Value> v)
-{
+static double get_double_value(const SharedPtr<Value> v) {
   // REMOVE ME.
   return get_double_value(*v);
 }
 
-static void* get_ptr_value(const Value* v)
-{
-  return v->ptr_value_;
-}
+static void* get_ptr_value(const Value* v) { return v->ptr_value_; }
 
-static void* get_ptr_value(const SharedPtr<Value>& v)
-{
+static void* get_ptr_value(const SharedPtr<Value>& v) {
   return get_ptr_value(v.get());
 }
 
-static BytesImpl* get_bytes_value(const Value* v)
-{
+static BytesImpl* get_bytes_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_BYTES);
   return static_cast<BytesImpl*>(v->ptr_value_);
 }
 
-static std::string* get_str_value(const Value* v)
-{
+static std::string* get_str_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_STR);
   return static_cast<std::string*>(v->ptr_value_);
 }
 
-static Value* new_str_value(const StringImpl& s)
-{
-  Value * v = new Value(VALUE_TYPE_STR);
+static Value* new_str_value(const StringImpl& s) {
+  Value* v = new Value(VALUE_TYPE_STR);
   v->ptr_value_ = new std::string(s);
   return v;
 }
 
-static BytesImpl* get_bytes_value(const SharedPtr<Value>& v)
-{
+static BytesImpl* get_bytes_value(const SharedPtr<Value>& v) {
   // remove me
   return get_bytes_value(v.get());
 }
 
-static StringImpl* get_str_value(const SharedPtr<Value>& v)
-{
+static StringImpl* get_str_value(const SharedPtr<Value>& v) {
   // remove me
   return get_str_value(v.get());
 }
 
-static int get_int_value(const SharedPtr<Value>& v)
-{
+static int get_int_value(const SharedPtr<Value>& v) {
   // REMOVE ME.
   return get_int_value(*v);
 }
 
-static Value* new_undef_value() {
-    return new Value(VALUE_TYPE_UNDEF);
-}
+static Value* new_undef_value() { return new Value(VALUE_TYPE_UNDEF); }
 
 /**
  * Hold local variable.
@@ -275,26 +245,22 @@ static Value* new_undef_value() {
  * But release it.
  */
 class MortalValue {
-protected:
+ protected:
   Value* v_;
-public:
-  MortalValue(Value* v) :v_(v) {
-  }
+
+ public:
+  MortalValue(Value* v) : v_(v) {}
   MortalValue(const MortalValue& mv) = delete;
   ~MortalValue() {
     assert(v_);
     v_->release();
   }
-  Value& operator*() const {
-    return *v_;
-  }
-  Value * operator->() const {
+  Value& operator*() const { return *v_; }
+  Value* operator->() const {
     assert(v_ != NULL);
     return v_;
   }
-  Value *get() const {
-    return v_;
-  }
+  Value* get() const { return v_; }
 };
 /**
  * MortalStrValue
@@ -302,9 +268,8 @@ public:
  * Shorthand to create mortal string value.
  */
 class MortalStrValue : public MortalValue {
-public:
-  MortalStrValue(const std::string& s) : MortalValue(new_str_value(s)) {
-  }
+ public:
+  MortalStrValue(const std::string& s) : MortalValue(new_str_value(s)) {}
 };
 /**
  * MortalStrValue
@@ -312,15 +277,13 @@ public:
  * Shorthand to create mortal undef value.
  */
 class MortalUndefValue : public MortalValue {
-public:
-  MortalUndefValue() : MortalValue(new_undef_value()) {
-  }
+ public:
+  MortalUndefValue() : MortalValue(new_undef_value()) {}
 };
-
 };
 
 #include "value/int.h"
 #include "value/double.h"
 #include "value/exception.h"
 
-#endif // TORA_VALUE_H_
+#endif  // TORA_VALUE_H_

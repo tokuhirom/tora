@@ -6,39 +6,38 @@
 using namespace tora;
 
 void tora::Node::dump(int indent) {
-    print_indent(indent);
-    printf("[%s] %s(size: %ld)\n", this->type_name_str(), node_type2name[this->type], (long int) this->children().size());
-    for (size_t i=0; i<this->children().size(); i++) {
-        auto n = this->children().at(i);
-        if (n.get()) {
-            n->dump(indent+1);
-        } else {
-            print_indent(indent+1);
-            printf("NULL\n");
-        }
+  print_indent(indent);
+  printf("[%s] %s(size: %ld)\n", this->type_name_str(),
+         node_type2name[this->type], (long int)this->children().size());
+  for (size_t i = 0; i < this->children().size(); i++) {
+    auto n = this->children().at(i);
+    if (n.get()) {
+      n->dump(indent + 1);
+    } else {
+      print_indent(indent + 1);
+      printf("NULL\n");
     }
+  }
 }
 
 void tora::IntNode::dump(int indent) {
-    print_indent(indent);
-    printf("[Int]%s(%d)\n", this->type_name_str(), this->int_value);
+  print_indent(indent);
+  printf("[Int]%s(%d)\n", this->type_name_str(), this->int_value);
 }
 
 void tora::DoubleNode::dump(int indent) {
-    print_indent(indent);
-    printf("[Double]%s(%lf)\n", this->type_name_str(), this->double_value);
+  print_indent(indent);
+  printf("[Double]%s(%lf)\n", this->type_name_str(), this->double_value);
 }
 
 void tora::StrNode::dump(int indent) {
-    print_indent(indent);
-    printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value.c_str());
+  print_indent(indent);
+  printf("[Str]%s(%s)\n", this->type_name_str(), this->str_value.c_str());
 }
 
 void tora::RegexpNode::dump(int indent) {
-    print_indent(indent);
-    printf("[Regexp] %s\n", this->regexp_value.c_str());
+  print_indent(indent);
+  printf("[Regexp] %s\n", this->regexp_value.c_str());
 }
 
-void tora::Node::dump() {
-    this->dump(0);
-}
+void tora::Node::dump() { this->dump(0); }

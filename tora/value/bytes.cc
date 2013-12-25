@@ -3,8 +3,4 @@
 
 using namespace tora;
 
-int BytesValue::length() {
-    return VAL().size();
-}
-
-
+int BytesValue::length() { return VAL().size(); }

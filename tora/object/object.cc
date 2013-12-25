@@ -24,8 +24,8 @@ using namespace tora;
  * convert object to tora source.
  */
 static SharedPtr<Value> object_tora(VM *vm, Value *self) {
-    Inspector ins(vm);
-    return new_str_value(ins.inspect(self));
+  Inspector ins(vm);
+  return new_str_value(ins.inspect(self));
 }
 
 /**
@@ -34,16 +34,18 @@ static SharedPtr<Value> object_tora(VM *vm, Value *self) {
  * get a meta class.
  */
 static SharedPtr<Value> object_meta(VM *vm, Value *self) {
-    auto n = vm->get_builtin_class(SYMBOL_METACLASS_CLASS);
-    if (self->value_type == VALUE_TYPE_SYMBOL) {
-        return new ObjectValue(vm, n, vm->get_class(self->upcast<SymbolValue>()->id()));
-    } else if (self->value_type == VALUE_TYPE_OBJECT) {
-        return new ObjectValue(vm, n, self->upcast<ObjectValue>()->class_value());
-    } else if (self->value_type == VALUE_TYPE_CLASS) {
-        return new ObjectValue(vm, n, self->upcast<ClassValue>());
-    } else {
-        return new ObjectValue(vm, n, vm->get_builtin_class(self->object_package_id()));
-    }
+  auto n = vm->get_builtin_class(SYMBOL_METACLASS_CLASS);
+  if (self->value_type == VALUE_TYPE_SYMBOL) {
+    return new ObjectValue(vm, n,
+                           vm->get_class(self->upcast<SymbolValue>()->id()));
+  } else if (self->value_type == VALUE_TYPE_OBJECT) {
+    return new ObjectValue(vm, n, self->upcast<ObjectValue>()->class_value());
+  } else if (self->value_type == VALUE_TYPE_CLASS) {
+    return new ObjectValue(vm, n, self->upcast<ClassValue>());
+  } else {
+    return new ObjectValue(vm, n,
+                           vm->get_builtin_class(self->object_package_id()));
+  }
 }
 
 /**
@@ -52,13 +54,13 @@ static SharedPtr<Value> object_meta(VM *vm, Value *self) {
  * This method returns true if $object is-a $target, false otherwise.
  */
 static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
-    if (self->value_type == VALUE_TYPE_OBJECT) {
-        StringImpl target = target_v->to_s();
-        ID target_id = vm->symbol_table->get_id(target);
-        return vm->to_bool(self->upcast<ObjectValue>()->isa(target_id));
-    } else {
-        TODO();
-    }
+  if (self->value_type == VALUE_TYPE_OBJECT) {
+    StringImpl target = target_v->to_s();
+    ID target_id = vm->symbol_table->get_id(target);
+    return vm->to_bool(self->upcast<ObjectValue>()->isa(target_id));
+  } else {
+    TODO();
+  }
 }
 
 /**
@@ -66,20 +68,19 @@ static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
  *
  * Create new instance with $data.
  */
-static SharedPtr<Value> mc_bless(VM * vm, Value* self, Value *data) {
-    if (self->value_type == VALUE_TYPE_CLASS) {
-        return new ObjectValue(vm, self->upcast<ClassValue>(), data);
-    } else {
-        throw new ExceptionValue("You cannot bless non-class value.");
-    }
+static SharedPtr<Value> mc_bless(VM *vm, Value *self, Value *data) {
+  if (self->value_type == VALUE_TYPE_CLASS) {
+    return new ObjectValue(vm, self->upcast<ClassValue>(), data);
+  } else {
+    throw new ExceptionValue("You cannot bless non-class value.");
+  }
 }
 
 void tora::Init_Object(VM *vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_OBJECT_CLASS);
-    klass->add_method("tora", new CallbackFunction(object_tora));
-    klass->add_method("meta", new CallbackFunction(object_meta));
-    klass->add_method("isa",  new CallbackFunction(object_isa));
-    klass->add_method("bless", new CallbackFunction(mc_bless));
-    vm->add_builtin_class(klass);
+  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_OBJECT_CLASS);
+  klass->add_method("tora", new CallbackFunction(object_tora));
+  klass->add_method("meta", new CallbackFunction(object_meta));
+  klass->add_method("isa", new CallbackFunction(object_isa));
+  klass->add_method("bless", new CallbackFunction(mc_bless));
+  vm->add_builtin_class(klass);
 }
-

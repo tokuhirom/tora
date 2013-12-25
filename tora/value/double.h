@@ -5,13 +5,10 @@
 
 namespace tora {
 
-class DoubleValue: public Value {
-public:
-    DoubleValue(double d): Value(VALUE_TYPE_DOUBLE) {
-        this->double_value_ = d;
-    }
+class DoubleValue : public Value {
+ public:
+  DoubleValue(double d) : Value(VALUE_TYPE_DOUBLE) { this->double_value_ = d; }
+};
 };
 
-};
-
-#endif // TORA_VALUE_DOUBLE_H_
+#endif  // TORA_VALUE_DOUBLE_H_

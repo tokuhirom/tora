@@ -13,8 +13,7 @@ class VM;
  *
  * This is Devel::Peek in Perl5.
  */
-void peek(VM *vm, Value * v);
-
+void peek(VM *vm, Value *v);
 };
 
-#endif // TORA_PEEK_H_
+#endif  // TORA_PEEK_H_

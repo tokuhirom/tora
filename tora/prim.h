@@ -4,18 +4,18 @@
 #include <cassert>
 #include <stdio.h>
 
-#define PRIM_DECL() \
-public: \
-    int refcnt; \
-    void release() { \
-        --refcnt; \
-        if (refcnt == 0) { \
-            delete this; \
-        } \
-    } \
-    void retain() { \
-        assert(refcnt >= 0); \
-        ++refcnt; \
-    }
+#define PRIM_DECL()      \
+ public:                 \
+  int refcnt;            \
+  void release() {       \
+    --refcnt;            \
+    if (refcnt == 0) {   \
+      delete this;       \
+    }                    \
+  }                      \
+  void retain() {        \
+    assert(refcnt >= 0); \
+    ++refcnt;            \
+  }
 
-#endif // TORA_PRIM_H_
+#endif  // TORA_PRIM_H_

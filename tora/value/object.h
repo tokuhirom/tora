@@ -9,49 +9,43 @@ namespace tora {
 class VM;
 
 class ObjectImpl {
-    friend class ObjectValue;
-protected:
-    VM * vm_;
-    SharedPtr<ClassValue> klass_;
-    bool destroyed_;
-    SharedPtr<Value> data_;
-    ObjectImpl(VM *vm, const SharedPtr<ClassValue>& klass, const SharedPtr<Value>& d)
-        : vm_(vm)
-        , klass_(klass)
-        , destroyed_(false)
-        , data_(d)
-        { }
+  friend class ObjectValue;
+
+ protected:
+  VM* vm_;
+  SharedPtr<ClassValue> klass_;
+  bool destroyed_;
+  SharedPtr<Value> data_;
+  ObjectImpl(VM* vm, const SharedPtr<ClassValue>& klass,
+             const SharedPtr<Value>& d)
+      : vm_(vm), klass_(klass), destroyed_(false), data_(d) {}
 };
 
 class ObjectValue : public Value {
-private:
-    const ObjectImpl & VAL() const {
-        return *object_value_;
-    }
-    ObjectImpl & VAL() {
-        return *object_value_;
-    }
-public:
-    ObjectValue(VM *v, const SharedPtr<ClassValue>& klass, const SharedPtr<Value>& data);
-    ObjectValue(VM *v, ID klass_id, const SharedPtr<Value>& data);
-    ~ObjectValue();
-    const SharedPtr<Value> data() const { return VAL().data_; }
-    SharedPtr<Value> data() { return VAL().data_; }
-    void release();
-    void call_destroy();
-    VM * vm() const { return VAL().vm_; }
+ private:
+  const ObjectImpl& VAL() const { return *object_value_; }
+  ObjectImpl& VAL() { return *object_value_; }
 
-    SharedPtr<ClassValue> class_value() const { return VAL().klass_; }
+ public:
+  ObjectValue(VM* v, const SharedPtr<ClassValue>& klass,
+              const SharedPtr<Value>& data);
+  ObjectValue(VM* v, ID klass_id, const SharedPtr<Value>& data);
+  ~ObjectValue();
+  const SharedPtr<Value> data() const { return VAL().data_; }
+  SharedPtr<Value> data() { return VAL().data_; }
+  void release();
+  void call_destroy();
+  VM* vm() const { return VAL().vm_; }
 
-    void dump(int indent);
-    const char *type_str() const;
+  SharedPtr<ClassValue> class_value() const { return VAL().klass_; }
 
-    SharedPtr<Value> get_item(SharedPtr<Value> index);
-    SharedPtr<Value> set_item(SharedPtr<Value>index, SharedPtr<Value>v);
-    bool isa(ID target_id) const;
+  void dump(int indent);
+  const char* type_str() const;
+
+  SharedPtr<Value> get_item(SharedPtr<Value> index);
+  SharedPtr<Value> set_item(SharedPtr<Value> index, SharedPtr<Value> v);
+  bool isa(ID target_id) const;
+};
 };
 
-};
-
-#endif // TORA_VALUE_OBJECT_T_
-
+#endif  // TORA_VALUE_OBJECT_T_

@@ -17,7 +17,6 @@ using namespace tora;
  */
 
 void tora::Init_FilePackage(VM* vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILEPACKAGE_CLASS);
-    vm->add_builtin_class(klass);
+  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILEPACKAGE_CLASS);
+  vm->add_builtin_class(klass);
 }
-

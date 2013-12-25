@@ -20,14 +20,15 @@ using namespace tora;
  *
  * Create a new object from $symbol and $data.
  */
-SharedPtr<Value> tora::Symbol_bless(VM * vm, Value* klass, Value *data) {
-    assert(klass->value_type == VALUE_TYPE_SYMBOL);
-    return new ObjectValue(vm, vm->get_class(klass->upcast<SymbolValue>()->id()).get(), data);
+SharedPtr<Value> tora::Symbol_bless(VM *vm, Value *klass, Value *data) {
+  assert(klass->value_type == VALUE_TYPE_SYMBOL);
+  return new ObjectValue(
+      vm, vm->get_class(klass->upcast<SymbolValue>()->id()).get(), data);
 }
 
 void tora::Init_Symbol(VM *vm) {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_SYMBOL_CLASS);
-    klass->add_method(vm->symbol_table->get_id("bless"), new CallbackFunction(Symbol_bless));
-    vm->add_builtin_class(klass);
+  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_SYMBOL_CLASS);
+  klass->add_method(vm->symbol_table->get_id("bless"),
+                    new CallbackFunction(Symbol_bless));
+  vm->add_builtin_class(klass);
 }
-

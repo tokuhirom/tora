@@ -7,12 +7,11 @@
 namespace tora {
 
 class Disasm {
-public:
-    static void disasm_op(OP* op);
+ public:
+  static void disasm_op(OP* op);
 
-    static void disasm(const SharedPtr<OPArray>& ops);
+  static void disasm(const SharedPtr<OPArray>& ops);
+};
 };
 
-};
-
-#endif // TORA_DISASM_H_
+#endif  // TORA_DISASM_H_

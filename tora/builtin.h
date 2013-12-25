@@ -6,7 +6,6 @@ namespace tora {
 class VM;
 
 void Init_builtins(VM *vm);
-
 };
 
-#endif //  TORA_BUILTIN_H_
+#endif  //  TORA_BUILTIN_H_

@@ -9,30 +9,26 @@
 namespace tora {
 
 class SymbolTable {
-    PRIM_DECL();
-private:
-    int counter;
-    std::map<std::string, int> tbl;
-    std::map<int, std::string> rev_tbl; // reverse table
-public:
-    SymbolTable();
-    
-    /**
-     * Convert :symbol to ID.
-     */
-    ID get_id(const char *str) {
-        return this->get_id(std::string(str));
-    }
-    ID get_id(const std::string &str);
-    /**
-     * Convert ID to :symbol.
-     */
-    std::string &id2name(int id) {
-        return rev_tbl[id];
-    }
-    void dump() const;
+  PRIM_DECL();
+
+ private:
+  int counter;
+  std::map<std::string, int> tbl;
+  std::map<int, std::string> rev_tbl;  // reverse table
+ public:
+  SymbolTable();
+
+  /**
+   * Convert :symbol to ID.
+   */
+  ID get_id(const char *str) { return this->get_id(std::string(str)); }
+  ID get_id(const std::string &str);
+  /**
+   * Convert ID to :symbol.
+   */
+  std::string &id2name(int id) { return rev_tbl[id]; }
+  void dump() const;
+};
 };
 
-};
-
-#endif // TORA_SYMBOL_TABLE_H_
+#endif  // TORA_SYMBOL_TABLE_H_
