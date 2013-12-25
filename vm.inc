@@ -1007,7 +1007,7 @@ OP_EXTRACT_ARRAY {
     if (obj->value_type != VALUE_TYPE_ARRAY) {
         throw new ExceptionValue("You cannot extract %s by '*' operator. You can only extract Array.", obj->type_str());
     }
-    MortalValue res(array_reverse(obj.get()));
+    SharedValue res(array_reverse(obj.get()));
     res->value_type = VALUE_TYPE_TUPLE; // Difference of array and tuple is only value_type.
     stack[stack.size()-1].reset(res.get());
 }

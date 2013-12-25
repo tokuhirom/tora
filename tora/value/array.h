@@ -31,7 +31,7 @@ namespace tora {
   bool array_iter_finished(Value *iter);
   void array_iter_next(Value *iter);
 
-  Value* array_reverse(const Value* v);
+  SharedValue array_reverse(const Value* v);
   void array_push_back(Value* ary, Value* v);
   void array_push_front(Value* ary, Value* v);
   void array_pop_front(Value* ary);
@@ -42,7 +42,7 @@ namespace tora {
   tra_int array_size(const Value* self);
   void REMOVE_ME_array_copy(Value* a, const Value *b);
   void array_copy(Value* a, const Value *b);
-  Value* array_stable_sort(const Value* self);
+  SharedValue array_stable_sort(const Value* self);
   void array_free(Value* self);
 
   // tuple

@@ -30,6 +30,8 @@ int main() {
   // is((void*)v.get(), (void*)av->at(1).get());
   is(array_size(av.get()), (tra_int) 2UL);
 
+  SharedValue v(array_stable_sort(av.get()));
+
   done_testing();
 }
 

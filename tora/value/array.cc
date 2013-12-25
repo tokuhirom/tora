@@ -82,7 +82,7 @@ void tora::array_iter_next(Value* iter)
 
 // -- Array --
 
-Value* tora::array_reverse(const Value* v)
+SharedValue tora::array_reverse(const Value* v)
 {
   MortalArrayValue res;
   // TODO extend res's size first.
@@ -104,7 +104,7 @@ public:
 };
 
 // stable sort
-Value* tora::array_stable_sort(const Value* self) {
+SharedValue tora::array_stable_sort(const Value* self) {
   MortalArrayValue av;
   *(ary(av.get())) = *(ary(self));
   std::stable_sort(ary(av.get())->begin(), ary(av.get())->end(), LessValue());

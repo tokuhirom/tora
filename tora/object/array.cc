@@ -38,7 +38,7 @@ static SharedPtr<Value> av_size(VM *vm, Value* self) {
 static SharedPtr<Value> av_sort(VM* vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_ARRAY);
     // copy and sort.
-    MortalValue av(array_stable_sort(self));
+    SharedValue av(array_stable_sort(self));
     return av.get();
 }
 
@@ -94,7 +94,7 @@ static SharedPtr<Value> av_shift(VM * vm, Value* self) {
 }
 
 static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
-  return array_reverse(self);
+  return array_reverse(self).get();
 }
 
 /**

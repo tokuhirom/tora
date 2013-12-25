@@ -63,7 +63,7 @@ public:
      */
     void add_method(ID, const CallbackFunction*);
     bool has_method(ID) const;
-    Value* get_method_list() const;
+    SharedValue get_method_list() const;
     bool isa(ID target_id) const;
     const_iterator find_method(ID id) const {
         return VAL().methods_.find(id);

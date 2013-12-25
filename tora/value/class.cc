@@ -57,7 +57,7 @@ bool ClassValue::has_method(ID target_id) const {
     return VAL().methods_.find(target_id) != VAL().methods_.end();
 }
 
-Value* ClassValue::get_method_list() const {
+SharedValue ClassValue::get_method_list() const {
   MortalArrayValue av;
   for (auto iter=VAL().methods_.begin(); iter!=VAL().methods_.end(); ++iter) {
     MortalStrValue s(VAL().vm_->symbol_table->id2name(iter->first));

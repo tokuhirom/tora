@@ -13,6 +13,11 @@
 
 using namespace tora;
 
+SharedValue::~SharedValue() {
+  if (v_) {
+    v_->release();
+  }
+}
 SharedValue::SharedValue(const MortalValue& sv)
   : v_(sv.get()) {
   v_->retain();

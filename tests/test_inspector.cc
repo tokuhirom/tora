@@ -30,8 +30,10 @@ int main() {
 
     {
       MortalHashValue hv;
-      hash_set_item(hv.get(), "HOGE", new IntValue(5963));
-      hash_set_item(hv.get(), "IYAN", new IntValue(4649));
+      MortalIntValue i5963(5963);
+      MortalIntValue i4649(4649);
+      hash_set_item(hv.get(), "HOGE", i5963.get());
+      hash_set_item(hv.get(), "IYAN", i4649.get());
       is(ins.inspect(hv.get()), std::string("{\"HOGE\" => 5963,\"IYAN\" => 4649}"));
     }
 

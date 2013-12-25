@@ -42,7 +42,7 @@ static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) 
  * Get a method list defined in package.
  */
 static SharedPtr<Value> mc_get_method_list(VM * vm, Value* self) {
-    return SELF(self)->get_method_list();
+    return SELF(self)->get_method_list().get();
 }
 
 

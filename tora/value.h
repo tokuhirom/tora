@@ -79,17 +79,19 @@ protected:
   int refcnt_;
 public:
     int refcnt() const {
+      assert(refcnt_ >= 0);
       return refcnt_;
     }
     virtual void release() {
-        --refcnt_;
-        if (refcnt_ == 0) {
-            delete this;
-        }
+      assert(refcnt_ > 0);
+      --refcnt_;
+      if (refcnt_ == 0) {
+        delete this;
+      }
     }
     void retain() {
-        assert(refcnt_ >= 0);
-        ++refcnt_;
+      assert(refcnt_ >= 0);
+      ++refcnt_;
     }
 protected:
 
@@ -143,13 +145,11 @@ public:
     v_->retain();
   }
   SharedValue() : v_(NULL) { }
-  ~SharedValue() {
-    if (v_) {
-      v_->release();
-    }
-  }
+  ~SharedValue();
   SharedValue(const SharedValue& sv) : v_(sv.get()) {
-    v_->retain();
+    if (v_) {
+      v_->retain();
+    }
   }
   SharedValue(const MortalValue& sv);
   SharedValue & operator=(Value* rhs) {
@@ -282,6 +282,7 @@ public:
   }
   MortalValue(const MortalValue& mv) = delete;
   ~MortalValue() {
+    assert(v_);
     v_->release();
   }
   Value& operator*() const {
