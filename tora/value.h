@@ -45,7 +45,6 @@ typedef enum {
 class Value;
 class IntValue;
 class DoubleValue;
-class BoolValue;
 class ObjectImpl;
 class ClassImpl;
 class FilePackageImpl;
@@ -290,7 +289,6 @@ public:
 
 };
 
-#include "value/bool.h"
 #include "value/int.h"
 #include "value/double.h"
 #include "value/exception.h"

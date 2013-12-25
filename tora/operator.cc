@@ -3,6 +3,7 @@
 #include "value/hash.h"
 #include "value/object.h"
 #include "value/array.h"
+#include "value/bool.h"
 #include "ops.gen.h"
 #include "value/bytes.h"
 #include <math.h>
@@ -252,7 +253,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d, OperationS oper
         break;
     }
     case VALUE_TYPE_BOOL: {
-        return lhs->upcast<BoolValue>()->bool_value() == rhs->to_bool();
+        return get_bool_value(lhs.get()) == rhs->to_bool();
     }
     case VALUE_TYPE_UNDEF: {
         return rhs->value_type == VALUE_TYPE_UNDEF;

@@ -18,6 +18,7 @@
 #include "value/object.h"
 #include "value/class.h"
 #include "value/file_package.h"
+#include "value/bool.h"
 
 #include "object.h"
 
@@ -77,6 +78,11 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dum
     this->myrand = new std::mt19937(rd());
     this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
     this->file_scope_.reset(new std::map<ID, SharedPtr<Value>>());
+
+    MortalTrueValue t;
+    this->true_value_ = t.get();
+    MortalFalseValue f;
+    this->false_value_ = f.get();
 }
 
 VM::~VM() {
@@ -871,6 +877,10 @@ std::string VM::id2name(ID id) const {
 
 ID VM::get_id(const std::string &name) const {
     return symbol_table->get_id(name);
+}
+
+Value* VM::to_bool(bool b) const {
+  return b ? this->true_value_.get() : this->false_value_.get();
 }
 
 void VM::add_builtin_function(const char *name, CallbackFunction* func) {

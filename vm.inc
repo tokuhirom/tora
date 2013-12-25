@@ -1,11 +1,11 @@
 /* vim: set filetype=cpp: */
 
 OP_PUSH_TRUE {
-    stack.push_back(new BoolValue(true));
+  stack.push_back(true_value_);
 }
 
 OP_PUSH_FALSE {
-    stack.push_back(new BoolValue(false));
+  stack.push_back(false_value_);
 }
 
 OP_PUSH_SELF {
@@ -509,7 +509,7 @@ OP_EQ {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_NE {
@@ -520,7 +520,7 @@ OP_NE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GT {
@@ -531,7 +531,7 @@ OP_GT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LT {
@@ -542,7 +542,7 @@ OP_LT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_GE {
@@ -553,7 +553,7 @@ OP_GE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_LE {
@@ -564,7 +564,7 @@ OP_LE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)BoolValue::instance(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
 }
 
 OP_SETLOCAL {
@@ -751,16 +751,16 @@ OP_FILE_TEST {
     struct stat buf;
     switch (get_int_operand()) {
     case 'f':
-        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFREG));
+        stack.push_back(to_bool(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFREG));
         break;
     case 'd':
-        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
+        stack.push_back(to_bool(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IFDIR));
         break;
     case 'x':
-        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IXUSR));
+        stack.push_back(to_bool(stat(fname.c_str(), &buf)==0 && buf.st_mode & S_IXUSR));
         break;
     case 'e':
-        stack.push_back(new BoolValue(stat(fname.c_str(), &buf)==0));
+        stack.push_back(to_bool(stat(fname.c_str(), &buf)==0));
         break;
     case 's':
         if (stat(fname.c_str(), &buf) == 0) {
@@ -951,7 +951,7 @@ OP_USE {
 OP_NOT {
     SharedPtr<Value> v = stack.back();
     stack.pop_back();
-    stack.push_back(new BoolValue(!v->to_bool()));
+    stack.push_back(to_bool(!v->to_bool()));
 }
 
 OP_PACKAGE_ENTER {

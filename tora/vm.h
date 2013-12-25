@@ -46,6 +46,9 @@ class VM {
     std::map<ID, std::shared_ptr<std::map<ID, SharedPtr<Value>>>> file_scope_map_;
     std::map<ID, SharedPtr<ClassValue>> builtin_classes_;
     std::map<ID, SharedPtr<CodeValue>> builtin_functions_;
+    
+    SharedPtr<Value> true_value_;
+    SharedPtr<Value> false_value_;
 public:
     int sp; // stack pointer
     int pc; // program counter
@@ -86,6 +89,7 @@ public:
     void execute_normal();
     void execute_trace();
 
+    Value* to_bool(bool b) const;
 
     void init_globals(const std::vector<std::string> & args);
 

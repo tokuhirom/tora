@@ -58,7 +58,7 @@ static SharedPtr<Value> code_filename(VM * vm, Value* self) {
 // undocumented.
 static SharedPtr<Value> code_is_closure(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_CODE);
-    return new BoolValue(self->upcast<CodeValue>()->closure_var_names()->size() > 0);
+    return vm->to_bool(self->upcast<CodeValue>()->closure_var_names()->size() > 0);
 }
 
 /**

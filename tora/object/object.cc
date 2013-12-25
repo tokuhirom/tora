@@ -55,7 +55,7 @@ static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
     if (self->value_type == VALUE_TYPE_OBJECT) {
         StringImpl target = target_v->to_s();
         ID target_id = vm->symbol_table->get_id(target);
-        return BoolValue::instance(self->upcast<ObjectValue>()->isa(target_id));
+        return vm->to_bool(self->upcast<ObjectValue>()->isa(target_id));
     } else {
         TODO();
     }

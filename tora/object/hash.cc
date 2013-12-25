@@ -62,7 +62,7 @@ static SharedPtr<Value> Hash_delete(VM * vm, Value* self, Value *key) {
 static SharedPtr<Value> Hash_exists(VM * vm, Value* self, Value *key) {
     assert(self->value_type == VALUE_TYPE_HASH);
     bool b = self->upcast<HashValue>()->has_key(key->to_s());
-    return new BoolValue(b);
+    return vm->to_bool(b);
 }
 
 void tora::Init_Hash(VM *vm) {

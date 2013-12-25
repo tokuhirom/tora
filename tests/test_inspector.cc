@@ -22,7 +22,7 @@ int main() {
     {
         SharedPtr<ArrayValue> av = new ArrayValue();
         av->push_back(new IntValue(5963));
-        av->push_back(new BoolValue(true));
+        av->push_back(vm.to_bool(true));
         is(ins.inspect(av), std::string("[5963,true]"));
     }
 

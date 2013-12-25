@@ -58,7 +58,7 @@ bool Value::to_bool() const {
     case VALUE_TYPE_UNDEF:
         return false;
     case VALUE_TYPE_BOOL:
-        return static_cast<const BoolValue*>(this)->bool_value();
+        return get_bool_value(this);
     default:
         return true;
     }
@@ -115,7 +115,7 @@ std::string Value::to_s() {
         return os.str();
     }
     case VALUE_TYPE_BOOL: {
-        return this->upcast<BoolValue>()->bool_value() ? "true" : "false";
+        return get_bool_value(this) ? "true" : "false";
     }
     case VALUE_TYPE_UNDEF: {
         return "undef";

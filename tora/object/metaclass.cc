@@ -33,7 +33,7 @@ inline static ClassValue* SELF(Value *self) {
 static SharedPtr<Value> mc_has_method(VM * vm, Value* self, Value * methname_v) {
     std::string methname = methname_v->to_s();
     bool ret = SELF(self)->has_method(vm->symbol_table->get_id(methname));
-    return BoolValue::instance(ret);
+    return vm->to_bool(ret);
 }
 
 /**

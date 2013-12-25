@@ -5,22 +5,32 @@
 
 namespace tora {
 
-class BoolValue: public Value {
-public:
-    BoolValue(bool b): Value(VALUE_TYPE_BOOL) {
-        this->bool_value_ = b;
+  class MortalTrueValue : public MortalValue {
+    static Value* new_true_value() {
+      Value * v = new Value(VALUE_TYPE_BOOL);
+      v->bool_value_ = true;
+      return v;
     }
-    static BoolValue* true_instance() {
-        return new BoolValue(true);
+  public:
+    MortalTrueValue() : MortalValue(new_true_value()) {
     }
-    static BoolValue* false_instance() {
-        return new BoolValue(false);
+  };
+
+  class MortalFalseValue : public MortalValue {
+    static Value* new_false_value() {
+      Value * v = new Value(VALUE_TYPE_BOOL);
+      v->bool_value_ = false;
+      return v;
     }
-    static BoolValue* instance(bool b) {
-        return b ? BoolValue::true_instance() : BoolValue::false_instance();
+  public:
+    MortalFalseValue() : MortalValue(new_false_value()) {
     }
-    bool bool_value() const { return this->bool_value_; }
-};
+  };
+
+  static bool get_bool_value(const Value * v) {
+    assert(type(v) == VALUE_TYPE_BOOL);
+    return v->bool_value_;
+  }
 
 };
 

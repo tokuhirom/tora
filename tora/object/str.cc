@@ -63,7 +63,7 @@ static SharedPtr<Value> str_length(VM *vm, Value* self) {
 static SharedPtr<Value> str_match(VM *vm, Value* self_v, Value* arg1) {
     if (arg1->value_type == VALUE_TYPE_STR) {
         Value *pattern = arg1;
-        return new BoolValue(get_str_value(self_v)->find(*get_str_value(pattern)) != std::string::npos);
+        return vm->to_bool(get_str_value(self_v)->find(*get_str_value(pattern)) != std::string::npos);
     } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
         return regex->match(vm, *get_str_value(self_v));
