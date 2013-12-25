@@ -253,29 +253,6 @@ static Value* new_undef_value() {
     return new Value(VALUE_TYPE_UNDEF);
 }
 
-class AutoPtrValue {
-protected:
-  Value* v_;
-public:
-  AutoPtrValue(Value* v) :v_(v) {
-    v->retain();
-  }
-  AutoPtrValue(const AutoPtrValue& mv) = delete;
-  ~AutoPtrValue() {
-    v_->release();
-  }
-  Value& operator*() const {
-    return *v_;
-  }
-  Value * operator->() const {
-    assert(v_ != NULL);
-    return v_;
-  }
-  Value *get() const {
-    return v_;
-  }
-};
-
 /**
  * Hold local variable.
  *
