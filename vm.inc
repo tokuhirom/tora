@@ -1,11 +1,11 @@
 /* vim: set filetype=cpp: */
 
 OP_PUSH_TRUE {
-  stack.push_back(true_value_);
+  stack.push_back(true_value_.get());
 }
 
 OP_PUSH_FALSE {
-  stack.push_back(false_value_);
+  stack.push_back(false_value_.get());
 }
 
 OP_PUSH_SELF {

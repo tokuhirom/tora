@@ -140,6 +140,38 @@ public:
         return value_type == VALUE_TYPE_EXCEPTION;
     }
 };
+class SharedValue {
+  Value *v_;
+public:
+  SharedValue(Value* v) : v_(v) {
+    v_->retain();
+  }
+  SharedValue() : v_(NULL) { }
+  ~SharedValue() {
+    if (v_) {
+      v_->release();
+    }
+  }
+  SharedValue(const SharedValue& sv) : v_(sv.get()) {
+    v_->retain();
+  }
+  SharedValue & operator=(Value* rhs) {
+    rhs->retain();
+    v_ = rhs;
+    return *this;
+  }
+  Value& operator*() {
+    assert(v_);
+    return *v_;
+  }
+  Value* operator->() {
+    assert(v_);
+    return v_;
+  }
+  Value* get() const {
+    return v_;
+  }
+};
 
 static value_type_t type(const Value &v)
 {

@@ -47,8 +47,8 @@ class VM {
     std::map<ID, SharedPtr<ClassValue>> builtin_classes_;
     std::map<ID, SharedPtr<CodeValue>> builtin_functions_;
     
-    SharedPtr<Value> true_value_;
-    SharedPtr<Value> false_value_;
+    SharedValue true_value_;
+    SharedValue false_value_;
 public:
     int sp; // stack pointer
     int pc; // program counter
