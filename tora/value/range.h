@@ -7,25 +7,24 @@
 
 namespace tora {
 
-class RangeValue: public Value {
+  tra_int range_right(Value * v);
+  tra_int range_left(Value * v);
+  class MortalRangeValue : public MortalValue {
+  public:
+    MortalRangeValue(tra_int l, tra_int r);
+  };
+  void range_free(Value* v);
+
+class RangeValue {
 public:
     explicit RangeValue(tra_int l, tra_int r);
-    ~RangeValue();
-
-    tra_int left() const {
-        return range_value_->left_;
-    }
-    tra_int right() {
-        return range_value_->right_;
-    }
-
     class Iterator : public Value {
     public:
         int counter;
-        SharedPtr<RangeValue> parent;
-        Iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
+        SharedPtr<Value> parent;
+        Iterator(SharedPtr<Value> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
             parent  = parent_;
-            counter = parent->left();
+            counter = range_left(parent.get());
         }
     };
 };

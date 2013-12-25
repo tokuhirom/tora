@@ -46,21 +46,11 @@ class Value;
 class IntValue;
 class DoubleValue;
 class BoolValue;
-class RangeValue;
 class ObjectImpl;
 class ClassImpl;
 class FilePackageImpl;
 
 class CallbackFunction;
-
-class RangeImpl {
-    friend class RangeValue;
-protected:
-    tra_int left_;
-    tra_int right_;
-    RangeImpl(tra_int l, tra_int r) : left_(l), right_(r) {
-    }
-};
 
 class ExceptionImpl {
     friend class ExceptionValue;
@@ -106,11 +96,7 @@ public:
     }
 protected:
 
-    virtual ~Value() {
-      if (value_type == VALUE_TYPE_STR) {
-        delete static_cast<StringImpl*>(ptr_value_);
-      }
-    }
+    virtual ~Value();
     Value(const Value&) = delete;
 public:
     Value(value_type_t t) : refcnt_(1), value_type(t) { }
@@ -124,7 +110,6 @@ public:
         // TODO: remove me.
         std::string* str_value_;
 
-        RangeImpl* range_value_;
         ArrayImpl* array_value_;
         HashImpl*hash_value_;
         Value * value_value_;

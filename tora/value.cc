@@ -14,6 +14,14 @@
 
 using namespace tora;
 
+Value::~Value() {
+  if (value_type == VALUE_TYPE_STR) {
+    delete static_cast<StringImpl*>(ptr_value_);
+  } else if (value_type == VALUE_TYPE_RANGE) {
+    range_free(this);
+  }
+}
+
 const char * Value::type_str() const {
     switch (this->value_type) {
     case VALUE_TYPE_RANGE: return "Range";
@@ -118,9 +126,9 @@ std::string Value::to_s() {
     }
     case VALUE_TYPE_RANGE: {
         std::ostringstream os;
-        os << this->upcast<RangeValue>()->left();
+        os << range_left(this);
         os << "..";
-        os << this->upcast<RangeValue>()->right();
+        os << range_right(this);
         return os.str();
     }
     default: {

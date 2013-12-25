@@ -67,7 +67,7 @@ OP_NEW_RANGE {
 
     // SharedPtr<IntValue> l2 = l->value_type == VALUE_TYPE_INT ? l->upcast<IntValue>() : new IntValue(l->to_int());
     // SharedPtr<IntValue> r2 = r->value_type == VALUE_TYPE_INT ? r->upcast<IntValue>() : new IntValue(r->to_int());
-    MortalValue rv(new RangeValue(l->to_int(), r->to_int()));
+    MortalRangeValue rv(l->to_int(), r->to_int());
     stack.push_back(rv.get());
 }
 
@@ -794,7 +794,7 @@ OP_ENTER_FOREACH {
         iter->counter = 0;
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_RANGE) {
-        SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a->upcast<RangeValue>());
+        SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a);
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_HASH) {
         SharedPtr<HashValue::iterator> iter = new HashValue::iterator(a->upcast<HashValue>());
@@ -846,7 +846,7 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= riter->parent->right()) {
+        if (riter->counter <= range_right(riter->parent.get())) {
             const SharedPtr<Value> & cur = fframe->current_value;
             if (cur.get() && cur->refcnt() == 2) {
                 // value is not copied.

@@ -34,9 +34,9 @@ int main() {
     }
 
     {
-        SharedPtr<RangeValue> rv = new RangeValue(3, 9);
-        is(ins.inspect(rv), std::string("3..9"));
-    }
+      MortalRangeValue rv(3, 9);
+      is(ins.inspect(rv.get()), std::string("3..9"));
+  }
 
     done_testing();
 }

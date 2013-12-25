@@ -57,9 +57,8 @@ std::string Inspector::inspect(Value* v) const {
     case VALUE_TYPE_FILE:
         return "#<File>";
     case VALUE_TYPE_RANGE: {
-        SharedPtr<RangeValue> rv = v->upcast<RangeValue>();
         std::ostringstream os;
-        os << rv->left() << ".." << rv->right();
+        os << range_left(v) << ".." << range_right(v);
         return os.str();
     }
     case VALUE_TYPE_ARRAY_ITERATOR:
