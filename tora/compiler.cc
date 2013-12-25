@@ -446,7 +446,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
             break;
         }
 
-        tora::local sv(new_str_value(node->at(0)->upcast<StrNode>()->str_value));
+        MortalStrValue sv(node->at(0)->upcast<StrNode>()->str_value);
         SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv.get());
         push_op(tmp);
         push_op(new OP(OP_LOCAL));
@@ -703,7 +703,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         break;
     }
     case NODE_STRING: {
-        local sv(new_str_value(node->upcast<StrNode>()->str_value));
+        MortalStrValue sv(node->upcast<StrNode>()->str_value);
         SharedPtr<ValueOP> tmp = new ValueOP(OP_PUSH_STRING, sv.get());
         push_op(tmp);
         break;

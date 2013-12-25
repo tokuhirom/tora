@@ -324,8 +324,6 @@ public:
   }
 };
 
-typedef MortalValue local; // remove me
-
 };
 
 #include "value/bool.h"

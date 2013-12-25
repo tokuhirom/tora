@@ -56,7 +56,7 @@ public:
         : OP(type)
         , value(v) {
     }
-    ValueOP(op_type_t type, local& v)
+    ValueOP(op_type_t type, const MortalValue& v)
         : OP(type)
         , value(v.get()) {
     }
