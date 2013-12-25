@@ -75,12 +75,13 @@ ADD_CUSTOM_COMMAND(
     COMMAND perl tora/token.gen.pl
 )
 SET(TORA_SRCS
+    tora/vm.gen.cc
     tora/object/time.cc
 
     tora/builtin.cc    tora/lexer.gen.cc  tora/op.cc        tora/peek.cc          tora/util.cc
     tora/compiler.cc         tora/operator.cc  tora/printf.cc        tora/value.cc
     tora/disasm.cc     tora/node.cc       tora/ops.gen.cc   tora/symbol_table.cc  tora/vm.cc
-    tora/frame.cc      tora/nodes.gen.cc  tora/pad_list.cc  tora/symbols.gen.cc   tora/vm.gen.cc
+    tora/frame.cc      tora/nodes.gen.cc  tora/pad_list.cc  tora/symbols.gen.cc
     tora/inspector.cc  tora/object.cc     tora/parser.cc    tora/token.gen.cc
 
     tora/object/array.cc       tora/object/file.cc                tora/object/stat.cc    tora/value/exception.cc

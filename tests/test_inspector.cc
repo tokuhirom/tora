@@ -34,7 +34,7 @@ int main() {
     }
 
     {
-        SharedPtr<RangeValue> rv = new RangeValue(new IntValue(3), new IntValue(9));
+        SharedPtr<RangeValue> rv = new RangeValue(3, 9);
         is(ins.inspect(rv), std::string("3..9"));
     }
 

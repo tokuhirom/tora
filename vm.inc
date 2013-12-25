@@ -65,9 +65,10 @@ OP_NEW_RANGE {
     SharedPtr<Value> r = stack.back();
     stack.pop_back();
 
-    SharedPtr<IntValue> l2 = l->value_type == VALUE_TYPE_INT ? l->upcast<IntValue>() : new IntValue(l->to_int());
-    SharedPtr<IntValue> r2 = r->value_type == VALUE_TYPE_INT ? r->upcast<IntValue>() : new IntValue(r->to_int());
-    stack.push_back(new RangeValue(l2, r2));
+    // SharedPtr<IntValue> l2 = l->value_type == VALUE_TYPE_INT ? l->upcast<IntValue>() : new IntValue(l->to_int());
+    // SharedPtr<IntValue> r2 = r->value_type == VALUE_TYPE_INT ? r->upcast<IntValue>() : new IntValue(r->to_int());
+    MortalValue rv(new RangeValue(l->to_int(), r->to_int()));
+    stack.push_back(rv.get());
 }
 
 OP_FUNCDEF {
@@ -845,7 +846,7 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= get_int_value(riter->parent->right())) {
+        if (riter->counter <= riter->parent->right()) {
             const SharedPtr<Value> & cur = fframe->current_value;
             if (cur.get() && cur->refcnt() == 2) {
                 // value is not copied.

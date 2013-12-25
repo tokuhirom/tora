@@ -14,6 +14,8 @@
 
 namespace tora {
 
+  typedef int tra_int;
+
 typedef enum {
     VALUE_TYPE_UNDEF = 0,
     VALUE_TYPE_INT = 1,
@@ -54,9 +56,9 @@ class CallbackFunction;
 class RangeImpl {
     friend class RangeValue;
 protected:
-    SharedPtr<IntValue> left_;
-    SharedPtr<IntValue> right_;
-    RangeImpl(IntValue* l, IntValue *r) : left_(l), right_(r) {
+    tra_int left_;
+    tra_int right_;
+    RangeImpl(tra_int l, tra_int r) : left_(l), right_(r) {
     }
 };
 

@@ -2,8 +2,8 @@
 
 using namespace tora;
 
-RangeValue::RangeValue(const SharedPtr<IntValue> &l, const SharedPtr<IntValue>& r) : Value(VALUE_TYPE_RANGE) {
-    range_value_ = new RangeImpl(l.get(), r.get());
+RangeValue::RangeValue(tra_int l, tra_int r) : Value(VALUE_TYPE_RANGE) {
+    range_value_ = new RangeImpl(l, r);
 }
 
 RangeValue::~RangeValue() {

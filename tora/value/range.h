@@ -9,13 +9,13 @@ namespace tora {
 
 class RangeValue: public Value {
 public:
-    explicit RangeValue(const SharedPtr<IntValue> &l, const SharedPtr<IntValue> &r);
+    explicit RangeValue(tra_int l, tra_int r);
     ~RangeValue();
 
-    const SharedPtr<IntValue> &left() const {
+    tra_int left() const {
         return range_value_->left_;
     }
-    const SharedPtr<IntValue> &right() {
+    tra_int right() {
         return range_value_->right_;
     }
 
@@ -25,7 +25,7 @@ public:
         SharedPtr<RangeValue> parent;
         Iterator(SharedPtr<RangeValue> parent_) : Value(VALUE_TYPE_RANGE_ITERATOR) {
             parent  = parent_;
-            counter = get_int_value(*(parent->left()));
+            counter = parent->left();
         }
     };
 };

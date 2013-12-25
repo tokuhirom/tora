@@ -118,9 +118,9 @@ std::string Value::to_s() {
     }
     case VALUE_TYPE_RANGE: {
         std::ostringstream os;
-        os << get_int_value(this->upcast<RangeValue>()->left());
+        os << this->upcast<RangeValue>()->left();
         os << "..";
-        os <<get_int_value(this->upcast<RangeValue>()->right());
+        os << this->upcast<RangeValue>()->right();
         return os.str();
     }
     default: {
