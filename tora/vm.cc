@@ -713,23 +713,22 @@ void VM::call_method(const SharedPtr<Value> &object, const SharedPtr<Value> &fun
         // class method
         this->call_method(object, object->upcast<ClassValue>(), function_id, seen);
     } else if (object->value_type == VALUE_TYPE_FILE_PACKAGE) {
-        auto iter = object->upcast<FilePackageValue>()->find(function_id);
-        if (iter != object->upcast<FilePackageValue>()->end()) {
-            SharedPtr<Value> v = iter->second;
-            int argcnt = get_int_operand();
-            switch (v->value_type) {
-            case VALUE_TYPE_CODE:
-                this->function_call_ex(argcnt, v->upcast<CodeValue>(), object);
-                break;
-            case VALUE_TYPE_CLASS:
-                stack.push_back(v);
-                break;
-            default:
-                this->die("Unknown stuff in FilePackage: %s\n", v->type_str());
-            }
-        } else {
-            this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
+      Value* v = file_package_find(object.get(), function_id);
+      if (v) {
+        int argcnt = get_int_operand();
+        switch (v->value_type) {
+        case VALUE_TYPE_CODE:
+          this->function_call_ex(argcnt, v->upcast<CodeValue>(), object);
+          break;
+        case VALUE_TYPE_CLASS:
+          stack.push_back(v);
+          break;
+        default:
+          this->die("Unknown stuff in FilePackage: %s\n", v->type_str());
         }
+      } else {
+        this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
+      }
     } else {
         this->call_method(object, get_builtin_class(symbol_table->get_id(object->type_str())), function_id, seen);
     }

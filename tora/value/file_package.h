@@ -23,13 +23,9 @@ public:
     ~FilePackageValue() {
         delete this->file_package_value_;
     }
-    const_iterator find(ID id) const {
-        return file_package_value_->data_->find(id);
-    }
-    const_iterator end() const {
-        return file_package_value_->data_->end();
-    }
 };
+
+Value* file_package_find(Value * v, ID id);
 
 }
 
