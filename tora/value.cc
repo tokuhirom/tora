@@ -1,6 +1,5 @@
 #include "value.h"
 #include "value/code.h"
-#include "value/tuple.h"
 #include "value/range.h"
 #include "value/bool.h"
 #include "value/double.h"
@@ -13,6 +12,11 @@
 #include <errno.h>
 
 using namespace tora;
+
+SharedValue::SharedValue(const MortalValue& sv)
+  : v_(sv.get()) {
+  v_->retain();
+}
 
 Value::~Value() {
   if (value_type == VALUE_TYPE_STR) {
@@ -137,14 +141,14 @@ std::string Value::to_s() {
     }
 }
 
-int Value::to_int() const {
+int Value::to_int() {
     if (value_type == VALUE_TYPE_INT) {
         return get_int_value(*this);
     } else if (value_type == VALUE_TYPE_DOUBLE) {
         return static_cast<int>(this->to_double());
     } else if (value_type == VALUE_TYPE_TUPLE) {
-        if (static_cast<const TupleValue*>(this)->size() == 1) {
-            return static_cast<const TupleValue*>(this)->at(0)->to_int();
+        if (tuple_size(this) == 1) {
+            return tuple_get_item(this, 0)->to_int();
         } else {
             throw new ExceptionValue("Cannot coerce tuple to integer");
         }
@@ -171,6 +175,7 @@ int Value::to_int() const {
     throw new ExceptionValue("to_int is not supported yet in %s\n", this->type_str());
 }
 
+// XXX Is this needed?
 Value& tora::Value::operator=(const Value&lhs) {
     switch (this->value_type) {
     case VALUE_TYPE_INT:
@@ -183,8 +188,8 @@ Value& tora::Value::operator=(const Value&lhs) {
         this->str_value_ = NULL;
         break;
     case VALUE_TYPE_ARRAY:
-        delete this->array_value_;
-        this->array_value_ = NULL;
+        array_free(this);
+        this->ptr_value_ = NULL;
         break;
     default:
         printf("OOPS %s=%s\n", this->type_str(), lhs.type_str());
@@ -206,14 +211,11 @@ Value& tora::Value::operator=(const Value&lhs) {
         this->str_value_ = lhs.str_value_;
         return *this;
     }
-    case VALUE_TYPE_ARRAY: {
-        const ArrayValue *ap = static_cast<const ArrayValue*>(&lhs);
-        this->value_type = lhs.value_type;
-        this->array_value_ = new ArrayImpl();
-        // this->array_value_->reset(ap->array_value_->get());
-        *(this->array_value_) = *(ap->array_value_);
+    case VALUE_TYPE_ARRAY:
+      {
+        REMOVE_ME_array_copy(this, &lhs);
         return *this;
-    }
+      }
     default: {
         printf("OOPS %s=%s\n", this->type_str(), lhs.type_str());
         abort();

@@ -54,7 +54,7 @@ public:
     int sp; // stack pointer
     int pc; // program counter
     SharedPtr<OPArray> ops;
-    std::vector<SharedPtr<Value>> *global_vars;
+    std::vector<SharedValue> *global_vars;
     SharedPtr<SymbolTable> symbol_table;
     std::vector<SharedPtr<Value>> stack;
     bool exec_trace;
@@ -127,7 +127,7 @@ public:
 
     const SharedPtr<Value>& TOP() { return stack.back(); }
     SharedPtr<Value> set_item(const SharedPtr<Value>& container, const SharedPtr<Value>& index, const SharedPtr<Value>& rvalue) const;
-    void extract_tuple(const SharedPtr<TupleValue> &t);
+    void extract_tuple(const Value* t);
 
     std::mt19937 *myrand;
 

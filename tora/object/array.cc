@@ -26,21 +26,20 @@ using namespace tora;
  * Get the number of elements in an array.
  */
 static SharedPtr<Value> av_size(VM *vm, Value* self) {
-    SharedPtr<IntValue> size = new IntValue(self->upcast<ArrayValue>()->size());
+    SharedPtr<IntValue> size = new IntValue(array_size(self));
     return size;
 }
 
 /**
  * Array#sort()
  * 
- * Get a sorted array. This method is unstable sort(Perl5's sort function is stable sort).
+ * Get a sorted array. This method is stable sort(Because Perl5's sort function is stable).
  */
 static SharedPtr<Value> av_sort(VM* vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_ARRAY);
     // copy and sort.
-    SharedPtr<ArrayValue> av = new ArrayValue(*(self->upcast<ArrayValue>()));
-    av->sort();
-    return av;
+    MortalValue av(array_stable_sort(self));
+    return av.get();
 }
 
 /**
@@ -53,7 +52,7 @@ static SharedPtr<Value> av_sort(VM* vm, Value* self) {
 static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
     // Inspector ins(vm);
     // printf("# ARRY PUSH: %p\n", v);
-    self->upcast<ArrayValue>()->set_item(self->upcast<ArrayValue>()->size()-1+1, v);
+    array_set_item(self, array_size(self)-1+1, v);
     // self->upcast<ArrayValue>()->push_back(v);
     return self;
 }
@@ -64,9 +63,9 @@ static SharedPtr<Value> av_push(VM * vm, Value* self, Value* v) {
  * Pop a object from array.
  */
 static SharedPtr<Value> av_pop(VM * vm, Value* self) {
-    SharedPtr<Value> v = self->upcast<ArrayValue>()->back();
-    self->upcast<ArrayValue>()->pop_back();
-    return v;
+    SharedValue v = array_back(self);
+    array_pop_back(self);
+    return v.get();
 }
 
 /**
@@ -75,9 +74,7 @@ static SharedPtr<Value> av_pop(VM * vm, Value* self) {
  * push $v to front.
  */
 static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
-    self->upcast<ArrayValue>()->push_front(
-        v
-    );
+    array_push_front(self, v);
     return new_undef_value();
 }
 
@@ -87,20 +84,17 @@ static SharedPtr<Value> av_unshift(VM * vm, Value* self, Value *v) {
  * pop value from front.
  */
 static SharedPtr<Value> av_shift(VM * vm, Value* self) {
-    if (self->upcast<ArrayValue>()->size() > 0) {
-        SharedPtr<Value> ret = self->upcast<ArrayValue>()->at(0);
-        self->upcast<ArrayValue>()->pop_front();
-        return ret;
+    if (array_size(self) > 0) {
+      SharedValue ret = array_get_item(self, 0);
+      array_pop_front(self);
+      return ret.get();
     } else {
-        return new_undef_value();
+      return new_undef_value();
     }
 }
 
 static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
-    ArrayValue * src = self->upcast<ArrayValue>();
-    SharedPtr<ArrayValue> nav = new ArrayValue(*src);
-    std::reverse(nav->begin(), nav->end());
-    return nav.get();
+  return array_reverse(self);
 }
 
 /**
@@ -109,39 +103,37 @@ static SharedPtr<Value> av_reverse(VM * vm, Value* self) {
  * concatenete strings in array.
  */
 static SharedPtr<Value> av_join(VM * vm, Value* self, Value *inner) {
-    assert(self->value_type == VALUE_TYPE_ARRAY);
-    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
-    std::string str = inner->to_s();
-    std::string ret;
-    for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-        ret += (*iter)->to_s();
-        if (iter+1 != src->end()) {
-            ret += str;
-        }
+  assert(self->value_type == VALUE_TYPE_ARRAY);
+  std::string str = inner->to_s();
+  std::string ret;
+  for (tra_int i=0, l=array_size(self); i<l; ++i) {
+    ret += array_get_item(self, i)->to_s();
+    if (i != l-1) {
+      ret += str;
     }
-    return new_str_value(ret);
+  }
+  return new_str_value(ret);
 }
 
 /**
  * [1,2,3].map(-> $n { say($n) })
  */
 static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
-    assert(self->value_type == VALUE_TYPE_ARRAY);
-    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
-    SharedPtr<ArrayValue> ret = new ArrayValue();
-    if (code_v->value_type != VALUE_TYPE_CODE) {
-        throw new ExceptionValue("Code is not a foo");
-    }
-    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-    for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-        vm->stack.push_back(*iter);
+  assert(self->value_type == VALUE_TYPE_ARRAY);
+  MortalArrayValue ret;
+  if (code_v->value_type != VALUE_TYPE_CODE) {
+    throw new ExceptionValue("Code is not a foo");
+  }
+  SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+  for (tra_int i=0, l=array_size(self); i<l; ++i) {
+    vm->stack.push_back(array_get_item(self, i));
 
-        vm->function_call_ex(1, code, new_undef_value());
+    vm->function_call_ex(1, code, new_undef_value());
 
-        ret->push_back(vm->stack.back());
-        vm->stack.pop_back();
-    }
-    return ret;
+    array_push_back(ret.get(), vm->stack.back().get());
+    vm->stack.pop_back();
+  }
+  return ret.get();
 }
 
 /**
@@ -151,31 +143,30 @@ static SharedPtr<Value> av_map(VM * vm, Value* self, Value *code_v) {
  */
 static SharedPtr<Value> av_grep(VM * vm, Value* self, Value *stuff_v) {
     assert(self->value_type == VALUE_TYPE_ARRAY);
-    SharedPtr<ArrayValue> src = self->upcast<ArrayValue>();
-    SharedPtr<ArrayValue> ret = new ArrayValue();
+    MortalArrayValue ret;
     if (stuff_v->value_type == VALUE_TYPE_CODE) {
         SharedPtr<CodeValue> code = stuff_v->upcast<CodeValue>();
-        for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-            vm->stack.push_back(*iter);
+        for (tra_int i=0, l=array_size(self); i<l; ++i) {
+            vm->stack.push_back(array_get_item(self, i));
 
             vm->function_call_ex(1, code, new_undef_value());
 
             if (vm->stack.back()->to_bool()) {
-                ret->push_back(*iter);
+                array_push_back(ret.get(), array_get_item(self, i));
             }
             vm->stack.pop_back();
         }
-        return ret;
+        return ret.get();
     } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
         SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
-        for (auto iter=src->begin(); iter!=src->end(); ++iter) {
-            std::string str = (*iter)->to_s();
+        for (tra_int i=0, l=array_size(self); i<l; ++i) {
+            std::string str = array_get_item(self, i)->to_s();
 
             if (re->match_bool(vm, str)) {
-                ret->push_back(*iter);
+              array_push_back(ret.get(), array_get_item(self, i));
             }
         }
-        return ret;
+        return ret.get();
     } else {
         throw new ExceptionValue("Second argument for Array#grep should be Code or Regexp");
     }

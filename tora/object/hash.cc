@@ -22,14 +22,14 @@ using namespace tora;
  */
 static SharedPtr<Value> Hash_keys(VM * vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_HASH);
-  SharedPtr<ArrayValue> av = new ArrayValue();
+  MortalArrayValue av;
   MortalHashIteratorValue iter(self);
   while (!hash_iter_finished(iter.get())) {
     MortalStrValue s(hash_iter_getkey(iter.get()));
-    av->push_back(s.get());
+    array_push_back(av.get(), s.get());
     hash_iter_increment(iter.get());
   }
-  return av;
+  return av.get();
 }
 
 /**
@@ -39,13 +39,13 @@ static SharedPtr<Value> Hash_keys(VM * vm, Value* self) {
  */
 static SharedPtr<Value> Hash_values(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_HASH);
-    SharedPtr<ArrayValue> av = new ArrayValue();
+    MortalArrayValue av;
     MortalHashIteratorValue iter(self);
     while (!hash_iter_finished(iter.get())) {
-        av->push_back(hash_iter_getval(iter.get()));
+        array_push_back(av.get(), hash_iter_getval(iter.get()));
         hash_iter_increment(iter.get());
     }
-    return av;
+    return av.get();
 }
 
 /**

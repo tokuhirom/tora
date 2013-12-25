@@ -14,7 +14,6 @@
 #include "value/file.h"
 #include "value/symbol.h"
 #include "value/array.h"
-#include "value/tuple.h"
 #include "value/object.h"
 #include "value/class.h"
 #include "value/file_package.h"
@@ -73,7 +72,7 @@ VM::VM(SharedPtr<OPArray>& ops_, SharedPtr<SymbolTable> &symbol_table_, bool dum
     this->stack.reserve(INITIAL_STACK_SIZE);
     this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
     this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
-    this->global_vars = new std::vector<SharedPtr<Value>>();
+    this->global_vars = new std::vector<SharedValue>();
     std::random_device rd;
     this->myrand = new std::mt19937(rd());
     this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
@@ -110,19 +109,21 @@ VM::~VM() {
 
 void VM::init_globals(const std::vector<std::string> & args) {
     // $ARGV
-    SharedPtr<ArrayValue> avalue = new ArrayValue();
-    for (auto arg=args.begin(); arg!=args.end(); ++arg) {
-        avalue->push_back(new_str_value(*arg));
+    MortalArrayValue avalue;
+    for (auto arg: args) {
+      MortalStrValue a(arg);
+      array_push_back(avalue.get(), a.get());
     }
-    this->global_vars->push_back(avalue);
+    this->global_vars->push_back(avalue.get());
 
     // $ENV
     SharedPtr<ObjectValue> env = new ObjectValue(this, this->get_builtin_class(SYMBOL_ENV_CLASS), new_undef_value());
-    this->global_vars->push_back(env);
+    this->global_vars->push_back(env.get());
 
     // $LIBPATH : Array
-    SharedPtr<ArrayValue> libpath = new ArrayValue();
-    libpath->push_back(new_str_value("lib"));
+    MortalArrayValue libpath;
+    MortalStrValue lib("lib");
+    array_push_back(libpath.get(), lib.get());
     this->global_vars->push_back(libpath);
 
     // $REQUIRED : Hash
@@ -264,8 +265,8 @@ void VM::use(tora::Value * package_v, bool need_copy) {
 
 void VM::require_package(const std::string &package) {
     VM *vm = this;
-    SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
-    SharedPtr<Value> &required = vm->global_vars->at(3);
+    SharedValue libpath = vm->global_vars->at(2);
+    SharedValue required = vm->global_vars->at(3);
     std::string s = package;
     {
         auto iter = s.find("::");
@@ -286,9 +287,9 @@ void VM::require_package(const std::string &package) {
     }
 
     // load
-    for (int i=0; i<libpath->size(); i++) {
+    for (int i=0; i<array_size(libpath.get()); i++) {
         std::string realfilename;
-        realfilename = libpath->at(i)->to_s();
+        realfilename = array_get_item(libpath.get(), i)->to_s();
         realfilename += "/";
         realfilename += s;
         struct stat stt;
@@ -320,8 +321,8 @@ void VM::require_package(const std::string &package) {
 
     // not found...
     std::string message = std::string("Cannot find ") + s + " in $LIBPATH\n";
-    for (int i=0; i<libpath->size(); i++) {
-        message += "  " + libpath->at(i)->to_s();
+    for (int i=0; i<array_size(libpath.get()); i++) {
+        message += "  " + array_get_item(libpath.get(), i)->to_s();
     }
     throw new ExceptionValue(message);
 }
@@ -453,6 +454,7 @@ void VM::copy_all_public_symbols(ID srcid) {
     }
 }
 
+// TODO use Value*
 SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value>& container, const SharedPtr<tora::Value>& index, const SharedPtr<tora::Value>& rvalue) const {
     switch (container->value_type) {
     case VALUE_TYPE_OBJECT:
@@ -464,8 +466,10 @@ SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value>& container, con
         return new_undef_value();
       }
     case VALUE_TYPE_ARRAY:
-        container->upcast<ArrayValue>()->set_item(index, rvalue);
+      {
+        array_set_item(container.get(), index->to_int(), rvalue.get());
         return new_undef_value();
+      }
     default:
         throw new ExceptionValue("%s is not a container. You cannot store item.\n", container->type_str());
     }
@@ -500,11 +504,12 @@ void VM::dump_stack() {
     printf("----------------\n");
 }
 
-void VM::extract_tuple(const SharedPtr<TupleValue> &t) {
-    int tuple_size = t->size();
-    for (int i=0; i<tuple_size; i++) {
-        this->stack.push_back(t->at(i));
-    }
+void VM::extract_tuple(const Value* t) {
+  assert(type(t) == VALUE_TYPE_TUPLE);
+  tra_int ts = tuple_size(t);
+  for (int i=0; i<ts; i++) {
+    this->stack.push_back(tuple_get_item(t, i));
+  }
 }
 
 SharedPtr<tora::Value> VM::get_self() {
@@ -559,13 +564,14 @@ void VM::handle_exception(const SharedPtr<Value> & exception) {
             pc = tframe->return_address + 1;
 
             stack.resize(frame->top);
-            SharedPtr<TupleValue> t = new TupleValue();
-            t->push_back(new_undef_value());
-            t->push_back(exception.get());
+
+            MortalTupleValue t;
+            tuple_push(t.get(), new_undef_value());
+            tuple_push(t.get(), exception.get());
 
             frame_stack->pop_back();
 
-            stack.push_back(t);
+            stack.push_back(t.get());
 
             break;
         } else {
@@ -681,9 +687,9 @@ void VM::load_dynamic_library(const std::string &filename, const std::string &en
 
 
 void VM::add_library_path(const std::string &dir) {
-    SharedPtr<Value> libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
+    SharedValue libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
     MortalStrValue dir_s(dir);
-    libpath->upcast<ArrayValue>()->push_back(dir_s.get());
+    array_push_back(libpath.get(), dir_s.get());
 }
 
 /**

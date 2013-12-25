@@ -56,61 +56,67 @@ SharedPtr<Value> RE2RegexpValue::scan(VM *vm, const std::string &str) {
 
     int start = 0;
     int end = str.size();
-    SharedPtr<ArrayValue> res = new ArrayValue();
+    MortalArrayValue res;
 
     while (VAL()->Match(str, start, end, RE2::UNANCHORED, buf.data(), VAL()->NumberOfCapturingGroups()+1)) {
         if (VAL()->NumberOfCapturingGroups() != 0) {
-            SharedPtr<ArrayValue> av = new ArrayValue();
-            for (int i=1; i< VAL()->NumberOfCapturingGroups()+1; i++) {
-                if (buf[i].data()) {
-                    av->push_back(new_str_value(buf[i].as_string()));
-                } else {
-                    av->push_back(new_undef_value());
-                }
-            }
-            res->push_back(av);
+          MortalArrayValue av;
+          for (int i=1; i< VAL()->NumberOfCapturingGroups()+1; i++) {
+              if (buf[i].data()) {
+                MortalStrValue s(buf[i].as_string());
+                array_push_back(av.get(), s.get());
+              } else {
+                array_push_back(av.get(), new_undef_value());
+              }
+          }
+          array_push_back(res.get(), av.get());
         } else {
-            res->push_back(new_str_value(buf[0].as_string()));
+          MortalStrValue s(buf[0].as_string());
+          array_push_back(res.get(), s.get());
         }
         start = buf[0].data() - str.c_str() + (buf[0].length() > 0 ? buf[0].length() : 1);
     }
-    return res;
+    return res.get();
 }
 
 SharedPtr<Value> RE2RegexpValue::split(VM *vm, const std::string &str, int limit) {
     // $str.split(//)
     if (this->pattern() == "") {
-        SharedPtr<ArrayValue> res = new ArrayValue();
-        size_t i = 0;
-        for (; i<str.size(); i++) {
-            if (limit==0 || res->size()+1 < limit) {
-                res->push_back(new_str_value(str.substr(i, 1)));
-            } else {
-                res->push_back(new_str_value(str.substr(i)));
-                break;
-            }
-        }
-        return res;
+      MortalArrayValue res;
+      size_t i = 0;
+      for (; i<str.size(); i++) {
+          if (limit==0 || array_size(res.get())+1 < limit) {
+            MortalStrValue s(str.substr(i, 1));
+            array_push_back(res.get(), s.get());
+          } else {
+            MortalStrValue s(str.substr(i));
+            array_push_back(res.get(), s.get());
+            break;
+          }
+      }
+      return res.get();
     } else {
         re2::StringPiece buf[1];
 
         int start = 0;
-        SharedPtr<ArrayValue> res = new ArrayValue();
+        MortalArrayValue res;
 
         std::string src = str;
 
         while (VAL()->Match(src, 0, src.length(), RE2::UNANCHORED, buf, 1)) {
-            if (limit==0 || res->size()+1 < limit) {
-                res->push_back(new_str_value(src.substr(start, buf[0].data() - src.c_str())));
+            if (limit==0 || array_size(res.get())+1 < limit) {
+              MortalStrValue s(src.substr(start, buf[0].data() - src.c_str()));
+              array_push_back(res.get(), s.get());
             } else {
-                break;
+              break;
             }
             src = src.substr((buf[0].data()-src.c_str())+buf[0].length());
         }
         if (src.size() > 0) {
-            res->push_back(new_str_value(src));
+          MortalStrValue s(src);
+          array_push_back(res.get(), s.get());
         }
-        return res;
+        return res.get();
     }
 }
 

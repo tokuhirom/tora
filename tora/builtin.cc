@@ -144,13 +144,13 @@ static SharedPtr<Value> builtin_callee(VM *vm) {
 static SharedPtr<Value> builtin_caller(VM *vm, const std::vector<SharedPtr<Value>>& args) {
     if (args.size() == 0) {
         int skiped_first = false;
-        SharedPtr<ArrayValue> av = new ArrayValue();
+        MortalArrayValue av;
         for (auto iter = vm->frame_stack->rbegin(); iter != vm->frame_stack->rend(); ++iter) {
             if ((*iter)->type == FRAME_TYPE_FUNCTION) {
                 if (skiped_first) {
                     FunctionFrame* fframe = (*iter)->upcast<FunctionFrame>();
                     SharedPtr<ObjectValue> o = new ObjectValue(vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(), fframe->code);
-                    av->push_back(o);
+                    array_push_back(av.get(), o.get());
                 } else {
                     skiped_first = true; // skip myself.
                 }

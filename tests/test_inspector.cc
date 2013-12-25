@@ -2,6 +2,7 @@
 #include "../tora/value.h"
 #include "../tora/value/array.h"
 #include "../tora/value/hash.h"
+#include "../tora/value/int.h"
 #include "../tora/value/range.h"
 #include "../tora/vm.h"
 #include "../tora/inspector.h"
@@ -20,10 +21,11 @@ int main() {
     }
 
     {
-        SharedPtr<ArrayValue> av = new ArrayValue();
-        av->push_back(new IntValue(5963));
-        av->push_back(vm.to_bool(true));
-        is(ins.inspect(av), std::string("[5963,true]"));
+      MortalArrayValue av;
+      MortalIntValue i5963(5963);
+      array_push_back(av.get(), i5963.get());
+      array_push_back(av.get(), vm.to_bool(true));
+      is(ins.inspect(av.get()), std::string("[5963,true]"));
     }
 
     {

@@ -13,8 +13,7 @@ class VM;
  *
  * This is Devel::Peek in Perl5.
  */
-void peek(VM *vm, const Value * v);
-void peek(VM *vm, const SharedPtr<Value>& v);
+void peek(VM *vm, Value * v);
 
 };
 

@@ -32,14 +32,15 @@ std::string Inspector::inspect(Value* v) const {
         return "sub { \"DUMMY\" }";
     case VALUE_TYPE_ARRAY: {
         std::string ret("[");
-        const ArrayValue* av = static_cast<const ArrayValue*>(v);
+        MortalArrayIteratorValue iter(v);
         bool first = true;
-        for (auto iter = av->begin(); iter!=av->end(); ++iter) {
+        while (!array_iter_finished(iter.get())) {
             if (!first) {
                 ret += ',';
             }
-            ret += this->inspect(*iter);
+            ret += this->inspect(array_iter_get(iter.get()));
             first = false;
+            array_iter_next(iter.get());
         }
         ret += "]";
         return ret;

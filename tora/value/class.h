@@ -8,7 +8,6 @@
 namespace tora {
 
 class ClassValue;
-class ArrayValue;
 
 class ClassImpl {
     friend class ClassValue;
@@ -64,7 +63,7 @@ public:
      */
     void add_method(ID, const CallbackFunction*);
     bool has_method(ID) const;
-    SharedPtr<ArrayValue> get_method_list() const;
+    Value* get_method_list() const;
     bool isa(ID target_id) const;
     const_iterator find_method(ID id) const {
         return VAL().methods_.find(id);

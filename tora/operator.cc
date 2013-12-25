@@ -207,7 +207,7 @@ SharedPtr<Value> tora::op_get_item(const SharedPtr<Value>& container, const Shar
         return hash_get_item(container.get(), index_s);
       }
     case VALUE_TYPE_ARRAY:
-        return container->upcast<ArrayValue>()->get_item(index);
+        return array_get_item(container.get(), index->to_int());
     case VALUE_TYPE_OBJECT:
         return container->upcast<ObjectValue>()->get_item(index);
     default:

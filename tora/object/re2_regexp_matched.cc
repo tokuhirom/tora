@@ -52,13 +52,14 @@ static SharedPtr<Value> RE2_Regexp_Matched_regexp(VM * vm, Value* self) {
  * Convert $matched object to array of strings.
  */
 static SharedPtr<Value> RE2_Regexp_Matched_to_array(VM * vm, Value* self) {
-    SharedPtr<ArrayValue> ary = new ArrayValue();
-    const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
-    for (int i=0; i<re->number_of_capturing_groups(); i++) {
-        const re2::StringPiece& res = SELF(self)->matches()->at(i);
-        ary->push_back(new_str_value(std::string(res.data(), res.length())));
-    }
-    return ary;
+  MortalArrayValue ary;
+  const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
+  for (int i=0; i<re->number_of_capturing_groups(); i++) {
+    const re2::StringPiece& res = SELF(self)->matches()->at(i);
+    MortalStrValue s(std::string(res.data(), res.length()));
+    array_push_back(ary.get(), s.get());
+  }
+  return ary.get();
 }
 
 /**

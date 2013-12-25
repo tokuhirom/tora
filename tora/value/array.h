@@ -13,79 +13,42 @@ namespace tora {
       : MortalValue(new_value(a)) { }
   };
 
+  class MortalArrayValue : public MortalValue {
+    static Value* new_value();
+  public:
+    MortalArrayValue()
+      : MortalValue(new_value()) { }
+  };
+
+  class MortalTupleValue : public MortalValue {
+    static Value* new_value();
+  public:
+    MortalTupleValue()
+      : MortalValue(new_value()) { }
+  };
+
   Value * array_iter_get(Value *iter);
   bool array_iter_finished(Value *iter);
   void array_iter_next(Value *iter);
 
-class ArrayValue: public Value {
-    friend class Value;
-protected:
-    inline ArrayImpl& VAL() {
-        return *(this->array_value_);
-    }
-    inline const ArrayImpl& VAL() const {
-        return *(this->array_value_);
-    }
-public:
-    // rename to iterator
-    typedef std::deque<SharedPtr<Value>>::iterator iterator2;
-    typedef std::deque<SharedPtr<Value>>::const_iterator const_iterator;
+  Value* array_reverse(const Value* v);
+  void array_push_back(Value* ary, Value* v);
+  void array_push_front(Value* ary, Value* v);
+  void array_pop_front(Value* ary);
+  void array_set_item(Value* ary, tra_int i, Value* v);
+  Value* array_get_item(const Value *self, tra_int i);
+  void array_pop_back(Value* self);
+  Value* array_back(const Value* self);
+  tra_int array_size(const Value* self);
+  void REMOVE_ME_array_copy(Value* a, const Value *b);
+  void array_copy(Value* a, const Value *b);
+  Value* array_stable_sort(const Value* self);
+  void array_free(Value* self);
 
-    ArrayValue() : Value(VALUE_TYPE_ARRAY) {
-        this->array_value_ = new std::shared_ptr<std::deque<SharedPtr<Value>>>(new std::deque<SharedPtr<Value>>());
-    }
-    ArrayValue(const ArrayValue & a);
-    ~ArrayValue() {
-        delete this->array_value_;
-    }
-    void sort();
-
-    iterator2 begin() { return VAL()->begin(); }
-    iterator2 end()   { return VAL()->end();   }
-    const_iterator begin() const { return VAL()->begin(); }
-    const_iterator end()   const { return VAL()->end();   }
-
-    void pop_back() {
-        VAL()->pop_back();
-    }
-    void push_back(Value *v) {
-        VAL()->push_back(v);
-    }
-    void push_back(const SharedPtr<Value> &v) {
-        VAL()->push_back(v);
-    }
-    void push_front(Value *v) {
-        VAL()->push_front(v);
-    }
-    void push_front(const SharedPtr<Value> &v) {
-        VAL()->push_front(v);
-    }
-    void pop_front() {
-        VAL()->pop_front();
-    }
-    size_t size() const {
-        return VAL()->size();
-    }
-    void resize(size_t n) {
-        VAL()->resize(n);
-    }
-    const SharedPtr<Value>& back() const {
-        return VAL()->back();
-    }
-    SharedPtr<Value>at(int i) const {
-        return VAL()->at(i);
-    }
-    SharedPtr<Value> operator[](int i) const {
-        return (*(VAL()))[i];
-    }
-    SharedPtr<Value> get_item(const SharedPtr<Value> &index);
-    void set_item(int i, const SharedPtr<Value> &v);
-    void set_item(const SharedPtr<Value>& index, const SharedPtr<Value> &v) {
-        this->set_item(index->to_int(), v);
-    }
-    const SharedPtr<Value> reverse() const;
-
-};
+  // tuple
+  Value* tuple_get_item(const Value* self, tra_int i);
+  tra_int tuple_size(const Value* self);
+  void tuple_push(Value* self, Value* v);
 
 };
 

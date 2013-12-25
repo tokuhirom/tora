@@ -57,7 +57,6 @@ sub vm_gen_cc {
 #include "disasm.h"
 #include "value/hash.h"
 #include "value/code.h"
-#include "value/tuple.h"
 #include "value/file.h"
 #include "value/range.h"
 #include "value/symbol.h"

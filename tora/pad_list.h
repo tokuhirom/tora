@@ -8,7 +8,6 @@
 
 namespace tora {
 
-class ArrayValue;
 class Value;
 
 class PadList {

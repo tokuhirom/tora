@@ -7,12 +7,8 @@
 
 using namespace tora;
 
-void tora::peek(VM *vm, const SharedPtr<Value>& v) {
-    peek(vm, v.get());
-}
-
 // vm is nullable.
-void tora::peek(VM *vm, const Value * v) {
+void tora::peek(VM *vm, Value * v) {
     if (v) {
         printf("Value: %s(%p)\n", v->type_str(), v);
         /*
@@ -46,8 +42,7 @@ void tora::peek(VM *vm, const Value * v) {
             break;
         }
         case VALUE_TYPE_ARRAY: {
-            const ArrayValue* av = static_cast<const ArrayValue*>(v);
-            printf("  SIZE: %ld\n", (long int) av->size());
+            printf("  SIZE: %ld\n", (long int)array_size(v));
             break;
         }
         case VALUE_TYPE_CLASS: {

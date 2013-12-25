@@ -47,6 +47,7 @@ class DoubleValue;
 class ObjectImpl;
 class ClassImpl;
 class FilePackageImpl;
+class MortalValue;
 
 class CallbackFunction;
 
@@ -66,7 +67,6 @@ protected:
     }
 };
 
-typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
 typedef std::string StringImpl;
 typedef std::string BytesImpl;
 
@@ -107,7 +107,6 @@ public:
         // TODO: remove me.
         std::string* str_value_;
 
-        ArrayImpl* array_value_;
         Value * value_value_;
         FILE *file_value_;
         ObjectImpl* object_value_;
@@ -119,7 +118,7 @@ public:
     Value& operator=(const Value&v);
 
     StringImpl to_s();
-    int to_int() const;
+    int to_int();
     double to_double() const;
     bool to_bool() const;
 
@@ -152,6 +151,7 @@ public:
   SharedValue(const SharedValue& sv) : v_(sv.get()) {
     v_->retain();
   }
+  SharedValue(const MortalValue& sv);
   SharedValue & operator=(Value* rhs) {
     rhs->retain();
     v_ = rhs;

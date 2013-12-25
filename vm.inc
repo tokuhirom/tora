@@ -46,9 +46,9 @@ OP_GETARG {
 
 OP_SETARG {
     int no = get_int_operand();
-    SharedPtr<Value> rvalue = stack.back();
+    SharedValue rvalue(stack.back().get());
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
-        rvalue = rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1);
+        rvalue = tuple_get_item(rvalue.get(), tuple_size(rvalue.get())-1);
     }
     stack[mark_stack.back() - no - 1].reset(rvalue.get());
 }
@@ -248,10 +248,11 @@ OP_BUILTIN_FUNCALL {
 
     int argcnt = get_int_operand();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
-        SharedPtr<TupleValue> t = stack.back()->upcast<TupleValue>();
-        argcnt = t->size();
+        SharedPtr<Value> t = stack.back();
+        argcnt = tuple_size(stack.back().get());
         stack.pop_back();
-        this->extract_tuple(t);
+
+        this->extract_tuple(t.get());
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
@@ -276,10 +277,11 @@ OP_FUNCALL {
 
     int argcnt = get_int_operand_high();
     if (stack.size() >= 1 && stack.back()->value_type == VALUE_TYPE_TUPLE) {
-        SharedPtr<TupleValue> t = stack.back()->upcast<TupleValue>();
+        SharedPtr<Value> t = stack.back();
         stack.pop_back();
-        argcnt = t->size();
-        this->extract_tuple(t);
+
+        argcnt = tuple_size(t.get());
+        this->extract_tuple(t.get());
     }
 #ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
@@ -348,13 +350,13 @@ OP_FUNCALL {
                 }
             } else {
                 // Perl5 like 'sub foo { }' form.
-                SharedPtr<ArrayValue> av = new ArrayValue();
+                MortalArrayValue av;
                 for (size_t i=0; i<argcnt; i++) {
-                    av->push_back(stack.back());
-                    stack.pop_back();
+                  array_push_back(av.get(), stack.back().get());
+                  stack.pop_back();
                 }
                 argcnt = 1;
-                stack.push_back(av); // and put it to $_.
+                stack.push_back(av.get()); // and put it to $_.
                 fframe->top = stack.size();
             }
 
@@ -572,7 +574,7 @@ OP_SETLOCAL {
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         frame_stack->back()->set_variable(
             get_int_operand(),
-            rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
+            tuple_get_item(rvalue.get(), tuple_size(rvalue.get()) - 1)
         );
     } else {
         frame_stack->back()->set_variable(
@@ -593,7 +595,7 @@ OP_SETDYNAMIC {
         frame_stack->back()->set_variable_dynamic(
             level,
             no,
-            rvalue->upcast<TupleValue>()->at(rvalue->upcast<TupleValue>()->size()-1)
+            tuple_get_item(rvalue.get(), tuple_size(rvalue.get()) - 1)
         );
     } else {
         frame_stack->back()->set_variable_dynamic(
@@ -669,29 +671,31 @@ OP_MAKE_HASH {
 }
 
 OP_MAKE_ARRAY {
-    SharedPtr<ArrayValue> a = new ArrayValue();
-    int array_size = get_int_operand();
-    for (int i=0; i<array_size; i++) {
-        SharedPtr<Value> v = stack.back(); stack.pop_back();
-        a->push_back(v);
-    }
-    stack.push_back(a);
+  MortalArrayValue a;
+  int array_size = get_int_operand();
+  for (int i=0; i<array_size; i++) {
+    SharedPtr<Value> &v = stack.back();
+    array_push_back(a.get(), v.get());
+
+    stack.pop_back();
+  }
+  stack.push_back(a.get());
 }
 
 OP_MAKE_TUPLE {
-    SharedPtr<TupleValue> t = new TupleValue();
-    int tuple_size = get_int_operand();
-    for (int i=0; i<tuple_size; i++) {
-        SharedPtr<Value> v = stack.back(); stack.pop_back();
-        t->push_back(v);
-    }
-    stack.push_back(t);
+  MortalTupleValue t;
+  int tuple_size = get_int_operand();
+  for (int i=0; i<tuple_size; i++) {
+    SharedPtr<Value> v = stack.back(); stack.pop_back();
+    tuple_push(t.get(), v.get());
+  }
+  stack.push_back(t.get());
 }
 
 OP_EXTRACT_TUPLE {
-    SharedPtr<TupleValue> t = stack.back()->upcast<TupleValue>();
-    stack.pop_back();
-    this->extract_tuple(t);
+  SharedPtr<Value> t = stack.back();
+  stack.pop_back();
+  this->extract_tuple(t.get());
 }
 
 OP_PRE_INCREMENT {
@@ -777,7 +781,7 @@ OP_FILE_TEST {
 
 OP_GETGLOBAL {
     int globalvarno = get_int_operand();
-    stack.push_back(this->global_vars->at(globalvarno));
+    stack.push_back(this->global_vars->at(globalvarno).get());
 }
 
 OP_POP_TOP {
@@ -834,9 +838,9 @@ OP_FOR_ITER {
             SharedValue val = array_iter_get(iter.get());
             array_iter_next(iter.get());
 
-            SharedPtr<TupleValue> t = new TupleValue();
-            t->push_back(val.get());
-            stack.push_back(t);
+            MortalTupleValue t;
+            tuple_push(t.get(), val.get());
+            stack.push_back(t.get());
         } else {
             // XXX refcnt issue
             stack.push_back(new StopIterationExceptionValue());
@@ -870,11 +874,11 @@ OP_FOR_ITER {
             SharedPtr<Value> val = hash_iter_getval(iter.get());
             hash_iter_increment(iter.get());
 
-            SharedPtr<TupleValue> t = new TupleValue();
+            MortalTupleValue t;
             MortalStrValue key_v(key);
-            t->push_back(val);
-            t->push_back(key_v.get());
-            stack.push_back(t);
+            tuple_push(t.get(), val.get());
+            tuple_push(t.get(), key_v.get());
+            stack.push_back(t.get());
         } else {
             stack.push_back(new StopIterationExceptionValue());
         }
@@ -1003,7 +1007,7 @@ OP_EXTRACT_ARRAY {
     if (obj->value_type != VALUE_TYPE_ARRAY) {
         throw new ExceptionValue("You cannot extract %s by '*' operator. You can only extract Array.", obj->type_str());
     }
-    SharedPtr<Value> res = obj->upcast<ArrayValue>()->reverse();
+    MortalValue res(array_reverse(obj.get()));
     res->value_type = VALUE_TYPE_TUPLE; // Difference of array and tuple is only value_type.
     stack[stack.size()-1].reset(res.get());
 }
