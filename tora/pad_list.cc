@@ -4,6 +4,7 @@
 #include "peek.h"
 #include "value/code.h"
 #include <iostream>
+#include <vector>
 
 using namespace tora;
 

@@ -14,8 +14,6 @@
 #include <sstream>
 #include <memory>
 
-#include <boost/program_options.hpp>
-
 #include "tora.h"
 #include "vm.h"
 #include "compiler.h"
@@ -28,8 +26,6 @@
 #include "value/file_package.h"
 
 using namespace tora;
-
-namespace po = boost::program_options;
 
 static void show_configuration() {
     printf("Tora %s\n", TORA_VERSION_STR);
@@ -68,6 +64,21 @@ static void run_repl(const std::vector<std::string>& args, const std::vector<std
     }
 }
 
+namespace tora {
+  class CommandLineParser {
+    int optind_;
+  public:
+    bool help;
+    bool vernum;
+    std::string eval;
+    std::vector<std::string> libs;
+
+    int optind() const { return optind_; }
+    void parse(int argc, char** argv) {
+    }
+  };
+};
+
 int main(int argc, char **argv) {
     bool dump_ops = false;
     bool dump_ast = false;
@@ -78,6 +89,51 @@ int main(int argc, char **argv) {
     std::vector< std::string > args;
     std::string code;
 
+    int optind = 1;
+
+    while (optind < argc) {
+      std::string arg(argv[optind]);
+      if (arg == "--") {
+        break;
+      } else if (arg == "--help") {
+        printf("Usage");
+      } else if (arg == "--vernum") {
+        std::cout << TORA_VERSION_STR << std::endl;
+        exit(EXIT_SUCCESS);
+      } else if (arg == "--version-full") {
+        show_configuration();
+        exit(EXIT_SUCCESS);
+      } else if (arg == "--Dtree") {
+        dump_ast = true;
+      } else if (arg == "--Dops" || arg == "-t") {
+        dump_ops = true;
+      } else if (arg == "-e" || arg == "--eval") {
+        optind++;
+        if (optind < argc) {
+          code = argv[optind];
+        }
+      } else if (arg == "-I" || arg == "--include") {
+        optind++;
+        if (optind < argc) {
+          libs.push_back(argv[optind]);
+        }
+      } else if (arg == "--compile-only" || arg == "-c") {
+        compile_only = true;
+      } else if (arg == "--parse-trace" || arg == "-y") {
+        parse_trace = true;
+      } else if (arg == "--exec-trace" || arg == "-q") {
+        exec_trace = true;
+      } else if (arg[0] != '-') {
+        break;
+      }
+      optind++;
+    }
+    while (optind < argc) {
+      args.push_back(argv[optind]);
+      optind++;
+    }
+
+    /*
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
@@ -140,6 +196,7 @@ int main(int argc, char **argv) {
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
+    */
 
     std::unique_ptr<std::ifstream> ifs;
     std::unique_ptr<std::stringstream> ss;

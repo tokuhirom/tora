@@ -2,6 +2,7 @@
 #define TORA_CALLBACK_H_
 
 #include "shared_ptr.h"
+#include <vector>
 
 namespace tora {
 

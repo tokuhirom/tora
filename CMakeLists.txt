@@ -5,7 +5,8 @@ SET(CMAKE_CC_FLAGS "${CMAKE_CC_FLAGS} ")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=2 -std=c++11 -D_REENTRANT -Wall -Wno-sign-compare -fstack-protector -Wno-unused-function -fPIC")
 SET(CMAKE_CXX_FLAGS_RELEASE " -O2 -g -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-E -Wl,-Bsymbolic -rdynamic -L.")
+SET(CMAKE_EXE_LINKER_FLAGS "-rdynamic -L.")
+# SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-E -Wl,-Bsymbolic -rdynamic -L.")
 SET(CMAKE_BUILD_TYPE Debug)
 
 # operating specific settings
@@ -109,7 +110,7 @@ TARGET_LINK_LIBRARIES(libtora_a ${libs})
 
 # bin/tora
 ADD_EXECUTABLE(toraexe tora/main.cc)
-TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a "boost_program_options")
+TARGET_LINK_LIBRARIES(toraexe ${libs} libtora_a)
 SET_TARGET_PROPERTIES(toraexe PROPERTIES OUTPUT_NAME "bin/tora")
 ADD_DEPENDENCIES(
     toraexe tora/ops.gen.h

@@ -4,6 +4,7 @@
 #include "prim.h"
 #include "shared_ptr.h"
 #include "value/array.h"
+#include <vector>
 
 namespace tora {
 

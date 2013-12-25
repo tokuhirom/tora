@@ -1,5 +1,6 @@
 #undef __STRICT_ANSI__
 #include <stdio.h>
+#include <unistd.h>
 
 #include "../object.h"
 #include "../vm.h"
