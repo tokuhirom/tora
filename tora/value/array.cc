@@ -4,6 +4,50 @@
 
 using namespace tora;
 
+namespace tora {
+  struct ArrayIteratorImpl {
+    int counter;
+    SharedValue parent;
+
+    ArrayIteratorImpl(Value* v)
+      : counter(0), parent(v) { }
+  };
+};
+
+static ArrayImpl* ary(const Value* v)
+{
+  assert(type(v) == VALUE_TYPE_ARRAY);
+  return static_cast<ArrayImpl*>(get_ptr_value(v));
+}
+
+static ArrayIteratorImpl* ary_iter(const Value* v)
+{
+  assert(type(v) == VALUE_TYPE_ARRAY_ITERATOR);
+  return static_cast<ArrayIteratorImpl*>(get_ptr_value(v));
+}
+
+Value* MortalArrayIteratorValue::new_value(Value* a)
+{
+  Value* v = new Value(VALUE_TYPE_ARRAY_ITERATOR);
+  v->ptr_value_ = new ArrayIteratorImpl(a);
+  return v;
+}
+
+Value * tora::array_iter_get(Value *iter)
+{
+  return (*ary(ary_iter(iter)->parent.get()))->at(ary_iter(iter)->counter).get();
+}
+
+bool tora::array_iter_finished(Value *iter)
+{
+  return (*ary(ary_iter(iter)->parent.get()))->size() <= ary_iter(iter)->counter;
+}
+
+void tora::array_iter_next(Value* iter)
+{
+  ary_iter(iter)->counter++;
+}
+
 /*
  * Default order of sort() function should be string comparision order.
  * It's same as Perl5.

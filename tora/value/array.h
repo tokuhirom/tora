@@ -6,6 +6,17 @@
 
 namespace tora {
 
+  class MortalArrayIteratorValue : public MortalValue {
+    static Value* new_value(Value* a);
+  public:
+    MortalArrayIteratorValue(Value* a)
+      : MortalValue(new_value(a)) { }
+  };
+
+  Value * array_iter_get(Value *iter);
+  bool array_iter_finished(Value *iter);
+  void array_iter_next(Value *iter);
+
 class ArrayValue: public Value {
     friend class Value;
 protected:
@@ -74,14 +85,6 @@ public:
     }
     const SharedPtr<Value> reverse() const;
 
-    // rename to Iterator
-    class iterator : public Value {
-    public:
-        int counter;
-        SharedPtr<ArrayValue> parent;
-        iterator() : Value(VALUE_TYPE_ARRAY_ITERATOR), counter(0) {
-        }
-    };
 };
 
 };

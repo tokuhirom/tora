@@ -789,10 +789,8 @@ OP_ENTER_FOREACH {
     stack.pop_back();
     SharedPtr<Value> iiter;
     if (a->value_type == VALUE_TYPE_ARRAY) {
-        SharedPtr<ArrayValue::iterator> iter = new ArrayValue::iterator();
-        iter->parent = a->upcast<ArrayValue>();
-        iter->counter = 0;
-        iiter = iter;
+      MortalArrayIteratorValue iter(a.get());
+      iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_RANGE) {
         SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a);
         iiter = iter;
@@ -832,14 +830,15 @@ OP_FOR_ITER {
     const SharedPtr<Value> & iter = fframe->iter;
     switch (iter->value_type) {
     case VALUE_TYPE_ARRAY_ITERATOR: {
-        SharedPtr<ArrayValue::iterator> aiter = iter->upcast<ArrayValue::iterator>();
-        if (aiter->counter < aiter->parent->size()) {
-            SharedPtr<Value> val = aiter->parent->at(aiter->counter);
-            aiter->counter++;
+        if (!array_iter_finished(iter.get())) {
+            SharedValue val = array_iter_get(iter.get());
+            array_iter_next(iter.get());
+
             SharedPtr<TupleValue> t = new TupleValue();
-            t->push_back(val);
+            t->push_back(val.get());
             stack.push_back(t);
         } else {
+            // XXX refcnt issue
             stack.push_back(new StopIterationExceptionValue());
         }
         break;
