@@ -21,7 +21,7 @@ void tora::peek(VM *vm, const Value * v) {
         printf("  VALUE SIZE: %ld\n", (long int) sizeof(Value));
         printf("  INT SIZE: %ld\n", (long int) sizeof(IntValue));
         */
-        printf("  REFCNT: %d\n", v->refcnt);
+        printf("  REFCNT: %d\n", v->refcnt());
         switch (v->value_type) {
         case VALUE_TYPE_SYMBOL: {
             ID id = static_cast<const SymbolValue*>(v)->id();

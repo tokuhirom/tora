@@ -86,17 +86,21 @@ typedef std::string BytesImpl;
  * The value class
  */
 class Value {
+protected:
+  int refcnt_;
 public:
-    int refcnt;
+    int refcnt() const {
+      return refcnt_;
+    }
     virtual void release() {
-        --refcnt;
-        if (refcnt == 0) {
+        --refcnt_;
+        if (refcnt_ == 0) {
             delete this;
         }
     }
     void retain() {
-        assert(refcnt >= 0);
-        ++refcnt;
+        assert(refcnt_ >= 0);
+        ++refcnt_;
     }
 protected:
 
@@ -107,7 +111,7 @@ protected:
     }
     Value(const Value&) = delete;
 public:
-    Value(value_type_t t) : refcnt(1), value_type(t) { }
+    Value(value_type_t t) : refcnt_(1), value_type(t) { }
     union {
         int int_value_;
         double double_value_;

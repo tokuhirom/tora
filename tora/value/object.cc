@@ -25,12 +25,12 @@ const char *ObjectValue::type_str() const {
 }
 
 void ObjectValue::release() {
-    --refcnt;
-    if (refcnt == 0) {
+    --refcnt_;
+    if (refcnt_ == 0) {
         if (!VAL().destroyed_) {
             VAL().destroyed_ = true;
             this->call_destroy();
-            assert(this->refcnt == 0);
+            assert(this->refcnt_ == -1);
             delete this;
         }
     }
@@ -38,7 +38,7 @@ void ObjectValue::release() {
 
 void ObjectValue::dump(int indent) {
     print_indent(indent);
-    printf("[dump] Object: %s(refcnt: %d)\n", this->type_str(), this->refcnt);
+    printf("[dump] Object: %s(refcnt: %d)\n", this->type_str(), this->refcnt());
 }
 
 SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value>index, SharedPtr<Value>v) {

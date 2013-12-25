@@ -21,7 +21,7 @@ int main() {
             lineno,
             params
         ));
-        is(code->refcnt, 1);
+        is(code->refcnt(), 1);
         SharedPtr<ValueOP> op(new ValueOP(OP_PUSH_VALUE, code.get()));
         is(op->refcnt, 1);
     }

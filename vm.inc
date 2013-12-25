@@ -847,7 +847,7 @@ OP_FOR_ITER {
         RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
         if (riter->counter <= get_int_value(riter->parent->right())) {
             const SharedPtr<Value> & cur = fframe->current_value;
-            if (cur.get() && cur->refcnt == 2) {
+            if (cur.get() && cur->refcnt() == 2) {
                 // value is not copied.
                 assert(cur->value_type == VALUE_TYPE_INT);
                 set_int_value(cur.get(), riter->counter);
