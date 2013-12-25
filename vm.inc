@@ -657,15 +657,15 @@ OP_UNARY_NEGATIVE {
 }
 
 OP_MAKE_HASH {
-    SharedPtr<HashValue> h = new HashValue();
-    int size = get_int_operand();
-    for (int i=0; i<size; i+=2) {
-        std::string k = stack.back()->to_s();
-        stack.pop_back();
-        SharedPtr<Value> v = stack.back(); stack.pop_back();
-        h->set(k, v);
-    }
-    stack.push_back(h);
+  MortalHashValue h;
+  int size = get_int_operand();
+  for (int i=0; i<size; i+=2) {
+    std::string k = stack.back()->to_s();
+    stack.pop_back();
+    SharedPtr<Value> v = stack.back(); stack.pop_back();
+    hash_set_item(h.get(), k, v.get());
+  }
+  stack.push_back(h.get());
 }
 
 OP_MAKE_ARRAY {
@@ -797,8 +797,8 @@ OP_ENTER_FOREACH {
         SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a);
         iiter = iter;
     } else if (a->value_type == VALUE_TYPE_HASH) {
-        SharedPtr<HashValue::iterator> iter = new HashValue::iterator(a->upcast<HashValue>());
-        iiter = iter;
+      MortalHashIteratorValue iter(a.get());
+      iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_OBJECT) {
         ObjectValue * o = a->upcast<ObjectValue>();
         auto iter = o->class_value()->find_method(this->symbol_table->get_id("__iter__"));
@@ -866,14 +866,15 @@ OP_FOR_ITER {
         break;
     }
     case VALUE_TYPE_HASH_ITERATOR: {
-        SharedPtr<HashValue::iterator> riter = iter->upcast<HashValue::iterator>();
-        if (!riter->finished()) {
-            SharedPtr<Value> key = riter->getkey();
-            SharedPtr<Value> val = riter->getval();
-            riter->increment();
+        if (!hash_iter_finished(iter.get())) {
+            std::string key = hash_iter_getkey(iter.get());
+            SharedPtr<Value> val = hash_iter_getval(iter.get());
+            hash_iter_increment(iter.get());
+
             SharedPtr<TupleValue> t = new TupleValue();
+            MortalStrValue key_v(key);
             t->push_back(val);
-            t->push_back(key);
+            t->push_back(key_v.get());
             stack.push_back(t);
         } else {
             stack.push_back(new StopIterationExceptionValue());

@@ -126,7 +126,8 @@ void VM::init_globals(const std::vector<std::string> & args) {
     this->global_vars->push_back(libpath);
 
     // $REQUIRED : Hash
-    this->global_vars->push_back(new HashValue());
+    MortalHashValue required;
+    this->global_vars->push_back(required.get());
 
     // $STDIN : File
     this->global_vars->push_back(new FileValue(stdin));
@@ -264,7 +265,7 @@ void VM::use(tora::Value * package_v, bool need_copy) {
 void VM::require_package(const std::string &package) {
     VM *vm = this;
     SharedPtr<ArrayValue> libpath = vm->global_vars->at(2)->upcast<ArrayValue>();
-    SharedPtr<HashValue> required = vm->global_vars->at(3)->upcast<HashValue>();
+    SharedPtr<Value> &required = vm->global_vars->at(3);
     std::string s = package;
     {
         auto iter = s.find("::");
@@ -276,8 +277,8 @@ void VM::require_package(const std::string &package) {
     }
 
     // inc check
-    if (required->has_key(s)) {
-        if (required->get(s)->value_type == VALUE_TYPE_UNDEF) {
+    if (hash_has_key(required.get(), s)) {
+        if (hash_get_item(required.get(), s)->value_type == VALUE_TYPE_UNDEF) {
             throw new_str_value("Compilation failed in require");
         } else {
             return;
@@ -305,14 +306,13 @@ void VM::require_package(const std::string &package) {
                 (void)vm->eval(&ifs, realfilename);
 
                 MortalStrValue realfilename_sv(realfilename);
-                required->set(s, realfilename_sv.get());
+                hash_set_item(required.get(), s, realfilename_sv.get());
 
                 vm->file_scope_ = orig_file_scope;
                 return;
             } else {
-              MortalStrValue ss(s);
               MortalUndefValue undef;
-              required->set_item(ss, undef);
+              hash_set_item(required.get(), s, undef.get());
               throw new ExceptionValue(realfilename + " : " + get_strerror(get_errno()));
             }
         }
@@ -458,8 +458,11 @@ SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value>& container, con
     case VALUE_TYPE_OBJECT:
         return container->upcast<ObjectValue>()->set_item(index, rvalue);
     case VALUE_TYPE_HASH:
-        container->upcast<HashValue>()->set_item(index, rvalue);
+      {
+        std::string key = index->to_s();
+        hash_set_item(container.get(), key, rvalue.get());
         return new_undef_value();
+      }
     case VALUE_TYPE_ARRAY:
         container->upcast<ArrayValue>()->set_item(index, rvalue);
         return new_undef_value();

@@ -3,6 +3,7 @@
 
 #include "../value.h"
 #include "../callback.h"
+#include <map>
 
 namespace tora {
 

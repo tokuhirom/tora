@@ -21,12 +21,15 @@ using namespace tora;
  * Return keys from $hash.
  */
 static SharedPtr<Value> Hash_keys(VM * vm, Value* self) {
-    assert(self->value_type == VALUE_TYPE_HASH);
-    SharedPtr<ArrayValue> av = new ArrayValue();
-    for (auto iter=self->upcast<HashValue>()->begin(); iter!=self->upcast<HashValue>()->end(); ++iter) {
-        av->push_back(new_str_value(iter->first));
-    }
-    return av;
+  assert(self->value_type == VALUE_TYPE_HASH);
+  SharedPtr<ArrayValue> av = new ArrayValue();
+  MortalHashIteratorValue iter(self);
+  while (!hash_iter_finished(iter.get())) {
+    MortalStrValue s(hash_iter_getkey(iter.get()));
+    av->push_back(s.get());
+    hash_iter_increment(iter.get());
+  }
+  return av;
 }
 
 /**
@@ -37,8 +40,10 @@ static SharedPtr<Value> Hash_keys(VM * vm, Value* self) {
 static SharedPtr<Value> Hash_values(VM * vm, Value* self) {
     assert(self->value_type == VALUE_TYPE_HASH);
     SharedPtr<ArrayValue> av = new ArrayValue();
-    for (auto iter=self->upcast<HashValue>()->begin(); iter!=self->upcast<HashValue>()->end(); ++iter) {
-        av->push_back(iter->second);
+    MortalHashIteratorValue iter(self);
+    while (!hash_iter_finished(iter.get())) {
+        av->push_back(hash_iter_getval(iter.get()));
+        hash_iter_increment(iter.get());
     }
     return av;
 }
@@ -50,7 +55,7 @@ static SharedPtr<Value> Hash_values(VM * vm, Value* self) {
  */
 static SharedPtr<Value> Hash_delete(VM * vm, Value* self, Value *key) {
     assert(self->value_type == VALUE_TYPE_HASH);
-    self->upcast<HashValue>()->delete_key(key->to_s());
+    hash_delete_key(self, key->to_s());
     return new_undef_value();
 }
 
@@ -61,7 +66,7 @@ static SharedPtr<Value> Hash_delete(VM * vm, Value* self, Value *key) {
  */
 static SharedPtr<Value> Hash_exists(VM * vm, Value* self, Value *key) {
     assert(self->value_type == VALUE_TYPE_HASH);
-    bool b = self->upcast<HashValue>()->has_key(key->to_s());
+    bool b = hash_has_key(self, key->to_s());
     return vm->to_bool(b);
 }
 

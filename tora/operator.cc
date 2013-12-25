@@ -202,7 +202,10 @@ Value* tora::op_unary_negative(const SharedPtr<Value> & v) {
 SharedPtr<Value> tora::op_get_item(const SharedPtr<Value>& container, const SharedPtr<Value> & index) {
     switch (container->value_type) {
     case VALUE_TYPE_HASH:
-        return container->upcast<HashValue>()->get_item(index);
+      {
+        std::string index_s = index->to_s();
+        return hash_get_item(container.get(), index_s);
+      }
     case VALUE_TYPE_ARRAY:
         return container->upcast<ArrayValue>()->get_item(index);
     case VALUE_TYPE_OBJECT:

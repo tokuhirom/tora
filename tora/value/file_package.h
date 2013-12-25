@@ -2,6 +2,7 @@
 #define TORA_VALUE_FILE_PACKAGE_H_
 
 #include "../value.h"
+#include <map>
 
 namespace tora {
 

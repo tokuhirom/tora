@@ -27,10 +27,10 @@ int main() {
     }
 
     {
-        SharedPtr<HashValue> hv = new HashValue();
-        hv->set("HOGE", new IntValue(5963));
-        hv->set("IYAN", new IntValue(4649));
-        is(ins.inspect(hv), std::string("{\"HOGE\" => 5963,\"IYAN\" => 4649}"));
+      MortalHashValue hv;
+      hash_set_item(hv.get(), "HOGE", new IntValue(5963));
+      hash_set_item(hv.get(), "IYAN", new IntValue(4649));
+      is(ins.inspect(hv.get()), std::string("{\"HOGE\" => 5963,\"IYAN\" => 4649}"));
     }
 
     {

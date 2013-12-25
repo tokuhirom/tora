@@ -4,7 +4,6 @@
 #include <sstream>
 #include <cstdio>
 #include <cassert>
-#include <map>
 #include <memory>
 #include <deque>
 
@@ -68,7 +67,6 @@ protected:
 };
 
 typedef std::shared_ptr<std::deque<SharedPtr<Value>>> ArrayImpl;
-typedef std::map<std::string, SharedPtr<Value> > HashImpl;
 typedef std::string StringImpl;
 typedef std::string BytesImpl;
 
@@ -110,7 +108,6 @@ public:
         std::string* str_value_;
 
         ArrayImpl* array_value_;
-        HashImpl*hash_value_;
         Value * value_value_;
         FILE *file_value_;
         ObjectImpl* object_value_;
@@ -220,7 +217,7 @@ static double get_double_value(const SharedPtr<Value> v)
   return get_double_value(*v);
 }
 
-static void* get_ptr_value(Value* v)
+static void* get_ptr_value(const Value* v)
 {
   return v->ptr_value_;
 }

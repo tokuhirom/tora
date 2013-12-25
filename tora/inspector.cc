@@ -87,17 +87,18 @@ std::string Inspector::inspect(Value* v) const {
     }
     case VALUE_TYPE_HASH: {
         std::string ret("{");
-        SharedPtr<HashValue> hv = v->upcast<HashValue>();
+        MortalHashIteratorValue iter(v);
         bool first = true;
-        for (auto iter = hv->begin(); iter!=hv->end(); ++iter) {
+        while (!hash_iter_finished(iter.get())) {
             if (!first) {
                 ret += ',';
             }
             ret += "\"";
-            ret += iter->first;
+            ret += hash_iter_getkey(iter.get());
             ret += "\" => ";
-            ret += this->inspect(iter->second);
+            ret += this->inspect(hash_iter_getval(iter.get()));
             first = false;
+            hash_iter_increment(iter.get());
         }
         ret += "}";
         return ret;
