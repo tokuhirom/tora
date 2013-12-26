@@ -2,7 +2,6 @@
 #define TORA_VALUE_OBJECT_T_
 
 #include "../value.h"
-#include "class.h"
 
 namespace tora {
 
@@ -13,10 +12,10 @@ class ObjectImpl {
 
  protected:
   VM* vm_;
-  SharedPtr<ClassValue> klass_;
+  SharedPtr<Value> klass_;
   bool destroyed_;
   SharedPtr<Value> data_;
-  ObjectImpl(VM* vm, const SharedPtr<ClassValue>& klass,
+  ObjectImpl(VM* vm, const SharedPtr<Value>& klass,
              const SharedPtr<Value>& d)
       : vm_(vm), klass_(klass), destroyed_(false), data_(d) {}
 };
@@ -27,7 +26,7 @@ class ObjectValue : public Value {
   ObjectImpl& VAL() { return *object_value_; }
 
  public:
-  ObjectValue(VM* v, const SharedPtr<ClassValue>& klass,
+  ObjectValue(VM* v, const SharedPtr<Value>& klass,
               const SharedPtr<Value>& data);
   ObjectValue(VM* v, ID klass_id, const SharedPtr<Value>& data);
   ~ObjectValue();
@@ -37,7 +36,7 @@ class ObjectValue : public Value {
   void call_destroy();
   VM* vm() const { return VAL().vm_; }
 
-  SharedPtr<ClassValue> class_value() const { return VAL().klass_; }
+  SharedPtr<Value> class_value() const { return VAL().klass_; }
 
   void dump(int indent);
   const char* type_str() const;

@@ -7,6 +7,7 @@
 #include "../value/file_package.h"
 #include "../peek.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -17,6 +18,6 @@ using namespace tora;
  */
 
 void tora::Init_FilePackage(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILEPACKAGE_CLASS);
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_FILEPACKAGE_CLASS);
+  vm->add_builtin_class(builder.value());
 }

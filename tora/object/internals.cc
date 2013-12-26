@@ -3,6 +3,7 @@
 #include "../peek.h"
 #include "../symbols.gen.h"
 #include "../value/class.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -55,11 +56,11 @@ static SharedPtr<Value> dump_dump_symbol_table(VM *vm, Value *self) {
 }
 
 void tora::Init_Internals(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_INTERNALS_CLASS);
-  klass->add_method("stack_size", new CallbackFunction(stack_size));
-  klass->add_method("dump_stack", new CallbackFunction(dump_stack));
-  klass->add_method("dump", new CallbackFunction(dump_dump));
-  klass->add_method("dump_symbol_table",
+  ClassBuilder builder(vm, SYMBOL_INTERNALS_CLASS);
+  builder.add_method("stack_size", new CallbackFunction(stack_size));
+  builder.add_method("dump_stack", new CallbackFunction(dump_stack));
+  builder.add_method("dump", new CallbackFunction(dump_dump));
+  builder.add_method("dump_symbol_table",
                     new CallbackFunction(dump_dump_symbol_table));
-  vm->add_builtin_class(klass);
+  vm->add_builtin_class(builder.value());
 }

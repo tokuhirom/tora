@@ -327,24 +327,24 @@ void Init_Socket(VM* vm) {
 #endif
 
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "Socket");
-        klass->add_method("socket", new CallbackFunction(sock_socket));
-        klass->add_method("sockaddr_in", new CallbackFunction(sock_sockaddr_in));
-        klass->add_method("inet_aton", new CallbackFunction(sock_inet_aton));
+        ClassBuilder builder(vm, "Socket");
+        builder.add_method("socket", new CallbackFunction(sock_socket));
+        builder.add_method("sockaddr_in", new CallbackFunction(sock_sockaddr_in));
+        builder.add_method("inet_aton", new CallbackFunction(sock_inet_aton));
         vm->add_class(klass);
     }
 
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "Socket::Socket");
-        klass->add_method("connect", new CallbackFunction(sock_sock_connect));
-        klass->add_method("write", new CallbackFunction(sock_write));
-        klass->add_method("read", new CallbackFunction(sock_read));
-        klass->add_method("DESTROY", new CallbackFunction(sock_sock_DESTROY));
-        klass->add_method("bind", new CallbackFunction(sock_sock_bind));
-        klass->add_method("listen", new CallbackFunction(sock_sock_listen));
-        klass->add_method("close", new CallbackFunction(sock_sock_close));
-        klass->add_method("accept", new CallbackFunction(sock_sock_accept));
-        klass->add_method("setsockopt", new CallbackFunction(sock_sock_setsockopt));
+        ClassBuilder builder(vm, "Socket::Socket");
+        builder.add_method("connect", new CallbackFunction(sock_sock_connect));
+        builder.add_method("write", new CallbackFunction(sock_write));
+        builder.add_method("read", new CallbackFunction(sock_read));
+        builder.add_method("DESTROY", new CallbackFunction(sock_sock_DESTROY));
+        builder.add_method("bind", new CallbackFunction(sock_sock_bind));
+        builder.add_method("listen", new CallbackFunction(sock_sock_listen));
+        builder.add_method("close", new CallbackFunction(sock_sock_close));
+        builder.add_method("accept", new CallbackFunction(sock_sock_accept));
+        builder.add_method("setsockopt", new CallbackFunction(sock_sock_setsockopt));
         vm->add_class(klass);
     }
 }

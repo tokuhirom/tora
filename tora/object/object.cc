@@ -8,6 +8,7 @@
 #include "../vm.h"
 #include "../peek.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -41,7 +42,7 @@ static SharedPtr<Value> object_meta(VM *vm, Value *self) {
   } else if (self->value_type == VALUE_TYPE_OBJECT) {
     return new ObjectValue(vm, n, self->upcast<ObjectValue>()->class_value());
   } else if (self->value_type == VALUE_TYPE_CLASS) {
-    return new ObjectValue(vm, n, self->upcast<ClassValue>());
+    return new ObjectValue(vm, n, self);
   } else {
     return new ObjectValue(vm, n,
                            vm->get_builtin_class(self->object_package_id()));
@@ -70,17 +71,17 @@ static SharedPtr<Value> object_isa(VM *vm, Value *self, Value *target_v) {
  */
 static SharedPtr<Value> mc_bless(VM *vm, Value *self, Value *data) {
   if (self->value_type == VALUE_TYPE_CLASS) {
-    return new ObjectValue(vm, self->upcast<ClassValue>(), data);
+    return new ObjectValue(vm, self, data);
   } else {
     throw new ExceptionValue("You cannot bless non-class value.");
   }
 }
 
 void tora::Init_Object(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_OBJECT_CLASS);
-  klass->add_method("tora", new CallbackFunction(object_tora));
-  klass->add_method("meta", new CallbackFunction(object_meta));
-  klass->add_method("isa", new CallbackFunction(object_isa));
-  klass->add_method("bless", new CallbackFunction(mc_bless));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_OBJECT_CLASS);
+  builder.add_method("tora", new CallbackFunction(object_tora));
+  builder.add_method("meta", new CallbackFunction(object_meta));
+  builder.add_method("isa", new CallbackFunction(object_isa));
+  builder.add_method("bless", new CallbackFunction(mc_bless));
+  vm->add_builtin_class(builder.value());
 }

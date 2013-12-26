@@ -7,6 +7,7 @@
 #include "../value/file.h"
 #include "../symbols.gen.h"
 #include "../value/class.h"
+#include "../class_builder.h"
 
 #ifdef _WIN32
 #include <winerror.h>
@@ -210,20 +211,20 @@ static SharedPtr<Value> file_sync(VM* vm, Value* self) {
 void tora::Init_File(VM* vm) {
   // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
   // tell(), truncate(), write($str), fdopen
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_FILE_CLASS);
-  klass->add_method("open", new CallbackFunction(file_open_method));
-  klass->add_method("slurp", new CallbackFunction(file_slurp));
-  klass->add_method("write", new CallbackFunction(file_write));
-  klass->add_method("print", new CallbackFunction(file_write));
-  klass->add_method("close", new CallbackFunction(file_close));
-  klass->add_method("flush", new CallbackFunction(file_flush));
-  klass->add_method("fileno", new CallbackFunction(file_fileno));
-  klass->add_method("getc", new CallbackFunction(file_getc));
-  klass->add_method("seek", new CallbackFunction(file_seek));
-  klass->add_method("tell", new CallbackFunction(file_tell));
-  klass->add_method("sync", new CallbackFunction(file_sync));
-  klass->add_constant("SEEK_SET", SEEK_SET);
-  klass->add_constant("SEEK_CUR", SEEK_CUR);
-  klass->add_constant("SEEK_END", SEEK_END);
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_FILE_CLASS);
+  builder.add_method("open", new CallbackFunction(file_open_method));
+  builder.add_method("slurp", new CallbackFunction(file_slurp));
+  builder.add_method("write", new CallbackFunction(file_write));
+  builder.add_method("print", new CallbackFunction(file_write));
+  builder.add_method("close", new CallbackFunction(file_close));
+  builder.add_method("flush", new CallbackFunction(file_flush));
+  builder.add_method("fileno", new CallbackFunction(file_fileno));
+  builder.add_method("getc", new CallbackFunction(file_getc));
+  builder.add_method("seek", new CallbackFunction(file_seek));
+  builder.add_method("tell", new CallbackFunction(file_tell));
+  builder.add_method("sync", new CallbackFunction(file_sync));
+  builder.add_constant("SEEK_SET", SEEK_SET);
+  builder.add_constant("SEEK_CUR", SEEK_CUR);
+  builder.add_constant("SEEK_END", SEEK_END);
+  vm->add_builtin_class(builder.value());
 }

@@ -6,6 +6,7 @@
 #include "../frame.h"
 #include "../callback.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -86,12 +87,12 @@ static SharedPtr<Value> code_call(VM* vm,
 }
 
 void tora::Init_Code(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_CODE_CLASS);
-  klass->add_method("package", new CallbackFunction(code_package));
-  klass->add_method("name", new CallbackFunction(code_name));
-  klass->add_method("line", new CallbackFunction(code_line));
-  klass->add_method("filename", new CallbackFunction(code_filename));
-  klass->add_method("is_closure", new CallbackFunction(code_is_closure));
-  klass->add_method("()", new CallbackFunction(code_call));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_CODE_CLASS);
+  builder.add_method("package", new CallbackFunction(code_package));
+  builder.add_method("name", new CallbackFunction(code_name));
+  builder.add_method("line", new CallbackFunction(code_line));
+  builder.add_method("filename", new CallbackFunction(code_filename));
+  builder.add_method("is_closure", new CallbackFunction(code_is_closure));
+  builder.add_method("()", new CallbackFunction(code_call));
+  vm->add_builtin_class(builder.value());
 }

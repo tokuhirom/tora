@@ -49,8 +49,7 @@ void tora::peek(VM *vm, Value *v) {
         break;
       }
       case VALUE_TYPE_CLASS: {
-        const ClassValue *cv = static_cast<const ClassValue *>(v);
-        printf("  NAME: %s\n", cv->name().c_str());
+        printf("  NAME: %s\n", vm->symbol_table->id2name(class_name_id(v)).c_str());
         break;
       }
       case VALUE_TYPE_UNDEF:

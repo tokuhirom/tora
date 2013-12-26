@@ -775,7 +775,7 @@ void VM::call_method(const SharedPtr<Value> &object,
     // this->get_class(object->upcast<SymbolValue>()->id()), function_id, seen);
   } else if (object->value_type == VALUE_TYPE_CLASS) {
     // class method
-    this->call_method(object, object->upcast<ClassValue>(), function_id, seen);
+    this->call_method(object, object.get(), function_id, seen);
   } else if (object->value_type == VALUE_TYPE_FILE_PACKAGE) {
     Value *v = file_package_find(object.get(), function_id);
     if (v) {
@@ -803,14 +803,13 @@ void VM::call_method(const SharedPtr<Value> &object,
 }
 
 void VM::call_method(const SharedPtr<Value> &object,
-                     const SharedPtr<ClassValue> &klass, ID function_id,
+                     const SharedPtr<Value> &klass, ID function_id,
                      std::set<ID> &seen) {
-  seen.insert(klass->name_id());
+  seen.insert(class_name_id(klass.get()));
   // std::cout << klass->name() << " " << id2name(function_id) << std::endl;
 
-  auto iter = klass->find_method(function_id);
-  if (iter != klass->end()) {
-    SharedPtr<Value> code_v = iter->second;
+  Value* code_v = class_get_method(klass.get(), function_id);
+  if (code_v) {
     assert(code_v->value_type == VALUE_TYPE_CODE);
     SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
     int argcnt = get_int_operand();
@@ -843,7 +842,7 @@ void VM::call_method(const SharedPtr<Value> &object,
       if (code->code_params() && argcnt != code->code_params()->size()) {
         throw new ArgumentExceptionValue(
             "%s::%s needs %d arguments but you passed %d arguments",
-            symbol_table->id2name(klass->name_id()).c_str(),
+            symbol_table->id2name(class_name_id(klass.get())).c_str(),
             symbol_table->id2name(function_id).c_str(),
             code->code_params()->size());
       }
@@ -853,7 +852,7 @@ void VM::call_method(const SharedPtr<Value> &object,
     }
   } else {
     // find in super class.
-    SharedPtr<ClassValue> super = klass->superclass();
+    SharedPtr<Value> super = class_superclass(klass.get()).get();
     if (super.get()) {
       this->call_method(object, super, function_id, seen);
       // symbol class
@@ -863,7 +862,7 @@ void VM::call_method(const SharedPtr<Value> &object,
                         function_id, seen);
       return;
       // object class(UNIVERSAL)
-    } else if (klass->name_id() != SYMBOL_OBJECT_CLASS &&
+    } else if (class_name_id(klass.get()) != SYMBOL_OBJECT_CLASS &&
                seen.find(SYMBOL_OBJECT_CLASS) == seen.end()) {
       this->call_method(object, this->get_builtin_class(SYMBOL_OBJECT_CLASS),
                         function_id, seen);
@@ -897,13 +896,13 @@ void VM::add_function(const SharedPtr<CodeValue> &code) {
       file_scope_body_t::value_type(code->func_name_id(), code.get()));
 }
 
-void VM::add_class(const SharedPtr<ClassValue> &klass) {
+void VM::add_class(const SharedPtr<Value> &klass) {
   assert(klass->value_type == VALUE_TYPE_CLASS);
   this->file_scope_->insert(file_scope_body_t::value_type(
-      klass->upcast<ClassValue>()->name_id(), klass.get()));
+      class_name_id(klass.get()), klass.get()));
 }
 
-const SharedPtr<ClassValue> &VM::get_builtin_class(ID name_id) const {
+const SharedPtr<Value> &VM::get_builtin_class(ID name_id) const {
   auto iter = builtin_classes_.find(name_id);
   if (iter != builtin_classes_.end()) {
     return iter->second;
@@ -916,21 +915,21 @@ const SharedPtr<ClassValue> &VM::get_builtin_class(ID name_id) const {
 
 void VM::klass(const SharedPtr<Value> &k) {
   assert(k->value_type == VALUE_TYPE_CLASS);
-  klass_.reset(k->upcast<ClassValue>());
+  klass_.reset(k.get());
 }
 
-void VM::add_builtin_class(const SharedPtr<ClassValue> &klass) {
-  this->builtin_classes_.insert(std::make_pair(klass->name_id(), klass));
+void VM::add_builtin_class(const SharedPtr<Value> &klass) {
+  this->builtin_classes_.insert(std::make_pair(class_name_id(klass.get()), klass));
 }
 
-SharedPtr<ClassValue> VM::get_class(ID name_id) const {
+SharedPtr<Value> VM::get_class(ID name_id) const {
   {
     auto iter = this->file_scope_->find(name_id);
     if (iter != this->file_scope_->end()) {
       if (iter->second->value_type != VALUE_TYPE_CLASS) {
         throw new ExceptionValue("%s is not a class", id2name(name_id).c_str());
       }
-      return iter->second->upcast<ClassValue>();
+      return iter->second.get();
     }
   }
   {

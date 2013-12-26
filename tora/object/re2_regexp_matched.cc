@@ -7,6 +7,7 @@
 #include "../value/object.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -111,14 +112,13 @@ SharedPtr<Value> tora::RE2_Regexp_Matched_new(
 }
 
 void tora::Init_RE2_Regexp_Matched(VM* vm) {
-  SharedPtr<ClassValue> klass =
-      new ClassValue(vm, SYMBOL_RE2_REGEXP_MATCHED_CLASS);
-  klass->add_method("regexp", new CallbackFunction(RE2_Regexp_Matched_regexp));
-  klass->add_method("to_array",
+  ClassBuilder builder(vm, SYMBOL_RE2_REGEXP_MATCHED_CLASS);
+  builder.add_method("regexp", new CallbackFunction(RE2_Regexp_Matched_regexp));
+  builder.add_method("to_array",
                     new CallbackFunction(RE2_Regexp_Matched_to_array));
-  klass->add_method(SYMBOL___GET_ITEM__,
+  builder.add_method("__getitem__",
                     new CallbackFunction(RE2_Regexp_Matched_getitem));
-  klass->add_method("DESTROY",
+  builder.add_method("DESTROY",
                     new CallbackFunction(RE2_Regexp_Matched_DESTROY));
-  vm->add_builtin_class(klass);
+  vm->add_builtin_class(builder.value());
 }

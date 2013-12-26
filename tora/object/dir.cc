@@ -10,6 +10,7 @@
 #include "../value/class.h"
 #include "../value.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -187,20 +188,20 @@ static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
 
 void tora::Init_Dir(VM* vm) {
   {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DIR_CLASS);
-    klass->add_method("new", new CallbackFunction(dir_new));
-    klass->add_method("read", new CallbackFunction(dir_read));
-    klass->add_method("close", new CallbackFunction(dir_close));
-    klass->add_method("mkdir", new CallbackFunction(dir_mkdir));
-    klass->add_method("rmdir", new CallbackFunction(dir_rmdir));
-    klass->add_method("DESTROY", new CallbackFunction(dir_DESTROY));
-    klass->add_method("__iter__", new CallbackFunction(dir___iter__));
-    vm->add_builtin_class(klass);
+    ClassBuilder builder(vm, SYMBOL_DIR_CLASS);
+    builder.add_method("new", new CallbackFunction(dir_new));
+    builder.add_method("read", new CallbackFunction(dir_read));
+    builder.add_method("close", new CallbackFunction(dir_close));
+    builder.add_method("mkdir", new CallbackFunction(dir_mkdir));
+    builder.add_method("rmdir", new CallbackFunction(dir_rmdir));
+    builder.add_method("DESTROY", new CallbackFunction(dir_DESTROY));
+    builder.add_method("__iter__", new CallbackFunction(dir___iter__));
+    vm->add_builtin_class(builder.value());
   }
 
   {
-    SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DIR_ITERATOR_CLASS);
-    klass->add_method("__next__", new CallbackFunction(dir_Iterator___next__));
-    vm->add_builtin_class(klass);
+    ClassBuilder builder(vm, SYMBOL_DIR_ITERATOR_CLASS);
+    builder.add_method("__next__", new CallbackFunction(dir_Iterator___next__));
+    vm->add_builtin_class(builder.value());
   }
 }

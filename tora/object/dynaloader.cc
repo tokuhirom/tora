@@ -4,6 +4,7 @@
 #include "../vm.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -32,7 +33,7 @@ static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v,
 }
 
 void tora::Init_DynaLoader(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_DYNALOADER_CLASS);
-  klass->add_method("load", new CallbackFunction(dynaloader_load));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_DYNALOADER_CLASS);
+  builder.add_method("load", new CallbackFunction(dynaloader_load));
+  vm->add_builtin_class(builder.value());
 }

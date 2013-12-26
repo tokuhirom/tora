@@ -1,4 +1,5 @@
 #include "../object.h"
+#include "../class_builder.h"
 
 using namespace tora;
 

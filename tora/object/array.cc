@@ -7,6 +7,7 @@
 #include "../peek.h"
 #include "../frame.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -199,30 +200,20 @@ static SharedPtr<Value> av_reserve(VM * vm, Value* self, Value * v) {
 */
 
 void tora::Init_Array(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ARRAY_CLASS);
-  klass->add_method(vm->symbol_table->get_id("size"),
-                    new CallbackFunction(av_size));
-  klass->add_method(vm->symbol_table->get_id("sort"),
-                    new CallbackFunction(av_sort));
-  klass->add_method(vm->symbol_table->get_id("push"),
-                    new CallbackFunction(av_push));
-  klass->add_method(vm->symbol_table->get_id("pop"),
-                    new CallbackFunction(av_pop));
-  klass->add_method(vm->symbol_table->get_id("unshift"),
-                    new CallbackFunction(av_unshift));
-  klass->add_method(vm->symbol_table->get_id("shift"),
-                    new CallbackFunction(av_shift));
-  klass->add_method(vm->symbol_table->get_id("reverse"),
-                    new CallbackFunction(av_reverse));
-  klass->add_method(vm->symbol_table->get_id("join"),
-                    new CallbackFunction(av_join));
-  klass->add_method(vm->symbol_table->get_id("map"),
-                    new CallbackFunction(av_map));
-  klass->add_method(vm->symbol_table->get_id("grep"),
-                    new CallbackFunction(av_grep));
-  // klass->add_method(vm->symbol_table->get_id("capacity"), new
+  ClassBuilder builder(vm, SYMBOL_ARRAY_CLASS);
+  builder.add_method("size", new CallbackFunction(av_size));
+  builder.add_method("sort", new CallbackFunction(av_sort));
+  builder.add_method("push", new CallbackFunction(av_push));
+  builder.add_method("pop", new CallbackFunction(av_pop));
+  builder.add_method("unshift", new CallbackFunction(av_unshift));
+  builder.add_method("shift", new CallbackFunction(av_shift));
+  builder.add_method("reverse", new CallbackFunction(av_reverse));
+  builder.add_method("join", new CallbackFunction(av_join));
+  builder.add_method("map", new CallbackFunction(av_map));
+  builder.add_method("grep", new CallbackFunction(av_grep));
+  // builder.add_method("capacity"), new
   // CallbackFunction(av_capacity));
-  // klass->add_method(vm->symbol_table->get_id("reserve"), new
+  // builder.add_method("reserve"), new
   // CallbackFunction(av_reserve));
-  vm->add_builtin_class(klass);
+  vm->add_builtin_class(builder.value());
 }

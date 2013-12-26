@@ -3,67 +3,32 @@
 
 #include "../value.h"
 #include "../callback.h"
-#include <map>
 
 namespace tora {
 
-class ClassValue;
+  class VM;
 
-class ClassImpl {
-  friend class ClassValue;
+  class MortalClassValue : public MortalValue {
+    static Value* new_value(VM* vm, ID name_id);
+  public:
+    MortalClassValue(VM* vm, ID name_id)
+      : MortalValue(new_value(vm, name_id)) {
+    }
+  };
 
- protected:
-  VM *vm_;
-  ID name_id_;
-  SharedPtr<ClassValue> superclass_;
-  std::map<ID, SharedPtr<Value>> methods_;
-  ClassImpl(VM *vm, ID name_id) : vm_(vm), name_id_(name_id) {}
-};
+  void class_free(Value* self);
+  ID class_name_id(Value* self);
+  std::string class_name(const Value* self);
+  void class_add_constant(Value* self, ID name_id, int val);
+  void class_add_method(Value* self, Value* code);
+  void class_add_method(Value* self, ID name_id, const CallbackFunction* cb);
+  bool class_has_method(Value* self, ID target_id);
+  SharedValue class_get_method_list(Value* self);
+  bool class_isa(Value* self, ID target_id);
+  Value* class_get_method(Value *self, ID id);
+  SharedValue class_superclass(Value* self);
+  void class_superclass(Value* v, Value* super);
 
-class ClassValue : public Value {
-  friend class Value;
-
- protected:
-  inline ClassImpl &VAL() { return *(this->class_value_); }
-  inline const ClassImpl &VAL() const { return *(this->class_value_); }
-
- public:
-  typedef std::map<ID, SharedPtr<Value>>::const_iterator const_iterator;
-
-  ClassValue(VM *vm, ID name_id) : Value(VALUE_TYPE_CLASS) {
-    this->class_value_ = new ClassImpl(vm, name_id);
-  }
-  ClassValue(VM *vm, const char *name);
-  ~ClassValue() { delete this->class_value_; }
-  VM *vm() const { return VAL().vm_; }
-  std::string name() const;
-  ID name_id() const { return VAL().name_id_; }
-  /**
-   * register method by code value.
-   */
-  void add_method(const SharedPtr<Value> &code);
-  /**
-   * register C++ method
-   */
-  void add_method(const char *, const CallbackFunction *);
-  /**
-   * add integer constant value
-   */
-  void add_constant(const char *, int val);
-  /**
-   * register C++ method
-   */
-  void add_method(ID, const CallbackFunction *);
-  bool has_method(ID) const;
-  SharedValue get_method_list() const;
-  bool isa(ID target_id) const;
-  const_iterator find_method(ID id) const { return VAL().methods_.find(id); }
-  const_iterator end() const { return VAL().methods_.end(); }
-  const SharedPtr<ClassValue> &superclass() const { return VAL().superclass_; }
-  void superclass(const SharedPtr<ClassValue> &super) {
-    VAL().superclass_ = super;
-  }
-};
 }
 
 #endif  // TORA_VALUE_CLASS_H_

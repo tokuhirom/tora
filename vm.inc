@@ -78,7 +78,7 @@ OP_FUNCDEF {
     assert(code->value_type == VALUE_TYPE_CODE);
     // printf("FUNCDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
     if (this->klass().get()) {
-        this->klass()->add_method( code );
+        class_add_method(this->klass().get(), code.get() );
     } else {
         this->add_function(code->upcast<CodeValue>());
     }
@@ -107,7 +107,7 @@ OP_CLOSUREDEF {
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
     if (this->klass().get()) {
-        this->klass()->add_method( code );
+        class_add_method(this->klass().get(), code.get() );
     } else {
         this->add_function(code->upcast<CodeValue>());
     }
@@ -803,9 +803,8 @@ OP_ENTER_FOREACH {
       iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_OBJECT) {
         ObjectValue * o = a->upcast<ObjectValue>();
-        auto iter = o->class_value()->find_method(this->symbol_table->get_id("__iter__"));
-        if (iter != o->class_value()->end()) {
-            CodeValue * code = iter->second->upcast<CodeValue>();
+        CodeValue* code = class_get_method(o->class_value().get(), this->symbol_table->get_id("__iter__"))->upcast<CodeValue>();
+        if (code) {
             if (code->is_native()) {
                 stack.push_back(a);
                this->call_native_func(code->callback(), 1);
@@ -886,9 +885,9 @@ OP_FOR_ITER {
     }
     case VALUE_TYPE_OBJECT: {
         ObjectValue * o = iter->upcast<ObjectValue>();
-        auto iter = o->class_value()->find_method(this->symbol_table->get_id("__next__"));
-        if (iter != o->class_value()->end()) {
-            CodeValue * code = iter->second->upcast<CodeValue>();
+        Value *code_v = class_get_method(o->class_value().get(), this->symbol_table->get_id("__next__"));
+        if (code_v) {
+            CodeValue * code = code_v->upcast<CodeValue>();
             if (code->is_native()) {
                 stack.push_back(o);
                this->call_native_func(code->callback(), 1);
@@ -973,12 +972,12 @@ OP_PACKAGE_LEAVE {
 OP_CLASS_ENTER {
     ID package_id = get_int_operand();
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    MortalValue klass(new ClassValue(this, package_id));
+    MortalClassValue klass(this, package_id);
 
     ClassFrame* cframe = new ClassFrame(this, stack.size(), klass.get());
     cframe->top = stack.size();
     this->frame_stack->push_back(cframe);
-    this->klass_.reset(klass->upcast<ClassValue>());
+    this->klass_.reset(klass.get());
 
     this->file_scope_->insert(file_scope_body_t::value_type(package_id, klass.get()));
 
@@ -1117,10 +1116,10 @@ OP_SET_PARENT {
     if (iter == this->file_scope_->end()) {
         throw new ExceptionValue("There is no class named %s.", symbol_table->id2name(get_int_operand()).c_str());
     }
-    SharedPtr<ClassValue> super = iter->second->upcast<ClassValue>();
-    if (super->name_id() == this->klass()->name_id()) {
+    SharedValue super = iter->second;
+    if (class_name_id(super.get()) == class_name_id(this->klass().get())) {
         throw new ExceptionValue("You cannot make itself as superclass.");
     }
-    this->klass()->superclass(super);
+    class_superclass(this->klass().get(), super.get());
 }
 

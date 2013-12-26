@@ -7,6 +7,7 @@
 #include "value/object.h"
 #include "value/regexp.h"
 #include "value/bytes.h"
+#include "value/class.h"
 
 using namespace tora;
 
@@ -103,7 +104,7 @@ std::string Inspector::inspect(Value* v) const {
       ret += "}";
       return ret;
     }
-    case VALUE_TYPE_CLASS: { return static_cast<ClassValue*>(v)->name(); }
+    case VALUE_TYPE_CLASS: { return class_name(v); }
     case VALUE_TYPE_OBJECT: {
       std::string ret;
       assert(vm_);

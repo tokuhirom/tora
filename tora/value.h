@@ -45,7 +45,6 @@ class Value;
 class IntValue;
 class DoubleValue;
 class ObjectImpl;
-class ClassImpl;
 class FilePackageImpl;
 class MortalValue;
 
@@ -114,7 +113,6 @@ class Value {
     Value* value_value_;
     FILE* file_value_;
     ObjectImpl* object_value_;
-    ClassImpl* class_value_;
     ExceptionImpl* exception_value_;
     FilePackageImpl* file_package_value_;
   };
@@ -142,7 +140,11 @@ class SharedValue {
   Value* v_;
 
  public:
-  SharedValue(Value* v) : v_(v) { v_->retain(); }
+  SharedValue(Value* v) : v_(v) {
+    if (v_) {
+      v_->retain();
+    }
+  }
   SharedValue() : v_(NULL) {}
   ~SharedValue();
   SharedValue(const SharedValue& sv) : v_(sv.get()) {
@@ -152,6 +154,7 @@ class SharedValue {
   }
   SharedValue(const MortalValue& sv);
   SharedValue& operator=(Value* rhs) {
+    assert(rhs);
     rhs->retain();
     v_ = rhs;
     return *this;
@@ -165,6 +168,14 @@ class SharedValue {
     return v_;
   }
   Value* get() const { return v_; }
+  void reset(Value* v) {
+    if (v_) {
+      v_->release();
+    }
+    assert(v);
+    v_ = v;
+    v_->retain();
+  }
 };
 
 static value_type_t type(const Value& v) { return v.value_type; }

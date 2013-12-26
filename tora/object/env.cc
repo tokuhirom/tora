@@ -7,6 +7,7 @@
 #include "../vm.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 #ifdef _WIN32
 static void unsetenv(const char* name) {
@@ -65,9 +66,9 @@ static SharedPtr<Value> env_get(VM* vm, Value* self, Value* k) {
 }
 
 void tora::Init_Env(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_ENV_CLASS);
-  klass->add_method("get", new CallbackFunction(env_get));
-  klass->add_method("__getitem__", new CallbackFunction(env_get));
-  klass->add_method("__setitem__", new CallbackFunction(env_set));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_ENV_CLASS);
+  builder.add_method("get", new CallbackFunction(env_get));
+  builder.add_method("__getitem__", new CallbackFunction(env_get));
+  builder.add_method("__setitem__", new CallbackFunction(env_set));
+  vm->add_builtin_class(builder.value());
 }

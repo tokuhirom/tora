@@ -407,49 +407,49 @@ extern "C" {
 TORA_EXPORT
 void Init_UV_(VM* vm) {
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV");
-        klass->add_method("run", new CallbackFunction(_uv_run));
-        klass->add_method("default_loop", new CallbackFunction(_uv_default_loop));
+        ClassBuilder builder(vm, "UV");
+        builder.add_method("run", new CallbackFunction(_uv_run));
+        builder.add_method("default_loop", new CallbackFunction(_uv_default_loop));
         vm->add_class(klass);
     }
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Loop");
-        klass->add_method("run", new CallbackFunction(_uv_loop_run));
-        klass->add_method("run_once", new CallbackFunction(_uv_loop_run_once));
-        klass->add_method("ref", new CallbackFunction(_uv_loop_ref));
-        klass->add_method("unref", new CallbackFunction(_uv_loop_unref));
+        ClassBuilder builder(vm, "UV::Loop");
+        builder.add_method("run", new CallbackFunction(_uv_loop_run));
+        builder.add_method("run_once", new CallbackFunction(_uv_loop_run_once));
+        builder.add_method("ref", new CallbackFunction(_uv_loop_ref));
+        builder.add_method("unref", new CallbackFunction(_uv_loop_unref));
         vm->add_class(klass);
     }
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Timer");
-        klass->add_method("new", new CallbackFunction(_uv_timer_new));
-        klass->add_method("start", new CallbackFunction(_uv_timer_start));
-        klass->add_method("stop", new CallbackFunction(_uv_timer_stop));
-        klass->add_method("close", new CallbackFunction(_uv_close));
-        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        ClassBuilder builder(vm, "UV::Timer");
+        builder.add_method("new", new CallbackFunction(_uv_timer_new));
+        builder.add_method("start", new CallbackFunction(_uv_timer_start));
+        builder.add_method("stop", new CallbackFunction(_uv_timer_stop));
+        builder.add_method("close", new CallbackFunction(_uv_close));
+        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
         vm->add_class(klass);
     }
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::TCP");
-        klass->add_method("new", new CallbackFunction(_uv_tcp_new));
-        klass->add_method("nodelay", new CallbackFunction(_uv_tcp_nodelay));
-        klass->add_method("connect", new CallbackFunction(_uv_tcp_connect));
-        klass->add_method("write", new CallbackFunction(_uv_write));
-        klass->add_method("read", new CallbackFunction(_uv_read));
-        klass->add_method("close", new CallbackFunction(_uv_close));
-        klass->add_method("bind", new CallbackFunction(_uv_tcp_bind));
-        klass->add_method("listen", new CallbackFunction(_uv_listen));
-        klass->add_method("accept", new CallbackFunction(_uv_accept));
-        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        ClassBuilder builder(vm, "UV::TCP");
+        builder.add_method("new", new CallbackFunction(_uv_tcp_new));
+        builder.add_method("nodelay", new CallbackFunction(_uv_tcp_nodelay));
+        builder.add_method("connect", new CallbackFunction(_uv_tcp_connect));
+        builder.add_method("write", new CallbackFunction(_uv_write));
+        builder.add_method("read", new CallbackFunction(_uv_read));
+        builder.add_method("close", new CallbackFunction(_uv_close));
+        builder.add_method("bind", new CallbackFunction(_uv_tcp_bind));
+        builder.add_method("listen", new CallbackFunction(_uv_listen));
+        builder.add_method("accept", new CallbackFunction(_uv_accept));
+        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
         vm->add_class(klass);
     }
     {
-        SharedPtr<ClassValue> klass = new ClassValue(vm, "UV::Idle");
-        klass->add_method("new", new CallbackFunction(_uv_idle_new));
-        klass->add_method("start", new CallbackFunction(_uv_idle_start));
-        klass->add_method("stop", new CallbackFunction(_uv_idle_stop));
-        klass->add_method("close", new CallbackFunction(_uv_close));
-        klass->add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        ClassBuilder builder(vm, "UV::Idle");
+        builder.add_method("new", new CallbackFunction(_uv_idle_new));
+        builder.add_method("start", new CallbackFunction(_uv_idle_start));
+        builder.add_method("stop", new CallbackFunction(_uv_idle_stop));
+        builder.add_method("close", new CallbackFunction(_uv_close));
+        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
         vm->add_class(klass);
     }
 }

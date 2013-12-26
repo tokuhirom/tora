@@ -6,6 +6,7 @@
 #include "../value/class.h"
 #include "../peek.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -19,9 +20,9 @@ using namespace tora;
  * Note. API is compatible with Moose in Perl5, preferably.
  */
 
-inline static ClassValue* SELF(Value* self) {
+inline static Value* SELF(Value* self) {
   const SharedPtr<Value>& dat = self->upcast<ObjectValue>()->data();
-  return dat->upcast<ClassValue>();
+  return dat->upcast<Value>();
 }
 
 /**
@@ -33,7 +34,7 @@ inline static ClassValue* SELF(Value* self) {
  */
 static SharedPtr<Value> mc_has_method(VM* vm, Value* self, Value* methname_v) {
   std::string methname = methname_v->to_s();
-  bool ret = SELF(self)->has_method(vm->symbol_table->get_id(methname));
+  bool ret = class_has_method(SELF(self), vm->symbol_table->get_id(methname));
   return vm->to_bool(ret);
 }
 
@@ -43,7 +44,7 @@ static SharedPtr<Value> mc_has_method(VM* vm, Value* self, Value* methname_v) {
  * Get a method list defined in package.
  */
 static SharedPtr<Value> mc_get_method_list(VM* vm, Value* self) {
-  return SELF(self)->get_method_list().get();
+  return class_get_method_list(SELF(self)).get();
 }
 
 /**
@@ -52,7 +53,8 @@ static SharedPtr<Value> mc_get_method_list(VM* vm, Value* self) {
  * Get a name of class.
  */
 static SharedPtr<Value> mc_name(VM* vm, Value* self) {
-  return new_str_value(SELF(self)->name());
+  MortalStrValue s(class_name(SELF(self)));
+  return s.get();
 }
 
 /**
@@ -62,9 +64,9 @@ static SharedPtr<Value> mc_name(VM* vm, Value* self) {
  * If the class does not have a superclass, it returns undef.
  */
 static SharedPtr<Value> mc_superclass(VM* vm, Value* self) {
-  const SharedPtr<ClassValue>& super = SELF(self)->superclass();
+  SharedValue  super = class_superclass(SELF(self));
   if (super.get()) {
-    return super;
+    return super.get();
   } else {
     return new_undef_value();
   }
@@ -76,16 +78,16 @@ static SharedPtr<Value> mc_superclass(VM* vm, Value* self) {
  * Create new instance with $data.
  */
 static SharedPtr<Value> mc_bless(VM* vm, Value* self, Value* data) {
-  return new ObjectValue(vm, self->upcast<ClassValue>(), data);
+  return new ObjectValue(vm, self, data);
 }
 
 void tora::Init_MetaClass(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_METACLASS_CLASS);
-  klass->add_method("has_method", new CallbackFunction(mc_has_method));
-  klass->add_method("get_method_list",
+  ClassBuilder builder(vm, SYMBOL_METACLASS_CLASS);
+  builder.add_method("has_method", new CallbackFunction(mc_has_method));
+  builder.add_method("get_method_list",
                     new CallbackFunction(mc_get_method_list));
-  klass->add_method("name", new CallbackFunction(mc_name));
-  klass->add_method("superclass", new CallbackFunction(mc_superclass));
-  klass->add_method("bless", new CallbackFunction(mc_bless));
-  vm->add_builtin_class(klass);
+  builder.add_method("name", new CallbackFunction(mc_name));
+  builder.add_method("superclass", new CallbackFunction(mc_superclass));
+  builder.add_method("bless", new CallbackFunction(mc_bless));
+  vm->add_builtin_class(builder.value());
 }

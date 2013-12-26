@@ -5,6 +5,7 @@
 #include "../symbols.gen.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -61,12 +62,12 @@ static SharedPtr<Value> Regexp_EXPANDED(VM* vm, Value* self) {
 }
 
 void tora::Init_Regexp(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_REGEXP_CLASS);
-  klass->add_method("flags", new CallbackFunction(Regexp_flags));
-  klass->add_method("quotemeta", new CallbackFunction(Regexp_quotemeta));
+  ClassBuilder builder(vm, SYMBOL_REGEXP_CLASS);
+  builder.add_method("flags", new CallbackFunction(Regexp_flags));
+  builder.add_method("quotemeta", new CallbackFunction(Regexp_quotemeta));
 
-  klass->add_method("MULTILINE", new CallbackFunction(Regexp_MULTILINE));
-  klass->add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
-  klass->add_method("EXPANDED", new CallbackFunction(Regexp_EXPANDED));
-  vm->add_builtin_class(klass);
+  builder.add_method("MULTILINE", new CallbackFunction(Regexp_MULTILINE));
+  builder.add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
+  builder.add_method("EXPANDED", new CallbackFunction(Regexp_EXPANDED));
+  vm->add_builtin_class(builder.value());
 }

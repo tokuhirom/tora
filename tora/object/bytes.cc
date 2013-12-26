@@ -6,6 +6,7 @@
 #include "../value.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 #include <unicode/unistr.h>
 
 using namespace tora;
@@ -88,10 +89,9 @@ static SharedPtr<Value> Bytes_decode(
 }
 
 void tora::Init_Bytes(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_BYTES_CLASS);
-  klass->add_method(vm->symbol_table->get_id("length"),
-                    new CallbackFunction(bytes_length));
-  klass->add_method("substr", new CallbackFunction(Bytes_substr));
-  klass->add_method("decode", new CallbackFunction(Bytes_decode));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_BYTES_CLASS);
+  builder.add_method("length", new CallbackFunction(bytes_length));
+  builder.add_method("substr", new CallbackFunction(Bytes_substr));
+  builder.add_method("decode", new CallbackFunction(Bytes_decode));
+  vm->add_builtin_class(builder.value());
 }

@@ -17,6 +17,7 @@
 #include "inspector.h"
 #include "printf.h"
 #include "symbols.gen.h"
+#include "callback.h"
 
 using namespace tora;
 

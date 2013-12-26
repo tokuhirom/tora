@@ -13,11 +13,24 @@ write_file('tora/vm.ops.inc.h', vm_ops_inc_h($dat));
 
 sub write_file {
     my ($fname, $body) = @_;
-    unlink $fname if -f $fname;
+    if (-f $fname) {
+        if (slurp($fname) eq $body) {
+            return; # skip.
+        } else {
+            unlink $fname;
+        }
+    }
     open my $fh, '>:raw', $fname;
     print $fh $body;
     close $fh;
     chmod 0444, $fname if $^O ne 'MSWin32'; # win32 sucks.
+}
+
+sub slurp {
+    my $fname = shift;
+    open my $fh, '<:utf8', $fname
+        or Carp::croak("Can't open '$fname' for reading: '$!'");
+    scalar(do { local $/; <$fh> })
 }
 
 sub parse {

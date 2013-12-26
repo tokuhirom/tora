@@ -6,6 +6,7 @@
 #include "../value/object.h"
 #include "../value/symbol.h"
 #include "../value/class.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -27,8 +28,7 @@ SharedPtr<Value> tora::Symbol_bless(VM *vm, Value *klass, Value *data) {
 }
 
 void tora::Init_Symbol(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_SYMBOL_CLASS);
-  klass->add_method(vm->symbol_table->get_id("bless"),
-                    new CallbackFunction(Symbol_bless));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_SYMBOL_CLASS);
+  builder.add_method("bless", new CallbackFunction(Symbol_bless));
+  vm->add_builtin_class(builder.value());
 }

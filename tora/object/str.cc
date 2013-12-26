@@ -6,6 +6,7 @@
 #include "../value/class.h"
 #include "../value/bytes.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 #include <re2/re2.h>
 #include <unicode/unistr.h>
 
@@ -269,16 +270,16 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v,
 }
 
 void tora::Init_Str(VM *vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_STRING_CLASS);
-  klass->add_method("length", new CallbackFunction(str_length));
-  klass->add_method("match", new CallbackFunction(str_match));
-  klass->add_method("replace", new CallbackFunction(str_replace));
-  klass->add_method("substr", new CallbackFunction(str_substr));
-  klass->add_method("scan", new CallbackFunction(str_scan));
-  klass->add_method("split", new CallbackFunction(str_split));
-  klass->add_method("index", new CallbackFunction(str_index));
-  klass->add_method("upper", new CallbackFunction(str_upper));
-  klass->add_method("lower", new CallbackFunction(str_lower));
-  klass->add_method("encode", new CallbackFunction(str_encode));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_STRING_CLASS);
+  builder.add_method("length", new CallbackFunction(str_length));
+  builder.add_method("match", new CallbackFunction(str_match));
+  builder.add_method("replace", new CallbackFunction(str_replace));
+  builder.add_method("substr", new CallbackFunction(str_substr));
+  builder.add_method("scan", new CallbackFunction(str_scan));
+  builder.add_method("split", new CallbackFunction(str_split));
+  builder.add_method("index", new CallbackFunction(str_index));
+  builder.add_method("upper", new CallbackFunction(str_upper));
+  builder.add_method("lower", new CallbackFunction(str_lower));
+  builder.add_method("encode", new CallbackFunction(str_encode));
+  vm->add_builtin_class(builder.value());
 }

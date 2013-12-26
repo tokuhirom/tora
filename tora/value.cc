@@ -6,6 +6,7 @@
 #include "value/object.h"
 #include "value/symbol.h"
 #include "value/bytes.h"
+#include "value/class.h"
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>
@@ -25,6 +26,8 @@ Value::~Value() {
     delete static_cast<StringImpl*>(ptr_value_);
   } else if (value_type == VALUE_TYPE_RANGE) {
     range_free(this);
+  } else if (value_type == VALUE_TYPE_CLASS) {
+    class_free(this);
   }
 }
 
@@ -294,7 +297,7 @@ ID Value::object_package_id() const {
     case VALUE_TYPE_SYMBOL:
       return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:
-      return static_cast<const ObjectValue*>(this)->class_value()->name_id();
+      return class_name_id(static_cast<const ObjectValue*>(this)->class_value().get());
     case VALUE_TYPE_UNDEF:
       throw new ExceptionValue("Cannot get package name from undefined value.");
   }

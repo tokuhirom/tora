@@ -7,7 +7,7 @@
 
 using namespace tora;
 
-ObjectValue::ObjectValue(VM* v, const SharedPtr<ClassValue>& klass,
+ObjectValue::ObjectValue(VM* v, const SharedPtr<Value>& klass,
                          const SharedPtr<Value>& data)
     : Value(VALUE_TYPE_OBJECT) {
   assert(klass.get());
@@ -22,7 +22,7 @@ ObjectValue::ObjectValue(VM* v, ID klass_id, const SharedPtr<Value>& data)
 ObjectValue::~ObjectValue() { delete object_value_; }
 
 const char* ObjectValue::type_str() const {
-  return this->class_value()->name().c_str();
+  return class_name(this->class_value().get()).c_str();
 }
 
 void ObjectValue::release() {
@@ -44,9 +44,8 @@ void ObjectValue::dump(int indent) {
 
 SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value> index,
                                        SharedPtr<Value> v) {
-  auto iter = VAL().klass_->find_method(SYMBOL___SET_ITEM__);
-  if (iter != VAL().klass_->end()) {
-    SharedPtr<Value> code_v = iter->second;
+  Value* code_v = class_get_method(VAL().klass_.get(), SYMBOL___SET_ITEM__);
+  if (code_v) {
     assert(code_v->value_type == VALUE_TYPE_CODE);
     SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
     if (code->is_native()) {
@@ -103,9 +102,8 @@ SharedPtr<Value> ObjectValue::set_item(SharedPtr<Value> index,
 
 SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
   assert(VAL().klass_.get());
-  auto iter = VAL().klass_->find_method(SYMBOL___GET_ITEM__);
-  if (iter != VAL().klass_->end()) {
-    SharedPtr<Value> code_v = iter->second;
+  Value* code_v = class_get_method(VAL().klass_.get(), SYMBOL___GET_ITEM__);
+  if (code_v) {
     assert(code_v->value_type == VALUE_TYPE_CODE);
     SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
     if (code->is_native()) {
@@ -160,9 +158,8 @@ SharedPtr<Value> ObjectValue::get_item(SharedPtr<Value> index) {
 
 // call DESTROY method if it's available.
 void ObjectValue::call_destroy() {
-  auto iter = VAL().klass_->find_method(SYMBOL_DESTROY);
-  if (iter != VAL().klass_->end()) {
-    SharedPtr<Value> code_v = iter->second;
+  Value* code_v = class_get_method(VAL().klass_.get(), SYMBOL_DESTROY);
+  if (code_v) {
     assert(code_v->value_type == VALUE_TYPE_CODE);
     SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
     if (code->is_native()) {
@@ -186,5 +183,5 @@ void ObjectValue::call_destroy() {
 }
 
 bool ObjectValue::isa(ID target_id) const {
-  return this->class_value()->isa(target_id);
+  return class_isa(this->class_value().get(), target_id);
 }

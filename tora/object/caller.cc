@@ -5,6 +5,7 @@
 #include "../value/object.h"
 #include "../value/class.h"
 #include "../symbols.gen.h"
+#include "../class_builder.h"
 
 using namespace tora;
 
@@ -26,8 +27,7 @@ static SharedPtr<Value> caller_code(VM* vm, Value* self) {
 }
 
 void tora::Init_Caller(VM* vm) {
-  SharedPtr<ClassValue> klass = new ClassValue(vm, SYMBOL_CALLER_CLASS);
-  klass->add_method(vm->symbol_table->get_id("code"),
-                    new CallbackFunction(caller_code));
-  vm->add_builtin_class(klass);
+  ClassBuilder builder(vm, SYMBOL_CALLER_CLASS);
+  builder.add_method("code", new CallbackFunction(caller_code));
+  vm->add_builtin_class(builder.value());
 }
