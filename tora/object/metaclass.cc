@@ -21,7 +21,7 @@ using namespace tora;
  */
 
 inline static Value* SELF(Value* self) {
-  const SharedPtr<Value>& dat = self->upcast<ObjectValue>()->data();
+  const SharedPtr<Value>& dat = object_data(self);
   return dat->upcast<Value>();
 }
 
@@ -78,7 +78,8 @@ static SharedPtr<Value> mc_superclass(VM* vm, Value* self) {
  * Create new instance with $data.
  */
 static SharedPtr<Value> mc_bless(VM* vm, Value* self, Value* data) {
-  return new ObjectValue(vm, self, data);
+  MortalObjectValue o(vm, self, data);
+  return o.get();
 }
 
 void tora::Init_MetaClass(VM* vm) {

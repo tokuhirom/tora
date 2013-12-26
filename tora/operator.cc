@@ -221,7 +221,7 @@ SharedPtr<Value> tora::op_get_item(const SharedPtr<Value> &container,
     case VALUE_TYPE_ARRAY:
       return array_get_item(container.get(), index->to_int());
     case VALUE_TYPE_OBJECT:
-      return container->upcast<ObjectValue>()->get_item(index);
+      return object_get_item(container.get(), index.get()).get();
     default:
       throw new ExceptionValue("%s is not a container.\n",
                                container->type_str());

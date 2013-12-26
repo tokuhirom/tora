@@ -23,7 +23,7 @@ using namespace tora;
  */
 static SharedPtr<Value> caller_code(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  return self->upcast<ObjectValue>()->data();
+  return object_data(self);
 }
 
 void tora::Init_Caller(VM* vm) {

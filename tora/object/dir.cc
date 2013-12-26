@@ -8,6 +8,7 @@
 #include "../vm.h"
 #include "../value/object.h"
 #include "../value/class.h"
+#include "../value/pointer.h"
 #include "../value.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
@@ -25,11 +26,16 @@ using namespace tora;
  *
  * Open directory named $directory and returns Dir object.
  */
-ObjectValue* tora::Dir_new(VM* vm, const std::string& dirname) {
+SharedValue tora::Dir_new(VM* vm, const std::string& dirname) {
   DIR* dp = opendir(dirname.c_str());
   if (dp) {
-    return new ObjectValue(vm, vm->get_builtin_class(SYMBOL_DIR_CLASS).get(),
-                           new_ptr_value(dp));
+    MortalPointerValue p(dp);
+    MortalObjectValue o(
+      vm,
+      vm->get_builtin_class(SYMBOL_DIR_CLASS).get(),
+      p.get()
+    );
+    return o.get();
   } else {
     throw new ErrnoExceptionValue(get_errno());
   }
@@ -41,7 +47,7 @@ ObjectValue* tora::Dir_new(VM* vm, const std::string& dirname) {
  * Create a new Dir class instance from $dirname.
  */
 static SharedPtr<Value> dir_new(VM* vm, Value* self, Value* dirname_v) {
-  return tora::Dir_new(vm, dirname_v->to_s());
+  return tora::Dir_new(vm, dirname_v->to_s()).get();
 }
 
 /**
@@ -52,7 +58,7 @@ static SharedPtr<Value> dir_new(VM* vm, Value* self, Value* dirname_v) {
  */
 static SharedPtr<Value> dir_read(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
+  SharedPtr<Value> v = object_data(self);
   assert(v->value_type = VALUE_TYPE_POINTER);
   DIR* dp = (DIR*)get_ptr_value(v);
   assert(dp);
@@ -73,7 +79,7 @@ static SharedPtr<Value> dir_read(VM* vm, Value* self) {
  *closes directory automtically.
  */
 static SharedPtr<Value> dir_close(VM* vm, Value* self) {
-  SharedPtr<Value> v = self->upcast<ObjectValue>()->data();
+  SharedPtr<Value> v = object_data(self);
   assert(v->value_type = VALUE_TYPE_POINTER);
 
   DIR* dp = static_cast<DIR*>(get_ptr_value(v));
@@ -161,9 +167,12 @@ static SharedPtr<Value> dir_DESTROY(VM* vm, Value* self) {
 static SharedPtr<Value> dir___iter__(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
 
-  ObjectValue* v = new ObjectValue(
-      vm, vm->get_builtin_class(SYMBOL_DIR_ITERATOR_CLASS).get(), self);
-  return v;
+  MortalObjectValue v(
+    vm,
+    vm->get_builtin_class(SYMBOL_DIR_ITERATOR_CLASS).get(),
+    self
+  );
+  return v.get();
 }
 
 /**
@@ -174,7 +183,7 @@ static SharedPtr<Value> dir___iter__(VM* vm, Value* self) {
 static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
 
-  SharedPtr<Value> dir = self->upcast<ObjectValue>()->data();
+  SharedPtr<Value> dir = object_data(self);
   if (dir->value_type != VALUE_TYPE_OBJECT) {
     return new ExceptionValue("[BUG] This is not a Directory value.: %s",
                               dir->type_str());

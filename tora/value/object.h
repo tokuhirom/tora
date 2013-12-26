@@ -5,46 +5,28 @@
 
 namespace tora {
 
-class VM;
+  class Value;
+  class SharedValue;
+  class VM;
+  class MortalValue;
 
-class ObjectImpl {
-  friend class ObjectValue;
+  class MortalObjectValue : public MortalValue {
+    static Value* new_value(VM*vm, Value* klass, Value* data);
+  public:
+    MortalObjectValue(VM* vm, Value* klass, Value* data)
+      : MortalValue(new_value(vm, klass, data)) { }
+  };
 
- protected:
-  VM* vm_;
-  SharedPtr<Value> klass_;
-  bool destroyed_;
-  SharedPtr<Value> data_;
-  ObjectImpl(VM* vm, const SharedPtr<Value>& klass,
-             const SharedPtr<Value>& d)
-      : vm_(vm), klass_(klass), destroyed_(false), data_(d) {}
-};
+  SharedValue object_get_item(Value* self, Value* index);
+  SharedValue object_set_item(Value* self, Value* index, Value* v);
+  bool object_isa(Value* self, ID target_id);
+  void object_free(Value* self);
+  void object_finalize(Value* self);
+  Value* object_data(Value* self);
+  Value* object_class(const Value* self);
+  std::string object_type_str(const Value* self);
+  void object_dump(Value* self, int indent);
 
-class ObjectValue : public Value {
- private:
-  const ObjectImpl& VAL() const { return *object_value_; }
-  ObjectImpl& VAL() { return *object_value_; }
-
- public:
-  ObjectValue(VM* v, const SharedPtr<Value>& klass,
-              const SharedPtr<Value>& data);
-  ObjectValue(VM* v, ID klass_id, const SharedPtr<Value>& data);
-  ~ObjectValue();
-  const SharedPtr<Value> data() const { return VAL().data_; }
-  SharedPtr<Value> data() { return VAL().data_; }
-  void release();
-  void call_destroy();
-  VM* vm() const { return VAL().vm_; }
-
-  SharedPtr<Value> class_value() const { return VAL().klass_; }
-
-  void dump(int indent);
-  const char* type_str() const;
-
-  SharedPtr<Value> get_item(SharedPtr<Value> index);
-  SharedPtr<Value> set_item(SharedPtr<Value> index, SharedPtr<Value> v);
-  bool isa(ID target_id) const;
-};
 };
 
 #endif  // TORA_VALUE_OBJECT_T_

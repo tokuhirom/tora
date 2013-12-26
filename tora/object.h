@@ -9,9 +9,9 @@
 namespace tora {
 
 class VM;
-class ObjectValue;
 class Value;
 class RE2RegexpValue;
+class SharedValue;
 
 void Init_Array(VM *vm);
 void Init_Caller(VM *vm);
@@ -37,7 +37,7 @@ void Init_Double(VM *vm);
 void Init_FilePackage(VM *vm);
 
 SharedPtr<Value> Symbol_bless(VM *vm, Value *self, Value *data);
-ObjectValue *Dir_new(VM *vm, const std::string &dirname);
+SharedValue Dir_new(VM *vm, const std::string &dirname);
 SharedPtr<Value> File_open(VM *vm, Value *fname, Value *mode);
 SharedPtr<Value> RE2_Regexp_Matched_new(
     VM *vm, RE2RegexpValue *re,

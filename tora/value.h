@@ -44,7 +44,6 @@ typedef enum {
 class Value;
 class IntValue;
 class DoubleValue;
-class ObjectImpl;
 class FilePackageImpl;
 class MortalValue;
 
@@ -82,13 +81,7 @@ class Value {
     assert(refcnt_ >= 0);
     return refcnt_;
   }
-  virtual void release() {
-    assert(refcnt_ > 0);
-    --refcnt_;
-    if (refcnt_ == 0) {
-      delete this;
-    }
-  }
+  void release();
   void retain() {
     assert(refcnt_ >= 0);
     ++refcnt_;
@@ -112,7 +105,6 @@ class Value {
 
     Value* value_value_;
     FILE* file_value_;
-    ObjectImpl* object_value_;
     ExceptionImpl* exception_value_;
     FilePackageImpl* file_package_value_;
   };

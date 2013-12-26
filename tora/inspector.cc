@@ -111,7 +111,7 @@ std::string Inspector::inspect(Value* v) const {
       assert(vm_->symbol_table);
       ret += v->type_str();
       ret += ".bless(";
-      ret += this->inspect(v->upcast<ObjectValue>()->data());
+      ret += this->inspect(object_data(v));
       ret += ")";
       return ret;
     }

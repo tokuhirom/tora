@@ -23,8 +23,12 @@ using namespace tora;
  */
 SharedPtr<Value> tora::Symbol_bless(VM *vm, Value *klass, Value *data) {
   assert(klass->value_type == VALUE_TYPE_SYMBOL);
-  return new ObjectValue(
-      vm, vm->get_class(klass->upcast<SymbolValue>()->id()).get(), data);
+  MortalObjectValue o(
+      vm,
+      vm->get_class(klass->upcast<SymbolValue>()->id()).get(),
+      data
+  );
+  return o.get();
 }
 
 void tora::Init_Symbol(VM *vm) {

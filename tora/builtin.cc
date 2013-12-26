@@ -77,7 +77,7 @@ static SharedPtr<Value> builtin_print(
 
 static SharedPtr<Value> builtin_opendir(VM *vm, Value *s) {
   std::string dirname = s->to_s();
-  return Dir_new(vm, dirname);
+  return Dir_new(vm, dirname).get();
 }
 
 /**
@@ -158,9 +158,10 @@ static SharedPtr<Value> builtin_caller(
       if ((*iter)->type == FRAME_TYPE_FUNCTION) {
         if (skiped_first) {
           FunctionFrame *fframe = (*iter)->upcast<FunctionFrame>();
-          SharedPtr<ObjectValue> o = new ObjectValue(
-              vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(),
-              fframe->code);
+          MortalObjectValue o(
+            vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(),
+            fframe->code.get()
+          );
           array_push_back(av.get(), o.get());
         } else {
           skiped_first = true;  // skip myself.
@@ -176,10 +177,12 @@ static SharedPtr<Value> builtin_caller(
       if ((*iter)->type == FRAME_TYPE_FUNCTION) {
         FunctionFrame *fframe = (*iter)->upcast<FunctionFrame>();
         if (seen == need + 1) {
-          SharedPtr<ObjectValue> o = new ObjectValue(
-              vm, vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(),
-              fframe->code);
-          return o;
+          MortalObjectValue o(
+            vm,
+            vm->get_builtin_class(SYMBOL_CALLER_CLASS).get(),
+            fframe->code.get()
+          );
+          return o.get();
         }
         ++seen;
       }

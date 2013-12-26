@@ -802,8 +802,7 @@ OP_ENTER_FOREACH {
       MortalHashIteratorValue iter(a.get());
       iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_OBJECT) {
-        ObjectValue * o = a->upcast<ObjectValue>();
-        CodeValue* code = class_get_method(o->class_value().get(), this->symbol_table->get_id("__iter__"))->upcast<CodeValue>();
+        CodeValue* code = class_get_method(object_class(a.get()), this->symbol_table->get_id("__iter__"))->upcast<CodeValue>();
         if (code) {
             if (code->is_native()) {
                 stack.push_back(a);
@@ -814,7 +813,7 @@ OP_ENTER_FOREACH {
                 TODO();
             }
         } else {
-            this->die("The object  %s doesn't support iteration(Does not have a __iter__ method)\n", o->type_str());
+            this->die("The object  %s doesn't support iteration(Does not have a __iter__ method)\n", object_type_str(a.get()).c_str());
         }
     } else {
         this->die("The object %s doesn't support iteration\n", a->type_str());
@@ -884,8 +883,8 @@ OP_FOR_ITER {
         break;
     }
     case VALUE_TYPE_OBJECT: {
-        ObjectValue * o = iter->upcast<ObjectValue>();
-        Value *code_v = class_get_method(o->class_value().get(), this->symbol_table->get_id("__next__"));
+        Value * o = iter.get();
+        Value *code_v = class_get_method(object_class(o), this->symbol_table->get_id("__next__"));
         if (code_v) {
             CodeValue * code = code_v->upcast<CodeValue>();
             if (code->is_native()) {
@@ -997,7 +996,7 @@ OP_DEREF {
     if (obj->value_type != VALUE_TYPE_OBJECT) {
         throw new ExceptionValue("You cannot dereference no object value.");
     }
-    stack[stack.size()-1].reset(obj->upcast<ObjectValue>()->data().get());
+    stack[stack.size()-1].reset(object_data(obj.get()));
 }
 
 OP_EXTRACT_ARRAY {

@@ -118,8 +118,8 @@ void VM::init_globals(const std::vector<std::string> &args) {
   this->global_vars->push_back(avalue.get());
 
   // $ENV
-  SharedPtr<ObjectValue> env = new ObjectValue(
-      this, this->get_builtin_class(SYMBOL_ENV_CLASS), new_undef_value());
+  MortalObjectValue env(
+      this, this->get_builtin_class(SYMBOL_ENV_CLASS).get(), new_undef_value());
   this->global_vars->push_back(env.get());
 
   // $LIBPATH : Array
@@ -484,7 +484,7 @@ SharedPtr<tora::Value> VM::set_item(const SharedPtr<tora::Value> &container,
     const {
   switch (container->value_type) {
     case VALUE_TYPE_OBJECT:
-      return container->upcast<ObjectValue>()->set_item(index, rvalue);
+      return object_set_item(container.get(), index.get(), rvalue.get()).get();
     case VALUE_TYPE_HASH: {
       std::string key = index->to_s();
       hash_set_item(container.get(), key, rvalue.get());
@@ -766,7 +766,7 @@ void VM::call_method(const SharedPtr<Value> &object,
 
   std::set<ID> seen;
   if (object->value_type == VALUE_TYPE_OBJECT) {
-    this->call_method(object, object->upcast<ObjectValue>()->class_value(),
+    this->call_method(object, object_class(object.get()),
                       function_id, seen);
   } else if (object->value_type == VALUE_TYPE_SYMBOL) {
     printf("[OBSOLETE] MAY NOT REACHE HERE\n");

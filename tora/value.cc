@@ -21,6 +21,20 @@ SharedValue::~SharedValue() {
 }
 SharedValue::SharedValue(const MortalValue& sv) : v_(sv.get()) { v_->retain(); }
 
+void Value::release() {
+  assert(refcnt_ > 0);
+  --refcnt_;
+
+  if (refcnt_ == 0) {
+    if (type(this) == VALUE_TYPE_OBJECT) {
+      object_finalize(this);
+      delete this;
+    } else {
+      delete this;
+    }
+  }
+}
+
 Value::~Value() {
   if (value_type == VALUE_TYPE_STR) {
     delete static_cast<StringImpl*>(ptr_value_);
@@ -28,6 +42,8 @@ Value::~Value() {
     range_free(this);
   } else if (value_type == VALUE_TYPE_CLASS) {
     class_free(this);
+  } else if (value_type == VALUE_TYPE_OBJECT) {
+    object_free(this);
   }
 }
 
@@ -77,7 +93,8 @@ const char* Value::type_str() const {
       return "Class";
     case VALUE_TYPE_FILE_PACKAGE:
       return "FilePackage";
-    case VALUE_TYPE_OBJECT: { return ((const ObjectValue*)this)->type_str(); }
+    case VALUE_TYPE_OBJECT:
+      return object_type_str(this).c_str();
   }
   abort();
 }
@@ -297,7 +314,7 @@ ID Value::object_package_id() const {
     case VALUE_TYPE_SYMBOL:
       return static_cast<const SymbolValue*>(this)->id();
     case VALUE_TYPE_OBJECT:
-      return class_name_id(static_cast<const ObjectValue*>(this)->class_value().get());
+      return class_name_id(object_class(this));
     case VALUE_TYPE_UNDEF:
       throw new ExceptionValue("Cannot get package name from undefined value.");
   }
