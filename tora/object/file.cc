@@ -24,7 +24,7 @@ using namespace tora;
 
 inline static FILE* FP(Value* self) {
   assert(self->value_type == VALUE_TYPE_FILE);
-  return self->upcast<FileValue>()->fp();
+  return get_file_pointer(self);
 }
 
 /*
@@ -41,9 +41,10 @@ SharedPtr<Value> tora::File_open(VM* vm, Value* fname, Value* mode_v) {
   }
 
   // TODO: check \0
-  SharedPtr<FileValue> file = new FileValue();
-  if (file->open(fname->to_s(), mode)) {
-    return file;
+  FILE * fp = fopen(fname->to_s().c_str(), mode.c_str());
+  if (fp) {
+    MortalFileValue file(fp);
+    return file.get();
   } else {
     throw new ExceptionValue("Cannot open file: %s: %s",
                              get_str_value(fname)->c_str(),
@@ -82,9 +83,9 @@ static SharedPtr<Value> file_open_method(
  *
  * Read all file content and return it in string.
  */
-static SharedPtr<Value> file_slurp(VM* vm, Value* self) {
+static SharedPtr<Value> meth_file_slurp(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_FILE);
-  return new_str_value(self->upcast<FileValue>()->read());
+  return new_str_value(file_slurp(self));
 }
 
 /**
@@ -92,9 +93,9 @@ static SharedPtr<Value> file_slurp(VM* vm, Value* self) {
  *
  * Close a file.
  */
-static SharedPtr<Value> file_close(VM* vm, Value* self) {
+static SharedPtr<Value> meth_file_close(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_FILE);
-  self->upcast<FileValue>()->close();
+  fclose(get_file_pointer(self));
   return new_undef_value();
 }
 
@@ -214,10 +215,10 @@ void tora::Init_File(VM* vm) {
   // tell(), truncate(), write($str), fdopen
   ClassBuilder builder(vm, SYMBOL_FILE_CLASS);
   builder.add_method("open", new CallbackFunction(file_open_method));
-  builder.add_method("slurp", new CallbackFunction(file_slurp));
+  builder.add_method("slurp", new CallbackFunction(meth_file_slurp));
   builder.add_method("write", new CallbackFunction(file_write));
   builder.add_method("print", new CallbackFunction(file_write));
-  builder.add_method("close", new CallbackFunction(file_close));
+  builder.add_method("close", new CallbackFunction(meth_file_close));
   builder.add_method("flush", new CallbackFunction(file_flush));
   builder.add_method("fileno", new CallbackFunction(file_fileno));
   builder.add_method("getc", new CallbackFunction(file_getc));

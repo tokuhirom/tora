@@ -134,13 +134,16 @@ void VM::init_globals(const std::vector<std::string> &args) {
   this->global_vars->push_back(required.get());
 
   // $STDIN : File
-  this->global_vars->push_back(new FileValue(stdin));
+  MortalFileValue in(stdin);
+  this->global_vars->push_back(in.get());
 
   // $STDOUT : File
-  this->global_vars->push_back(new FileValue(stdout));
+  MortalFileValue out(stdout);
+  this->global_vars->push_back(out.get());
 
   // $STDERR : File
-  this->global_vars->push_back(new FileValue(stderr));
+  MortalFileValue err(stderr);
+  this->global_vars->push_back(err.get());
 }
 
 void VM::die(const char *format, ...) {

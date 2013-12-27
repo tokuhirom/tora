@@ -90,6 +90,10 @@ class Value {
 
  public:
   Value(value_type_t t) : refcnt_(1), value_type(t) {}
+  explicit Value(value_type_t t, void* p)
+    : refcnt_(1),
+    ptr_value_(p),
+    value_type(t) {}
   union {
     int int_value_;
     double double_value_;
@@ -101,7 +105,6 @@ class Value {
     std::string* str_value_;
 
     Value* value_value_;
-    FILE* file_value_;
     ExceptionImpl* exception_value_;
   };
   value_type_t value_type;

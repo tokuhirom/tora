@@ -46,6 +46,8 @@ Value::~Value() {
     class_free(this);
   } else if (value_type == VALUE_TYPE_OBJECT) {
     object_free(this);
+  } else if (value_type == VALUE_TYPE_FILE) {
+    fclose(static_cast<FILE*>(this->ptr_value_));
   }
 }
 

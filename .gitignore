@@ -41,3 +41,7 @@ CMakeFiles/
 cmake_install.cmake
 install_manifest.txt
 Makefile
+/.ninja_deps
+/.ninja_log
+/build.ninja
+/rules.ninja

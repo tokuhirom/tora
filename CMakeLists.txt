@@ -95,6 +95,7 @@ SET(TORA_SRCS
     tora/object/dynaloader.cc  tora/object/re2_regexp_matched.cc  tora/value/class.cc
     tora/object/env.cc         tora/object/regexp.cc              tora/value/code.cc tora/value/file_package.cc
 
+    tora/value/file.cc
     tora/value/symbol.cc
 
     tora/class_builder.cc

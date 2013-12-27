@@ -6,48 +6,20 @@
 
 namespace tora {
 
-class FileValue : public Value {
- private:
-  FILE *VAL() const { return (this->file_value_); }
+  class MortalFileValue : public MortalValue {
+  public:
+    explicit MortalFileValue(FILE *fp)
+      : MortalValue(new Value(VALUE_TYPE_FILE, static_cast<void*>(fp))) { }
+  };
 
- public:
-  FileValue() : Value(VALUE_TYPE_FILE) { this->file_value_ = (FILE *)NULL; }
-  explicit FileValue(FILE *fp) : Value(VALUE_TYPE_FILE) {
-    this->file_value_ = fp;
+  static FILE * get_file_pointer(Value* v) {
+    assert(type(v) == VALUE_TYPE_FILE);
+    return static_cast<FILE*>(get_ptr_value(v));
   }
-  ~FileValue() {
-    if (VAL()) {
-      this->close();
-    }
-  }
-  void close() {
-    if (VAL()) {
-      fclose(this->VAL());
-      this->file_value_ = (FILE *)NULL;
-    }
-  }
-  bool open(const std::string &fname, const std::string &mode) {
-    this->file_value_ = fopen(fname.c_str(), mode.c_str());
-    return !!VAL();
-  }
-  FILE *fp() { return VAL(); }
-  std::string read() {
-    // slurp
-    std::string s;
-    const int bufsiz = 4096;
-    char buffer[bufsiz];
-    size_t n;
-    while ((n = fread(buffer, sizeof(char), bufsiz, VAL())) != 0) {
-      s.append(buffer, n);
-    }
-    if (feof(VAL())) {
-      return s;
-    } else {
-      // err?
-      throw new ErrnoExceptionValue(tora::get_errno());
-    }
-  }
-};
+
+  void file_close(Value* self);
+  std::string file_slurp(Value* self);
+
 };
 
 #endif  // TORA_FILE_H_
