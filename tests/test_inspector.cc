@@ -16,8 +16,8 @@ int main() {
     Inspector ins(&vm);
 
     {
-        SharedPtr<Value> v = new IntValue(4649);
-        is(ins.inspect(v), std::string("4649"));
+      MortalIntValue i4649(4649);
+      is(ins.inspect(i4649.get()), std::string("4649"));
     }
 
     {

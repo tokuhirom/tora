@@ -53,8 +53,10 @@ int main() {
         vm.frame_stack->push_back(f1);
         SharedPtr<LexicalVarsFrame> f2(new LexicalVarsFrame(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f2);
-        f2->set_variable(0, new IntValue(4));
-        f1->set_variable(0, new IntValue(5));
+        MortalIntValue i4(4);
+        f2->set_variable(0, i4.get());
+        MortalIntValue i5(5);
+        f1->set_variable(0, i5.get());
         is(f2->get_variable(0)->to_int(), 4);
         is(f2->get_variable_dynamic(1, 0)->to_int(), 5);
         SharedPtr<Value> v = new_str_value("OOO");

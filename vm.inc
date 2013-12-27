@@ -17,7 +17,8 @@ OP_PUSH_UNDEF {
 }
 
 OP_PUSH_INT {
-    stack.push_back(new IntValue(get_int_operand()));
+  MortalIntValue i(get_int_operand());
+  stack.push_back(i.get());
 }
 
 OP_PUSH_DOUBLE {
@@ -706,7 +707,7 @@ OP_PRE_INCREMENT {
     stack.pop_back();
     // printf("stack %d\n", (int) stack.size());
     if (i->value_type == VALUE_TYPE_INT) {
-        i->upcast<IntValue>()->tora__incr__();
+        i->int_value_++;
         stack.push_back(i);
     } else {
         this->die("%s does not supports increment operator.\n", i->type_str());
@@ -717,10 +718,9 @@ OP_POST_INCREMENT {
     // $i++
     SharedPtr<Value> i = stack.back(); stack.pop_back();
     if (i->value_type == VALUE_TYPE_INT) {
-        SharedPtr<IntValue>ii = i->upcast<IntValue>();
-        SharedPtr<IntValue>tmp = ii->clone();
-        ii->tora__incr__();
-        stack.push_back(tmp);
+        MortalIntValue tmp(get_int_value(i));
+        i->int_value_++;
+        stack.push_back(tmp.get());
     } else {
         this->die("%s does not supports post increment operator.\n", i->type_str());
     }
@@ -730,7 +730,7 @@ OP_PRE_DECREMENT {
     // --$i
     SharedPtr<Value> i = stack.back(); stack.pop_back();
     if (i->value_type == VALUE_TYPE_INT) {
-        i->upcast<IntValue>()->tora__decr__();
+        i->int_value_--;
         stack.push_back(i);
     } else {
         this->die("%s does not supports decrement operator.\n", i->type_str());
@@ -741,10 +741,9 @@ OP_POST_DECREMENT {
     // $i--
     SharedPtr<Value> i = stack.back(); stack.pop_back();
     if (i->value_type == VALUE_TYPE_INT) {
-        SharedPtr<IntValue>ii = i->upcast<IntValue>();
-        SharedPtr<IntValue>tmp = ii->clone();
-        ii->tora__decr__();
-        stack.push_back(tmp);
+      MortalIntValue tmp(get_int_value(i));
+      i->int_value_--;
+      stack.push_back(tmp.get());
     } else {
         this->die("%s does not supports post decrement operator.\n", i->type_str());
     }
@@ -770,7 +769,8 @@ OP_FILE_TEST {
         break;
     case 's':
         if (stat(fname.c_str(), &buf) == 0) {
-            stack.push_back(new IntValue(buf.st_size));
+          MortalIntValue i(buf.st_size);
+          stack.push_back(i.get());
         } else {
             stack.push_back(new_undef_value());
         }
@@ -857,9 +857,9 @@ OP_FOR_ITER {
                 set_int_value(cur.get(), riter->counter);
                 stack.push_back(cur);
             } else {
-                IntValue * iv = new IntValue(riter->counter);
-                stack.push_back(iv);
-                fframe->current_value.reset(iv);
+              MortalIntValue iv(riter->counter);
+              stack.push_back(iv.get());
+              fframe->current_value.reset(iv.get());
             }
             // fframe->current_value.reset(iv);
             riter->counter++;
