@@ -8,6 +8,7 @@
 #include "../symbols.gen.h"
 #include "../value/int.h"
 #include "../value/class.h"
+#include "../value/exception.h"
 #include "../class_builder.h"
 
 #ifdef _WIN32

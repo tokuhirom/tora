@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "file.h"
+#include "exception.h"
 
 using namespace tora;
 

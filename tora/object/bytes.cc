@@ -3,6 +3,7 @@
 #include "../vm.h"
 #include "../object.h"
 #include "../value/bytes.h"
+#include "../value/exception.h"
 #include "../value.h"
 #include "../value/class.h"
 #include "../value/int.h"

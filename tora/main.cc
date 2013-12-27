@@ -24,6 +24,7 @@
 #include "disasm.h"
 #include "config.h"
 #include "value/file_package.h"
+#include "value/exception.h"
 
 using namespace tora;
 
@@ -62,7 +63,7 @@ static void run_repl(const std::vector<std::string>& args,
       vm.dump_value(ret);
     }
     catch (ExceptionValue* e) {
-      std::cerr << e->message() << std::endl;
+      std::cerr << exception_message(e) << std::endl;
     };
   }
 }

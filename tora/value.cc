@@ -7,6 +7,7 @@
 #include "value/symbol.h"
 #include "value/bytes.h"
 #include "value/class.h"
+#include "value/exception.h"
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>
@@ -48,6 +49,8 @@ Value::~Value() {
     object_free(this);
   } else if (value_type == VALUE_TYPE_FILE) {
     fclose(static_cast<FILE*>(this->ptr_value_));
+  } else if (value_type == VALUE_TYPE_EXCEPTION) {
+    exception_free(this);
   }
 }
 
@@ -168,8 +171,7 @@ std::string Value::to_s() {
     case VALUE_TYPE_BOOL: { return get_bool_value(this) ? "true" : "false"; }
     case VALUE_TYPE_UNDEF: { return "undef"; }
     case VALUE_TYPE_EXCEPTION: {
-      ExceptionValue* e = this->upcast<ExceptionValue>();
-      return e->message();
+      return exception_message(this);
     }
     case VALUE_TYPE_RANGE: {
       std::ostringstream os;

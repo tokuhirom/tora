@@ -5,6 +5,7 @@
 #include "value/array.h"
 #include "value/bool.h"
 #include "value/double.h"
+#include "value/exception.h"
 #include "ops.gen.h"
 #include "value/bytes.h"
 #include "value/int.h"

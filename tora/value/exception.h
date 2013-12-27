@@ -7,15 +7,35 @@
 
 namespace tora {
 
+struct ExceptionImpl {
+  friend class ExceptionValue;
+  friend class ErrnoExceptionValue;
+  friend class ArgumentExceptionValue;
+
+ public:
+  exception_type_t type;
+  int errno_;
+  std::string message;
+  explicit ExceptionImpl(exception_type_t _type) : type(_type) {}
+  explicit ExceptionImpl(int err, exception_type_t _type = EXCEPTION_TYPE_ERRNO)
+      : type(_type), errno_(err) {}
+  explicit ExceptionImpl(const std::string& msg, exception_type_t _type)
+      : type(_type), message(msg) {}
+};
+
+  std::string exception_message(Value* self);
+  void exception_free(Value* self);
+  exception_type_t exception_type(Value* self);
+
 class ExceptionValue : public Value {
  private:
  protected:
   explicit ExceptionValue(exception_type_t type = EXCEPTION_TYPE_GENERAL)
       : Value(VALUE_TYPE_EXCEPTION) {
-    exception_value_ = new ExceptionImpl(type);
+    ptr_value_ = new ExceptionImpl(type);
   }
   explicit ExceptionValue(int err) : Value(VALUE_TYPE_EXCEPTION) {
-    exception_value_ = new ExceptionImpl(err, EXCEPTION_TYPE_ERRNO);
+    ptr_value_ = new ExceptionImpl(err, EXCEPTION_TYPE_ERRNO);
   }
 
  public:
@@ -23,23 +43,16 @@ class ExceptionValue : public Value {
   explicit ExceptionValue(const std::string &msg,
                           exception_type_t type = EXCEPTION_TYPE_GENERAL)
       : Value(VALUE_TYPE_EXCEPTION) {
-    exception_value_ = new ExceptionImpl(msg, type);
-  }
-  virtual ~ExceptionValue() { delete this->exception_value_; }
-  virtual std::string message() const {
-    return this->exception_value_->message_;
-  }
-  exception_type_t exception_type() const {
-    return this->exception_value_->type_;
+    ptr_value_ = new ExceptionImpl(msg, type);
   }
 };
 
 class ErrnoExceptionValue : public ExceptionValue {
  public:
   ErrnoExceptionValue(int err) : ExceptionValue(err) {}
-  int get_errno() const { return exception_value_->errno_; }
+  int get_errno() const { return static_cast<ExceptionImpl*>(ptr_value_)->errno_; }
   std::string message() const {
-    return tora::get_strerror(exception_value_->errno_);
+    return tora::get_strerror(static_cast<ExceptionImpl*>(ptr_value_)->errno_);
   }
 };
 

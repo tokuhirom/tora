@@ -1,5 +1,6 @@
 #include "printf.h"
 #include "value.h"
+#include "value/exception.h"
 
 #include <iostream>
 

@@ -9,6 +9,7 @@
 #include "../value/object.h"
 #include "../value/class.h"
 #include "../value/pointer.h"
+#include "../value/exception.h"
 #include "../value.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"

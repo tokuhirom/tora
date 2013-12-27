@@ -47,22 +47,6 @@ class MortalValue;
 
 class CallbackFunction;
 
-class ExceptionImpl {
-  friend class ExceptionValue;
-  friend class ErrnoExceptionValue;
-  friend class ArgumentExceptionValue;
-
- protected:
-  exception_type_t type_;
-  int errno_;
-  std::string message_;
-  explicit ExceptionImpl(exception_type_t type) : type_(type) {}
-  explicit ExceptionImpl(int err, exception_type_t type = EXCEPTION_TYPE_ERRNO)
-      : type_(type), errno_(err) {}
-  ExceptionImpl(const std::string& msg, exception_type_t type)
-      : type_(type), message_(msg) {}
-};
-
 typedef std::string StringImpl;
 
 // TODO: remove virtual from this class for performance.
@@ -105,7 +89,6 @@ class Value {
     std::string* str_value_;
 
     Value* value_value_;
-    ExceptionImpl* exception_value_;
   };
   value_type_t value_type;
   Value& operator=(const Value& v);
@@ -270,7 +253,5 @@ class MortalUndefValue : public MortalValue {
   MortalUndefValue() : MortalValue(new_undef_value()) {}
 };
 };
-
-#include "value/exception.h"
 
 #endif  // TORA_VALUE_H_

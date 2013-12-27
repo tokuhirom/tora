@@ -4,6 +4,7 @@
 #include "class.h"
 #include "../frame.h"
 #include "../symbols.gen.h"
+#include "../value/exception.h"
 
 using namespace tora;
 

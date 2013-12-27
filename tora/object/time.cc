@@ -5,6 +5,7 @@
 #include "../value/object.h"
 #include "../value/pointer.h"
 #include "../value/int.h"
+#include "../value/exception.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
 
