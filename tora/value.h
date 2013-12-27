@@ -5,7 +5,6 @@
 #include <cstdio>
 #include <cassert>
 #include <memory>
-#include <deque>
 
 #include "tora.h"
 #include "shared_ptr.h"
