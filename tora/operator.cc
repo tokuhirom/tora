@@ -4,6 +4,7 @@
 #include "value/object.h"
 #include "value/array.h"
 #include "value/bool.h"
+#include "value/double.h"
 #include "ops.gen.h"
 #include "value/bytes.h"
 #include <math.h>
@@ -13,11 +14,12 @@ using namespace tora;
 /**
  * binary addition operator
  */
-Value *tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {
       // upgrade to double type
-      return new DoubleValue(lhs->to_double() + rhs->to_double());
+      MortalDoubleValue d(lhs->to_double() + rhs->to_double());
+      return d.get();
     } else {
       int i = rhs->to_int();
       return new IntValue(get_int_value(*lhs) + i);
@@ -29,7 +31,8 @@ Value *tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
     std::string s = rhs->to_s();
     return new BytesValue(lhs->upcast<BytesValue>()->str_value() + s);
   } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-    return new DoubleValue(lhs->to_double() + rhs->to_double());
+    MortalDoubleValue d(lhs->to_double() + rhs->to_double());
+    return d.get();
   } else {
     std::string s = lhs->to_s();
     throw new ExceptionValue("'%s' is not numeric or string.\n", s.c_str());
@@ -41,12 +44,14 @@ Value *tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
  * subtract lhs and rhs.
  * return value must be return by caller.
  */
-Value *tora::op_sub(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_sub(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-    return new DoubleValue(lhs->to_double() - rhs->to_double());
+    MortalDoubleValue d(lhs->to_double() - rhs->to_double());
+    return d.get();
   } else if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {  // upgrade
-      return new DoubleValue(lhs->to_double() - rhs->to_double());
+      MortalDoubleValue d(lhs->to_double() - rhs->to_double());
+      return d.get();
     } else {
       return new IntValue(get_int_value(*lhs) - rhs->to_int());
     }
@@ -58,20 +63,22 @@ Value *tora::op_sub(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   abort();
 }
 
-Value *tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     double rhs_double = rhs->to_double();
     if (rhs_double == 0) {
       throw new ZeroDividedExceptionExceptionValue();
     }
-    return new DoubleValue(lhs->to_double() / rhs_double);
+    MortalDoubleValue d(lhs->to_double() / rhs_double);
+    return d.get();
   } else if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {  // upgrade
       double rhs_double = rhs->to_double();
       if (rhs_double == 0) {
         throw new ZeroDividedExceptionExceptionValue();
       }
-      return new DoubleValue(lhs->to_double() / rhs_double);
+      MortalDoubleValue d(lhs->to_double() / rhs_double);
+      return d.get();
     } else {
       double rhs_int = rhs->to_int();
       if (rhs_int == 0) {
@@ -87,12 +94,14 @@ Value *tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   abort();
 }
 
-Value *tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-    return new DoubleValue(lhs->to_double() * rhs->to_double());
+    MortalDoubleValue d(lhs->to_double() * rhs->to_double());
+    return d.get();
   } else if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {  // upgrade
-      return new DoubleValue(lhs->to_double() * rhs->to_double());
+      MortalDoubleValue d(lhs->to_double() * rhs->to_double());
+      return d.get();
     } else {
       return new IntValue(get_int_value(*lhs) * get_int_value(*rhs));
     }
@@ -111,12 +120,14 @@ Value *tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   abort();
 }
 
-Value *tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
-    return new DoubleValue(pow(lhs->to_double(), rhs->to_double()));
+    MortalDoubleValue d(pow(lhs->to_double(), rhs->to_double()));
+    return d;
   } else if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {  // upgrade
-      return new DoubleValue(pow(lhs->to_double(), rhs->to_double()));
+      MortalDoubleValue d(pow(lhs->to_double(), rhs->to_double()));
+      return d;
     } else {
       return new IntValue((int)pow(lhs->to_double(), rhs->to_double()));
     }
@@ -127,7 +138,7 @@ Value *tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
   abort();
 }
 
-Value *tora::op_bitand(const SharedPtr<Value> &lhs,
+SharedValue tora::op_bitand(const SharedPtr<Value> &lhs,
                        const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() & rhs->to_int());
@@ -138,7 +149,7 @@ Value *tora::op_bitand(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_bitor(const SharedPtr<Value> &lhs,
+SharedValue tora::op_bitor(const SharedPtr<Value> &lhs,
                       const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() | rhs->to_int());
@@ -150,7 +161,7 @@ Value *tora::op_bitor(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_bitxor(const SharedPtr<Value> &lhs,
+SharedValue tora::op_bitxor(const SharedPtr<Value> &lhs,
                        const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() ^ rhs->to_int());
@@ -161,7 +172,7 @@ Value *tora::op_bitxor(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_bitlshift(const SharedPtr<Value> &lhs,
+SharedValue tora::op_bitlshift(const SharedPtr<Value> &lhs,
                           const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() << rhs->to_int());
@@ -172,7 +183,7 @@ Value *tora::op_bitlshift(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_bitrshift(const SharedPtr<Value> &lhs,
+SharedValue tora::op_bitrshift(const SharedPtr<Value> &lhs,
                           const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() >> rhs->to_int());
@@ -183,7 +194,7 @@ Value *tora::op_bitrshift(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_modulo(const SharedPtr<Value> &lhs,
+SharedValue tora::op_modulo(const SharedPtr<Value> &lhs,
                        const SharedPtr<Value> &rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     double x = lhs->to_int();
@@ -196,12 +207,15 @@ Value *tora::op_modulo(const SharedPtr<Value> &lhs,
   abort();
 }
 
-Value *tora::op_unary_negative(const SharedPtr<Value> &v) {
+SharedValue tora::op_unary_negative(const SharedPtr<Value> &v) {
   switch (v->value_type) {
     case VALUE_TYPE_INT:
       return new IntValue(-(get_int_value(*v)));
     case VALUE_TYPE_DOUBLE:
-      return new DoubleValue(-get_double_value(*v));
+      {
+        MortalDoubleValue d(-get_double_value(v.get()));
+        return d.get();
+      }
     case VALUE_TYPE_OBJECT:
       TODO();
     default:
@@ -260,10 +274,10 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
       switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
           return (
-              operation_d(get_double_value(*lhs), (double)get_int_value(*rhs)));
+              operation_d(get_double_value(lhs.get()), (double)get_int_value(*rhs)));
         }
         case VALUE_TYPE_DOUBLE: {
-          return (operation_d(get_double_value(*lhs), get_double_value(*rhs)));
+          return (operation_d(get_double_value(lhs.get()), get_double_value(rhs.get())));
         }
         default: {
           TODO();  // throw exception

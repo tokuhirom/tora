@@ -115,7 +115,7 @@ double Value::to_double() const {
     case VALUE_TYPE_INT:
       return static_cast<double>(get_int_value(*this));
     case VALUE_TYPE_DOUBLE:
-      return static_cast<double>(get_double_value(*this));
+      return get_double_value(this);
     case VALUE_TYPE_OBJECT:
       TODO();
     case VALUE_TYPE_BOOL:
@@ -158,7 +158,7 @@ std::string Value::to_s() {
     }
     case VALUE_TYPE_DOUBLE: {
       std::ostringstream os;
-      os << get_double_value(*this);
+      os << get_double_value(this);
       return os.str();
     }
     case VALUE_TYPE_BOOL: { return get_bool_value(this) ? "true" : "false"; }

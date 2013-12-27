@@ -6,22 +6,23 @@
 namespace tora {
 
 class Value;
+class SharedValue;
 
 // binary operators
-Value* op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_div(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_mul(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_modulo(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_pow(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_bitand(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_bitor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_bitxor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_bitlshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
-Value* op_bitrshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_add(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_sub(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_div(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_mul(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_modulo(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_pow(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_bitand(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_bitor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_bitxor(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_bitlshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
+SharedValue op_bitrshift(const SharedPtr<Value>& lhs, const SharedPtr<Value>& rhs);
 
 // unary operators
-Value* op_unary_negative(const SharedPtr<Value>& v);
+SharedValue op_unary_negative(const SharedPtr<Value>& v);
 
 // container operators
 SharedPtr<Value> op_get_item(const SharedPtr<Value>& container,

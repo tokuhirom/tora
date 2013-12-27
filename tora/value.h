@@ -186,9 +186,9 @@ static void set_int_value(Value* v, int i) {
 
 static void set_int_value(Value& v, int i) { return set_int_value(&v, i); }
 
-static double get_double_value(const Value& v) {
+static double get_double_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_DOUBLE);
-  return v.double_value_;
+  return v->double_value_;
 }
 
 static SharedPtr<Value> new_ptr_value(void* p) {
@@ -197,10 +197,6 @@ static SharedPtr<Value> new_ptr_value(void* p) {
   return v;
 }
 
-static double get_double_value(const SharedPtr<Value> v) {
-  // REMOVE ME.
-  return get_double_value(*v);
-}
 
 static void* get_ptr_value(const Value* v) { return v->ptr_value_; }
 
@@ -286,7 +282,6 @@ class MortalUndefValue : public MortalValue {
 };
 
 #include "value/int.h"
-#include "value/double.h"
 #include "value/exception.h"
 
 #endif  // TORA_VALUE_H_

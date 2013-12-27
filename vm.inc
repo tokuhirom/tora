@@ -21,7 +21,8 @@ OP_PUSH_INT {
 }
 
 OP_PUSH_DOUBLE {
-    stack.push_back(new DoubleValue(get_double_operand()));
+  MortalDoubleValue d(get_double_operand());
+  stack.push_back(d.get());
 }
 
 OP_PUSH_STRING {
@@ -193,8 +194,8 @@ OP_ADD {
     stack.pop_back(); \
     const SharedPtr<Value>& lhs = stack.back(); \
     \
-    Value * ret = meth(lhs, rhs); \
-    stack[stack.size()-1].reset(ret); \
+    SharedValue ret = meth(lhs, rhs); \
+    stack[stack.size()-1].reset(ret.get()); \
     } while (0)
 
     BINOP(op_add);
@@ -656,7 +657,7 @@ OP_SET_ITEM {
 
 OP_UNARY_NEGATIVE {
     const SharedPtr<Value>& v = stack.back();
-    stack[stack.size()-1].reset(op_unary_negative(v));
+    stack[stack.size()-1].reset(op_unary_negative(v).get());
 }
 
 OP_MAKE_HASH {

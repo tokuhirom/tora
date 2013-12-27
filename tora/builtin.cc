@@ -12,6 +12,7 @@
 #include "value/array.h"
 #include "value/symbol.h"
 #include "value/exception.h"
+#include "value/double.h"
 #include "value.h"
 #include "object.h"
 #include "inspector.h"
@@ -95,12 +96,14 @@ static SharedPtr<Value> builtin_rand(
     VM *vm, const std::vector<SharedPtr<Value>> &args) {
   if (args.size() == 0) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    return new DoubleValue(dist(*(vm->myrand)));
+    MortalDoubleValue d(dist(*(vm->myrand)));
+    return d.get();
   } else if (args.size() == 1) {
     SharedPtr<Value> v = args.at(0);
     if (v->value_type == VALUE_TYPE_DOUBLE) {
-      std::uniform_real_distribution<double> dist(-0.0, get_double_value(*v));
-      return new DoubleValue(dist(*(vm->myrand)));
+      std::uniform_real_distribution<double> dist(-0.0, get_double_value(v.get()));
+      MortalDoubleValue d(dist(*(vm->myrand)));
+      return d.get();
     } else if (v->value_type == VALUE_TYPE_INT) {
       std::uniform_int_distribution<int> dist(0, get_int_value(*v));
       return new IntValue(dist(*(vm->myrand)));
@@ -249,26 +252,31 @@ static SharedPtr<Value> builtin_abs(VM *vm, Value *v) {
     return new IntValue(i < 0 ? -i : i);
   } else if (v->value_type == VALUE_TYPE_DOUBLE) {
     double i = v->to_double();
-    return new DoubleValue(i < 0 ? -i : i);
+    MortalDoubleValue d(i < 0 ? -i : i);
+    return d.get();
   } else {
     throw new ExceptionValue("abs() is not supported in non numeric value.");
   }
 }
 
 static SharedPtr<Value> builtin_atan2(VM *vm, Value *y, Value *x) {
-  return new DoubleValue(atan2(y->to_double(), x->to_double()));
+  MortalDoubleValue d(atan2(y->to_double(), x->to_double()));
+  return d.get();
 }
 
 static SharedPtr<Value> builtin_sqrt(VM *vm, Value *v) {
-  return new DoubleValue(sqrt(v->to_double()));
+  MortalDoubleValue d(sqrt(v->to_double()));
+  return d.get();
 }
 
 static SharedPtr<Value> builtin_cos(VM *vm, Value *v) {
-  return new DoubleValue(cos(v->to_double()));
+  MortalDoubleValue d(cos(v->to_double()));
+  return d.get();
 }
 
 static SharedPtr<Value> builtin_exp(VM *vm, Value *v) {
-  return new DoubleValue(exp(v->to_double()));
+  MortalDoubleValue d(exp(v->to_double()));
+  return d.get();
 }
 
 /**
@@ -318,11 +326,13 @@ static SharedPtr<Value> builtin_int(VM *vm, Value *v) {
 }
 
 static SharedPtr<Value> builtin_log(VM *vm, Value *v) {
-  return new DoubleValue(log(v->to_double()));
+  MortalDoubleValue d(log(v->to_double()));
+  return d.get();
 }
 
 static SharedPtr<Value> builtin_sin(VM *vm, Value *v) {
-  return new DoubleValue(sin(v->to_double()));
+  MortalDoubleValue d(sin(v->to_double()));
+  return d.get();
 }
 
 static SharedPtr<Value> builtin_printf(
