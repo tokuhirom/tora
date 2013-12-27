@@ -43,7 +43,6 @@ typedef enum {
 class Value;
 class IntValue;
 class DoubleValue;
-class FilePackageImpl;
 class MortalValue;
 
 class CallbackFunction;
@@ -104,7 +103,6 @@ class Value {
     Value* value_value_;
     FILE* file_value_;
     ExceptionImpl* exception_value_;
-    FilePackageImpl* file_package_value_;
   };
   value_type_t value_type;
   Value& operator=(const Value& v);
