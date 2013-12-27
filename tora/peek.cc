@@ -20,7 +20,7 @@ void tora::peek(VM *vm, Value *v) {
     printf("  REFCNT: %d\n", v->refcnt());
     switch (v->value_type) {
       case VALUE_TYPE_SYMBOL: {
-        ID id = static_cast<const SymbolValue *>(v)->id();
+        ID id = symbol_id(v);
         printf("  ID: %d(%s)\n", id, vm ? vm->symbol_table->id2name(id).c_str()
                                         : "NO Symbol table given");
         break;

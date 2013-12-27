@@ -120,7 +120,7 @@ static SharedPtr<Value> builtin_self(VM *vm) { return vm->get_self(); }
  * require("foo/bar.tra")
  */
 static SharedPtr<Value> builtin_require(VM *vm, Value *v) {
-  ID id = v->upcast<SymbolValue>()->id();
+  ID id = symbol_id(v);
   std::string name = vm->symbol_table->id2name(id);
   vm->require_package(name);
   return new_undef_value();

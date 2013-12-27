@@ -312,7 +312,7 @@ ID Value::object_package_id() const {
       fprintf(stderr, "[BUG] You must not get a package name from tuple.\n");
       abort();
     case VALUE_TYPE_SYMBOL:
-      return static_cast<const SymbolValue*>(this)->id();
+      return symbol_id(this);
     case VALUE_TYPE_OBJECT:
       return class_name_id(object_class(this));
     case VALUE_TYPE_UNDEF:

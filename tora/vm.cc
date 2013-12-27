@@ -252,11 +252,11 @@ static SharedPtr<tora::Value> builtin_do(VM *vm, tora::Value *v) {
 }
 
 void VM::use(tora::Value *package_v, bool need_copy) {
-  ID package_id = package_v->upcast<SymbolValue>()->id();
+  ID package_id = symbol_id(package_v);
   std::string package = symbol_table->id2name(package_id);
   this->require_package(package);
   if (need_copy) {
-    this->copy_all_public_symbols(package_v->upcast<SymbolValue>()->id());
+    this->copy_all_public_symbols(symbol_id(package_v));
   } else {
     MortalFilePackageValue fpv(package_id, file_scope_map_[package_id]);
     this->file_scope_->insert(
@@ -757,12 +757,11 @@ void VM::call_method(const SharedPtr<Value> &object,
   if (object->value_type == VALUE_TYPE_UNDEF) {
     throw new ExceptionValue(
         "NullPointerException: Can't call method %s on an undefined value.",
-        this->symbol_table->id2name(function_id_v->upcast<SymbolValue>()->id())
-            .c_str());
+        symbol_name(this, function_id_v.get()).c_str());
   }
 
   assert(function_id_v->value_type == VALUE_TYPE_SYMBOL);
-  ID function_id = function_id_v->upcast<SymbolValue>()->id();
+  ID function_id = symbol_id(function_id_v.get());
 
   std::set<ID> seen;
   if (object->value_type == VALUE_TYPE_OBJECT) {
@@ -772,7 +771,7 @@ void VM::call_method(const SharedPtr<Value> &object,
     printf("[OBSOLETE] MAY NOT REACHE HERE\n");
     abort();
     // this->call_method(object,
-    // this->get_class(object->upcast<SymbolValue>()->id()), function_id, seen);
+    // this->get_class(symbol_id(object)), function_id, seen);
   } else if (object->value_type == VALUE_TYPE_CLASS) {
     // class method
     this->call_method(object, object.get(), function_id, seen);

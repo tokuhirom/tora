@@ -90,7 +90,6 @@ class VM {
   void execute_normal();
   void execute_trace();
 
-  Value *to_bool(bool b) const;
 
   void init_globals(const std::vector<std::string> &args);
 

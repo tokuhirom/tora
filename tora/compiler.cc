@@ -786,7 +786,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
       if (this->is_builtin(funcname)) {
         ID id = this->symbol_table->get_id(
             node->upcast<FuncallNode>()->name()->upcast<StrNode>()->str_value);
-        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+        MortalSymbolValue sym(id);
+        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, sym.get());
         push_op(o);
         SharedPtr<OP> tmp = new OP;
         tmp->op_type = OP_BUILTIN_FUNCALL;
@@ -803,8 +804,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         bool splitted =
             tora::split_package_funname(funcname, pkgname, funcname2);
         ID id = this->symbol_table->get_id(funcname2);
-        SharedPtr<Value> v = new SymbolValue(id);
-        push_op(new ValueOP(OP_PUSH_VALUE, v));
+        MortalSymbolValue sym(id);
+        push_op(new ValueOP(OP_PUSH_VALUE, sym.get()));
 
         push_op(new OP(OP_FUNCALL, args_len,
                        splitted ? symbol_table->get_id(pkgname)
@@ -1325,8 +1326,9 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
         if (mcn->method()->type == NODE_IDENTIFIER) {
           ID id = this->symbol_table->get_id(
               mcn->method()->upcast<StrNode>()->str_value);
+          MortalSymbolValue sym(id);
           SharedPtr<ValueOP> o =
-              new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+              new ValueOP(OP_PUSH_VALUE, sym.get());
           push_op(o);
         } else {
           fprintf(stderr, "Compilation error. This is not a id.\n");
@@ -1336,7 +1338,8 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
       } else {
         // closure call
         ID id = symbol_table->get_id("()");
-        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, new SymbolValue(id));
+        MortalSymbolValue sym(id);
+        SharedPtr<ValueOP> o = new ValueOP(OP_PUSH_VALUE, sym);
         push_op(o);
       }
       this->compile(mcn->object());

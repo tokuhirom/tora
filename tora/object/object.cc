@@ -40,7 +40,7 @@ static SharedPtr<Value> object_meta(VM *vm, Value *self) {
     MortalObjectValue o(
       vm,
       n.get(),
-      vm->get_class(self->upcast<SymbolValue>()->id()).get()
+      vm->get_class(symbol_id(self)).get()
     );
     return o.get();
   } else if (self->value_type == VALUE_TYPE_OBJECT) {

@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 # SET(CMAKE_CXX_COMPILER "clang++")
 # SET(CMAKE_C_COMPILER "clang")
 SET(CMAKE_CC_FLAGS "${CMAKE_CC_FLAGS} ")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=2 -std=c++11 -D_REENTRANT -Wall -Wnon-virtual-dtor -Woverloaded-virtual -Wno-sign-compare -fstack-protector -Wno-unused-function -fPIC")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=2 -std=c++11 -D_REENTRANT -Wall -W -Wnon-virtual-dtor -Woverloaded-virtual -Wno-sign-compare -fstack-protector -Wno-unused-parameter -Wno-unused-function -fPIC")
 SET(CMAKE_CXX_FLAGS_RELEASE " -O2 -g -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 SET(CMAKE_EXE_LINKER_FLAGS "-rdynamic -L.")
@@ -94,6 +94,8 @@ SET(TORA_SRCS
     tora/object/double.cc      tora/object/object.cc              tora/value/bytes.cc
     tora/object/dynaloader.cc  tora/object/re2_regexp_matched.cc  tora/value/class.cc
     tora/object/env.cc         tora/object/regexp.cc              tora/value/code.cc tora/value/file_package.cc
+
+    tora/value/symbol.cc
 
     tora/class_builder.cc
 )

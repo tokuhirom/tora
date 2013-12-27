@@ -25,7 +25,7 @@ SharedPtr<Value> tora::Symbol_bless(VM *vm, Value *klass, Value *data) {
   assert(klass->value_type == VALUE_TYPE_SYMBOL);
   MortalObjectValue o(
       vm,
-      vm->get_class(klass->upcast<SymbolValue>()->id()).get(),
+      vm->get_class(symbol_id(klass)).get(),
       data
   );
   return o.get();

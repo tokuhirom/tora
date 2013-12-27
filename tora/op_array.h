@@ -35,7 +35,7 @@ class OPArray {
     return this->ops.at(i);
 #endif
   }
-  const op_type_t op_type_at(size_t i) const { return this->op_types[i]; }
+  op_type_t op_type_at(size_t i) const { return this->op_types[i]; }
   size_t size() const { return this->ops.size(); }
   void push_back(OP* o, size_t lineno) {
     o->retain();

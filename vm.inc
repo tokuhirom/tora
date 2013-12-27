@@ -256,9 +256,9 @@ OP_BUILTIN_FUNCALL {
     }
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, (int) stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_BUILTINFUNCALL)\n", this->symbol_table->id2name(symbol_id(funname.get())).c_str(), argcnt, (int) stack.size());
     }
-    ID id = funname->upcast<SymbolValue>()->id();
+    ID id = symbol_id(funname.get());
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions_.find(id);
     assert(iter->second->is_native());
@@ -286,14 +286,14 @@ OP_FUNCALL {
 #ifndef NDEBUG
     if (!(stack.size() >= (size_t) argcnt)) {
         dump_stack();
-        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(), argcnt, (int) stack.size());
+        this->die("[BUG] bad argument: %s requires %d arguments but only %d items available on stack(OP_FUNCALL)\n", this->symbol_table->id2name(symbol_id(funname.get())).c_str(), argcnt, (int) stack.size());
     }
 #endif
-    ID id = funname->upcast<SymbolValue>()->id();
+    ID id = symbol_id(funname.get());
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     // this->find_package(this->package_id())->dump(this->symbol_table, 1);
 
-// printf("CALLING------ %s\n", symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str());
+// printf("CALLING------ %s\n", symbol_table->id2name(symbol_id(funname)).c_str());
     // TODO split this part to other op code for performance?
     /*
     printf("in package '%s'\n",
@@ -342,7 +342,7 @@ OP_FUNCALL {
                         } else {
                             throw new ExceptionValue(
                                 "ArgumentException: %s needs %d arguments but you passed %d arguments.",
-                                this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str(),
+                                this->symbol_table->id2name(symbol_id(funname.get())).c_str(),
                                 code->code_params()->size(),
                                 orig_argcnt);
                         }
@@ -377,7 +377,7 @@ OP_FUNCALL {
         }
     } else {
         this->die("Unknown function '%s'",
-            this->symbol_table->id2name(funname->upcast<SymbolValue>()->id()).c_str()
+            this->symbol_table->id2name(symbol_id(funname.get())).c_str()
         );
     }
 }
@@ -476,7 +476,8 @@ OP_LEAVE {
 }
 
 OP_PUSH_IDENTIFIER {
-    stack.push_back(new SymbolValue(get_int_operand()));
+  MortalSymbolValue sym(get_int_operand());
+  stack.push_back(sym.get());
 }
 
 OP_DUMP {
@@ -1020,7 +1021,7 @@ OP_SET_PACKAGE_VARIABLE {
     stack.pop_back();
 
     int vid = get_int_operand();
-    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id());
+    Package *pkg = find_package(symbol_id(pkgid));
     pkg->set_variable(vid, rval);
 
     stack.push_back(rval);
@@ -1072,7 +1073,7 @@ OP_GET_PACKAGE_VARIABLE {
     stack.pop_back();
 
     int vid = get_int_operand();
-    Package *pkg = find_package(pkgid->upcast<SymbolValue>()->id());
+    Package *pkg = find_package(symbol_id(pkgid));
     auto iter = pkg->find(vid);
     SharedPtr<Value> ret(iter!=pkg->end() ? iter->second : new_undef_value());
     stack.push_back(ret);
