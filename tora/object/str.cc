@@ -71,8 +71,7 @@ static SharedPtr<Value> str_match(VM *vm, Value *self_v, Value *arg1) {
     return vm->to_bool(get_str_value(self_v)->find(*get_str_value(pattern)) !=
                        std::string::npos);
   } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
-    SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
-    return regex->match(vm, *get_str_value(self_v));
+    return regexp_match(arg1, vm, *get_str_value(self_v)).get();
   } else {
     throw new ArgumentExceptionValue(
         "String.match() requires string or regexp object for first argument, "
@@ -97,10 +96,8 @@ static SharedPtr<Value> str_replace(VM *vm, Value *self, Value *arg1,
     RE2::GlobalReplace(&ret, pattern, rewrite_v->to_s());
     return new_str_value(ret);
   } else if (arg1->value_type == VALUE_TYPE_REGEXP) {
-    SharedPtr<AbstractRegexpValue> regex = arg1->upcast<AbstractRegexpValue>();
     int replacements;
-    std::string ret =
-        regex->replace(*get_str_value(self), rewrite_v->to_s(), replacements);
+    std::string ret = regexp_replace(arg1, *get_str_value(self), rewrite_v->to_s(), replacements);
     return new_str_value(ret);
   } else {
     throw new ArgumentExceptionValue(
@@ -147,7 +144,7 @@ static SharedPtr<Value> str_scan(VM *vm, Value *self, Value *re_v) {
   }
 
   assert(self->value_type == VALUE_TYPE_STR);
-  return re_v->upcast<AbstractRegexpValue>()->scan(vm, *get_str_value(self));
+  return regexp_scan(re_v, vm, *get_str_value(self)).get();
 }
 
 /**
@@ -176,8 +173,7 @@ static SharedPtr<Value> str_split(VM *vm, Value *self,
   }
 
   assert(self->value_type == VALUE_TYPE_STR);
-  return re_v->upcast<AbstractRegexpValue>()->split(vm, *get_str_value(self),
-                                                    limit);
+  return regexp_split(re_v.get(), vm, *get_str_value(self), limit).get();
 }
 
 /**

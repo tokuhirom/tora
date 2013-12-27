@@ -2,15 +2,11 @@
 #define TORA_OBJECT_H_
 
 #include "shared_ptr.h"
-#include <vector>
-#include <memory>
-#include <re2/re2.h>
 
 namespace tora {
 
 class VM;
 class Value;
-class RE2RegexpValue;
 class SharedValue;
 
 void Init_Array(VM *vm);
@@ -39,9 +35,6 @@ void Init_FilePackage(VM *vm);
 SharedPtr<Value> Symbol_bless(VM *vm, Value *self, Value *data);
 SharedValue Dir_new(VM *vm, const std::string &dirname);
 SharedPtr<Value> File_open(VM *vm, Value *fname, Value *mode);
-SharedPtr<Value> RE2_Regexp_Matched_new(
-    VM *vm, RE2RegexpValue *re,
-    const std::shared_ptr<std::vector<re2::StringPiece>> &matches);
 
 void load_builtin_objects(VM *vm);
 };

@@ -23,7 +23,8 @@ using namespace tora;
  */
 static SharedPtr<Value> Regexp_flags(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_REGEXP);
-  MortalIntValue miv(self->upcast<AbstractRegexpValue>()->flags()); return miv.get();
+  MortalIntValue miv((regexp_get_flags(self)));
+  return miv.get();
 }
 
 /**
@@ -32,7 +33,8 @@ static SharedPtr<Value> Regexp_flags(VM* vm, Value* self) {
  * quote meta character in $val and return escaped string.
  */
 static SharedPtr<Value> Regexp_quotemeta(VM* vm, Value* self, Value* val) {
-  return new_str_value(RE2RegexpValue::quotemeta(val->to_s()));
+  MortalStrValue s(regexp_quotemeta(val->to_s()));
+  return s.get();
 }
 
 /**
@@ -41,7 +43,8 @@ static SharedPtr<Value> Regexp_quotemeta(VM* vm, Value* self, Value* val) {
  * multiline flag.
  */
 static SharedPtr<Value> Regexp_MULTILINE(VM* vm, Value* self) {
-  MortalIntValue miv(REGEXP_MULTILINE); return miv.get();
+  MortalIntValue miv(REGEXP_MULTILINE);
+  return miv.get();
 }
 
 /**

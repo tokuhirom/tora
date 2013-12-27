@@ -47,9 +47,7 @@ std::string Inspector::inspect(Value* v) const {
     case VALUE_TYPE_REGEXP: {
       // TODO: escape '/' character
       std::string ret("/");
-      const AbstractRegexpValue* rv =
-          static_cast<const AbstractRegexpValue*>(v);
-      ret += rv->pattern();
+      ret += regexp_pattern(v);
       ret += "/";
       return ret;
     }

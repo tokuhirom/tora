@@ -709,11 +709,10 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
       }
     case NODE_REGEXP: {
       auto re = node->upcast<RegexpNode>();
-      SharedPtr<AbstractRegexpValue> sv =
-          new RE2RegexpValue(re->regexp_value, re->flags);
-      if (!sv->ok()) {
+      MortalRegexpValue sv(re->regexp_value, re->flags);
+      if (!regexp_ok(sv.get())) {
         this->fail("Regexp compilation failed: /%s/ : %s\n",
-                   sv->pattern().c_str(), sv->error().c_str());
+                   regexp_pattern(sv.get()).c_str(), regexp_error(sv.get()).c_str());
         break;
       }
       push_op(new ValueOP(OP_PUSH_VALUE, sv));

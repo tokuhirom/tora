@@ -161,11 +161,11 @@ static SharedPtr<Value> av_grep(VM* vm, Value* self, Value* stuff_v) {
     }
     return ret.get();
   } else if (stuff_v->value_type == VALUE_TYPE_REGEXP) {
-    SharedPtr<AbstractRegexpValue> re = stuff_v->upcast<AbstractRegexpValue>();
+    Value * re = stuff_v;
     for (tra_int i = 0, l = array_size(self); i < l; ++i) {
       std::string str = array_get_item(self, i)->to_s();
 
-      if (re->match_bool(vm, str)) {
+      if (regexp_match_bool(re, str)) {
         array_push_back(ret.get(), array_get_item(self, i));
       }
     }

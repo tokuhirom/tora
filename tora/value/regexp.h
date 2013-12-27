@@ -8,71 +8,40 @@
 
 namespace tora {
 
-// ref. http://docs.python.org/library/re.html#module-contents
-enum regexp_flags {
-  REGEXP_GLOBAL = 1,      // 'g'
-  REGEXP_MULTILINE = 2,   // 'm'
-  REGEXP_IGNORECASE = 4,  // 'i'
-  REGEXP_EXPANDED = 8,    // 'x'
-  REGEXP_DOTALL = 16      // 's'
-};
+  // ref. http://docs.python.org/library/re.html#module-contents
+  enum regexp_flags {
+    REGEXP_GLOBAL = 1,      // 'g'
+    REGEXP_MULTILINE = 2,   // 'm'
+    REGEXP_IGNORECASE = 4,  // 'i'
+    REGEXP_EXPANDED = 8,    // 'x'
+    REGEXP_DOTALL = 16      // 's'
+  };
 
-class AbstractRegexpValue : public Value {
- protected:
-  int flags_;
+  class MortalRegexpValue : public MortalValue {
+    static Value* new_value(std::string str, int flags);
+  public:
+    MortalRegexpValue(std::string str, int flags)
+      : MortalValue(new_value(str, flags)) { }
+  };
 
- public:
-  AbstractRegexpValue(int flags) : Value(VALUE_TYPE_REGEXP), flags_(flags) {}
-  virtual ~AbstractRegexpValue() {}
-  virtual bool ok() = 0;
-  virtual const std::string &error() const = 0;
-  virtual const std::string &pattern() const = 0;
-  virtual SharedPtr<Value> match(VM *vm, const std::string &str) = 0;
-  virtual bool match_bool(VM *vm, const std::string &str) = 0;
-  virtual SharedPtr<Value> scan(VM *vm, const std::string &str) = 0;
-  virtual SharedPtr<Value> split(VM *vm, const std::string &str, int limit) = 0;
-  virtual std::string replace(const std::string &str,
-                              const std::string &rewrite,
-                              int &replacements) const = 0;
-  virtual int flags() const { return flags_; }
-};
 
-class RE2RegexpValue : public AbstractRegexpValue {
- private:
-  RE2 *VAL() const { return static_cast<RE2 *>(this->ptr_value_); }
+  SharedValue regexp_match(Value * self, VM *vm, const std::string &str);
+  std::string regexp_pattern(Value * self);
+  std::string regexp_error(Value * self);
+  bool regexp_ok(Value * self);
+  SharedValue regexp_scan(Value* self, VM *vm, const std::string &str);
+  SharedValue regexp_split(Value* self, VM *vm, const std::string &str, int limit);
+  void regexp_dump(Value* self, int indent);
+  int regexp_number_of_capturing_groups(Value *self);
+  std::string regexp_quotemeta(const std::string &str);
+  void regexp_free(Value* self);
+  int regexp_get_flags(Value* self);
+  bool regexp_match_bool(Value* self, const std::string &str);
+  std::string regexp_replace(Value* self, const std::string &str, const std::string &rewrite, int &replacements);
+  SharedValue regexp_matches_get_item(Value* self, tra_int i);
+  void regexp_matched_free(Value* self);
 
- public:
-  RE2RegexpValue(std::string &str, int flags);
-  ~RE2RegexpValue();
-  bool ok() { return VAL()->ok(); }
-  const std::string &pattern() const { return VAL()->pattern(); }
-  const std::string &error() const { return VAL()->error(); }
-  SharedPtr<Value> match(VM *vm, const std::string &str);
-  bool match_bool(VM *vm, const std::string &str);
-  SharedPtr<Value> scan(VM *vm, const std::string &str);
-  SharedPtr<Value> split(VM *vm, const std::string &str, int limit);
-  static std::string quotemeta(const std::string &str) {
-    return RE2::QuoteMeta(str);
-  }
-  std::string replace(const std::string &str, const std::string &rewrite,
-                      int &replacements) const {
-    // optimizable
-    std::string buf(str);
-    if (this->flags() & REGEXP_GLOBAL) {
-      replacements = RE2::GlobalReplace(&buf, *(VAL()), rewrite);
-    } else {
-      replacements = RE2::Replace(&buf, *(VAL()), rewrite);
-    }
-    return buf;
-  }
-  void dump(int indent) {
-    print_indent(indent);
-    printf("/%s/", VAL()->pattern().c_str());
-  }
-  int number_of_capturing_groups() const {
-    return VAL()->NumberOfCapturingGroups();
-  }
-};
+  SharedValue regexp_matched_regexp(Value* self);
 
 static inline int regexp_flag(char c) {
   switch (c) {

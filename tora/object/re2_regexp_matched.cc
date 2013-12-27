@@ -19,35 +19,13 @@ using namespace tora;
  * You would get a instance of this class in String#match method.
  */
 
-class RE2RegexpMatched {
- private:
-  SharedPtr<RE2RegexpValue> re_;
-  std::shared_ptr<std::vector<re2::StringPiece>> matches_;
-
- public:
-  RE2RegexpMatched(
-      RE2RegexpValue* re,
-      const std::shared_ptr<std::vector<re2::StringPiece>>& matches)
-      : re_(re), matches_(matches) {}
-  const SharedPtr<RE2RegexpValue>& re() const { return re_; }
-  const std::shared_ptr<std::vector<re2::StringPiece>>& matches() const {
-    return matches_;
-  }
-};
-
-static inline RE2RegexpMatched* SELF(Value* self) {
-  assert(self->value_type == VALUE_TYPE_OBJECT);
-  return static_cast<RE2RegexpMatched*>(
-      get_ptr_value(object_data(self)));
-}
-
 /**
  * $matched.regexp() : Regexp
  *
  * Get a source regular expression object.
  */
 static SharedPtr<Value> RE2_Regexp_Matched_regexp(VM* vm, Value* self) {
-  return SELF(self)->re();
+  return regexp_matched_regexp(self).get();
 }
 
 /**
@@ -57,10 +35,9 @@ static SharedPtr<Value> RE2_Regexp_Matched_regexp(VM* vm, Value* self) {
  */
 static SharedPtr<Value> RE2_Regexp_Matched_to_array(VM* vm, Value* self) {
   MortalArrayValue ary;
-  const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
-  for (int i = 0; i < re->number_of_capturing_groups(); i++) {
-    const re2::StringPiece& res = SELF(self)->matches()->at(i);
-    MortalStrValue s(std::string(res.data(), res.length()));
+  SharedValue re = regexp_matched_regexp(self);
+  for (int i = 0; i < regexp_number_of_capturing_groups(re.get()); i++) {
+    SharedValue s = regexp_matches_get_item(self, i);
     array_push_back(ary.get(), s.get());
   }
   return ary.get();
@@ -78,16 +55,12 @@ static SharedPtr<Value> RE2_Regexp_Matched_to_array(VM* vm, Value* self) {
 static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM* vm, Value* self,
                                                    Value* index) {
   if (index->value_type == VALUE_TYPE_INT) {
-    const SharedPtr<RE2RegexpValue>& re = SELF(self)->re();
-    if (index->to_int() > re->number_of_capturing_groups()) {
+    SharedValue re = regexp_matched_regexp(self);
+    if (index->to_int() > regexp_number_of_capturing_groups(re.get())) {
       return new_undef_value();
     }
-    const re2::StringPiece& res = SELF(self)->matches()->at(index->to_int());
-    if (res.data()) {
-      return new_str_value(std::string(res.data(), res.length()));
-    } else {
-      return new_undef_value();
-    }
+    SharedValue res = regexp_matches_get_item(self, index->to_int());
+    return res.get();
     // TODO: check out of range
   } else if (index->value_type == VALUE_TYPE_STR) {
     TODO();
@@ -100,20 +73,9 @@ static SharedPtr<Value> RE2_Regexp_Matched_getitem(VM* vm, Value* self,
 }
 
 static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM* vm, Value* self) {
-  delete SELF(self);
-  return new_undef_value();
-}
-
-SharedPtr<Value> tora::RE2_Regexp_Matched_new(
-    VM* vm, RE2RegexpValue* re,
-    const std::shared_ptr<std::vector<re2::StringPiece>>& matches) {
-  MortalPointerValue p(new RE2RegexpMatched(re, matches));
-  MortalObjectValue o(
-    vm,
-    vm->get_builtin_class(SYMBOL_RE2_REGEXP_MATCHED_CLASS).get(),
-    p.get()
-  );
-  return o.get();
+  regexp_matched_free(self);
+  MortalUndefValue u;
+  return u.get();
 }
 
 void tora::Init_RE2_Regexp_Matched(VM* vm) {
