@@ -194,7 +194,7 @@ OP_ADD {
     stack.pop_back(); \
     const SharedPtr<Value>& lhs = stack.back(); \
     \
-    SharedValue ret = meth(lhs, rhs); \
+    SharedValue ret = meth(lhs.get(), rhs.get()); \
     stack[stack.size()-1].reset(ret.get()); \
     } while (0)
 
@@ -513,7 +513,7 @@ OP_EQ {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_NE {
@@ -524,7 +524,7 @@ OP_NE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_GT {
@@ -535,7 +535,7 @@ OP_GT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_LT {
@@ -546,7 +546,7 @@ OP_LT {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_GE {
@@ -557,7 +557,7 @@ OP_GE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_LE {
@@ -568,7 +568,7 @@ OP_LE {
     const SharedPtr<Value> lhs(stack.back());
     stack.pop_back();
     const SharedPtr<Value> rhs(stack.back());
-    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs, rhs)));
+    stack[stack.size()-1].reset((Value*)to_bool(cmpop(i, d, s, lhs.get(), rhs.get())));
 }
 
 OP_SETLOCAL {
@@ -635,7 +635,7 @@ OP_GET_ITEM {
     stack.pop_back();
     const SharedPtr<Value> & container = stack.back();
 
-    SharedPtr<Value> ret(op_get_item(container, index));
+    SharedPtr<Value> ret(op_get_item(container.get(), index.get()));
     stack.back().reset(ret.get());
 }
 
@@ -657,7 +657,7 @@ OP_SET_ITEM {
 
 OP_UNARY_NEGATIVE {
     const SharedPtr<Value>& v = stack.back();
-    stack[stack.size()-1].reset(op_unary_negative(v).get());
+    stack[stack.size()-1].reset(op_unary_negative(v.get()).get());
 }
 
 OP_MAKE_HASH {

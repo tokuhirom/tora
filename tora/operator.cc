@@ -14,7 +14,7 @@ using namespace tora;
 /**
  * binary addition operator
  */
-SharedValue tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_add(Value*lhs, Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     if (rhs->value_type == VALUE_TYPE_DOUBLE) {
       // upgrade to double type
@@ -44,7 +44,7 @@ SharedValue tora::op_add(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
  * subtract lhs and rhs.
  * return value must be return by caller.
  */
-SharedValue tora::op_sub(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_sub(Value*lhs, Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     MortalDoubleValue d(lhs->to_double() - rhs->to_double());
     return d.get();
@@ -63,7 +63,7 @@ SharedValue tora::op_sub(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
   abort();
 }
 
-SharedValue tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_div(Value*lhs, Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     double rhs_double = rhs->to_double();
     if (rhs_double == 0) {
@@ -94,7 +94,7 @@ SharedValue tora::op_div(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
   abort();
 }
 
-SharedValue tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_mul(Value*lhs, Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     MortalDoubleValue d(lhs->to_double() * rhs->to_double());
     return d.get();
@@ -120,7 +120,7 @@ SharedValue tora::op_mul(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
   abort();
 }
 
-SharedValue tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rhs) {
+SharedValue tora::op_pow(Value*lhs, Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     MortalDoubleValue d(pow(lhs->to_double(), rhs->to_double()));
     return d;
@@ -138,8 +138,8 @@ SharedValue tora::op_pow(const SharedPtr<Value> &lhs, const SharedPtr<Value> &rh
   abort();
 }
 
-SharedValue tora::op_bitand(const SharedPtr<Value> &lhs,
-                       const SharedPtr<Value> &rhs) {
+SharedValue tora::op_bitand(Value*lhs,
+                       Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() & rhs->to_int());
   } else {
@@ -149,8 +149,8 @@ SharedValue tora::op_bitand(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_bitor(const SharedPtr<Value> &lhs,
-                      const SharedPtr<Value> &rhs) {
+SharedValue tora::op_bitor(Value*lhs,
+                      Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() | rhs->to_int());
   } else {
@@ -161,8 +161,8 @@ SharedValue tora::op_bitor(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_bitxor(const SharedPtr<Value> &lhs,
-                       const SharedPtr<Value> &rhs) {
+SharedValue tora::op_bitxor(Value*lhs,
+                       Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() ^ rhs->to_int());
   } else {
@@ -172,8 +172,8 @@ SharedValue tora::op_bitxor(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_bitlshift(const SharedPtr<Value> &lhs,
-                          const SharedPtr<Value> &rhs) {
+SharedValue tora::op_bitlshift(Value*lhs,
+                          Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() << rhs->to_int());
   } else {
@@ -183,8 +183,8 @@ SharedValue tora::op_bitlshift(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_bitrshift(const SharedPtr<Value> &lhs,
-                          const SharedPtr<Value> &rhs) {
+SharedValue tora::op_bitrshift(Value*lhs,
+                          Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     return new IntValue(lhs->to_int() >> rhs->to_int());
   } else {
@@ -194,8 +194,8 @@ SharedValue tora::op_bitrshift(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_modulo(const SharedPtr<Value> &lhs,
-                       const SharedPtr<Value> &rhs) {
+SharedValue tora::op_modulo(Value*lhs,
+                       Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
     double x = lhs->to_int();
     double y = rhs->to_int();
@@ -207,13 +207,13 @@ SharedValue tora::op_modulo(const SharedPtr<Value> &lhs,
   abort();
 }
 
-SharedValue tora::op_unary_negative(const SharedPtr<Value> &v) {
+SharedValue tora::op_unary_negative(Value*v) {
   switch (v->value_type) {
     case VALUE_TYPE_INT:
       return new IntValue(-(get_int_value(*v)));
     case VALUE_TYPE_DOUBLE:
       {
-        MortalDoubleValue d(-get_double_value(v.get()));
+        MortalDoubleValue d(-get_double_value(v));
         return d.get();
       }
     case VALUE_TYPE_OBJECT:
@@ -225,17 +225,17 @@ SharedValue tora::op_unary_negative(const SharedPtr<Value> &v) {
   }
 }
 
-SharedPtr<Value> tora::op_get_item(const SharedPtr<Value> &container,
-                                   const SharedPtr<Value> &index) {
+SharedPtr<Value> tora::op_get_item(Value*container,
+                                   Value*index) {
   switch (container->value_type) {
     case VALUE_TYPE_HASH: {
       std::string index_s = index->to_s();
-      return hash_get_item(container.get(), index_s);
+      return hash_get_item(container, index_s);
     }
     case VALUE_TYPE_ARRAY:
-      return array_get_item(container.get(), index->to_int());
+      return array_get_item(container, index->to_int());
     case VALUE_TYPE_OBJECT:
-      return object_get_item(container.get(), index.get()).get();
+      return object_get_item(container, index).get();
     default:
       throw new ExceptionValue("%s is not a container.\n",
                                container->type_str());
@@ -244,8 +244,8 @@ SharedPtr<Value> tora::op_get_item(const SharedPtr<Value> &container,
 
 template <class operationI, class operationD, class OperationS>
 bool tora::cmpop(operationI operation_i, operationD operation_d,
-                 OperationS operation_s, const SharedPtr<Value> &lhs,
-                 const SharedPtr<Value> &rhs) {
+                 OperationS operation_s, Value*lhs,
+                 Value*rhs) {
 #ifndef NDEBUG
   if (rhs->value_type == VALUE_TYPE_SYMBOL) {
     fprintf(stderr, "[BUG] Do not compare with symbol value.\n");
@@ -274,10 +274,10 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
       switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
           return (
-              operation_d(get_double_value(lhs.get()), (double)get_int_value(*rhs)));
+              operation_d(get_double_value(lhs), (double)get_int_value(*rhs)));
         }
         case VALUE_TYPE_DOUBLE: {
-          return (operation_d(get_double_value(lhs.get()), get_double_value(rhs.get())));
+          return (operation_d(get_double_value(lhs), get_double_value(rhs)));
         }
         default: {
           TODO();  // throw exception
@@ -287,7 +287,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
       break;
     }
     case VALUE_TYPE_BOOL: {
-      return get_bool_value(lhs.get()) == rhs->to_bool();
+      return get_bool_value(lhs) == rhs->to_bool();
     }
     case VALUE_TYPE_UNDEF: { return rhs->value_type == VALUE_TYPE_UNDEF; }
     default:
@@ -301,20 +301,20 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
 }
 
 template bool tora::cmpop(std::equal_to<int>, std::equal_to<double>,
-                          std::equal_to<std::string>, const SharedPtr<Value> &,
-                          const SharedPtr<Value> &);
+                          std::equal_to<std::string>, Value*,
+                          Value*);
 template bool tora::cmpop(std::greater<int>, std::greater<double>,
-                          std::greater<std::string>, const SharedPtr<Value> &,
-                          const SharedPtr<Value> &);
+                          std::greater<std::string>, Value*,
+                          Value*);
 template bool tora::cmpop(std::greater_equal<int>, std::greater_equal<double>,
                           std::greater_equal<std::string>,
-                          const SharedPtr<Value> &, const SharedPtr<Value> &);
+                          Value*, Value*);
 template bool tora::cmpop(std::less<int>, std::less<double>,
-                          std::less<std::string>, const SharedPtr<Value> &,
-                          const SharedPtr<Value> &);
+                          std::less<std::string>, Value*,
+                          Value*);
 template bool tora::cmpop(std::less_equal<int>, std::less_equal<double>,
                           std::less_equal<std::string>,
-                          const SharedPtr<Value> &, const SharedPtr<Value> &);
+                          Value*, Value*);
 template bool tora::cmpop(std::not_equal_to<int>, std::not_equal_to<double>,
                           std::not_equal_to<std::string>,
-                          const SharedPtr<Value> &, const SharedPtr<Value> &);
+                          Value*, Value*);
