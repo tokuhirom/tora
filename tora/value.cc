@@ -38,6 +38,8 @@ void Value::release() {
 Value::~Value() {
   if (value_type == VALUE_TYPE_STR) {
     delete static_cast<StringImpl*>(ptr_value_);
+  } else if (value_type == VALUE_TYPE_BYTES) {
+    delete static_cast<BytesImpl*>(ptr_value_);
   } else if (value_type == VALUE_TYPE_RANGE) {
     range_free(this);
   } else if (value_type == VALUE_TYPE_CLASS) {
@@ -150,7 +152,7 @@ std::string Value::to_s() {
       return *get_str_value(this);
     case VALUE_TYPE_BYTES:
       // TODO: utf8 validation?
-      return (static_cast<BytesValue*>(this)->str_value());
+      return bytes_stringify(this);
     case VALUE_TYPE_INT: {
       std::ostringstream os;
       os << get_int_value(*this);
@@ -320,3 +322,9 @@ ID Value::object_package_id() const {
   }
   abort();
 }
+
+std::string value_to_bytes(Value* v)
+{
+  return v->to_s();
+}
+

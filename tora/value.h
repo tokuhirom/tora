@@ -66,7 +66,6 @@ class ExceptionImpl {
 };
 
 typedef std::string StringImpl;
-typedef std::string BytesImpl;
 
 // TODO: remove virtual from this class for performance.
 /**
@@ -204,11 +203,6 @@ static void* get_ptr_value(const SharedPtr<Value>& v) {
   return get_ptr_value(v.get());
 }
 
-static BytesImpl* get_bytes_value(const Value* v) {
-  assert(type(v) == VALUE_TYPE_BYTES);
-  return static_cast<BytesImpl*>(v->ptr_value_);
-}
-
 static std::string* get_str_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_STR);
   return static_cast<std::string*>(v->ptr_value_);
@@ -218,11 +212,6 @@ static Value* new_str_value(const StringImpl& s) {
   Value* v = new Value(VALUE_TYPE_STR);
   v->ptr_value_ = new std::string(s);
   return v;
-}
-
-static BytesImpl* get_bytes_value(const SharedPtr<Value>& v) {
-  // remove me
-  return get_bytes_value(v.get());
 }
 
 static StringImpl* get_str_value(const SharedPtr<Value>& v) {
@@ -236,6 +225,7 @@ static int get_int_value(const SharedPtr<Value>& v) {
 }
 
 static Value* new_undef_value() { return new Value(VALUE_TYPE_UNDEF); }
+std::string value_to_bytes(Value* v);
 
 /**
  * Hold local variable.

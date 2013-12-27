@@ -74,7 +74,7 @@ std::string Inspector::inspect(Value* v) const {
       return "#<Symbol>";
     case VALUE_TYPE_BYTES: {
       std::ostringstream os;
-      std::string buf = static_cast<const BytesValue*>(v)->str_value();
+      std::string buf = *get_bytes_value(v);
 
       os << "b\"";
       for (auto iter = buf.begin(); iter != buf.end(); iter++) {

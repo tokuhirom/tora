@@ -5,29 +5,23 @@
 
 namespace tora {
 
-class BytesValue : public Value {
- private:
-  const std::string &VAL() const { return *(this->str_value_); }
+  typedef std::string BytesImpl;
 
- public:
-  BytesValue() : Value(VALUE_TYPE_BYTES) {}
-  BytesValue(const char *str) : Value(VALUE_TYPE_BYTES) {
-    this->str_value_ = new std::string(str);
+  class MortalBytesValue : public MortalValue {
+    static Value* new_value(const std::string s);
+  public:
+    MortalBytesValue(const std::string s)
+      : MortalValue(new_value(s)) { }
+  };
+
+  static BytesImpl* get_bytes_value(const Value* v) {
+    assert(type(v) == VALUE_TYPE_BYTES);
+    return static_cast<BytesImpl*>(v->ptr_value_);
   }
-  BytesValue(const char *str, size_t len) : Value(VALUE_TYPE_BYTES) {
-    this->str_value_ = new std::string(str, len);
-  }
-  BytesValue(const std::string &str) : Value(VALUE_TYPE_BYTES) {
-    this->str_value_ = new std::string(str);
-  }
-  ~BytesValue() { delete str_value_; }
-  std::string str_value() const { return VAL(); }
-  const char *c_str() const { return VAL().c_str(); }
-  void set_str(const char *s) { *str_value_ = s; }
-  void set_str(const std::string &s) { *str_value_ = s; }
-  int length();
-  size_t size() { return VAL().size(); }
-};
+
+  tra_int bytes_length(const Value* v);
+  std::string bytes_stringify(Value* self);
+
 };
 
 #endif  // TORA_VALUE_BYTES_H_

@@ -251,7 +251,8 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v,
     throw new ArgumentExceptionValue("This is not a string value.");
   }
   if (args.size() == 0) {  // "foobar".decode()
-    return new BytesValue(*get_str_value(self_v));
+    MortalBytesValue b(*get_str_value(self_v));
+    return b.get();
   } else if (args.size() == 1) {
     // convert to utf-8.
     icu::UnicodeString src(get_str_value(self_v)->c_str(), "utf8");
@@ -261,7 +262,8 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v,
     std::vector<char> result(length + 1);
     src.extract(0, src.length(), &result[0], dstcharset.c_str());
 
-    return new BytesValue(std::string(result.begin(), result.end() - 1));
+    MortalBytesValue b(std::string(result.begin(), result.end() - 1));
+    return b.get();
   } else {
     throw new ArgumentExceptionValue(
         "Bytes#decode requires 0 or 1 arguments. but you passed %d.",

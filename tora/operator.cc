@@ -28,8 +28,12 @@ SharedValue tora::op_add(Value*lhs, Value*rhs) {
     std::string s = rhs->to_s();
     return new_str_value(*(get_str_value(lhs)) + s);
   } else if (lhs->value_type == VALUE_TYPE_BYTES) {
-    std::string s = rhs->to_s();
-    return new BytesValue(lhs->upcast<BytesValue>()->str_value() + s);
+    if (type(rhs) == VALUE_TYPE_BYTES) {
+      MortalBytesValue b(*get_bytes_value(lhs) + *get_bytes_value(rhs));
+      return b.get();
+    } else {
+      throw new ExceptionValue("You can't concatenate '%s' with bytes.\n", rhs->type_str());
+    }
   } else if (lhs->value_type == VALUE_TYPE_DOUBLE) {
     MortalDoubleValue d(lhs->to_double() + rhs->to_double());
     return d.get();
@@ -265,7 +269,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
     case VALUE_TYPE_BYTES: {
       if (rhs->value_type == VALUE_TYPE_BYTES) {
         return (operation_s(*(get_bytes_value(lhs)),
-                            rhs->upcast<BytesValue>()->str_value()));
+                            (*get_bytes_value(rhs))));
       } else {
         return false;
       }
