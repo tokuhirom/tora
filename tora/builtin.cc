@@ -13,6 +13,7 @@
 #include "value/symbol.h"
 #include "value/exception.h"
 #include "value/double.h"
+#include "value/int.h"
 #include "value.h"
 #include "object.h"
 #include "inspector.h"
@@ -106,7 +107,7 @@ static SharedPtr<Value> builtin_rand(
       return d.get();
     } else if (v->value_type == VALUE_TYPE_INT) {
       std::uniform_int_distribution<int> dist(0, get_int_value(*v));
-      return new IntValue(dist(*(vm->myrand)));
+      MortalIntValue miv(dist(*(vm->myrand))); return miv.get();
     } else {
       // support to_int?
       return new ExceptionValue("Invalid arguments for rand() : %s",
@@ -218,9 +219,9 @@ static SharedPtr<Value> builtin_getcwd(VM *vm) {
 static SharedPtr<Value> builtin_getpid(VM *vm) {
 // POSIX.1-2001, 4.3BSD, SVr4.
 #ifdef _WIN32
-  return new IntValue(-1);
+  MortalIntValue miv(-1); return miv.get();
 #else
-  return new IntValue(getpid());
+  MortalIntValue miv(getpid()); return miv.get();
 #endif
 }
 
@@ -230,9 +231,9 @@ static SharedPtr<Value> builtin_getpid(VM *vm) {
 static SharedPtr<Value> builtin_getppid(VM *vm) {
 // POSIX.1-2001, 4.3BSD, SVr4.
 #ifdef _WIN32
-  return new IntValue(-1);
+  MortalIntValue miv(-1); return miv.get();
 #else
-  return new IntValue(getppid());
+  MortalIntValue miv(getppid()); return miv.get();
 #endif
 }
 
@@ -243,13 +244,13 @@ static SharedPtr<Value> builtin_getppid(VM *vm) {
  */
 static SharedPtr<Value> builtin_system(VM *vm, Value *command) {
   // system(3) conforming to: C89, C99, POSIX.1-2001.
-  return new IntValue(system(command->to_s().c_str()));
+  MortalIntValue miv(system(command->to_s().c_str())); return miv.get();
 }
 
 static SharedPtr<Value> builtin_abs(VM *vm, Value *v) {
   if (v->value_type == VALUE_TYPE_INT) {
     int i = v->to_int();
-    return new IntValue(i < 0 ? -i : i);
+    MortalIntValue miv(i < 0 ? -i : i); return miv.get();
   } else if (v->value_type == VALUE_TYPE_DOUBLE) {
     double i = v->to_double();
     MortalDoubleValue d(i < 0 ? -i : i);
@@ -300,7 +301,7 @@ static SharedPtr<Value> builtin_hex(VM *vm, Value *v) {
     throw new ExceptionValue("The value is not hexadecimal: %s.",
                              get_str_value(v)->c_str());
   }
-  return new IntValue(n);
+  MortalIntValue miv(n); return miv.get();
 }
 
 static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
@@ -318,11 +319,11 @@ static SharedPtr<Value> builtin_oct(VM *vm, Value *v) {
     throw new ExceptionValue("The value is not oct: %s.",
                              get_str_value(v)->c_str());
   }
-  return new IntValue(n);
+  MortalIntValue miv(n); return miv.get();
 }
 
 static SharedPtr<Value> builtin_int(VM *vm, Value *v) {
-  return new IntValue(v->to_int());
+  MortalIntValue miv(v->to_int()); return miv.get();
 }
 
 static SharedPtr<Value> builtin_log(VM *vm, Value *v) {

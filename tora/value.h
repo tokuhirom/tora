@@ -271,7 +271,6 @@ class MortalUndefValue : public MortalValue {
 };
 };
 
-#include "value/int.h"
 #include "value/exception.h"
 
 #endif  // TORA_VALUE_H_

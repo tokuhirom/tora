@@ -1,5 +1,6 @@
 #include "nanotap.h"
 #include "../tora/frame.h"
+#include "../tora/value/int.h"
 #include <stdarg.h>
 #include <assert.h>
 
@@ -10,7 +11,8 @@ int main() {
 
     {
         SharedPtr<PadList> p1 = new PadList(1, NULL);
-        p1->set(0, new IntValue(5));
+        MortalIntValue i5(5);
+        p1->set(0, i5.get());
         SharedPtr<Value> val = p1->get(0);
         ok(!!val.get());
         is(val->value_type, VALUE_TYPE_INT);
@@ -38,10 +40,14 @@ int main() {
         SharedPtr<PadList> p1 = new PadList(1, NULL);
         SharedPtr<PadList> p2 = new PadList(1, p1.get());
         SharedPtr<PadList> p3 = new PadList(3, p2.get());
-        p1->set(0, new IntValue(5));
-        p2->set(1, new IntValue(9));
-        p3->set(2, new IntValue(6));
-        p3->set(0, new IntValue(3));
+        MortalIntValue i5(5);
+        MortalIntValue i9(9);
+        MortalIntValue i6(6);
+        MortalIntValue i3(3);
+        p1->set(0, i5.get());
+        p2->set(1, i9.get());
+        p3->set(2, i6.get());
+        p3->set(0, i3.get());
 
         is(p2->get_dynamic(1, 0)->value_type, VALUE_TYPE_INT);
         is(p2->get_dynamic(1, 0)->to_int(), 5);

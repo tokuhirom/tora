@@ -4,6 +4,7 @@
 #include "../value/object.h"
 #include "../value/code.h"
 #include "../value/class.h"
+#include "../value/int.h"
 #include "../peek.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"

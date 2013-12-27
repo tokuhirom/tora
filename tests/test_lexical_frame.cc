@@ -3,6 +3,7 @@
 #include "../tora/vm.h"
 #include "../tora/symbol_table.h"
 #include "../tora/op_array.h"
+#include "../tora/value/int.h"
 #include <stdarg.h>
 #include <assert.h>
 
@@ -33,9 +34,11 @@ int main() {
     // LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
         SharedPtr<LexicalVarsFrame> f1(new LexicalVarsFrame(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f1);
-        f1->set_variable(0, new IntValue(5));
+        MortalIntValue i(5);
+        f1->set_variable(0, i.get());
         is(f1->get_variable(0)->to_int(), 5);
-        f1->set_variable(0, new IntValue(9));
+        MortalIntValue i9(9);
+        f1->set_variable(0, i9.get());
         is(f1->get_variable(0)->to_int(), 9);
     }
 

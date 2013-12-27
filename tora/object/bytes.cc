@@ -5,6 +5,7 @@
 #include "../value/bytes.h"
 #include "../value.h"
 #include "../value/class.h"
+#include "../value/int.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
 #include <unicode/unistr.h>

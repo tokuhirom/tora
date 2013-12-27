@@ -18,6 +18,7 @@
 #include "value/class.h"
 #include "value/file_package.h"
 #include "value/bool.h"
+#include "value/int.h"
 
 #include "object.h"
 
@@ -429,7 +430,8 @@ void VM::call_native_func(const CallbackFunction *callback, int argcnt) {
       for (int i = 0; i < argcnt; i++) {
         stack.pop_back();  // Foo::Bar.baz();
       }
-      stack.push_back(new IntValue(callback->const_int));
+      MortalIntValue r(callback->const_int);
+      stack.push_back(r.get());
       break;
     }
     case CallbackFunction::type_vm_self_v: {

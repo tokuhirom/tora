@@ -4,6 +4,7 @@
 #include "../vm.h"
 #include "../value/object.h"
 #include "../value/pointer.h"
+#include "../value/int.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
 
@@ -78,7 +79,8 @@ static SharedPtr<Value> time_epoch(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
   SharedPtr<Value> t = object_data(self);
   std::time_t ret = std::mktime(static_cast<struct tm*>(get_ptr_value(t)));
-  return new IntValue(ret);
+  MortalIntValue i(ret);
+  return i.get();
 }
 
 /**
@@ -120,7 +122,8 @@ static struct tm* GET_TM(Value* self) {
  * Get a year from $time.
  */
 static SharedPtr<Value> time_year(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_year + 1900);
+  MortalIntValue i(GET_TM(self)->tm_year + 1900);
+  return i.get();
 }
 
 /**
@@ -129,7 +132,8 @@ static SharedPtr<Value> time_year(VM* vm, Value* self) {
  * Get a month from $time.
  */
 static SharedPtr<Value> time_month(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_mon + 1);
+  MortalIntValue i(GET_TM(self)->tm_mon + 1);
+  return i.get();
 }
 
 /**
@@ -138,7 +142,7 @@ static SharedPtr<Value> time_month(VM* vm, Value* self) {
  * Get a month from $time.
  */
 static SharedPtr<Value> time_day(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_mday);
+  MortalIntValue miv(GET_TM(self)->tm_mday); return miv.get();
 }
 
 /**
@@ -147,7 +151,7 @@ static SharedPtr<Value> time_day(VM* vm, Value* self) {
  * Get a month from $time.
  */
 static SharedPtr<Value> time_hour(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_hour);
+  MortalIntValue miv(GET_TM(self)->tm_hour); return miv.get();
 }
 
 /**
@@ -156,7 +160,7 @@ static SharedPtr<Value> time_hour(VM* vm, Value* self) {
  * Get a month value from $time.
  */
 static SharedPtr<Value> time_minute(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_min);
+  MortalIntValue miv(GET_TM(self)->tm_min); return miv.get();
 }
 
 /**
@@ -165,7 +169,7 @@ static SharedPtr<Value> time_minute(VM* vm, Value* self) {
  * Get a month value from $time.
  */
 static SharedPtr<Value> time_second(VM* vm, Value* self) {
-  return new IntValue(GET_TM(self)->tm_sec);
+  MortalIntValue miv(GET_TM(self)->tm_sec); return miv.get();
 }
 
 /**
@@ -177,7 +181,7 @@ static SharedPtr<Value> time_wday(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
   SharedPtr<Value> t = object_data(self);
   int ret = static_cast<struct tm*>(get_ptr_value(t))->tm_wday;
-  return new IntValue(ret + 1);
+  MortalIntValue miv(ret + 1); return miv.get();
 }
 
 void tora::Init_Time(VM* vm) {

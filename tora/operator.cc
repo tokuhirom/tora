@@ -7,6 +7,7 @@
 #include "value/double.h"
 #include "ops.gen.h"
 #include "value/bytes.h"
+#include "value/int.h"
 #include <math.h>
 
 using namespace tora;
@@ -22,7 +23,7 @@ SharedValue tora::op_add(Value*lhs, Value*rhs) {
       return d.get();
     } else {
       int i = rhs->to_int();
-      return new IntValue(get_int_value(*lhs) + i);
+      MortalIntValue miv(get_int_value(*lhs) + i); return miv.get();
     }
   } else if (lhs->value_type == VALUE_TYPE_STR) {
     std::string s = rhs->to_s();
@@ -57,7 +58,7 @@ SharedValue tora::op_sub(Value*lhs, Value*rhs) {
       MortalDoubleValue d(lhs->to_double() - rhs->to_double());
       return d.get();
     } else {
-      return new IntValue(get_int_value(*lhs) - rhs->to_int());
+      MortalIntValue miv(get_int_value(*lhs) - rhs->to_int()); return miv.get();
     }
   } else {
     std::string s(lhs->to_s());
@@ -88,7 +89,7 @@ SharedValue tora::op_div(Value*lhs, Value*rhs) {
       if (rhs_int == 0) {
         throw new ZeroDividedExceptionExceptionValue();
       }
-      return new IntValue(get_int_value(*lhs) / rhs_int);
+      MortalIntValue miv(get_int_value(*lhs) / rhs_int); return miv.get();
     }
   } else {
     std::string s(lhs->to_s());
@@ -107,7 +108,7 @@ SharedValue tora::op_mul(Value*lhs, Value*rhs) {
       MortalDoubleValue d(lhs->to_double() * rhs->to_double());
       return d.get();
     } else {
-      return new IntValue(get_int_value(*lhs) * get_int_value(*rhs));
+      MortalIntValue miv(get_int_value(*lhs) * get_int_value(*rhs)); return miv.get();
     }
   } else if (lhs->value_type == VALUE_TYPE_STR) {
     std::ostringstream buf;
@@ -133,7 +134,7 @@ SharedValue tora::op_pow(Value*lhs, Value*rhs) {
       MortalDoubleValue d(pow(lhs->to_double(), rhs->to_double()));
       return d;
     } else {
-      return new IntValue((int)pow(lhs->to_double(), rhs->to_double()));
+      MortalIntValue miv((int)pow(lhs->to_double(), rhs->to_double())); return miv.get();
     }
   } else {
     StringImpl s(lhs->to_s());
@@ -145,7 +146,7 @@ SharedValue tora::op_pow(Value*lhs, Value*rhs) {
 SharedValue tora::op_bitand(Value*lhs,
                        Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
-    return new IntValue(lhs->to_int() & rhs->to_int());
+    MortalIntValue miv(lhs->to_int() & rhs->to_int()); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot and.", s.c_str());
@@ -156,7 +157,7 @@ SharedValue tora::op_bitand(Value*lhs,
 SharedValue tora::op_bitor(Value*lhs,
                       Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
-    return new IntValue(lhs->to_int() | rhs->to_int());
+    MortalIntValue miv(lhs->to_int() | rhs->to_int()); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot bit or.",
@@ -168,7 +169,7 @@ SharedValue tora::op_bitor(Value*lhs,
 SharedValue tora::op_bitxor(Value*lhs,
                        Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
-    return new IntValue(lhs->to_int() ^ rhs->to_int());
+    MortalIntValue miv(lhs->to_int() ^ rhs->to_int()); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot xor.", s.c_str());
@@ -179,7 +180,7 @@ SharedValue tora::op_bitxor(Value*lhs,
 SharedValue tora::op_bitlshift(Value*lhs,
                           Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
-    return new IntValue(lhs->to_int() << rhs->to_int());
+    MortalIntValue miv(lhs->to_int() << rhs->to_int()); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot <<.", s.c_str());
@@ -190,7 +191,7 @@ SharedValue tora::op_bitlshift(Value*lhs,
 SharedValue tora::op_bitrshift(Value*lhs,
                           Value*rhs) {
   if (lhs->value_type == VALUE_TYPE_INT) {
-    return new IntValue(lhs->to_int() >> rhs->to_int());
+    MortalIntValue miv(lhs->to_int() >> rhs->to_int()); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot >>.", s.c_str());
@@ -203,7 +204,7 @@ SharedValue tora::op_modulo(Value*lhs,
   if (lhs->value_type == VALUE_TYPE_INT) {
     double x = lhs->to_int();
     double y = rhs->to_int();
-    return new IntValue(x - y * floor(x / y));
+    MortalIntValue miv(x - y * floor(x / y)); return miv.get();
   } else {
     StringImpl s(lhs->to_s());
     throw new ExceptionValue("'%s' is not integer. You cannot >>.", s.c_str());
@@ -214,7 +215,9 @@ SharedValue tora::op_modulo(Value*lhs,
 SharedValue tora::op_unary_negative(Value*v) {
   switch (v->value_type) {
     case VALUE_TYPE_INT:
-      return new IntValue(-(get_int_value(*v)));
+      {
+        MortalIntValue miv(-(get_int_value(*v))); return miv.get();
+      }
     case VALUE_TYPE_DOUBLE:
       {
         MortalDoubleValue d(-get_double_value(v));

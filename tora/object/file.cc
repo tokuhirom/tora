@@ -6,6 +6,7 @@
 #include "../vm.h"
 #include "../value/file.h"
 #include "../symbols.gen.h"
+#include "../value/int.h"
 #include "../value/class.h"
 #include "../class_builder.h"
 
@@ -132,7 +133,7 @@ static SharedPtr<Value> file_flush(VM* vm, Value* self) {
  */
 static SharedPtr<Value> file_fileno(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_FILE);
-  return new IntValue(fileno(FP(self)));
+  MortalIntValue miv(fileno(FP(self))); return miv.get();
 }
 
 /**
@@ -182,7 +183,7 @@ static SharedPtr<Value> file_seek(VM* vm, Value* self, Value* offset,
 static SharedPtr<Value> file_tell(VM* vm, Value* self) {
   long ret = ftell(FP(self));
   if (ret >= 0) {
-    return new IntValue(ret);
+    MortalIntValue miv(ret); return miv.get();
   } else {
     throw new ErrnoExceptionValue(get_errno());
   }

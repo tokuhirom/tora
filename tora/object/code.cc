@@ -3,6 +3,7 @@
 #include "../vm.h"
 #include "../value/code.h"
 #include "../value/class.h"
+#include "../value/int.h"
 #include "../frame.h"
 #include "../callback.h"
 #include "../symbols.gen.h"
@@ -45,7 +46,7 @@ static SharedPtr<Value> code_name(VM* vm, Value* self) {
  */
 static SharedPtr<Value> code_line(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
-  return new IntValue(self->upcast<CodeValue>()->lineno());
+  MortalIntValue miv(self->upcast<CodeValue>()->lineno()); return miv.get();
 }
 
 /**

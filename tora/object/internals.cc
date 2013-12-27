@@ -3,6 +3,7 @@
 #include "../peek.h"
 #include "../symbols.gen.h"
 #include "../value/class.h"
+#include "../value/int.h"
 #include "../class_builder.h"
 
 using namespace tora;
@@ -21,7 +22,7 @@ using namespace tora;
  * Returns the number of items in stack.
  */
 static SharedPtr<Value> stack_size(VM *vm, Value *self) {
-  return new IntValue(vm->stack.size());
+  MortalIntValue miv(vm->stack.size()); return miv.get();
 }
 
 /**

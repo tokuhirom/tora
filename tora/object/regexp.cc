@@ -5,6 +5,7 @@
 #include "../symbols.gen.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
+#include "../value/int.h"
 #include "../class_builder.h"
 
 using namespace tora;
@@ -22,7 +23,7 @@ using namespace tora;
  */
 static SharedPtr<Value> Regexp_flags(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_REGEXP);
-  return new IntValue(self->upcast<AbstractRegexpValue>()->flags());
+  MortalIntValue miv(self->upcast<AbstractRegexpValue>()->flags()); return miv.get();
 }
 
 /**
@@ -40,7 +41,7 @@ static SharedPtr<Value> Regexp_quotemeta(VM* vm, Value* self, Value* val) {
  * multiline flag.
  */
 static SharedPtr<Value> Regexp_MULTILINE(VM* vm, Value* self) {
-  return new IntValue(REGEXP_MULTILINE);
+  MortalIntValue miv(REGEXP_MULTILINE); return miv.get();
 }
 
 /**
@@ -49,7 +50,7 @@ static SharedPtr<Value> Regexp_MULTILINE(VM* vm, Value* self) {
  * case insensitive flag.
  */
 static SharedPtr<Value> Regexp_IGNORECASE(VM* vm, Value* self) {
-  return new IntValue(REGEXP_IGNORECASE);
+  MortalIntValue miv(REGEXP_IGNORECASE); return miv.get();
 }
 
 /**
@@ -58,7 +59,7 @@ static SharedPtr<Value> Regexp_IGNORECASE(VM* vm, Value* self) {
  * //x flag.
  */
 static SharedPtr<Value> Regexp_EXPANDED(VM* vm, Value* self) {
-  return new IntValue(REGEXP_EXPANDED);
+  MortalIntValue miv(REGEXP_EXPANDED); return miv.get();
 }
 
 void tora::Init_Regexp(VM* vm) {

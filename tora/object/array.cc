@@ -4,6 +4,7 @@
 #include "../value/code.h"
 #include "../value/class.h"
 #include "../value/regexp.h"
+#include "../value/int.h"
 #include "../peek.h"
 #include "../frame.h"
 #include "../symbols.gen.h"
@@ -27,8 +28,8 @@ using namespace tora;
  * Get the number of elements in an array.
  */
 static SharedPtr<Value> av_size(VM* vm, Value* self) {
-  SharedPtr<IntValue> size = new IntValue(array_size(self));
-  return size;
+  MortalIntValue size(array_size(self));
+  return size.get();
 }
 
 /**
@@ -183,7 +184,7 @@ static SharedPtr<Value> av_grep(VM* vm, Value* self, Value* stuff_v) {
  */
 /*
 static SharedPtr<Value> av_capacity(VM * vm, Value* self) {
-    return new IntValue(self->upcast<ArrayValue>()->values->capacity());
+    MortalIntValue miv(self->upcast<ArrayValue>()->values->capacity()); return miv.get();
 }
 */
 

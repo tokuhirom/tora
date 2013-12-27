@@ -7,6 +7,7 @@
 #include "../value/bytes.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
+#include "../value/int.h"
 #include <re2/re2.h>
 #include <unicode/unistr.h>
 
@@ -53,7 +54,7 @@ static int utf8_length(const std::string *str_value) {
  * Get a String length.
  */
 static SharedPtr<Value> str_length(VM *vm, Value *self) {
-  return new IntValue(utf8_length(get_str_value(self)));
+  MortalIntValue miv(utf8_length(get_str_value(self))); return miv.get();
 }
 
 /**
@@ -197,7 +198,7 @@ static SharedPtr<Value> str_index(VM *vm,
 
   Value *v = args.at(0).get();
   size_t ret = get_str_value(v)->find(args.at(1)->to_s(), pos);
-  return new IntValue(ret == std::string::npos ? -1 : ret);
+  MortalIntValue miv(ret == std::string::npos ? -1 : ret); return miv.get();
 }
 
 /**
