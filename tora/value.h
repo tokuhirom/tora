@@ -4,7 +4,6 @@
 #include <sstream>
 #include <cstdio>
 #include <cassert>
-#include <memory>
 
 #include "tora.h"
 #include "shared_ptr.h"
