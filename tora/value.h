@@ -172,13 +172,6 @@ static double get_double_value(const Value* v) {
   return v->double_value_;
 }
 
-static SharedPtr<Value> new_ptr_value(void* p) {
-  SharedPtr<Value> v(new Value(VALUE_TYPE_POINTER));
-  v->ptr_value_ = p;
-  return v;
-}
-
-
 static void* get_ptr_value(const Value* v) { return v->ptr_value_; }
 
 static void* get_ptr_value(const SharedPtr<Value>& v) {
