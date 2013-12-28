@@ -5,10 +5,12 @@
 #include "../value/class.h"
 #include "../value/regexp.h"
 #include "../value/int.h"
+#include "../value/exception.h"
 #include "../peek.h"
 #include "../frame.h"
 #include "../symbols.gen.h"
 #include "../class_builder.h"
+#include "../exception.h"
 
 using namespace tora;
 

@@ -2,9 +2,6 @@
 #define TORA_REGEXP_H_
 
 #include "../value.h"
-#include "../value/exception.h"
-
-#include <re2/re2.h>
 
 namespace tora {
 

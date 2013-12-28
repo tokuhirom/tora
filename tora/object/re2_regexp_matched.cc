@@ -8,6 +8,7 @@
 #include "../value/regexp.h"
 #include "../value/class.h"
 #include "../value/pointer.h"
+#include "../value/exception.h"
 #include "../class_builder.h"
 
 using namespace tora;

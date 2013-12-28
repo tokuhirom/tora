@@ -8,6 +8,8 @@
 #include "../symbols.gen.h"
 #include "../class_builder.h"
 #include "../value/int.h"
+#include "../value/exception.h"
+#include "../exception.h"
 #include <re2/re2.h>
 #include <unicode/unistr.h>
 

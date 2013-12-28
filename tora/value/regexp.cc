@@ -2,11 +2,13 @@
 #include "array.h"
 #include "../object.h"
 #include "../vm.h"
+#include "../util.h"
 #include "../symbols.gen.h"
 #include "../value/object.h"
 #include "../value/pointer.h"
 #include <vector>
 #include <memory>
+#include <re2/re2.h>
 
 using namespace tora;
 

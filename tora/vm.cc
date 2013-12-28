@@ -7,7 +7,9 @@
 #include "inspector.h"
 #include "symbols.gen.h"
 #include "callback.h"
+#include "exception.h"
 
+#include "value/exception.h"
 #include "value/hash.h"
 #include "value/code.h"
 #include "value/regexp.h"

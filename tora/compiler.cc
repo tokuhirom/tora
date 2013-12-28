@@ -7,6 +7,7 @@
 #include "value/regexp.h"
 #include "symbol_table.h"
 #include "disasm.h"
+#include "util.h"
 #include <iostream>
 
 using namespace tora;

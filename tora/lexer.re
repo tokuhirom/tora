@@ -3,6 +3,7 @@
 #include "nodes.gen.h"
 #include "parser.h"
 #include "value/regexp.h"
+#include "util.h"
 
 using namespace tora;
 
