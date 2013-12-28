@@ -718,7 +718,7 @@ OP_POST_INCREMENT {
     // $i++
     SharedPtr<Value> i = stack.back(); stack.pop_back();
     if (i->value_type == VALUE_TYPE_INT) {
-        MortalIntValue tmp(get_int_value(i));
+        MortalIntValue tmp(get_int_value(i.get()));
         i->int_value_++;
         stack.push_back(tmp.get());
     } else {
@@ -741,7 +741,7 @@ OP_POST_DECREMENT {
     // $i--
     SharedPtr<Value> i = stack.back(); stack.pop_back();
     if (i->value_type == VALUE_TYPE_INT) {
-      MortalIntValue tmp(get_int_value(i));
+      MortalIntValue tmp(get_int_value(i.get()));
       i->int_value_--;
       stack.push_back(tmp.get());
     } else {
@@ -947,7 +947,7 @@ OP_USE {
     SharedPtr<Value> include  = stack.back();
     stack.pop_back();
 
-    bool is_copy_all = include->value_type == VALUE_TYPE_INT && get_int_value(include) == 1;
+    bool is_copy_all = include->value_type == VALUE_TYPE_INT && get_int_value(include.get()) == 1;
     this->use(mod_name.get(), is_copy_all);
     stack.push_back(new_undef_value());
 }

@@ -78,8 +78,8 @@ static SharedPtr<Value> time_DESTROY(VM* vm, Value* self) {
  */
 static SharedPtr<Value> time_epoch(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> t = object_data(self);
-  std::time_t ret = std::mktime(static_cast<struct tm*>(get_ptr_value(t)));
+  SharedValue t = object_data(self);
+  std::time_t ret = std::mktime(static_cast<struct tm*>(get_ptr_value(t.get())));
   MortalIntValue i(ret);
   return i.get();
 }
@@ -95,12 +95,12 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value* format) {
   std::string format_s = format->to_s();
 
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> t = object_data(self);
+  SharedValue t = object_data(self);
   assert(t->value_type == VALUE_TYPE_POINTER);
 
   char out[256];
 
-  void* tm = get_ptr_value(t);
+  void* tm = get_ptr_value(t.get());
   size_t r = strftime(out, sizeof(out), format_s.c_str(),
                       static_cast<const struct tm*>(tm));
   if (r == sizeof(out)) {
@@ -113,8 +113,8 @@ static SharedPtr<Value> time_strftime(VM* vm, Value* self, Value* format) {
 
 static struct tm* GET_TM(Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> t = object_data(self);
-  return static_cast<struct tm*>(get_ptr_value(t));
+  SharedValue t = object_data(self);
+  return static_cast<struct tm*>(get_ptr_value(t.get()));
 }
 
 /**
@@ -180,8 +180,8 @@ static SharedPtr<Value> time_second(VM* vm, Value* self) {
  */
 static SharedPtr<Value> time_wday(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> t = object_data(self);
-  int ret = static_cast<struct tm*>(get_ptr_value(t))->tm_wday;
+  SharedValue t = object_data(self);
+  int ret = static_cast<struct tm*>(get_ptr_value(t.get()))->tm_wday;
   MortalIntValue miv(ret + 1); return miv.get();
 }
 

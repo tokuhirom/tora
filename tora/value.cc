@@ -123,7 +123,7 @@ bool Value::to_bool() const {
 double Value::to_double() const {
   switch (value_type) {
     case VALUE_TYPE_INT:
-      return static_cast<double>(get_int_value(*this));
+      return static_cast<double>(get_int_value(this));
     case VALUE_TYPE_DOUBLE:
       return get_double_value(this);
     case VALUE_TYPE_OBJECT:
@@ -163,7 +163,7 @@ std::string Value::to_s() {
       return bytes_stringify(this);
     case VALUE_TYPE_INT: {
       std::ostringstream os;
-      os << get_int_value(*this);
+      os << get_int_value(this);
       return os.str();
     }
     case VALUE_TYPE_DOUBLE: {
@@ -192,7 +192,7 @@ std::string Value::to_s() {
 
 int Value::to_int() {
   if (value_type == VALUE_TYPE_INT) {
-    return get_int_value(*this);
+    return get_int_value(this);
   } else if (value_type == VALUE_TYPE_DOUBLE) {
     return static_cast<int>(this->to_double());
   } else if (value_type == VALUE_TYPE_TUPLE) {
@@ -249,7 +249,7 @@ Value& tora::Value::operator=(const Value& lhs) {
 
   switch (lhs.value_type) {
     case VALUE_TYPE_INT: {
-      set_int_value(*this, get_int_value(lhs));
+      set_int_value(*this, get_int_value(&lhs));
       return *this;
     }
     case VALUE_TYPE_UNDEF: {

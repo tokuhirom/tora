@@ -124,7 +124,7 @@ static SharedPtr<Value> str_replace(VM *vm, Value *self, Value *arg1,
 static SharedPtr<Value> str_substr(VM *vm,
                                    const std::vector<SharedPtr<Value>> &args) {
   assert(args[0]->value_type == VALUE_TYPE_STR);
-  const std::string *str = get_str_value(args[0]);
+  const std::string *str = get_str_value(args[0].get());
   if (args.size() - 1 == 1) {  // "foobar".substr(3)
     return new_str_value(str->substr(args[1]->to_int()));
   } else if (args.size() - 1 == 2) {  // "foobar".substr(3,2)

@@ -106,7 +106,7 @@ static SharedPtr<Value> builtin_rand(
       MortalDoubleValue d(dist(*(vm->myrand)));
       return d.get();
     } else if (v->value_type == VALUE_TYPE_INT) {
-      std::uniform_int_distribution<int> dist(0, get_int_value(*v));
+      std::uniform_int_distribution<int> dist(0, get_int_value(v.get()));
       MortalIntValue miv(dist(*(vm->myrand))); return miv.get();
     } else {
       // support to_int?

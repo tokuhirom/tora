@@ -24,7 +24,7 @@ SharedValue tora::op_add(Value*lhs, Value*rhs) {
       return d.get();
     } else {
       int i = rhs->to_int();
-      MortalIntValue miv(get_int_value(*lhs) + i); return miv.get();
+      MortalIntValue miv(get_int_value(lhs) + i); return miv.get();
     }
   } else if (lhs->value_type == VALUE_TYPE_STR) {
     std::string s = rhs->to_s();
@@ -59,7 +59,7 @@ SharedValue tora::op_sub(Value*lhs, Value*rhs) {
       MortalDoubleValue d(lhs->to_double() - rhs->to_double());
       return d.get();
     } else {
-      MortalIntValue miv(get_int_value(*lhs) - rhs->to_int()); return miv.get();
+      MortalIntValue miv(get_int_value(lhs) - rhs->to_int()); return miv.get();
     }
   } else {
     std::string s(lhs->to_s());
@@ -90,7 +90,7 @@ SharedValue tora::op_div(Value*lhs, Value*rhs) {
       if (rhs_int == 0) {
         throw new ZeroDividedExceptionExceptionValue();
       }
-      MortalIntValue miv(get_int_value(*lhs) / rhs_int); return miv.get();
+      MortalIntValue miv(get_int_value(lhs) / rhs_int); return miv.get();
     }
   } else {
     std::string s(lhs->to_s());
@@ -109,7 +109,7 @@ SharedValue tora::op_mul(Value*lhs, Value*rhs) {
       MortalDoubleValue d(lhs->to_double() * rhs->to_double());
       return d.get();
     } else {
-      MortalIntValue miv(get_int_value(*lhs) * get_int_value(*rhs)); return miv.get();
+      MortalIntValue miv(get_int_value(lhs) * get_int_value(rhs)); return miv.get();
     }
   } else if (lhs->value_type == VALUE_TYPE_STR) {
     std::ostringstream buf;
@@ -217,7 +217,7 @@ SharedValue tora::op_unary_negative(Value*v) {
   switch (v->value_type) {
     case VALUE_TYPE_INT:
       {
-        MortalIntValue miv(-(get_int_value(*v))); return miv.get();
+        MortalIntValue miv(-(get_int_value(v))); return miv.get();
       }
     case VALUE_TYPE_DOUBLE:
       {
@@ -264,7 +264,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
   switch (lhs->value_type) {
     case VALUE_TYPE_INT: {
       int ie2 = rhs->to_int();
-      return operation_i(get_int_value(*lhs), ie2);
+      return operation_i(get_int_value(lhs), ie2);
     }
     case VALUE_TYPE_STR: {
       StringImpl s2(rhs->to_s());
@@ -282,7 +282,7 @@ bool tora::cmpop(operationI operation_i, operationD operation_d,
       switch (rhs->value_type) {
         case VALUE_TYPE_INT: {
           return (
-              operation_d(get_double_value(lhs), (double)get_int_value(*rhs)));
+              operation_d(get_double_value(lhs), (double)get_int_value(rhs)));
         }
         case VALUE_TYPE_DOUBLE: {
           return (operation_d(get_double_value(lhs), get_double_value(rhs)));

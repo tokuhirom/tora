@@ -567,7 +567,7 @@ void VM::handle_exception(const SharedPtr<Value> &exception) {
   while (1) {
     if (frame_stack->size() == 1) {
       if (exception->value_type == VALUE_TYPE_STR) {
-        fprintf(stderr, "%s line %d.\n", get_str_value(exception)->c_str(),
+        fprintf(stderr, "%s line %d.\n", get_str_value(exception.get())->c_str(),
                 lineno);
       } else if (exception->value_type == VALUE_TYPE_EXCEPTION) {
         if (exception_type(exception.get()) ==

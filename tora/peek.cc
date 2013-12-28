@@ -26,7 +26,7 @@ void tora::peek(VM *vm, Value *v) {
         break;
       }
       case VALUE_TYPE_INT: {
-        printf("  INT: %d\n", get_int_value(*v));
+        printf("  INT: %d\n", get_int_value(v));
         break;
       }
       case VALUE_TYPE_CODE: {

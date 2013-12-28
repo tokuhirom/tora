@@ -155,9 +155,9 @@ static value_type_t type(const Value& v) { return v.value_type; }
 
 static value_type_t type(const Value* v) { return v->value_type; }
 
-static int get_int_value(const Value& v) {
+static tra_int get_int_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_INT);
-  return v.int_value_;
+  return v->int_value_;
 }
 
 static void set_int_value(Value* v, int i) {
@@ -174,10 +174,6 @@ static double get_double_value(const Value* v) {
 
 static void* get_ptr_value(const Value* v) { return v->ptr_value_; }
 
-static void* get_ptr_value(const SharedPtr<Value>& v) {
-  return get_ptr_value(v.get());
-}
-
 static std::string* get_str_value(const Value* v) {
   assert(type(v) == VALUE_TYPE_STR);
   return static_cast<std::string*>(v->ptr_value_);
@@ -187,16 +183,6 @@ static Value* new_str_value(const StringImpl& s) {
   Value* v = new Value(VALUE_TYPE_STR);
   v->ptr_value_ = new std::string(s);
   return v;
-}
-
-static StringImpl* get_str_value(const SharedPtr<Value>& v) {
-  // remove me
-  return get_str_value(v.get());
-}
-
-static int get_int_value(const SharedPtr<Value>& v) {
-  // REMOVE ME.
-  return get_int_value(*v);
 }
 
 static Value* new_undef_value() { return new Value(VALUE_TYPE_UNDEF); }

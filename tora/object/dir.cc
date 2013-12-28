@@ -59,9 +59,9 @@ static SharedPtr<Value> dir_new(VM* vm, Value* self, Value* dirname_v) {
  */
 static SharedPtr<Value> dir_read(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_OBJECT);
-  SharedPtr<Value> v = object_data(self);
+  SharedValue v = object_data(self);
   assert(v->value_type = VALUE_TYPE_POINTER);
-  DIR* dp = (DIR*)get_ptr_value(v);
+  DIR* dp = (DIR*)get_ptr_value(v.get());
   assert(dp);
   // TODO: support readdir_r
   struct dirent* ent = readdir(dp);
@@ -83,7 +83,7 @@ static SharedPtr<Value> dir_close(VM* vm, Value* self) {
   SharedPtr<Value> v = object_data(self);
   assert(v->value_type = VALUE_TYPE_POINTER);
 
-  DIR* dp = static_cast<DIR*>(get_ptr_value(v));
+  DIR* dp = static_cast<DIR*>(get_ptr_value(v.get()));
   assert(dp);
   closedir(dp);
   return new_undef_value();
