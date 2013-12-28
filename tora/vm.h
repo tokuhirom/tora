@@ -15,7 +15,6 @@ int swprintf(wchar_t *, size_t, const wchar_t *, ...);
 #endif
 
 #include "tora.h"
-#include "op.h"
 #include "value.h"
 #include "shared_ptr.h"
 #include "symbol_table.h"
