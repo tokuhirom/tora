@@ -798,8 +798,8 @@ OP_ENTER_FOREACH {
       MortalArrayIteratorValue iter(a.get());
       iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_RANGE) {
-        SharedPtr<RangeValue::Iterator> iter = new RangeValue::Iterator(a);
-        iiter = iter;
+      MortalRangeIteratorValue iter(a.get());
+      iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_HASH) {
       MortalHashIteratorValue iter(a.get());
       iiter = iter.get();
@@ -848,25 +848,25 @@ OP_FOR_ITER {
         break;
     }
     case VALUE_TYPE_RANGE_ITERATOR: {
-        RangeValue::Iterator* riter = static_cast<RangeValue::Iterator*>(iter.get());
-        if (riter->counter <= range_right(riter->parent.get())) {
-            const SharedPtr<Value> & cur = fframe->current_value;
-            if (cur.get() && cur->refcnt() == 2) {
-                // value is not copied.
-                assert(cur->value_type == VALUE_TYPE_INT);
-                set_int_value(cur.get(), riter->counter);
-                stack.push_back(cur);
-            } else {
-              MortalIntValue iv(riter->counter);
-              stack.push_back(iv.get());
-              fframe->current_value.reset(iv.get());
-            }
-            // fframe->current_value.reset(iv);
-            riter->counter++;
+      if (!range_iter_finished(iter.get())) {
+        const SharedPtr<Value> & cur = fframe->current_value;
+        if (cur.get() && cur->refcnt() == 1) {
+          // value is not referenced from other place.
+          // We can re-use the value.
+          assert(cur->value_type == VALUE_TYPE_INT);
+          set_int_value(cur.get(), range_iter_get(iter.get()));
+          stack.push_back(cur);
         } else {
-            stack.push_back(new StopIterationExceptionValue());
+          MortalIntValue iv(range_iter_get(iter.get()));
+          stack.push_back(iv.get());
+          fframe->current_value.reset(iv.get());
         }
-        break;
+        // fframe->current_value.reset(iv);
+        range_iter_next(iter.get());
+      } else {
+        stack.push_back(new StopIterationExceptionValue());
+      }
+      break;
     }
     case VALUE_TYPE_HASH_ITERATOR: {
         if (!hash_iter_finished(iter.get())) {

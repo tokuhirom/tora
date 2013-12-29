@@ -79,6 +79,7 @@ sub vm_gen_cc {
 #include "value/class.h"
 #include "value/bool.h"
 #include "value/double.h"
+#include "value/int.h"
 #include "value/bool.h"
 #include "symbols.gen.h"
 
