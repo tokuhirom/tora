@@ -3,6 +3,7 @@
 #include "value/symbol.h"
 #include "value/code.h"
 #include "value/class.h"
+#include "value/array.h"
 #include "vm.h"
 
 using namespace tora;
@@ -30,14 +31,14 @@ void tora::peek(VM *vm, Value *v) {
         break;
       }
       case VALUE_TYPE_CODE: {
-        const CodeValue *cv = static_cast<const CodeValue *>(v);
+        Value *cv = v;
         if (vm) {
           printf("  PACKAGE: %s\n",
-                 vm->symbol_table->id2name(cv->package_id()).c_str());
+                 vm->symbol_table->id2name(code_package_id(cv)).c_str());
           printf("  FUNC_NAME: %s\n",
                  vm->symbol_table->id2name(code_func_name_id(cv)).c_str());
         } else {
-          printf("  PACKAGE_ID: %d\n", cv->package_id());
+          printf("  PACKAGE_ID: %d\n", code_package_id(cv));
           printf("  FUNC_NAME_ID: %d\n", code_func_name_id(cv));
         }
         printf("  LINE: %d\n", code_lineno(cv));

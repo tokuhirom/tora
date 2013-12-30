@@ -188,18 +188,18 @@ static SharedPtr<Value> time_wday(VM* vm, Value* self) {
 void tora::Init_Time(VM* vm) {
   // TODO: strptime
   ClassBuilder builder(vm, SYMBOL_TIME_CLASS);
-  builder.add_method("new", new CallbackFunction(time_new));
-  builder.add_method("now", new CallbackFunction(time_new));
-  builder.add_method("DESTROY", new CallbackFunction(time_DESTROY));
-  builder.add_method("epoch", new CallbackFunction(time_epoch));
-  builder.add_method("strftime", new CallbackFunction(time_strftime));
-  builder.add_method("month", new CallbackFunction(time_month));
-  builder.add_method("year", new CallbackFunction(time_year));
-  builder.add_method("day", new CallbackFunction(time_day));
-  builder.add_method("hour", new CallbackFunction(time_hour));
-  builder.add_method("minute", new CallbackFunction(time_minute));
-  builder.add_method("min", new CallbackFunction(time_minute));
-  builder.add_method("second", new CallbackFunction(time_second));
-  builder.add_method("day_of_week", new CallbackFunction(time_wday));
+  builder.add_method("new", std::make_shared<CallbackFunction>(time_new));
+  builder.add_method("now", std::make_shared<CallbackFunction>(time_new));
+  builder.add_method("DESTROY", std::make_shared<CallbackFunction>(time_DESTROY));
+  builder.add_method("epoch", std::make_shared<CallbackFunction>(time_epoch));
+  builder.add_method("strftime", std::make_shared<CallbackFunction>(time_strftime));
+  builder.add_method("month", std::make_shared<CallbackFunction>(time_month));
+  builder.add_method("year", std::make_shared<CallbackFunction>(time_year));
+  builder.add_method("day", std::make_shared<CallbackFunction>(time_day));
+  builder.add_method("hour", std::make_shared<CallbackFunction>(time_hour));
+  builder.add_method("minute", std::make_shared<CallbackFunction>(time_minute));
+  builder.add_method("min", std::make_shared<CallbackFunction>(time_minute));
+  builder.add_method("second", std::make_shared<CallbackFunction>(time_second));
+  builder.add_method("day_of_week", std::make_shared<CallbackFunction>(time_wday));
   vm->add_builtin_class(builder.value());
 }

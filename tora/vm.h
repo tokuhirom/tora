@@ -29,9 +29,7 @@ const int GLOBAL_VAR_REQUIRED = 3;
 
 class Stack;
 class LexicalVarsFrame;
-class TupleValue;
 class FunctionFrame;
-class CodeValue;
 class Callback;
 
 class VM;
@@ -45,7 +43,7 @@ class VM {
   std::shared_ptr<file_scope_body_t> file_scope_;
   std::map<ID, std::shared_ptr<std::map<ID, SharedValue>>> file_scope_map_;
   std::map<ID, SharedPtr<Value>> builtin_classes_;
-  std::map<ID, SharedPtr<CodeValue>> builtin_functions_;
+  std::map<ID, SharedValue> builtin_functions_;
 
   SharedValue true_value_;
   SharedValue false_value_;
@@ -53,7 +51,7 @@ class VM {
  public:
   int sp;  // stack pointer
   int pc;  // program counter
-  SharedPtr<OPArray> ops;
+  std::shared_ptr<OPArray> ops;
   std::vector<SharedValue> *global_vars;
   SharedPtr<SymbolTable> symbol_table;
   std::vector<SharedPtr<Value>> stack;
@@ -70,19 +68,19 @@ class VM {
   const SharedPtr<Value> &klass() { return klass_; }
   void klass(const SharedPtr<Value> &k);
 
-  void add_builtin_function(const char *name, CallbackFunction *func);
+  void add_builtin_function(const char *name, const std::shared_ptr<CallbackFunction>& func);
 
   /*
    * stack for lexical variables.
    */
-  std::vector<SharedPtr<LexicalVarsFrame>> *frame_stack;
+  std::shared_ptr<std::vector<SharedPtr<LexicalVarsFrame>>> frame_stack;
   /**
    * mark for first argument in function call.
    */
   std::vector<int> mark_stack;
   std::vector<int> stack_base;
 
-  VM(SharedPtr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
+  VM(std::shared_ptr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
      bool dump_ops);
   ~VM();
   void execute();
@@ -97,9 +95,9 @@ class VM {
   void dump_stack();
   void use(Value *v, bool);
   void require_package(const std::string &);
-  void add_function(const SharedPtr<CodeValue> &klass);
-  void add_function(ID id, const CallbackFunction *cb);
-  void add_function(const char *name, const CallbackFunction *cb);
+  void add_function(const SharedPtr<Value> &klass);
+  void add_function(ID id, const std::shared_ptr<CallbackFunction>& cb);
+  void add_function(const char *name, const std::shared_ptr<CallbackFunction>& cb);
   void add_constant(const char *name, int n);
   void add_class(const SharedPtr<Value> &code);
   void die(const SharedPtr<Value> &exception);
@@ -131,14 +129,14 @@ class VM {
   /**
    * Call a function.
    */
-  void function_call(int argcnt, const SharedPtr<CodeValue> &code,
+  void function_call(int argcnt, const SharedPtr<Value> &code,
                      const SharedPtr<Value> &self);
   /**
    * inject code to VM and run it. And... restore VM state!
    *
    * You must take a return value from stack top.
    */
-  void function_call_ex(int argcnt, const SharedPtr<CodeValue> &code,
+  void function_call_ex(int argcnt, const SharedPtr<Value> &code,
                         const SharedPtr<Value> &self);
 
   /**

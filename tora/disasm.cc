@@ -32,7 +32,7 @@ void Disasm::disasm_op(OP* op) {
   printf("\n");
 }
 
-void Disasm::disasm(const SharedPtr<OPArray>& ops) {
+void Disasm::disasm(const std::shared_ptr<OPArray>& ops) {
   printf("-- OP DUMP    --\n");
   for (size_t i = 0; i < ops->size(); i++) {
     const OP* op = ops->at(i);

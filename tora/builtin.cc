@@ -141,7 +141,7 @@ static SharedPtr<Value> builtin_callee(VM *vm) {
        ++iter) {
     if ((*iter)->type == FRAME_TYPE_FUNCTION) {
       FunctionFrame *fframe = (*iter)->upcast<FunctionFrame>();
-      return fframe->code;
+      return fframe->code.get();
     }
   }
   return new_undef_value();
@@ -348,7 +348,7 @@ static SharedPtr<Value> builtin_sprintf(
 }
 
 void tora::Init_builtins(VM *vm) {
-#define ADD(name, cb) vm->add_builtin_function(name, new CallbackFunction(cb));
+#define ADD(name, cb) vm->add_builtin_function(name, std::make_shared<CallbackFunction>(cb));
   ADD("p", builtin_p);
   ADD("exit", builtin_exit);
   ADD("say", builtin_say);

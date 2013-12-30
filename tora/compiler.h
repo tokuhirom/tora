@@ -40,7 +40,7 @@ class Compiler {
   std::string filename_;
 
  public:
-  SharedPtr<OPArray> ops;
+  std::shared_ptr<OPArray> ops;
   std::vector<Block> *blocks;
   std::vector<std::string> *global_vars;
   std::shared_ptr<std::vector<std::string>> closure_vars;

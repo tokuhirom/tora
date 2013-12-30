@@ -84,11 +84,11 @@ static SharedPtr<Value> mc_bless(VM* vm, Value* self, Value* data) {
 
 void tora::Init_MetaClass(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_METACLASS_CLASS);
-  builder.add_method("has_method", new CallbackFunction(mc_has_method));
+  builder.add_method("has_method", std::make_shared<CallbackFunction>(mc_has_method));
   builder.add_method("get_method_list",
-                    new CallbackFunction(mc_get_method_list));
-  builder.add_method("name", new CallbackFunction(mc_name));
-  builder.add_method("superclass", new CallbackFunction(mc_superclass));
-  builder.add_method("bless", new CallbackFunction(mc_bless));
+                    std::make_shared<CallbackFunction>(mc_get_method_list));
+  builder.add_method("name", std::make_shared<CallbackFunction>(mc_name));
+  builder.add_method("superclass", std::make_shared<CallbackFunction>(mc_superclass));
+  builder.add_method("bless", std::make_shared<CallbackFunction>(mc_bless));
   vm->add_builtin_class(builder.value());
 }

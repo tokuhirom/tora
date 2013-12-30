@@ -215,17 +215,17 @@ void tora::Init_File(VM* vm) {
   // isatty, __iter__, __next__, read(), readline(), readlines(), seek()
   // tell(), truncate(), write($str), fdopen
   ClassBuilder builder(vm, SYMBOL_FILE_CLASS);
-  builder.add_method("open", new CallbackFunction(file_open_method));
-  builder.add_method("slurp", new CallbackFunction(meth_file_slurp));
-  builder.add_method("write", new CallbackFunction(file_write));
-  builder.add_method("print", new CallbackFunction(file_write));
-  builder.add_method("close", new CallbackFunction(meth_file_close));
-  builder.add_method("flush", new CallbackFunction(file_flush));
-  builder.add_method("fileno", new CallbackFunction(file_fileno));
-  builder.add_method("getc", new CallbackFunction(file_getc));
-  builder.add_method("seek", new CallbackFunction(file_seek));
-  builder.add_method("tell", new CallbackFunction(file_tell));
-  builder.add_method("sync", new CallbackFunction(file_sync));
+  builder.add_method("open", std::make_shared<CallbackFunction>(file_open_method));
+  builder.add_method("slurp", std::make_shared<CallbackFunction>(meth_file_slurp));
+  builder.add_method("write", std::make_shared<CallbackFunction>(file_write));
+  builder.add_method("print", std::make_shared<CallbackFunction>(file_write));
+  builder.add_method("close", std::make_shared<CallbackFunction>(meth_file_close));
+  builder.add_method("flush", std::make_shared<CallbackFunction>(file_flush));
+  builder.add_method("fileno", std::make_shared<CallbackFunction>(file_fileno));
+  builder.add_method("getc", std::make_shared<CallbackFunction>(file_getc));
+  builder.add_method("seek", std::make_shared<CallbackFunction>(file_seek));
+  builder.add_method("tell", std::make_shared<CallbackFunction>(file_tell));
+  builder.add_method("sync", std::make_shared<CallbackFunction>(file_sync));
   builder.add_constant("SEEK_SET", SEEK_SET);
   builder.add_constant("SEEK_CUR", SEEK_CUR);
   builder.add_constant("SEEK_END", SEEK_END);

@@ -37,7 +37,7 @@ extern "C" {
 
 TORA_EXPORT
 void Init_Digest_MD5(VM* vm) {
-    vm->add_function("md5_hex", new CallbackFunction(Digest_MD5_md5_hex));
+    vm->add_function("md5_hex", std::make_shared<CallbackFunction>(Digest_MD5_md5_hex));
 }
 
 }

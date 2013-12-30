@@ -31,8 +31,8 @@ extern "C" {
 TORA_EXPORT
 void Init_Curl(VM* vm) {
     ClassBuilder builder(vm, "Curl::Easy");
-    builder.add_method(vm->symbol_table->get_id("new"), new CallbackFunction(Curl_Easy_new));
-    builder.add_method(vm->symbol_table->get_id("DESTROY"), new CallbackFunction(Curl_Easy_DESTROY));
+    builder.add_method(vm->symbol_table->get_id("new"), std::make_shared<CallbackFunction>(Curl_Easy_new));
+    builder.add_method(vm->symbol_table->get_id("DESTROY"), std::make_shared<CallbackFunction>(Curl_Easy_DESTROY));
     klass->add_constant("CURLOPT_URL", CURLOPT_URL);
     vm->add_class(klass);
 }

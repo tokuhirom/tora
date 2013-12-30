@@ -20,8 +20,8 @@ extern "C" {
 
 TORA_EXPORT
 void Init_URI_Escape(VM *vm) {
-    vm->add_function("uri_escape",   new CallbackFunction(uri_escape));
-    vm->add_function("uri_unescape", new CallbackFunction(uri_unescape));
+    vm->add_function("uri_escape",   std::make_shared<CallbackFunction>(uri_escape));
+    vm->add_function("uri_unescape", std::make_shared<CallbackFunction>(uri_unescape));
 }
 
 }

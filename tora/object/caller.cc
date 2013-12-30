@@ -28,6 +28,6 @@ static SharedPtr<Value> caller_code(VM* vm, Value* self) {
 
 void tora::Init_Caller(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_CALLER_CLASS);
-  builder.add_method("code", new CallbackFunction(caller_code));
+  builder.add_method("code", std::make_shared<CallbackFunction>(caller_code));
   vm->add_builtin_class(builder.value());
 }

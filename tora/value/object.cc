@@ -47,14 +47,13 @@ std::string tora::object_type_str(const Value* self)
 
 // call DESTROY method if it's available.
 static void call_destroy(Value* self) {
-  Value* code_v = class_get_method(object(self)->klass.get(), SYMBOL_DESTROY);
-  if (code_v) {
-    assert(code_v->value_type == VALUE_TYPE_CODE);
-    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-    if (code->is_native()) {
-      if (code->callback()->argc == -3) {
+  Value* code = class_get_method(object(self)->klass.get(), SYMBOL_DESTROY);
+  if (code) {
+    assert(code->value_type == VALUE_TYPE_CODE);
+    if (code_is_native(code)) {
+      if (code_callback(code)->argc == -3) {
         // TODO: catch exception
-        SharedPtr<Value> ret = code->callback()->func_vm1(object(self)->vm, self);
+        SharedPtr<Value> ret = code_callback(code)->func_vm1(object(self)->vm, self);
       } else {
         // this is just a warnings?
         throw new ExceptionValue(
@@ -87,22 +86,21 @@ void tora::object_dump(Value* self, int indent)
 }
 
 SharedValue tora::object_set_item(Value* self, Value* index, Value* v) {
-  Value* code_v = class_get_method(object(self)->klass.get(), SYMBOL___SET_ITEM__);
-  if (code_v) {
-    assert(code_v->value_type == VALUE_TYPE_CODE);
-    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-    if (code->is_native()) {
+  Value* code = class_get_method(object(self)->klass.get(), SYMBOL___SET_ITEM__);
+  if (code) {
+    assert(code->value_type == VALUE_TYPE_CODE);
+    if (code_is_native(code)) {
       // TODO: use function frame
       // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt,
       // this->VAL().vm_->frame_stack->back());
       // this->VAL().vm_->frame_stack->push_back(fframe);
 
-      if (code->callback()->argc == 2) {
+      if (code_callback(code)->argc == 2) {
         // code->callback()->func2(this, index.get());
         abort();  // not tested yet.
-      } else if (code->callback()->argc == -5) {
+      } else if (code_callback(code)->argc == -5) {
         SharedPtr<Value> ret =
-            code->callback()->func_vm3(object(self)->vm, self, index, v);
+            code_callback(code)->func_vm3(object(self)->vm, self, index, v);
         return ret.get();
       } else {
         // this is just a warnings?
@@ -145,22 +143,21 @@ SharedValue tora::object_set_item(Value* self, Value* index, Value* v) {
 
 SharedValue tora::object_get_item(Value* self, Value* index) {
   assert(object(self)->klass.get());
-  Value* code_v = class_get_method(object(self)->klass.get(), SYMBOL___GET_ITEM__);
-  if (code_v) {
-    assert(code_v->value_type == VALUE_TYPE_CODE);
-    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
-    if (code->is_native()) {
+  Value* code = class_get_method(object(self)->klass.get(), SYMBOL___GET_ITEM__);
+  if (code) {
+    assert(code->value_type == VALUE_TYPE_CODE);
+    if (code_is_native(code)) {
       // TODO: use function frame
       // SharedPtr<FunctionFrame> fframe = new FunctionFrame(argcnt,
       // this->VAL().vm_->frame_stack->back());
       // this->VAL().vm_->frame_stack->push_back(fframe);
 
-      if (code->callback()->argc == 2) {
+      if (code_callback(code)->argc == 2) {
         // code->callback()->func2(this, index.get());
         abort();  // not tested yet.
-      } else if (code->callback()->argc == -4) {
+      } else if (code_callback(code)->argc == -4) {
         SharedPtr<Value> ret =
-            code->callback()->func_vm2(object(self)->vm, self, index);
+            code_callback(code)->func_vm2(object(self)->vm, self, index);
         return ret.get();
       } else {
         // this is just a warnings?

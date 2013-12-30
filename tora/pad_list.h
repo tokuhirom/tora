@@ -1,23 +1,22 @@
 #ifndef TORA_PAD_LIST_H_
 #define TORA_PAD_LIST_H_
 
-#include "prim.h"
 #include "shared_ptr.h"
-#include "value/array.h"
 #include <vector>
+#include <memory>
 
 namespace tora {
 
 class Value;
+class VM;
 
 class PadList {
- private:
-  PRIM_DECL();
+ public:
   std::vector<SharedPtr<Value>> pad_;
-  SharedPtr<PadList> next_;
+  std::shared_ptr<PadList>  next_;
 
  public:
-  PadList(int vars_cnt, PadList *next);
+  PadList(int vars_cnt, std::shared_ptr<PadList> next=NULL);
   void set(int index, const SharedPtr<Value> &val);
   SharedPtr<Value> get(int index) const;
   PadList *upper(int level) const;

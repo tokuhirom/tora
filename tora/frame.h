@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "prim.h"
 #include "shared_ptr.h"
 #include "inspector.h"
 #include "value.h"
@@ -14,8 +15,6 @@ namespace tora {
 
 class OPArray;
 class VM;
-class CodeValue;
-class ArrayValue;
 class PadList;
 
 typedef enum {
@@ -56,9 +55,9 @@ class LexicalVarsFrame {
  public:
   size_t top;
   frame_type_t type;
-  SharedPtr<CodeValue> code;
+  SharedValue code;
   // std::vector<SharedPtr<DynamicScopeData>> dynamic_scope_vars;
-  SharedPtr<PadList> pad_list;
+  std::shared_ptr<PadList> pad_list;
 
   LexicalVarsFrame(VM *vm, int vars_cnt, size_t top,
                    frame_type_t type_ = FRAME_TYPE_LEXICAL);
@@ -89,12 +88,12 @@ class TryFrame : public LexicalVarsFrame {
 class FunctionFrame : public LexicalVarsFrame {
  public:
   int return_address;
-  SharedPtr<OPArray> orig_ops;
+  std::shared_ptr<OPArray> orig_ops;
   SharedPtr<Value> self;
   int argcnt;
   FunctionFrame(VM *vm, int vars_cnt, size_t top)
       : LexicalVarsFrame(vm, vars_cnt, top, FRAME_TYPE_FUNCTION) {}
-  FunctionFrame(VM *vm, int vars_cnt, size_t top, const SharedPtr<OPArray> &op)
+  FunctionFrame(VM *vm, int vars_cnt, size_t top, const std::shared_ptr<OPArray> &op)
       : LexicalVarsFrame(vm, vars_cnt, top), orig_ops(op) {
     this->type = FRAME_TYPE_FUNCTION;
   }

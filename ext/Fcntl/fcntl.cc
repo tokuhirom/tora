@@ -40,7 +40,7 @@ extern "C" {
 
 TORA_EXPORT
 void Init_Fcntl(VM* vm) {
-    vm->add_function("flock", new CallbackFunction(Fcntl_flock));
+    vm->add_function("flock", std::make_shared<CallbackFunction>(Fcntl_flock));
     vm->add_constant("LOCK_SH", LOCK_SH);
     vm->add_constant("LOCK_EX", LOCK_EX);
     vm->add_constant("LOCK_UN", LOCK_UN);

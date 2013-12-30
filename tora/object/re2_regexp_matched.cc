@@ -7,6 +7,7 @@
 #include "../value/object.h"
 #include "../value/regexp.h"
 #include "../value/class.h"
+#include "../value/array.h"
 #include "../value/pointer.h"
 #include "../value/exception.h"
 #include "../class_builder.h"
@@ -81,12 +82,12 @@ static SharedPtr<Value> RE2_Regexp_Matched_DESTROY(VM* vm, Value* self) {
 
 void tora::Init_RE2_Regexp_Matched(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_RE2_REGEXP_MATCHED_CLASS);
-  builder.add_method("regexp", new CallbackFunction(RE2_Regexp_Matched_regexp));
+  builder.add_method("regexp", std::make_shared<CallbackFunction>(RE2_Regexp_Matched_regexp));
   builder.add_method("to_array",
-                    new CallbackFunction(RE2_Regexp_Matched_to_array));
+                    std::make_shared<CallbackFunction>(RE2_Regexp_Matched_to_array));
   builder.add_method("__getitem__",
-                    new CallbackFunction(RE2_Regexp_Matched_getitem));
+                    std::make_shared<CallbackFunction>(RE2_Regexp_Matched_getitem));
   builder.add_method("DESTROY",
-                    new CallbackFunction(RE2_Regexp_Matched_DESTROY));
+                    std::make_shared<CallbackFunction>(RE2_Regexp_Matched_DESTROY));
   vm->add_builtin_class(builder.value());
 }

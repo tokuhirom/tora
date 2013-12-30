@@ -7,6 +7,7 @@
 #include "value/symbol.h"
 #include "value/bytes.h"
 #include "value/class.h"
+#include "value/array.h"
 #include "value/regexp.h"
 #include "value/exception.h"
 #include "symbols.gen.h"
@@ -54,6 +55,8 @@ Value::~Value() {
     exception_free(this);
   } else if (value_type == VALUE_TYPE_REGEXP) {
     regexp_free(this);
+  } else if (value_type == VALUE_TYPE_CODE) {
+    code_free(this);
   }
 }
 

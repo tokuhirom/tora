@@ -1,8 +1,11 @@
 #include "nanotap.h"
 #include "../tora/frame.h"
 #include "../tora/value/int.h"
+#include "../tora/pad_list.h"
 #include <stdarg.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stddef.h>
 
 using namespace tora;
 
@@ -10,7 +13,7 @@ int main() {
     std::string filename_("foo.tra");
 
     {
-        SharedPtr<PadList> p1 = new PadList(1, NULL);
+        std::shared_ptr<PadList>  p1 = std::make_shared<PadList>((int)1);
         MortalIntValue i5(5);
         p1->set(0, i5.get());
         SharedPtr<Value> val = p1->get(0);
@@ -24,9 +27,9 @@ int main() {
 
     printf("# second phase\n");
     {
-        SharedPtr<PadList> p1 = new PadList(0, NULL);
-        SharedPtr<PadList> p2 = new PadList(0, p1.get());
-        SharedPtr<PadList> p3 = new PadList(0, p2.get());
+        std::shared_ptr<PadList>  p1 = std::make_shared<PadList>(0);
+        std::shared_ptr<PadList>  p2 = std::make_shared<PadList>(0, p1);
+        std::shared_ptr<PadList>  p3 = std::make_shared<PadList>(0, p2);
         is((void*)p1->upper(1), (void*)NULL);
         is(p2->upper(1), p1.get());
         is(p3->upper(1), p2.get());
@@ -37,9 +40,9 @@ int main() {
     printf("# third phase\n");
 
     {
-        SharedPtr<PadList> p1 = new PadList(1, NULL);
-        SharedPtr<PadList> p2 = new PadList(1, p1.get());
-        SharedPtr<PadList> p3 = new PadList(3, p2.get());
+        std::shared_ptr<PadList>  p1 = std::make_shared<PadList>(1);
+        std::shared_ptr<PadList>  p2 = std::make_shared<PadList>(1, p1);
+        std::shared_ptr<PadList>  p3 = std::make_shared<PadList>(3, p2);
         MortalIntValue i5(5);
         MortalIntValue i9(9);
         MortalIntValue i6(6);

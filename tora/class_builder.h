@@ -13,7 +13,7 @@ namespace tora {
     ClassBuilder(VM* vm, ID name_id)
       : vm_(vm), mcv_(vm, name_id) {
     }
-    void add_method(const char* name, const CallbackFunction* func);
+    void add_method(const char* name, const std::shared_ptr<CallbackFunction>& func);
     void add_constant(const char* name, tra_int i);
     Value* value() {
       return mcv_.get();

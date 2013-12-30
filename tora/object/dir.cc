@@ -199,19 +199,19 @@ static SharedPtr<Value> dir_Iterator___next__(VM* vm, Value* self) {
 void tora::Init_Dir(VM* vm) {
   {
     ClassBuilder builder(vm, SYMBOL_DIR_CLASS);
-    builder.add_method("new", new CallbackFunction(dir_new));
-    builder.add_method("read", new CallbackFunction(dir_read));
-    builder.add_method("close", new CallbackFunction(dir_close));
-    builder.add_method("mkdir", new CallbackFunction(dir_mkdir));
-    builder.add_method("rmdir", new CallbackFunction(dir_rmdir));
-    builder.add_method("DESTROY", new CallbackFunction(dir_DESTROY));
-    builder.add_method("__iter__", new CallbackFunction(dir___iter__));
+    builder.add_method("new", std::make_shared<CallbackFunction>(dir_new));
+    builder.add_method("read", std::make_shared<CallbackFunction>(dir_read));
+    builder.add_method("close", std::make_shared<CallbackFunction>(dir_close));
+    builder.add_method("mkdir", std::make_shared<CallbackFunction>(dir_mkdir));
+    builder.add_method("rmdir", std::make_shared<CallbackFunction>(dir_rmdir));
+    builder.add_method("DESTROY", std::make_shared<CallbackFunction>(dir_DESTROY));
+    builder.add_method("__iter__", std::make_shared<CallbackFunction>(dir___iter__));
     vm->add_builtin_class(builder.value());
   }
 
   {
     ClassBuilder builder(vm, SYMBOL_DIR_ITERATOR_CLASS);
-    builder.add_method("__next__", new CallbackFunction(dir_Iterator___next__));
+    builder.add_method("__next__", std::make_shared<CallbackFunction>(dir_Iterator___next__));
     vm->add_builtin_class(builder.value());
   }
 }

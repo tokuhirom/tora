@@ -25,7 +25,7 @@ using namespace tora;
 static SharedPtr<Value> code_package(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
   return new_str_value(
-      vm->symbol_table->id2name(self->upcast<CodeValue>()->package_id()));
+      vm->symbol_table->id2name(code_package_id(self)));
 }
 
 /**
@@ -64,7 +64,7 @@ static SharedPtr<Value> meth_code_filename(VM* vm, Value* self) {
 // undocumented.
 static SharedPtr<Value> code_is_closure(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
-  return vm->to_bool(self->upcast<CodeValue>()->closure_var_names()->size() >
+  return vm->to_bool(code_closure_var_names(self)->size() >
                      0);
 }
 
@@ -75,10 +75,10 @@ static SharedPtr<Value> code_is_closure(VM* vm, Value* self) {
  */
 static SharedPtr<Value> code_call(VM* vm,
                                   const std::vector<SharedPtr<Value>>& values) {
-  const SharedPtr<CodeValue> code = values[0]->upcast<CodeValue>();
+  const SharedPtr<Value> code = values[0];
 
   int argcnt = values.size() - 1;
-  if (code->is_native()) {
+  if (code_is_native(code.get())) {
     TODO();
   } else {
     for (int i = 1; i < values.size(); i++) {
@@ -91,11 +91,11 @@ static SharedPtr<Value> code_call(VM* vm,
 
 void tora::Init_Code(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_CODE_CLASS);
-  builder.add_method("package", new CallbackFunction(code_package));
-  builder.add_method("name", new CallbackFunction(code_name));
-  builder.add_method("line", new CallbackFunction(meth_code_line));
-  builder.add_method("filename", new CallbackFunction(meth_code_filename));
-  builder.add_method("is_closure", new CallbackFunction(code_is_closure));
-  builder.add_method("()", new CallbackFunction(code_call));
+  builder.add_method("package", std::make_shared<CallbackFunction>(code_package));
+  builder.add_method("name", std::make_shared<CallbackFunction>(code_name));
+  builder.add_method("line", std::make_shared<CallbackFunction>(meth_code_line));
+  builder.add_method("filename", std::make_shared<CallbackFunction>(meth_code_filename));
+  builder.add_method("is_closure", std::make_shared<CallbackFunction>(code_is_closure));
+  builder.add_method("()", std::make_shared<CallbackFunction>(code_call));
   vm->add_builtin_class(builder.value());
 }

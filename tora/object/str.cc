@@ -272,15 +272,15 @@ static SharedPtr<Value> str_encode(VM *vm, Value *self_v,
 
 void tora::Init_Str(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_STRING_CLASS);
-  builder.add_method("length", new CallbackFunction(str_length));
-  builder.add_method("match", new CallbackFunction(str_match));
-  builder.add_method("replace", new CallbackFunction(str_replace));
-  builder.add_method("substr", new CallbackFunction(str_substr));
-  builder.add_method("scan", new CallbackFunction(str_scan));
-  builder.add_method("split", new CallbackFunction(str_split));
-  builder.add_method("index", new CallbackFunction(str_index));
-  builder.add_method("upper", new CallbackFunction(str_upper));
-  builder.add_method("lower", new CallbackFunction(str_lower));
-  builder.add_method("encode", new CallbackFunction(str_encode));
+  builder.add_method("length", std::make_shared<CallbackFunction>(str_length));
+  builder.add_method("match", std::make_shared<CallbackFunction>(str_match));
+  builder.add_method("replace", std::make_shared<CallbackFunction>(str_replace));
+  builder.add_method("substr", std::make_shared<CallbackFunction>(str_substr));
+  builder.add_method("scan", std::make_shared<CallbackFunction>(str_scan));
+  builder.add_method("split", std::make_shared<CallbackFunction>(str_split));
+  builder.add_method("index", std::make_shared<CallbackFunction>(str_index));
+  builder.add_method("upper", std::make_shared<CallbackFunction>(str_upper));
+  builder.add_method("lower", std::make_shared<CallbackFunction>(str_lower));
+  builder.add_method("encode", std::make_shared<CallbackFunction>(str_encode));
   vm->add_builtin_class(builder.value());
 }

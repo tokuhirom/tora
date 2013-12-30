@@ -408,48 +408,48 @@ TORA_EXPORT
 void Init_UV_(VM* vm) {
     {
         ClassBuilder builder(vm, "UV");
-        builder.add_method("run", new CallbackFunction(_uv_run));
-        builder.add_method("default_loop", new CallbackFunction(_uv_default_loop));
+        builder.add_method("run", std::make_shared<CallbackFunction>(_uv_run));
+        builder.add_method("default_loop", std::make_shared<CallbackFunction>(_uv_default_loop));
         vm->add_class(klass);
     }
     {
         ClassBuilder builder(vm, "UV::Loop");
-        builder.add_method("run", new CallbackFunction(_uv_loop_run));
-        builder.add_method("run_once", new CallbackFunction(_uv_loop_run_once));
-        builder.add_method("ref", new CallbackFunction(_uv_loop_ref));
-        builder.add_method("unref", new CallbackFunction(_uv_loop_unref));
+        builder.add_method("run", std::make_shared<CallbackFunction>(_uv_loop_run));
+        builder.add_method("run_once", std::make_shared<CallbackFunction>(_uv_loop_run_once));
+        builder.add_method("ref", std::make_shared<CallbackFunction>(_uv_loop_ref));
+        builder.add_method("unref", std::make_shared<CallbackFunction>(_uv_loop_unref));
         vm->add_class(klass);
     }
     {
         ClassBuilder builder(vm, "UV::Timer");
-        builder.add_method("new", new CallbackFunction(_uv_timer_new));
-        builder.add_method("start", new CallbackFunction(_uv_timer_start));
-        builder.add_method("stop", new CallbackFunction(_uv_timer_stop));
-        builder.add_method("close", new CallbackFunction(_uv_close));
-        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        builder.add_method("new", std::make_shared<CallbackFunction>(_uv_timer_new));
+        builder.add_method("start", std::make_shared<CallbackFunction>(_uv_timer_start));
+        builder.add_method("stop", std::make_shared<CallbackFunction>(_uv_timer_stop));
+        builder.add_method("close", std::make_shared<CallbackFunction>(_uv_close));
+        builder.add_method("DESTROY", std::make_shared<CallbackFunction>(_uv_DESTROY));
         vm->add_class(klass);
     }
     {
         ClassBuilder builder(vm, "UV::TCP");
-        builder.add_method("new", new CallbackFunction(_uv_tcp_new));
-        builder.add_method("nodelay", new CallbackFunction(_uv_tcp_nodelay));
-        builder.add_method("connect", new CallbackFunction(_uv_tcp_connect));
-        builder.add_method("write", new CallbackFunction(_uv_write));
-        builder.add_method("read", new CallbackFunction(_uv_read));
-        builder.add_method("close", new CallbackFunction(_uv_close));
-        builder.add_method("bind", new CallbackFunction(_uv_tcp_bind));
-        builder.add_method("listen", new CallbackFunction(_uv_listen));
-        builder.add_method("accept", new CallbackFunction(_uv_accept));
-        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        builder.add_method("new", std::make_shared<CallbackFunction>(_uv_tcp_new));
+        builder.add_method("nodelay", std::make_shared<CallbackFunction>(_uv_tcp_nodelay));
+        builder.add_method("connect", std::make_shared<CallbackFunction>(_uv_tcp_connect));
+        builder.add_method("write", std::make_shared<CallbackFunction>(_uv_write));
+        builder.add_method("read", std::make_shared<CallbackFunction>(_uv_read));
+        builder.add_method("close", std::make_shared<CallbackFunction>(_uv_close));
+        builder.add_method("bind", std::make_shared<CallbackFunction>(_uv_tcp_bind));
+        builder.add_method("listen", std::make_shared<CallbackFunction>(_uv_listen));
+        builder.add_method("accept", std::make_shared<CallbackFunction>(_uv_accept));
+        builder.add_method("DESTROY", std::make_shared<CallbackFunction>(_uv_DESTROY));
         vm->add_class(klass);
     }
     {
         ClassBuilder builder(vm, "UV::Idle");
-        builder.add_method("new", new CallbackFunction(_uv_idle_new));
-        builder.add_method("start", new CallbackFunction(_uv_idle_start));
-        builder.add_method("stop", new CallbackFunction(_uv_idle_stop));
-        builder.add_method("close", new CallbackFunction(_uv_close));
-        builder.add_method("DESTROY", new CallbackFunction(_uv_DESTROY));
+        builder.add_method("new", std::make_shared<CallbackFunction>(_uv_idle_new));
+        builder.add_method("start", std::make_shared<CallbackFunction>(_uv_idle_start));
+        builder.add_method("stop", std::make_shared<CallbackFunction>(_uv_idle_stop));
+        builder.add_method("close", std::make_shared<CallbackFunction>(_uv_close));
+        builder.add_method("DESTROY", std::make_shared<CallbackFunction>(_uv_DESTROY));
         vm->add_class(klass);
     }
 }

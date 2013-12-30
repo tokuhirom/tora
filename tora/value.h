@@ -68,7 +68,7 @@ class Value {
   }
 
  protected:
-  virtual ~Value();
+  ~Value();
   Value(const Value&) = delete;
 
  public:

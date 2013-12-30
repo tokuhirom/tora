@@ -14,14 +14,14 @@ int main() {
         int lineno = 3;
         std::shared_ptr<std::vector<std::string>> params = std::make_shared<std::vector<std::string>>();
 
-        SharedPtr<CodeValue> code = new CodeValue(
+        MortalCodeValue code(
             symbol_table->get_id("HOGE"), // package id
             symbol_table->get_id("FUGA"),        // func name id
             filename_,
             lineno,
             params
         );
-        is(code->package_id(), symbol_table->get_id("HOGE"));
+        is(code_package_id(code.get()), symbol_table->get_id("HOGE"));
     }
 
     done_testing();

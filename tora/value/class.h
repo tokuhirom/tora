@@ -21,7 +21,7 @@ namespace tora {
   std::string class_name(const Value* self);
   void class_add_constant(Value* self, ID name_id, int val);
   void class_add_method(Value* self, Value* code);
-  void class_add_method(Value* self, ID name_id, const CallbackFunction* cb);
+  void class_add_method(Value* self, ID name_id, const std::shared_ptr<CallbackFunction>& cb);
   bool class_has_method(Value* self, ID target_id);
   SharedValue class_get_method_list(Value* self);
   bool class_isa(Value* self, ID target_id);

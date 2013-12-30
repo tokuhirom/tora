@@ -123,13 +123,12 @@ static SharedPtr<Value> av_join(VM* vm, Value* self, Value* inner) {
 /**
  * [1,2,3].map(-> $n { say($n) })
  */
-static SharedPtr<Value> av_map(VM* vm, Value* self, Value* code_v) {
+static SharedPtr<Value> av_map(VM* vm, Value* self, Value* code) {
   assert(self->value_type == VALUE_TYPE_ARRAY);
   MortalArrayValue ret;
-  if (code_v->value_type != VALUE_TYPE_CODE) {
+  if (code->value_type != VALUE_TYPE_CODE) {
     throw new ExceptionValue("Code is not a foo");
   }
-  SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
   for (tra_int i = 0, l = array_size(self); i < l; ++i) {
     vm->stack.push_back(array_get_item(self, i));
 
@@ -150,7 +149,7 @@ static SharedPtr<Value> av_grep(VM* vm, Value* self, Value* stuff_v) {
   assert(self->value_type == VALUE_TYPE_ARRAY);
   MortalArrayValue ret;
   if (stuff_v->value_type == VALUE_TYPE_CODE) {
-    SharedPtr<CodeValue> code = stuff_v->upcast<CodeValue>();
+    Value* code = stuff_v;
     for (tra_int i = 0, l = array_size(self); i < l; ++i) {
       vm->stack.push_back(array_get_item(self, i));
 
@@ -204,16 +203,16 @@ static SharedPtr<Value> av_reserve(VM * vm, Value* self, Value * v) {
 
 void tora::Init_Array(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_ARRAY_CLASS);
-  builder.add_method("size", new CallbackFunction(av_size));
-  builder.add_method("sort", new CallbackFunction(av_sort));
-  builder.add_method("push", new CallbackFunction(av_push));
-  builder.add_method("pop", new CallbackFunction(av_pop));
-  builder.add_method("unshift", new CallbackFunction(av_unshift));
-  builder.add_method("shift", new CallbackFunction(av_shift));
-  builder.add_method("reverse", new CallbackFunction(av_reverse));
-  builder.add_method("join", new CallbackFunction(av_join));
-  builder.add_method("map", new CallbackFunction(av_map));
-  builder.add_method("grep", new CallbackFunction(av_grep));
+  builder.add_method("size", std::make_shared<CallbackFunction>(av_size));
+  builder.add_method("sort", std::make_shared<CallbackFunction>(av_sort));
+  builder.add_method("push", std::make_shared<CallbackFunction>(av_push));
+  builder.add_method("pop", std::make_shared<CallbackFunction>(av_pop));
+  builder.add_method("unshift", std::make_shared<CallbackFunction>(av_unshift));
+  builder.add_method("shift", std::make_shared<CallbackFunction>(av_shift));
+  builder.add_method("reverse", std::make_shared<CallbackFunction>(av_reverse));
+  builder.add_method("join", std::make_shared<CallbackFunction>(av_join));
+  builder.add_method("map", std::make_shared<CallbackFunction>(av_map));
+  builder.add_method("grep", std::make_shared<CallbackFunction>(av_grep));
   // builder.add_method("capacity"), new
   // CallbackFunction(av_capacity));
   // builder.add_method("reserve"), new

@@ -33,6 +33,6 @@ SharedPtr<Value> tora::Symbol_bless(VM *vm, Value *klass, Value *data) {
 
 void tora::Init_Symbol(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_SYMBOL_CLASS);
-  builder.add_method("bless", new CallbackFunction(Symbol_bless));
+  builder.add_method("bless", std::make_shared<CallbackFunction>(Symbol_bless));
   vm->add_builtin_class(builder.value());
 }

@@ -27,7 +27,7 @@ extern "C" {
 
 TORA_EXPORT
 void Init_IRC(VM *vm) {
-    vm->add_function("parse_irc",   new CallbackFunction(parse_irc));
+    vm->add_function("parse_irc",   std::make_shared<CallbackFunction>(parse_irc));
 }
 
 }

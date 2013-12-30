@@ -38,8 +38,8 @@ extern "C" {
 
 TORA_EXPORT
 void Init_File_Path(VM* vm) {
-    vm->add_function("mkpath", new CallbackFunction(File_Path_mkpath));
-    vm->add_function("rmtree", new CallbackFunction(File_Path_rmtree));
+    vm->add_function("mkpath", std::make_shared<CallbackFunction>(File_Path_mkpath));
+    vm->add_function("rmtree", std::make_shared<CallbackFunction>(File_Path_rmtree));
 }
 
 }

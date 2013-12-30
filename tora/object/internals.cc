@@ -58,10 +58,10 @@ static SharedPtr<Value> dump_dump_symbol_table(VM *vm, Value *self) {
 
 void tora::Init_Internals(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_INTERNALS_CLASS);
-  builder.add_method("stack_size", new CallbackFunction(stack_size));
-  builder.add_method("dump_stack", new CallbackFunction(dump_stack));
-  builder.add_method("dump", new CallbackFunction(dump_dump));
+  builder.add_method("stack_size", std::make_shared<CallbackFunction>(stack_size));
+  builder.add_method("dump_stack", std::make_shared<CallbackFunction>(dump_stack));
+  builder.add_method("dump", std::make_shared<CallbackFunction>(dump_dump));
   builder.add_method("dump_symbol_table",
-                    new CallbackFunction(dump_dump_symbol_table));
+                    std::make_shared<CallbackFunction>(dump_dump_symbol_table));
   vm->add_builtin_class(builder.value());
 }

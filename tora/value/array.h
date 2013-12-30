@@ -1,7 +1,6 @@
 #ifndef TORA_ARRAY_H_
 #define TORA_ARRAY_H_
 
-#include <deque>
 #include "../value.h"
 
 namespace tora {

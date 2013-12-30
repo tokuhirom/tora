@@ -91,9 +91,9 @@ static SharedPtr<Value> mc_bless(VM *vm, Value *self, Value *data) {
 
 void tora::Init_Object(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_OBJECT_CLASS);
-  builder.add_method("tora", new CallbackFunction(object_tora));
-  builder.add_method("meta", new CallbackFunction(object_meta));
-  builder.add_method("isa", new CallbackFunction(st_object_isa));
-  builder.add_method("bless", new CallbackFunction(mc_bless));
+  builder.add_method("tora", std::make_shared<CallbackFunction>(object_tora));
+  builder.add_method("meta", std::make_shared<CallbackFunction>(object_meta));
+  builder.add_method("isa", std::make_shared<CallbackFunction>(st_object_isa));
+  builder.add_method("bless", std::make_shared<CallbackFunction>(mc_bless));
   vm->add_builtin_class(builder.value());
 }

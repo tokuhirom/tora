@@ -122,8 +122,8 @@ extern "C" {
 
 TORA_EXPORT
 void Init_JSON(VM* vm) {
-    vm->add_function(vm->symbol_table->get_id("encode"), new CallbackFunction(json_encode));
-    vm->add_function(vm->symbol_table->get_id("decode"), new CallbackFunction(json_decode));
+    vm->add_function(vm->symbol_table->get_id("encode"), std::make_shared<CallbackFunction>(json_encode));
+    vm->add_function(vm->symbol_table->get_id("decode"), std::make_shared<CallbackFunction>(json_decode));
 }
 
 }

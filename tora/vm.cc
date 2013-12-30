@@ -64,7 +64,7 @@ using namespace tora;
 const int INITIAL_STACK_SIZE = 1024;
 const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(SharedPtr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
+VM::VM(std::shared_ptr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
        bool dump_ops)
     : dump_ops_(dump_ops),
       ops(ops_),
@@ -74,7 +74,7 @@ VM::VM(SharedPtr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
   sp = 0;
   pc = 0;
   this->stack.reserve(INITIAL_STACK_SIZE);
-  this->frame_stack = new std::vector<SharedPtr<LexicalVarsFrame>>();
+  this->frame_stack = std::make_shared<std::vector<SharedPtr<LexicalVarsFrame>>>();
   this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
   this->global_vars = new std::vector<SharedValue>();
   std::random_device rd;
@@ -97,7 +97,6 @@ VM::~VM() {
   //      delete this->frame_stack->back();
   //      frame_stack->pop_back();
   //  }
-  delete this->frame_stack;
   delete this->myrand;
 
   /*
@@ -200,7 +199,7 @@ SharedPtr<tora::Value> VM::eval(std::istream *is, const std::string &fname) {
   // vm->init_globals(argc-optind, argv+optind);
 
   // save orig ops.
-  SharedPtr<OPArray> orig_ops = vm->ops;
+  std::shared_ptr<OPArray> orig_ops = vm->ops;
   int orig_pc = vm->pc;
   size_t orig_stack_size = vm->stack.size();
   size_t orig_frame_size = vm->frame_stack->size();
@@ -471,8 +470,8 @@ void VM::register_standard_methods() {
   Init_builtins(this);
 
   // TODO: move to Init_builtins.
-  this->add_builtin_function("eval", new CallbackFunction(builtin_eval));
-  this->add_builtin_function("do", new CallbackFunction(builtin_do));
+  this->add_builtin_function("eval", std::make_shared<CallbackFunction>(builtin_eval));
+  this->add_builtin_function("do", std::make_shared<CallbackFunction>(builtin_do));
 }
 
 void VM::copy_all_public_symbols(ID srcid) {
@@ -659,7 +658,7 @@ void VM::dump_pad() {
   this->frame_stack->back()->dump_pad(this);
 }
 
-void VM::function_call(int argcnt, const SharedPtr<CodeValue> &code,
+void VM::function_call(int argcnt, const SharedPtr<Value> &code,
                        const SharedPtr<Value> &self) {
   assert(code.get());
 
@@ -667,21 +666,21 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue> &code,
       new FunctionFrame(this, argcnt, stack.size(), this->ops);
   fframe->return_address = this->pc;
   fframe->argcnt = argcnt;
-  fframe->code = code;
+  fframe->code = code.get();
   fframe->self = self;
 
   pc = -1;
-  this->ops = code->code_opcodes();
+  this->ops = code_opcodes(code.get());
 
 // TODO: vargs support
 // TODO: kwargs support
 #ifndef NDEBUG
-  if (code->code_params() && argcnt != (int)code->code_params()->size()) {
+  if (code_params(code.get()) && argcnt != (int)code_params(code.get())->size()) {
     fprintf(stderr,
             "[BUG] argument count mismatch. name: %s, argcnt: %d, "
             "code_params.size(): %ld\n",
-            symbol_table->id2name(code->package_id()).c_str(), argcnt,
-            (long int)code->code_params()->size());
+            symbol_table->id2name(code_package_id(code.get())).c_str(), argcnt,
+            (long int)code_params(code.get())->size());
     abort();
   }
 #endif
@@ -689,21 +688,21 @@ void VM::function_call(int argcnt, const SharedPtr<CodeValue> &code,
   frame_stack->push_back(fframe);
 }
 
-void VM::function_call_ex(int argcnt, const SharedPtr<CodeValue> &code,
+void VM::function_call_ex(int argcnt, const SharedPtr<Value> &code,
                           const SharedPtr<Value> &self) {
-  if (code->is_native()) {
-    this->call_native_func(code->callback(), argcnt);
+  if (code_is_native(code.get())) {
+    this->call_native_func(code_callback(code.get()), argcnt);
   } else {
     // inject codevalue to VM, and execute it.
     size_t pc = this->pc;
     // TODO: catch exceptions in destroy
 
-    SharedPtr<OPArray> end_ops = new OPArray();
+    std::shared_ptr<OPArray> end_ops = std::make_shared<OPArray>();
     end_ops->push_back(new OP(OP_END), -1);
 
     this->function_call(argcnt, code, self);
     this->frame_stack->back()->upcast<FunctionFrame>()->return_address = -1;
-    SharedPtr<OPArray> orig_ops =
+    std::shared_ptr<OPArray> orig_ops =
         this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops;
     this->frame_stack->back()->upcast<FunctionFrame>()->orig_ops = end_ops;
     this->pc = 0;
@@ -788,7 +787,7 @@ void VM::call_method(const SharedPtr<Value> &object,
       int argcnt = get_int_operand();
       switch (v->value_type) {
         case VALUE_TYPE_CODE:
-          this->function_call_ex(argcnt, v->upcast<CodeValue>(), object);
+          this->function_call_ex(argcnt, v->upcast<Value>(), object);
           break;
         case VALUE_TYPE_CLASS:
           stack.push_back(v);
@@ -814,13 +813,12 @@ void VM::call_method(const SharedPtr<Value> &object,
   seen.insert(class_name_id(klass.get()));
   // std::cout << klass->name() << " " << id2name(function_id) << std::endl;
 
-  Value* code_v = class_get_method(klass.get(), function_id);
-  if (code_v) {
-    assert(code_v->value_type == VALUE_TYPE_CODE);
-    SharedPtr<CodeValue> code = code_v->upcast<CodeValue>();
+  Value* code = class_get_method(klass.get(), function_id);
+  if (code) {
+    assert(code->value_type == VALUE_TYPE_CODE);
     int argcnt = get_int_operand();
 
-    if (code->is_native()) {
+    if (code_is_native(code)) {
       // FunctionFrame* fframe = new FunctionFrame(this, argcnt,
       // stack.size()-argcnt);
       // fframe->return_address = pc;
@@ -828,7 +826,7 @@ void VM::call_method(const SharedPtr<Value> &object,
 
       // frame_stack->push_back(fframe);
       stack.push_back(object);
-      this->call_native_func(code->callback(), argcnt + 1);
+      this->call_native_func(code_callback(code), argcnt + 1);
       // delete fframe;
       // frame_stack->pop_back();
     } else {
@@ -840,17 +838,17 @@ void VM::call_method(const SharedPtr<Value> &object,
       fframe->self = object;
 
       pc = -1;
-      this->ops = code->code_opcodes();
+      this->ops = code_opcodes(code);
 
       // TODO: vargs support
       // TODO: kwargs support
       // TODO: support code_defaults
-      if (code->code_params() && argcnt != code->code_params()->size()) {
+      if (code_params(code) && argcnt != code_params(code)->size()) {
         throw new ArgumentExceptionValue(
             "%s::%s needs %d arguments but you passed %d arguments",
             symbol_table->id2name(class_name_id(klass.get())).c_str(),
             symbol_table->id2name(function_id).c_str(),
-            code->code_params()->size());
+            code_params(code)->size());
       }
       // assert(argcnt == (int)code->code_params()->size());
       mark_stack.push_back(stack.size());
@@ -885,19 +883,20 @@ void VM::call_method(const SharedPtr<Value> &object,
 }
 
 void VM::add_constant(const char *name, int n) {
-  this->add_function(get_id(name), new CallbackFunction(n));
+  this->add_function(get_id(name), std::make_shared<CallbackFunction>(n));
 }
 
-void VM::add_function(const char *name, const CallbackFunction *cb) {
+void VM::add_function(const char *name, const std::shared_ptr<CallbackFunction>& cb) {
   this->add_function(get_id(name), cb);
 }
 
-void VM::add_function(ID id, const CallbackFunction *cb) {
+void VM::add_function(ID id, const std::shared_ptr<CallbackFunction>& cb) {
+  MortalCodeValue code(0, id, cb);
   this->file_scope_->insert(
-      file_scope_body_t::value_type(id, new CodeValue(0, id, cb)));
+      file_scope_body_t::value_type(id, code.get()));
 }
 
-void VM::add_function(const SharedPtr<CodeValue> &code) {
+void VM::add_function(const SharedPtr<Value> &code) {
   this->file_scope_->insert(
       file_scope_body_t::value_type(code_func_name_id(code.get()), code.get()));
 }
@@ -961,8 +960,8 @@ Value *VM::to_bool(bool b) const {
   return b ? this->true_value_.get() : this->false_value_.get();
 }
 
-void VM::add_builtin_function(const char *name, CallbackFunction *func) {
+void VM::add_builtin_function(const char *name, const std::shared_ptr<CallbackFunction>& func) {
   ID id = this->symbol_table->get_id(std::string(name));
-  this->builtin_functions_.insert(
-      std::make_pair(id, new CodeValue(0, id, func)));
+  MortalCodeValue code(0, id, func);
+  this->builtin_functions_.insert(std::make_pair(id, code.get()));
 }

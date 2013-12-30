@@ -81,7 +81,7 @@ Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_,
   error = 0;
   blocks = new std::vector<Block>();
   global_vars = new std::vector<std::string>();
-  ops = new OPArray();
+  ops = std::make_shared<OPArray>();
   in_try_block = false;
   symbol_table = symbol_table_;
   dump_ops = false;
@@ -536,13 +536,14 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
       // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
-      SharedPtr<CodeValue> code =
-          new CodeValue(this->symbol_table->get_id("<lambda>"),  // package id
-                        this->symbol_table->get_id("<lambda>"),  // func name id
-                        filename_, node->lineno, params);
+      MortalCodeValue code(
+        this->symbol_table->get_id("<lambda>"),  // package id
+        this->symbol_table->get_id("<lambda>"),  // func name id
+        filename_, node->lineno, params
+      );
       assert(params);
-      code->code_opcodes(funccomp.ops);
-      code->closure_var_names(funccomp.closure_vars);
+      code_opcodes(code.get(), funccomp.ops);
+      code_closure_var_names(code.get(), funccomp.closure_vars);
 
 // if (funccomp.closure_vars->size() > 0) {
 // create closure
@@ -556,7 +557,7 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
       }
 #endif
 
-      SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code);
+      SharedPtr<ValueOP> putval = new ValueOP(OP_PUSH_VALUE, code.get());
       push_op(putval);
 
       // define method.
@@ -662,14 +663,15 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 
       // printf("CLOSURE VARS: %d\n", funccomp.closure_vars->size());
 
-      SharedPtr<CodeValue> code(
-          new CodeValue(this->symbol_table->get_id(package),   // package id
-                        this->symbol_table->get_id(funcname),  // func name id
-                        filename_, node->lineno, params));
+      MortalCodeValue code(
+        this->symbol_table->get_id(package),   // package id
+        this->symbol_table->get_id(funcname),  // func name id
+        filename_, node->lineno, params
+      );
       // code->code_id = this->symbol_table->get_id(package + "::" + funcname);
-      code->code_defaults(defaults);
-      code->code_opcodes(funccomp.ops);
-      code->closure_var_names(funccomp.closure_vars);
+      code_defaults(code.get(), defaults);
+      code_opcodes(code.get(), funccomp.ops);
+      code_closure_var_names(code.get(), funccomp.closure_vars);
 
       // SharedPtr<StrValue> funcname_value = new StrValue(funcname);
       if (1 && funccomp.closure_vars->size() > 0) {
@@ -685,11 +687,11 @@ void tora::Compiler::compile(const SharedPtr<Node> &node) {
 #endif
 
         // define method.
-        push_op(new ValueOP(OP_PUSH_VALUE, code));
+        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
         push_op(new OP(OP_CLOSUREDEF, funccomp.closure_vars->size()));
       } else {
         // create normal function
-        push_op(new ValueOP(OP_PUSH_VALUE, code));
+        push_op(new ValueOP(OP_PUSH_VALUE, code.get()));
         push_op(new OP(OP_FUNCDEF));
       }
 

@@ -67,11 +67,11 @@ static SharedPtr<Value> Regexp_EXPANDED(VM* vm, Value* self) {
 
 void tora::Init_Regexp(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_REGEXP_CLASS);
-  builder.add_method("flags", new CallbackFunction(Regexp_flags));
-  builder.add_method("quotemeta", new CallbackFunction(Regexp_quotemeta));
+  builder.add_method("flags", std::make_shared<CallbackFunction>(Regexp_flags));
+  builder.add_method("quotemeta", std::make_shared<CallbackFunction>(Regexp_quotemeta));
 
-  builder.add_method("MULTILINE", new CallbackFunction(Regexp_MULTILINE));
-  builder.add_method("IGNORECASE", new CallbackFunction(Regexp_IGNORECASE));
-  builder.add_method("EXPANDED", new CallbackFunction(Regexp_EXPANDED));
+  builder.add_method("MULTILINE", std::make_shared<CallbackFunction>(Regexp_MULTILINE));
+  builder.add_method("IGNORECASE", std::make_shared<CallbackFunction>(Regexp_IGNORECASE));
+  builder.add_method("EXPANDED", std::make_shared<CallbackFunction>(Regexp_EXPANDED));
   vm->add_builtin_class(builder.value());
 }

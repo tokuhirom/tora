@@ -1,6 +1,7 @@
 #include "class.h"
 #include "code.h"
 #include "../vm.h"
+#include "../value/array.h"
 #include <utility>
 
 using namespace tora;
@@ -48,7 +49,7 @@ std::string tora::class_name(const Value* self)
 
 void tora::class_add_constant(Value* self, ID name_id, int val)
 {
-  tora::class_add_method(self, name_id, new CallbackFunction(val));
+  tora::class_add_method(self, name_id, std::make_shared<CallbackFunction>(val));
 }
 
 void tora::class_add_method(Value* self, Value* code)
@@ -61,12 +62,15 @@ void tora::class_add_method(Value* self, Value* code)
   );
 }
 
-void tora::class_add_method(Value* self, ID name_id, const CallbackFunction* cb)
+void tora::class_add_method(Value* self, ID name_id, const std::shared_ptr<CallbackFunction>& cb)
 {
+  MortalCodeValue code(
+    klass(self)->name_id, name_id, cb
+  );
   klass(self)->methods.insert(
     std::pair<ID, SharedValue>(
       name_id,
-      new CodeValue(klass(self)->name_id, name_id, cb)
+      code.get()
     )
   );
 }

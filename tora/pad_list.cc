@@ -8,7 +8,7 @@
 
 using namespace tora;
 
-PadList::PadList(int vars_cnt, PadList *next) : refcnt(0), next_(next) {
+PadList::PadList(int vars_cnt, std::shared_ptr<PadList> next) : next_(next) {
   // printf("VARS: %d\n", vars_cnt);
   /*
    for (int i=0; i<vars_cnt; i++) {

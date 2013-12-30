@@ -34,6 +34,6 @@ static SharedPtr<Value> dynaloader_load(VM *vm, Value *self, Value *filename_v,
 
 void tora::Init_DynaLoader(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_DYNALOADER_CLASS);
-  builder.add_method("load", new CallbackFunction(dynaloader_load));
+  builder.add_method("load", std::make_shared<CallbackFunction>(dynaloader_load));
   vm->add_builtin_class(builder.value());
 }

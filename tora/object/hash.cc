@@ -73,9 +73,9 @@ static SharedPtr<Value> Hash_exists(VM* vm, Value* self, Value* key) {
 
 void tora::Init_Hash(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_HASH_CLASS);
-  builder.add_method("keys", new CallbackFunction(Hash_keys));
-  builder.add_method("values", new CallbackFunction(Hash_values));
-  builder.add_method("delete", new CallbackFunction(Hash_delete));
-  builder.add_method("exists", new CallbackFunction(Hash_exists));
+  builder.add_method("keys", std::make_shared<CallbackFunction>(Hash_keys));
+  builder.add_method("values", std::make_shared<CallbackFunction>(Hash_values));
+  builder.add_method("delete", std::make_shared<CallbackFunction>(Hash_delete));
+  builder.add_method("exists", std::make_shared<CallbackFunction>(Hash_exists));
   vm->add_builtin_class(builder.value());
 }

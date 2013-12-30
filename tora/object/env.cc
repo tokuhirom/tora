@@ -67,8 +67,8 @@ static SharedPtr<Value> env_get(VM* vm, Value* self, Value* k) {
 
 void tora::Init_Env(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_ENV_CLASS);
-  builder.add_method("get", new CallbackFunction(env_get));
-  builder.add_method("__getitem__", new CallbackFunction(env_get));
-  builder.add_method("__setitem__", new CallbackFunction(env_set));
+  builder.add_method("get", std::make_shared<CallbackFunction>(env_get));
+  builder.add_method("__getitem__", std::make_shared<CallbackFunction>(env_get));
+  builder.add_method("__setitem__", std::make_shared<CallbackFunction>(env_set));
   vm->add_builtin_class(builder.value());
 }

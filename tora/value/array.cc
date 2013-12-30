@@ -1,6 +1,7 @@
 #include "../value.h"
 #include "array.h"
 #include <algorithm>
+#include <deque>
 
 using namespace tora;
 

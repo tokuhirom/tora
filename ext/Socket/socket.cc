@@ -328,23 +328,23 @@ void Init_Socket(VM* vm) {
 
     {
         ClassBuilder builder(vm, "Socket");
-        builder.add_method("socket", new CallbackFunction(sock_socket));
-        builder.add_method("sockaddr_in", new CallbackFunction(sock_sockaddr_in));
-        builder.add_method("inet_aton", new CallbackFunction(sock_inet_aton));
+        builder.add_method("socket", std::make_shared<CallbackFunction>(sock_socket));
+        builder.add_method("sockaddr_in", std::make_shared<CallbackFunction>(sock_sockaddr_in));
+        builder.add_method("inet_aton", std::make_shared<CallbackFunction>(sock_inet_aton));
         vm->add_class(klass);
     }
 
     {
         ClassBuilder builder(vm, "Socket::Socket");
-        builder.add_method("connect", new CallbackFunction(sock_sock_connect));
-        builder.add_method("write", new CallbackFunction(sock_write));
-        builder.add_method("read", new CallbackFunction(sock_read));
-        builder.add_method("DESTROY", new CallbackFunction(sock_sock_DESTROY));
-        builder.add_method("bind", new CallbackFunction(sock_sock_bind));
-        builder.add_method("listen", new CallbackFunction(sock_sock_listen));
-        builder.add_method("close", new CallbackFunction(sock_sock_close));
-        builder.add_method("accept", new CallbackFunction(sock_sock_accept));
-        builder.add_method("setsockopt", new CallbackFunction(sock_sock_setsockopt));
+        builder.add_method("connect", std::make_shared<CallbackFunction>(sock_sock_connect));
+        builder.add_method("write", std::make_shared<CallbackFunction>(sock_write));
+        builder.add_method("read", std::make_shared<CallbackFunction>(sock_read));
+        builder.add_method("DESTROY", std::make_shared<CallbackFunction>(sock_sock_DESTROY));
+        builder.add_method("bind", std::make_shared<CallbackFunction>(sock_sock_bind));
+        builder.add_method("listen", std::make_shared<CallbackFunction>(sock_sock_listen));
+        builder.add_method("close", std::make_shared<CallbackFunction>(sock_sock_close));
+        builder.add_method("accept", std::make_shared<CallbackFunction>(sock_sock_accept));
+        builder.add_method("setsockopt", std::make_shared<CallbackFunction>(sock_sock_setsockopt));
         vm->add_class(klass);
     }
 }

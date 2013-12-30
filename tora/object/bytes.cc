@@ -96,8 +96,8 @@ static SharedPtr<Value> Bytes_decode(
 
 void tora::Init_Bytes(VM *vm) {
   ClassBuilder builder(vm, SYMBOL_BYTES_CLASS);
-  builder.add_method("length", new CallbackFunction(meth_bytes_length));
-  builder.add_method("substr", new CallbackFunction(Bytes_substr));
-  builder.add_method("decode", new CallbackFunction(Bytes_decode));
+  builder.add_method("length", std::make_shared<CallbackFunction>(meth_bytes_length));
+  builder.add_method("substr", std::make_shared<CallbackFunction>(Bytes_substr));
+  builder.add_method("decode", std::make_shared<CallbackFunction>(Bytes_decode));
   vm->add_builtin_class(builder.value());
 }

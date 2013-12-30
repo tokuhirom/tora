@@ -312,8 +312,8 @@ extern "C" {
 
 TORA_EXPORT
 void Init_HTTP_Parser(VM* vm) {
-    vm->add_function("parse_http_request", new CallbackFunction(HTTP_Parser_parse_http_request));
-    vm->add_function("parse_http_response", new CallbackFunction(HTTP_Parser_parse_http_response));
+    vm->add_function("parse_http_request", std::make_shared<CallbackFunction>(HTTP_Parser_parse_http_request));
+    vm->add_function("parse_http_response", std::make_shared<CallbackFunction>(HTTP_Parser_parse_http_response));
     vm->add_constant("HEADERS_NONE", HEADERS_NONE);
     vm->add_constant("HEADERS_AS_HASHREF", HEADERS_AS_HASHREF);
     vm->add_constant("HEADERS_AS_ARRAYREF", HEADERS_AS_ARRAYREF);

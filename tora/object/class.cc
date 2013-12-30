@@ -29,6 +29,6 @@ static SharedPtr<Value> Class_name(VM* vm, Value* self) {
 
 void tora::Init_Class(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_CLASS_CLASS);
-  builder.add_method("name", new CallbackFunction(Class_name));
+  builder.add_method("name", std::make_shared<CallbackFunction>(Class_name));
   vm->add_builtin_class(builder.value());
 }

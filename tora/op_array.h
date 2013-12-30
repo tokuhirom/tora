@@ -8,15 +8,14 @@
 namespace tora {
 
 class OPArray {
-  PRIM_DECL()
  private:
   std::vector<op_type_t> op_types;
   std::vector<OP*> ops;
   std::vector<size_t> lineno;
 
  public:
-  OPArray() : refcnt(0) {}
-  OPArray(const OPArray& opa) : refcnt(0) {
+  OPArray() {}
+  OPArray(const OPArray& opa) {
     op_types = opa.op_types;
     ops = opa.ops;
     lineno = opa.lineno;

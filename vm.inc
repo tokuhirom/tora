@@ -82,7 +82,7 @@ OP_FUNCDEF {
     if (this->klass().get()) {
         class_add_method(this->klass().get(), code.get() );
     } else {
-        this->add_function(code->upcast<CodeValue>());
+        this->add_function(code.get());
     }
 }
 
@@ -101,17 +101,17 @@ OP_CLOSUREDEF {
     for (int i=0; i<closure_vars_cnt; i++) {
         SharedPtr<Value> v = stack.back();
         stack.pop_back();
-        code->upcast<CodeValue>()->closure_vars().push_back(v);
+        code_closure_vars(code.get()).push_back(v);
     }
 #else
-    code->upcast<CodeValue>()->pad_list(this->frame_stack->back()->pad_list);
+    code_pad_list(code.get(), this->frame_stack->back()->pad_list);
 #endif
     // printf("CLOSUREDEF!! %d, %d\n", package_id(), code->upcast<CodeValue>()->func_name_id);
 
     if (this->klass().get()) {
         class_add_method(this->klass().get(), code.get() );
     } else {
-        this->add_function(code->upcast<CodeValue>());
+        this->add_function(code.get());
     }
 }
 
@@ -126,28 +126,28 @@ OP_GETCLOSURE {
         }
     }
     assert(frame.get());
-    assert(frame->code);
+    assert(frame->code.get());
     assert(code_func_name_id(frame->code.get()));
 // printf("GETCLOSURE: %d, %d, %s\n", level, no, symbol_table->id2name(frame->code->func_name_id()).c_str());
 // dump_value(frame->code);
 // frame->code->upcast<CodeValue>()->pad_list()->dump(this);
 #ifdef PERLISH_CLOSURE
     int i = get_int_operand();
-    assert(i < frame->code->upcast<CodeValue>()->closure_vars().size());
-    const SharedPtr<Value>& v = frame->code->upcast<CodeValue>()->closure_vars().at(i);
+    assert(i < code_closure_vars(frame->code.get()).size());
+    const SharedPtr<Value>& v = code_closure_vars(frame->code.get()).at(i);
     // printf("# GETCLOSURE: %d, %s\n", i, symbol_table->id2name(frame->code->func_name_id()).c_str());
     stack.push_back(v);
 #else
     int level = get_int_operand_high();
     int no    = get_int_operand_low();
-    assert(frame->code->upcast<CodeValue>()->pad_list().get());
+    assert(code_pad_list(frame->code.get()).get());
     if (level == 1) {
-        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get(
+        SharedPtr<Value> v = code_pad_list(frame->code.get())->get(
             no
         );
         stack.push_back(v);
     } else {
-        SharedPtr<Value> v = frame->code->upcast<CodeValue>()->pad_list()->get_dynamic(
+        SharedPtr<Value> v = code_pad_list(frame->code.get())->get_dynamic(
             level-1, no
         );
         stack.push_back(v);
@@ -168,18 +168,18 @@ OP_SETCLOSURE {
     SharedPtr<Value> v = stack.back();
 #ifdef PERLISH_CLOSURE
     int i = get_int_operand();
-    const SharedPtr<Value> &dst = frame->code->upcast<CodeValue>()->closure_vars()[i];
+    const SharedPtr<Value> &dst = code_closure_vars(frame->code.get())[i];
     *dst = *v;
 #else
     int level = get_int_operand_high();
     int no    = get_int_operand_low();
     if (level == 1) {
-        frame->code->upcast<CodeValue>()->pad_list()->set(
+        code_pad_list(frame->code.get())->set(
             no,
             v
         );
     } else {
-        frame->code->upcast<CodeValue>()->pad_list()->set_dynamic(
+        code_pad_list(frame->code.get())->set_dynamic(
             level-1,
             no,
             v
@@ -263,9 +263,9 @@ OP_BUILTIN_FUNCALL {
     ID id = symbol_id(funname.get());
     assert(funname->value_type == VALUE_TYPE_SYMBOL);
     auto iter = this->builtin_functions_.find(id);
-    assert(iter->second->is_native());
+    assert(code_is_native(iter->second.get()));
     assert(iter != this->builtin_functions_.end());
-    this->call_native_func(iter->second->callback(), argcnt);
+    this->call_native_func(code_callback(iter->second.get()), argcnt);
 }
 
 OP_NEXTSTATE {
@@ -307,27 +307,27 @@ OP_FUNCALL {
         if (iter->second->value_type != VALUE_TYPE_CODE) {
             throw new ExceptionValue("This is not a funciton.");
         }
-        CodeValue* code = iter->second->upcast<CodeValue>();
+        Value* code = iter->second.get();
 
 // Disasm::disasm(this->ops);
         SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
 
-        if (code->is_native()) {
-            assert(code->callback());
-            this->call_native_func(code->callback(), argcnt);
+        if (code_is_native(code)) {
+            assert(code_callback(code));
+            this->call_native_func(code_callback(code), argcnt);
         } else {
             // TODO: vargs support
             // TODO: kwargs support
             int orig_argcnt = argcnt;
             int start_stack_size = stack.size() - argcnt;
-            this->ops = code->code_opcodes();
+            this->ops = code_opcodes(code);
 
 // printf("PARAM count: %d\n", (int) code->code_params->size());
-            if (code->code_params().get()) {
-                for (size_t i=0; i<code->code_params()->size(); i++) {
+            if (code_params(code).get()) {
+                for (size_t i=0; i<code_params(code)->size(); i++) {
                     if (argcnt <= i) {
-                        int def = code->code_defaults()->at(i);
+                        int def = code_defaults(code)->at(i);
                         if (def >= 0) {
                             pc = def;
                             this->execute();
@@ -345,7 +345,7 @@ OP_FUNCALL {
                             throw new ExceptionValue(
                                 "ArgumentException: %s needs %d arguments but you passed %d arguments.",
                                 this->symbol_table->id2name(symbol_id(funname.get())).c_str(),
-                                code->code_params()->size(),
+                                code_params(code)->size(),
                                 orig_argcnt);
                         }
                     }
@@ -804,11 +804,11 @@ OP_ENTER_FOREACH {
       MortalHashIteratorValue iter(a.get());
       iiter = iter.get();
     } else if (a->value_type == VALUE_TYPE_OBJECT) {
-        CodeValue* code = class_get_method(object_class(a.get()), this->symbol_table->get_id("__iter__"))->upcast<CodeValue>();
+        Value* code = class_get_method(object_class(a.get()), this->symbol_table->get_id("__iter__"));
         if (code) {
-            if (code->is_native()) {
+            if (code_is_native(code)) {
                 stack.push_back(a);
-               this->call_native_func(code->callback(), 1);
+               this->call_native_func(code_callback(code), 1);
                iiter = stack.back();
                stack.pop_back();
             } else {
@@ -888,10 +888,10 @@ OP_FOR_ITER {
         Value * o = iter.get();
         Value *code_v = class_get_method(object_class(o), this->symbol_table->get_id("__next__"));
         if (code_v) {
-            CodeValue * code = code_v->upcast<CodeValue>();
-            if (code->is_native()) {
+            Value * code = code_v;
+            if (code_is_native(code)) {
                 stack.push_back(o);
-               this->call_native_func(code->callback(), 1);
+               this->call_native_func(code_callback(code), 1);
                SharedPtr<Value> val = stack.back();
                stack.pop_back();
                if (val->value_type == VALUE_TYPE_EXCEPTION) {
@@ -1036,11 +1036,11 @@ OP_INSTANCIATE_IDENTIFIER {
     if (iter != file_scope_->end()) {
         if (iter->second->value_type == VALUE_TYPE_CODE) {
             int argcnt = 0;
-            auto code = iter->second->upcast<CodeValue>();
-            if (code->is_native()) {
-                this->call_native_func(code->callback(), argcnt);
+            Value * code = iter->second.get();
+            if (code_is_native(code)) {
+                this->call_native_func(code_callback(code), argcnt);
             } else {
-                this->function_call(argcnt, iter->second->upcast<CodeValue>(), new_undef_value());
+                this->function_call(argcnt, iter->second.get(), new_undef_value());
             }
         } else {
             stack.push_back(iter->second.get());
@@ -1053,11 +1053,11 @@ OP_INSTANCIATE_IDENTIFIER {
             auto iter = this->builtin_functions_.find(id);
             if (iter != this->builtin_functions_.end()) {
                 int argcnt = 0;
-                auto code = iter->second->upcast<CodeValue>();
-                if (code->is_native()) {
-                    this->call_native_func(code->callback(), argcnt);
+                Value* code = iter->second.get();
+                if (code_is_native(code)) {
+                    this->call_native_func(code_callback(code), argcnt);
                 } else {
-                    this->function_call(argcnt, iter->second->upcast<CodeValue>(), new_undef_value());
+                    this->function_call(argcnt, iter->second.get(), new_undef_value());
                 }
             } else {
                 throw new ExceptionValue("There is no stuff named '%s'", id2name(id).c_str());

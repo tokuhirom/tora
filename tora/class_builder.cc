@@ -3,7 +3,7 @@
 
 using namespace tora;
 
-void tora::ClassBuilder::add_method(const char *name, const CallbackFunction* func)
+void tora::ClassBuilder::add_method(const char *name, const std::shared_ptr<CallbackFunction>& func)
 {
   ID name_id = vm_->symbol_table->get_id(name);
   tora::class_add_method(mcv_.get(), name_id, func);
