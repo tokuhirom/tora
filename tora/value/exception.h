@@ -1,5 +1,5 @@
-#ifndef TORA_EXCEPTION_H_
-#define TORA_EXCEPTION_H_
+#ifndef TORA_VALUE_EXCEPTION_H_
+#define TORA_VALUE_EXCEPTION_H_
 
 #include "../exception.h"
 #include "../value.h"
@@ -75,4 +75,4 @@ class ArgumentExceptionValue : public ExceptionValue {
 };
 };
 
-#endif  // TORA_EXCEPTION_H_
+#endif  // TORA_VALUE_EXCEPTION_H_
