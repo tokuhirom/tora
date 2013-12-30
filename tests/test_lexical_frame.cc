@@ -12,7 +12,7 @@ using namespace tora;
 int main() {
     {
         std::shared_ptr<OPArray> opa(new OPArray());
-        SharedPtr<SymbolTable> st(new SymbolTable());
+         std::shared_ptr<SymbolTable> st(new SymbolTable());
         VM vm(opa, st, false);
         int vars_cnt = 3;
         int top = 0;
@@ -27,7 +27,7 @@ int main() {
 
     {
         std::shared_ptr<OPArray> opa(new OPArray());
-        SharedPtr<SymbolTable> st(new SymbolTable());
+         std::shared_ptr<SymbolTable> st(new SymbolTable());
         VM vm(opa, st, false);
         int vars_cnt = 3;
         int top = 0;
@@ -44,7 +44,7 @@ int main() {
 
     {
         std::shared_ptr<OPArray> opa(new OPArray());
-        SharedPtr<SymbolTable> st(new SymbolTable());
+         std::shared_ptr<SymbolTable> st(new SymbolTable());
         VM vm(opa, st, false);
         int vars_cnt = 3;
         int top = 0;

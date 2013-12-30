@@ -53,7 +53,7 @@ class VM {
   int pc;  // program counter
   std::shared_ptr<OPArray> ops;
   std::vector<SharedValue> *global_vars;
-  SharedPtr<SymbolTable> symbol_table;
+  std::shared_ptr<SymbolTable> symbol_table;
   std::vector<SharedPtr<Value>> stack;
   bool exec_trace;
 
@@ -80,7 +80,7 @@ class VM {
   std::vector<int> mark_stack;
   std::vector<int> stack_base;
 
-  VM(std::shared_ptr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
+  VM(std::shared_ptr<OPArray> &ops_, std::shared_ptr<SymbolTable> &symbol_table_,
      bool dump_ops);
   ~VM();
   void execute();

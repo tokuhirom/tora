@@ -44,7 +44,7 @@ class Compiler {
   std::vector<Block> *blocks;
   std::vector<std::string> *global_vars;
   std::shared_ptr<std::vector<std::string>> closure_vars;
-  SharedPtr<SymbolTable> symbol_table;
+  std::shared_ptr<SymbolTable> symbol_table;
   int error;
   bool in_try_block;
   bool dump_ops;
@@ -58,7 +58,7 @@ class Compiler {
   void package(const std::string &p) { package_ = p; }
   std::string &package() { return package_; }
 
-  Compiler(const SharedPtr<SymbolTable> &symbol_table_,
+  Compiler(const  std::shared_ptr<SymbolTable> &symbol_table_,
            const std::string &filename);
   ~Compiler();
 

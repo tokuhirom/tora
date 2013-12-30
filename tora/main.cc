@@ -39,7 +39,7 @@ static void run_repl(const std::vector<std::string>& args,
   bool dump_ops = false;
 
   SharedPtr<Scanner> scanner = new Scanner(&std::cin, "<stdin>");
-  SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+  std::shared_ptr<SymbolTable> symbol_table(new SymbolTable());
   tora::Compiler compiler(symbol_table, "<repl>");
   compiler.init_globals();
   // compiler.compile(parser.root_node());
@@ -271,7 +271,7 @@ int main(int argc, char** argv) {
   }
 
   // compile
-  SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+  std::shared_ptr<SymbolTable> symbol_table(new SymbolTable());
   tora::Compiler compiler(symbol_table, filename);
   compiler.dump_ops = dump_ops;
   compiler.init_globals();

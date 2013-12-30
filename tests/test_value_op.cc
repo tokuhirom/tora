@@ -10,7 +10,7 @@ using namespace tora;
 
 int main() {
     {
-        SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+         std::shared_ptr<SymbolTable> symbol_table = std::make_shared<SymbolTable>();
         std::shared_ptr<OPArray> op_array = std::make_shared<OPArray>();
         std::string filename("HOGE");
         int lineno = 3;

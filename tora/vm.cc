@@ -64,7 +64,7 @@ using namespace tora;
 const int INITIAL_STACK_SIZE = 1024;
 const int INITIAL_MARK_STACK_SIZE = 128;
 
-VM::VM(std::shared_ptr<OPArray> &ops_, SharedPtr<SymbolTable> &symbol_table_,
+VM::VM(std::shared_ptr<OPArray> &ops_, std::shared_ptr<SymbolTable> &symbol_table_,
        bool dump_ops)
     : dump_ops_(dump_ops),
       ops(ops_),
@@ -182,7 +182,7 @@ SharedPtr<tora::Value> VM::eval(std::istream *is, const std::string &fname) {
   }
 
   // compile
-  // SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+  //  std::shared_ptr<SymbolTable> symbol_table = new SymbolTable();
   Compiler compiler(vm->symbol_table, fname);
   compiler.init_globals();
   compiler.compile(parser.root_node());

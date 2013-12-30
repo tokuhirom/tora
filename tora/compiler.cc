@@ -75,7 +75,7 @@ inline static SharedPtr<Node> STRING_IF_BAREWORD(SharedPtr<Node> &node) {
   }
 }
 
-Compiler::Compiler(const SharedPtr<SymbolTable> &symbol_table_,
+Compiler::Compiler(const std::shared_ptr<SymbolTable> &symbol_table_,
                    const std::string &filename)
     : filename_(filename), in_class_context(false) {
   error = 0;

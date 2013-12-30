@@ -9,7 +9,7 @@ using namespace tora;
 
 int main() {
     {
-        SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+        std::shared_ptr<SymbolTable> symbol_table = std::make_shared<SymbolTable>();
         std::string filename_("<eval>");
         int lineno = 3;
         std::shared_ptr<std::vector<std::string>> params = std::make_shared<std::vector<std::string>>();

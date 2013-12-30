@@ -73,7 +73,7 @@ print $cfh render_mt(<<'...', $dat);
 
 using namespace tora;
 
-SymbolTable::SymbolTable() : refcnt(0), counter(0) {
+SymbolTable::SymbolTable() :counter(0) {
 ? for (@{$_[0]}) {
     this->get_id("<?= $_->[1] ?>"); // <?= $_->[0] ?>
 ? }

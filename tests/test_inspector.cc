@@ -11,7 +11,7 @@ using namespace tora;
 
 int main() {
     std::shared_ptr<OPArray> oparray = std::make_shared<OPArray>();
-    SharedPtr<SymbolTable> symbol_table = new SymbolTable();
+    std::shared_ptr<SymbolTable> symbol_table = std::make_shared<SymbolTable>();
     VM vm(oparray, symbol_table, false);
     Inspector ins(&vm);
 

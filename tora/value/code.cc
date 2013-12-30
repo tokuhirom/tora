@@ -163,7 +163,7 @@ MortalCodeValue::MortalCodeValue(
 ) : MortalValue(new_cpp_code(_package_id, _func_name_id, _cb)) { }
 
 /*
-void CodeValue::dump(SharedPtr<SymbolTable> & symbol_table, int indent) {
+void CodeValue::dump( std::shared_ptr<SymbolTable> & symbol_table, int indent) {
     print_indent(indent);
     printf("[dump] code: name: %s::%s\n",
 symbol_table->id2name(this->package_id).c_str(),
