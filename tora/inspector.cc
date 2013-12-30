@@ -9,6 +9,8 @@
 #include "value/bytes.h"
 #include "value/class.h"
 
+#include <sstream>
+
 using namespace tora;
 
 Inspector::Inspector(VM* vm) : vm_(vm) { assert(vm); }

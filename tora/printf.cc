@@ -2,6 +2,7 @@
 #include "value.h"
 #include "value/exception.h"
 
+#include <sstream>
 #include <iostream>
 
 using namespace tora;

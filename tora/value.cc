@@ -14,6 +14,7 @@
 #include "peek.h"
 #include <stdarg.h>
 #include <errno.h>
+#include <sstream>
 
 using namespace tora;
 
@@ -238,8 +239,8 @@ Value& tora::Value::operator=(const Value& lhs) {
       // primitive value does not needs deletion
       break;
     case VALUE_TYPE_STR:
-      delete this->str_value_;
-      this->str_value_ = NULL;
+      delete static_cast<std::string*>(this->ptr_value_);
+      this->ptr_value_ = NULL;
       break;
     case VALUE_TYPE_ARRAY:
       array_free(this);
@@ -262,7 +263,7 @@ Value& tora::Value::operator=(const Value& lhs) {
     case VALUE_TYPE_STR: {
       this->value_type = lhs.value_type;
       // printf("# COPY!\n");
-      this->str_value_ = lhs.str_value_;
+      this->ptr_value_ = lhs.ptr_value_;
       return *this;
     }
     case VALUE_TYPE_ARRAY: {

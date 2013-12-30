@@ -1,7 +1,7 @@
 #ifndef TORA_VALUE_H_
 #define TORA_VALUE_H_
 
-#include <sstream>
+#include <string>
 #include <cstdio>
 #include <cassert>
 
@@ -81,11 +81,6 @@ class Value {
     bool bool_value_;
     ID id_value_;
     void* ptr_value_;
-
-    // TODO: remove me.
-    std::string* str_value_;
-
-    Value* value_value_;
   };
   value_type_t value_type;
   Value& operator=(const Value& v);

@@ -10,6 +10,7 @@
 #include "value/bytes.h"
 #include "value/int.h"
 #include <math.h>
+#include <sstream>
 
 using namespace tora;
 
