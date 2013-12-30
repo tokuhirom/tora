@@ -6,8 +6,6 @@
 #include <cassert>
 
 #include "tora.h"
-#include "shared_ptr.h"
-#include "exception.h"
 
 namespace tora {
 
