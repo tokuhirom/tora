@@ -17,13 +17,11 @@ class CallbackFunction;
 class SymbolTable;
 
 class CodeValue : public Value {
- private:
-  // line number.
-  // It's -1 if it's native function
+public:
   const CallbackFunction *callback_;
   bool is_native_;
   ID package_id_;
-  ID func_name_id_;
+  ID func_name_id;
   // ID code_id_;
   // std::string code_name_;
   std::shared_ptr<std::vector<std::string>> code_params_;
@@ -32,8 +30,12 @@ class CodeValue : public Value {
   std::vector<SharedPtr<Value>> closure_vars_;
   SharedPtr<PadList> pad_list_;
   SharedPtr<OPArray> code_opcodes_;
-  std::string filename_;
-  int lineno_;
+public:
+  std::string filename;
+
+  // line number.
+  // It's -1 if it's native function
+  int lineno;
 
  public:
   bool is_native() const { return is_native_; }
@@ -41,30 +43,30 @@ class CodeValue : public Value {
 
   // for tora functions
   explicit CodeValue(
-      ID package_id, ID func_name_id, const std::string &filename, int lineno,
+      ID package_id, ID _func_name_id, const std::string &_filename, int _lineno,
       const std::shared_ptr<std::vector<std::string>> &code_params)
       : Value(VALUE_TYPE_CODE),
         callback_(NULL),
         is_native_(false),
         package_id_(package_id),
-        func_name_id_(func_name_id),
+        func_name_id(_func_name_id),
         code_params_(code_params)
         // , closure_var_names_(NULL)
         ,
-        filename_(filename),
-        lineno_(lineno) {}
+        filename(_filename),
+        lineno(_lineno) {}
 
   // for C++ functions
-  CodeValue(ID package_id, ID func_name_id, const CallbackFunction *cb)
+  CodeValue(ID package_id, ID _func_name_id, const CallbackFunction *cb)
       : Value(VALUE_TYPE_CODE),
         callback_(cb),
         is_native_(true),
         package_id_(package_id),
-        func_name_id_(func_name_id)
+        func_name_id(_func_name_id)
         // , code_params_(NULL)
         // , closure_var_names_(NULL)
         ,
-        lineno_(-1) {}
+        lineno(-1) {}
   ~CodeValue();
 
   void code_params(const std::shared_ptr<std::vector<std::string>> &v) {
@@ -91,11 +93,10 @@ class CodeValue : public Value {
   ID package_id() const { return package_id_; }
   void package_id(ID id) { package_id_ = id; }
 
-  ID func_name_id() const { return func_name_id_; }
-  void func_name_id(ID id) { func_name_id_ = id; }
+  // void func_name_id(ID id) { func_name_id_ = id; }
 
-  int lineno() const { return lineno_; }
-  const std::string &filename() const { return filename_; }
+  // int lineno() const { return lineno_; }
+  // const std::string &filename() const { return filename_; }
 
   void pad_list(const SharedPtr<PadList> &p) { pad_list_.reset(p.get()); }
   const SharedPtr<PadList> &pad_list() const { return pad_list_; }
@@ -115,6 +116,11 @@ class CodeValue : public Value {
   }
   */
 };
+
+std::string code_filename(const Value *v);
+int code_lineno(const Value *v);
+ID code_func_name_id(const Value* v);
+
 };
 
 #endif  // TORA_CODE_H_

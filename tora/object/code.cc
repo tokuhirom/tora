@@ -36,7 +36,7 @@ static SharedPtr<Value> code_package(VM* vm, Value* self) {
 static SharedPtr<Value> code_name(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
   return new_str_value(
-      vm->symbol_table->id2name(self->upcast<CodeValue>()->func_name_id()));
+      vm->symbol_table->id2name(code_func_name_id(self)));
 }
 
 /**
@@ -44,9 +44,10 @@ static SharedPtr<Value> code_name(VM* vm, Value* self) {
  *
  * Returns line number.
  */
-static SharedPtr<Value> code_line(VM* vm, Value* self) {
+static SharedPtr<Value> meth_code_line(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
-  MortalIntValue miv(self->upcast<CodeValue>()->lineno()); return miv.get();
+  MortalIntValue miv(code_lineno(self));
+  return miv.get();
 }
 
 /**
@@ -54,9 +55,10 @@ static SharedPtr<Value> code_line(VM* vm, Value* self) {
  *
  * Declared file name in string.
  */
-static SharedPtr<Value> code_filename(VM* vm, Value* self) {
+static SharedPtr<Value> meth_code_filename(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_CODE);
-  return new_str_value(self->upcast<CodeValue>()->filename());
+  MortalStrValue s(code_filename(self));
+  return s.get();
 }
 
 // undocumented.
@@ -91,8 +93,8 @@ void tora::Init_Code(VM* vm) {
   ClassBuilder builder(vm, SYMBOL_CODE_CLASS);
   builder.add_method("package", new CallbackFunction(code_package));
   builder.add_method("name", new CallbackFunction(code_name));
-  builder.add_method("line", new CallbackFunction(code_line));
-  builder.add_method("filename", new CallbackFunction(code_filename));
+  builder.add_method("line", new CallbackFunction(meth_code_line));
+  builder.add_method("filename", new CallbackFunction(meth_code_filename));
   builder.add_method("is_closure", new CallbackFunction(code_is_closure));
   builder.add_method("()", new CallbackFunction(code_call));
   vm->add_builtin_class(builder.value());

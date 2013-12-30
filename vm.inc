@@ -127,7 +127,7 @@ OP_GETCLOSURE {
     }
     assert(frame.get());
     assert(frame->code);
-    assert(frame->code->func_name_id());
+    assert(code_func_name_id(frame->code.get()));
 // printf("GETCLOSURE: %d, %d, %s\n", level, no, symbol_table->id2name(frame->code->func_name_id()).c_str());
 // dump_value(frame->code);
 // frame->code->upcast<CodeValue>()->pad_list()->dump(this);

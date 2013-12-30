@@ -35,13 +35,13 @@ void tora::peek(VM *vm, Value *v) {
           printf("  PACKAGE: %s\n",
                  vm->symbol_table->id2name(cv->package_id()).c_str());
           printf("  FUNC_NAME: %s\n",
-                 vm->symbol_table->id2name(cv->func_name_id()).c_str());
+                 vm->symbol_table->id2name(code_func_name_id(cv)).c_str());
         } else {
           printf("  PACKAGE_ID: %d\n", cv->package_id());
-          printf("  FUNC_NAME_ID: %d\n", cv->func_name_id());
+          printf("  FUNC_NAME_ID: %d\n", code_func_name_id(cv));
         }
-        printf("  LINE: %d\n", cv->lineno());
-        printf("  FILE: %s\n", cv->filename().c_str());
+        printf("  LINE: %d\n", code_lineno(cv));
+        printf("  FILE: %s\n", code_filename(cv).c_str());
         break;
       }
       case VALUE_TYPE_ARRAY: {

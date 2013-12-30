@@ -55,7 +55,7 @@ void tora::class_add_method(Value* self, Value* code)
 {
   klass(self)->methods.insert(
     std::pair<ID, SharedValue>(
-      code->upcast<CodeValue>()->func_name_id(),
+      code_func_name_id(code),
       code
     )
   );

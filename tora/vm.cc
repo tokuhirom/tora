@@ -899,7 +899,7 @@ void VM::add_function(ID id, const CallbackFunction *cb) {
 
 void VM::add_function(const SharedPtr<CodeValue> &code) {
   this->file_scope_->insert(
-      file_scope_body_t::value_type(code->func_name_id(), code.get()));
+      file_scope_body_t::value_type(code_func_name_id(code.get()), code.get()));
 }
 
 void VM::add_class(const SharedPtr<Value> &klass) {

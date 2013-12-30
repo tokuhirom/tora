@@ -4,6 +4,28 @@
 
 using namespace tora;
 
+static CodeValue* get_code(const Value* v)
+{
+  assert(type(v) == VALUE_TYPE_CODE);
+  return static_cast<CodeValue*>(const_cast<Value*>(v));
+// return static_cast<CodeValue*>(get_ptr_value(v));
+}
+
+std::string tora::code_filename(const Value *v)
+{
+  return get_code(v)->filename;
+}
+
+int tora::code_lineno(const Value *v)
+{
+  return get_code(v)->lineno;
+}
+
+ID tora::code_func_name_id(const Value* v)
+{
+  return get_code(v)->func_name_id;
+}
+
 CodeValue::~CodeValue() {
   /*
   if (code_params_) {
