@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TORA_EXCEPTION_H_
+#define TORA_EXCEPTION_H_
 
 typedef enum {
   EXCEPTION_TYPE_UNDEF,
@@ -8,3 +9,5 @@ typedef enum {
   EXCEPTION_TYPE_ARGUMENT,
   EXCEPTION_TYPE_ERRNO,
 } exception_type_t;
+
+#endif // TORA_EXCEPTION_H_
