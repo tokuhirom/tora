@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "prim.h"
 #include "shared_ptr.h"
 #include "inspector.h"
 #include "value.h"
@@ -30,7 +29,6 @@ typedef enum {
 
 /*
 struct DynamicScopeData {
-    PRIM_DECL();
     Package * package_;
     ID moniker_id_;
     SharedPtr<Value> value_;

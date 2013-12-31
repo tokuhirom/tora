@@ -2,7 +2,6 @@
 #define TORA_COMPILER_H_
 
 #include "shared_ptr.h"
-#include "prim.h"
 #include "op.h"
 #include <stdarg.h>
 #include <vector>
