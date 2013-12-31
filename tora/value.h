@@ -64,11 +64,9 @@ class Value {
   Value(const Value&) = delete;
 
  public:
-  Value(value_type_t t) : refcnt_(1), value_type(t) {}
-  explicit Value(value_type_t t, void* p)
-    : refcnt_(1),
-    ptr_value_(p),
-    value_type(t) {}
+  Value(value_type_t t);
+  explicit Value(value_type_t t, void* p);
+
   union {
     int int_value_;
     double double_value_;

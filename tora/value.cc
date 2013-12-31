@@ -17,9 +17,17 @@
 #include <errno.h>
 #include <sstream>
 
+// #define VALUE_DEBUG
+
 using namespace tora;
 
 const int REFCNT_IN_FINALIZE = -5963;
+
+#ifdef VALUE_DEBUG
+namespace tora {
+  static int OBJECT_COUNT = 0;
+}
+#endif
 
 SharedValue::~SharedValue() {
   if (v_) {
@@ -27,6 +35,23 @@ SharedValue::~SharedValue() {
   }
 }
 SharedValue::SharedValue(const MortalValue& sv) : v_(sv.get()) { v_->retain(); }
+
+Value::Value(value_type_t t) : refcnt_(1), value_type(t) {
+#ifdef VALUE_DEBUG
+  printf("new value: %p %d %d\n", this, OBJECT_COUNT, t);
+  tora::OBJECT_COUNT++;
+#endif
+}
+
+Value::Value(value_type_t t, void* p)
+  : refcnt_(1),
+  ptr_value_(p),
+  value_type(t) {
+#ifdef VALUE_DEBUG
+  printf("new value: %p %d\n", this, OBJECT_COUNT);
+  tora::OBJECT_COUNT++;
+#endif
+}
 
 int Value::refcnt() const {
   if (refcnt_ == REFCNT_IN_FINALIZE) {
@@ -67,6 +92,11 @@ void Value::release() {
 }
 
 Value::~Value() {
+#ifdef VALUE_DEBUG
+  tora::OBJECT_COUNT--;
+  printf("delete value: %p %d\n", this, OBJECT_COUNT);
+#endif
+
   if (value_type == VALUE_TYPE_STR) {
     delete static_cast<StringImpl*>(ptr_value_);
   } else if (value_type == VALUE_TYPE_BYTES) {
