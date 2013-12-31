@@ -10,6 +10,7 @@
 #include "value/array.h"
 #include "value/regexp.h"
 #include "value/exception.h"
+#include "value/file.h"
 #include "symbols.gen.h"
 #include "peek.h"
 #include <stdarg.h>
@@ -51,7 +52,7 @@ Value::~Value() {
   } else if (value_type == VALUE_TYPE_OBJECT) {
     object_free(this);
   } else if (value_type == VALUE_TYPE_FILE) {
-    fclose(static_cast<FILE*>(this->ptr_value_));
+    tora::file_close(this);
   } else if (value_type == VALUE_TYPE_EXCEPTION) {
     exception_free(this);
   } else if (value_type == VALUE_TYPE_REGEXP) {

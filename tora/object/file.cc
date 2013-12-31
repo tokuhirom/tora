@@ -96,7 +96,7 @@ static SharedPtr<Value> meth_file_slurp(VM* vm, Value* self) {
  */
 static SharedPtr<Value> meth_file_close(VM* vm, Value* self) {
   assert(self->value_type == VALUE_TYPE_FILE);
-  fclose(get_file_pointer(self));
+  tora::file_close(self);
   return new_undef_value();
 }
 
