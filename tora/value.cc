@@ -19,6 +19,8 @@
 
 using namespace tora;
 
+const int REFCNT_IN_FINALIZE = -5963;
+
 SharedValue::~SharedValue() {
   if (v_) {
     v_->release();
@@ -26,17 +28,41 @@ SharedValue::~SharedValue() {
 }
 SharedValue::SharedValue(const MortalValue& sv) : v_(sv.get()) { v_->retain(); }
 
+int Value::refcnt() const {
+  if (refcnt_ == REFCNT_IN_FINALIZE) {
+    return 0;
+  }
+
+  assert(refcnt_ >= 0);
+  return refcnt_;
+}
+
+void Value::retain() {
+  if (refcnt_ == REFCNT_IN_FINALIZE) {
+    return;
+  }
+
+  assert(refcnt_ >= 0);
+  ++refcnt_;
+}
+
 void Value::release() {
+  if (refcnt_ == REFCNT_IN_FINALIZE) {
+    return;
+  }
+
   assert(refcnt_ > 0);
+
+  // Should we catch the exception in destroy?
+  if (refcnt_ == 1 && type(this) == VALUE_TYPE_OBJECT) {
+    refcnt_ = REFCNT_IN_FINALIZE;
+    object_finalize(this);
+  }
+
   --refcnt_;
 
   if (refcnt_ == 0) {
-    if (type(this) == VALUE_TYPE_OBJECT) {
-      object_finalize(this);
-      delete this;
-    } else {
-      delete this;
-    }
+    delete this;
   }
 }
 

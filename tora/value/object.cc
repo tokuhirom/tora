@@ -37,7 +37,11 @@ static ObjectImpl* object(const Value* v)
 
 void tora::object_free(Value* self)
 {
-  delete object(self);
+  ObjectImpl *o = object(self);
+  assert(o);
+  delete o;
+
+  self->ptr_value_ = NULL;
 }
 
 std::string tora::object_type_str(const Value* self)

@@ -55,15 +55,9 @@ class Value {
   int refcnt_;
 
  public:
-  int refcnt() const {
-    assert(refcnt_ >= 0);
-    return refcnt_;
-  }
+  int refcnt() const;
   void release();
-  void retain() {
-    assert(refcnt_ >= 0);
-    ++refcnt_;
-  }
+  void retain();
 
  protected:
   ~Value();
