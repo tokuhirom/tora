@@ -63,16 +63,7 @@ class Compiler {
   ~Compiler();
 
   void define_my(SharedPtr<Node> node);
-  void define_global_var(const char *name) {
-    auto iter = global_vars->begin();
-    for (; iter != global_vars->end(); iter++) {
-      if (*iter == name) {
-        printf("[BUG] duplicated global variable name: %s\n", name);
-        abort();
-      }
-    }
-    global_vars->push_back(name);
-  }
+  void define_global_var(const char *name);
   int find_global_var(std::string &name) {
     auto iter = global_vars->begin();
     for (; iter != global_vars->end(); iter++) {

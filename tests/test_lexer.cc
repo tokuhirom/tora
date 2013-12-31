@@ -168,7 +168,7 @@ int main() {
     {
         BEGIN("qr{abc}ig;");
         TOKEN_IS(REGEXP_LITERAL);
-        LVAL_REGFLAG_IS(regexp_flag('i') | regexp_flag('g'));
+        LVAL_REGFLAG_IS(regexp_flag_from_char('i') | regexp_flag_from_char('g'));
         LVAL_STR_IS("abc");
         TOKEN_IS(SEMICOLON);
         TOKEN_IS(0);
@@ -176,7 +176,7 @@ int main() {
     {
         BEGIN("/hoge}xm/i;");
         TOKEN_IS(REGEXP_LITERAL);
-        LVAL_REGFLAG_IS(regexp_flag('i'));
+        LVAL_REGFLAG_IS(regexp_flag_from_char('i'));
         LVAL_STR_IS("hoge}xm");
         TOKEN_IS(SEMICOLON);
         TOKEN_IS(0);

@@ -670,7 +670,7 @@ regexp_literal:
         int flag = 0;
         char *ptr;
         for (ptr=m_cursor-1; isalpha(*ptr); --ptr) {
-            flag |= tora::regexp_flag(*ptr);
+            flag |= tora::regexp_flag_from_char(*ptr);
         }
         if (*ptr==close_char) {
             *yylval = new RegexpNode(NODE_REGEXP, string_buffer->str(), flag);

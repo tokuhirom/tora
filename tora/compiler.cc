@@ -25,6 +25,17 @@ class LoopContext {
   ~LoopContext() { compiler_->in_loop_context = orig; }
 };
 
+void Compiler::define_global_var(const char *name) {
+  auto iter = global_vars->begin();
+  for (; iter != global_vars->end(); iter++) {
+    if (*iter == name) {
+      printf("[BUG] duplicated global variable name: %s\n", name);
+      abort();
+    }
+  }
+  global_vars->push_back(name);
+}
+
 void Compiler::dump_localvars() {
   printf("-- dump_localvars --\n");
   printf("Levels: %ld\n", (long int)this->blocks->size());

@@ -40,23 +40,8 @@ namespace tora {
 
   SharedValue regexp_matched_regexp(Value* self);
 
-static inline int regexp_flag(char c) {
-  switch (c) {
-    case 'm':
-      return REGEXP_MULTILINE;
-    case 'g':
-      return REGEXP_GLOBAL;
-    case 'i':
-      return REGEXP_IGNORECASE;
-    case 'x':
-      return REGEXP_EXPANDED;
-    case 's':
-      return REGEXP_DOTALL;
-    default:
-      printf("[BUG] Unknown regexp option: %c\n", c);
-      abort();
-  }
-}
+  int regexp_flag_from_char(char c);
+
 };
 
 #endif  // TORA_REGEXP_H_
