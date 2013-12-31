@@ -783,7 +783,7 @@ OP_FILE_TEST {
 
 OP_GETGLOBAL {
     int globalvarno = get_int_operand();
-    stack.push_back(this->global_vars->at(globalvarno).get());
+    stack.push_back(this->global_vars.at(globalvarno).get());
 }
 
 OP_POP_TOP {

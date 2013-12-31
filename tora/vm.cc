@@ -76,7 +76,6 @@ VM::VM(std::shared_ptr<OPArray> &ops_, std::shared_ptr<SymbolTable> &symbol_tabl
   this->stack.reserve(INITIAL_STACK_SIZE);
   this->frame_stack = std::make_shared<std::vector< std::shared_ptr<LexicalVarsFrame>>>();
   this->frame_stack->push_back(std::make_shared<LexicalVarsFrame>(this, 0, 0));
-  this->global_vars = new std::vector<SharedValue>();
   std::random_device rd;
   this->myrand = new std::mt19937(rd());
   this->mark_stack.reserve(INITIAL_MARK_STACK_SIZE);
@@ -91,7 +90,6 @@ VM::VM(std::shared_ptr<OPArray> &ops_, std::shared_ptr<SymbolTable> &symbol_tabl
 VM::~VM() {
   stack.resize(0);
 
-  delete this->global_vars;
   // assert(this->frame_stack->size() == 1);
   //  while (frame_stack->size()) {
   //      delete this->frame_stack->back();
@@ -117,34 +115,34 @@ void VM::init_globals(const std::vector<std::string> &args) {
     MortalStrValue a(arg);
     array_push_back(avalue.get(), a.get());
   }
-  this->global_vars->push_back(avalue.get());
+  this->global_vars.push_back(avalue.get());
 
   // $ENV
   MortalObjectValue env(
       this, this->get_builtin_class(SYMBOL_ENV_CLASS).get(), new_undef_value());
-  this->global_vars->push_back(env.get());
+  this->global_vars.push_back(env.get());
 
   // $LIBPATH : Array
   MortalArrayValue libpath;
   MortalStrValue lib("lib");
   array_push_back(libpath.get(), lib.get());
-  this->global_vars->push_back(libpath);
+  this->global_vars.push_back(libpath);
 
   // $REQUIRED : Hash
   MortalHashValue required;
-  this->global_vars->push_back(required.get());
+  this->global_vars.push_back(required.get());
 
   // $STDIN : File
   MortalFileValue in(stdin);
-  this->global_vars->push_back(in.get());
+  this->global_vars.push_back(in.get());
 
   // $STDOUT : File
   MortalFileValue out(stdout);
-  this->global_vars->push_back(out.get());
+  this->global_vars.push_back(out.get());
 
   // $STDERR : File
   MortalFileValue err(stderr);
-  this->global_vars->push_back(err.get());
+  this->global_vars.push_back(err.get());
 }
 
 void VM::die(const char *format, ...) {
@@ -271,8 +269,8 @@ void VM::use(tora::Value *package_v, bool need_copy) {
 
 void VM::require_package(const std::string &package) {
   VM *vm = this;
-  SharedValue libpath = vm->global_vars->at(2);
-  SharedValue required = vm->global_vars->at(3);
+  SharedValue libpath = vm->global_vars.at(2);
+  SharedValue required = vm->global_vars.at(3);
   std::string s = package;
   {
     auto iter = s.find("::");
@@ -741,7 +739,7 @@ void VM::load_dynamic_library(const std::string &filename,
 }
 
 void VM::add_library_path(const std::string &dir) {
-  SharedValue libpath = this->global_vars->at(GLOBAL_VAR_LIBPATH);
+  SharedValue libpath = this->global_vars.at(GLOBAL_VAR_LIBPATH);
   MortalStrValue dir_s(dir);
   array_push_back(libpath.get(), dir_s.get());
 }
