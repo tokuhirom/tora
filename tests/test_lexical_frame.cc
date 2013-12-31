@@ -17,9 +17,9 @@ int main() {
         int vars_cnt = 3;
         int top = 0;
     // LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
-        SharedPtr<LexicalVarsFrame> f1(new LexicalVarsFrame(&vm, vars_cnt, top));
+         std::shared_ptr<LexicalVarsFrame> f1(std::make_shared<LexicalVarsFrame>(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f1);
-        SharedPtr<LexicalVarsFrame> f2(new LexicalVarsFrame(&vm, vars_cnt, top));
+         std::shared_ptr<LexicalVarsFrame> f2(std::make_shared<LexicalVarsFrame>(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f2);
         SharedPtr<Value> v = f2->get_variable_dynamic(1, 0);
         is(v->value_type, VALUE_TYPE_UNDEF);
@@ -32,7 +32,7 @@ int main() {
         int vars_cnt = 3;
         int top = 0;
     // LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
-        SharedPtr<LexicalVarsFrame> f1(new LexicalVarsFrame(&vm, vars_cnt, top));
+         std::shared_ptr<LexicalVarsFrame> f1(std::make_shared<LexicalVarsFrame>(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f1);
         MortalIntValue i(5);
         f1->set_variable(0, i.get());
@@ -49,9 +49,9 @@ int main() {
         int vars_cnt = 3;
         int top = 0;
     // LexicalVarsFrame(VM *vm, int vars_cnt, size_t top, frame_type_t type_=FRAME_TYPE_LEXICAL);
-        SharedPtr<LexicalVarsFrame> f1(new LexicalVarsFrame(&vm, vars_cnt, top));
+         std::shared_ptr<LexicalVarsFrame> f1(std::make_shared<LexicalVarsFrame>(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f1);
-        SharedPtr<LexicalVarsFrame> f2(new LexicalVarsFrame(&vm, vars_cnt, top));
+         std::shared_ptr<LexicalVarsFrame> f2(std::make_shared<LexicalVarsFrame>(&vm, vars_cnt, top));
         vm.frame_stack->push_back(f2);
         MortalIntValue i4(4);
         f2->set_variable(0, i4.get());

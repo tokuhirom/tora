@@ -118,7 +118,7 @@ OP_CLOSUREDEF {
 OP_GETCLOSURE {
     // take variable from code->closure_cells[n]
 
-    SharedPtr<LexicalVarsFrame> frame;
+     std::shared_ptr<LexicalVarsFrame> frame;
     for (auto iter=frame_stack->rbegin(); iter!=frame_stack->rend(); iter++) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             frame = *iter;
@@ -157,7 +157,7 @@ OP_GETCLOSURE {
 
 OP_SETCLOSURE {
     // save variable to code->closure_cells[n]
-    SharedPtr<LexicalVarsFrame> frame;
+     std::shared_ptr<LexicalVarsFrame> frame;
     for (auto iter=frame_stack->begin(); iter!=frame_stack->end(); iter++) {
         if ((*iter)->type == FRAME_TYPE_FUNCTION) {
             frame = *iter;
@@ -310,7 +310,7 @@ OP_FUNCALL {
         Value* code = iter->second.get();
 
 // Disasm::disasm(this->ops);
-        SharedPtr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
+        std::shared_ptr<FunctionFrame> fframe(new FunctionFrame(this, argcnt, stack.size(), this->ops));
         fframe->return_address = pc;
 
         if (code_is_native(code)) {
@@ -375,7 +375,7 @@ OP_FUNCALL {
             *   +------+
             */
             mark_stack.push_back(stack.size());
-            frame_stack->push_back(fframe);
+            this->frame_stack->push_back(fframe);
         }
     } else {
         this->die("Unknown function '%s'",
@@ -396,7 +396,7 @@ OP_METHOD_CALL {
 OP_LAST {
     while (1) {
         assert(frame_stack->size() > 0);
-        SharedPtr<LexicalVarsFrame> frame(frame_stack->back());
+         std::shared_ptr<LexicalVarsFrame> frame(frame_stack->back());
         assert(frame->type != FRAME_TYPE_FUNCTION);
         assert(frame->type != FRAME_TYPE_TRY);
         stack.resize(frame->top);
@@ -427,7 +427,7 @@ OP_RETURN {
         assert(frame_stack->size() > 0);
         LexicalVarsFrame* frame = frame_stack->back().get();
         if (frame->type == FRAME_TYPE_FUNCTION) {
-            SharedPtr<FunctionFrame> fframe = static_cast<FunctionFrame*>(frame);
+            FunctionFrame* fframe = static_cast<FunctionFrame*>(frame);
             pc = fframe->return_address;
             assert(fframe->orig_ops);
             ops = fframe->orig_ops;
@@ -457,22 +457,22 @@ OP_RETURN {
 }
 
 OP_ENTER {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(this, get_int_operand(), stack.size());
+     std::shared_ptr<LexicalVarsFrame> frame = std::make_shared<LexicalVarsFrame>(this, get_int_operand(), stack.size());
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_WHILE {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(this, get_int_operand(), stack.size(), FRAME_TYPE_WHILE);
+     std::shared_ptr<LexicalVarsFrame> frame = std::make_shared<LexicalVarsFrame>(this, get_int_operand(), stack.size(), FRAME_TYPE_WHILE);
     frame_stack->push_back(frame);
 }
 
 OP_ENTER_FOR {
-    SharedPtr<LexicalVarsFrame> frame = new LexicalVarsFrame(this, get_int_operand(), stack.size(), FRAME_TYPE_FOR);
+     std::shared_ptr<LexicalVarsFrame> frame = std::make_shared<LexicalVarsFrame>(this, get_int_operand(), stack.size(), FRAME_TYPE_FOR);
     frame_stack->push_back(frame);
 }
 
 OP_LEAVE {
-    SharedPtr<LexicalVarsFrame> frame(frame_stack->back());
+     std::shared_ptr<LexicalVarsFrame> frame(frame_stack->back());
     stack.resize(frame->top);
     frame_stack->pop_back();
 }
@@ -592,7 +592,7 @@ OP_SETDYNAMIC {
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     DBG("SETDYNAMIC %d, %d\n", level, no);
-    // const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
+    // const  std::shared_ptr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
     const SharedPtr<Value> & rvalue = stack.back();
     if (rvalue->value_type == VALUE_TYPE_TUPLE) {
         frame_stack->back()->set_variable_dynamic(
@@ -614,7 +614,7 @@ OP_GETDYNAMIC {
     int level = (get_int_operand() >> 16) & 0x0000FFFF;
     int no    = get_int_operand() & 0x0000ffff;
     /*
-    const SharedPtr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
+    const  std::shared_ptr<LexicalVarsFrame> & frame = frame_stack->at(frame_stack->size()-level-1);
     SharedPtr<Value>v = frame->get_variable(no);
     */
     SharedPtr<Value> v = frame_stack->back()->get_variable_dynamic(level, no);
@@ -822,7 +822,7 @@ OP_ENTER_FOREACH {
     }
 
     int vars_cnt = get_int_operand();
-    ForeachFrame* fframe = new ForeachFrame(this, vars_cnt, stack.size());
+    std::shared_ptr<ForeachFrame> fframe = std::make_shared<ForeachFrame>(this, vars_cnt, stack.size());
     fframe->iter = iiter;
     frame_stack->push_back(fframe);
 }
@@ -929,7 +929,7 @@ OP_DOTDOTDOT {
 }
 
 OP_TRY {
-    TryFrame* fframe = new TryFrame(this, stack.size());
+    std::shared_ptr<TryFrame> fframe(new TryFrame(this, stack.size()));
     fframe->return_address = get_int_operand()-1;
     frame_stack->push_back(fframe);
     mark_stack.push_back(stack.size());
@@ -960,7 +960,7 @@ OP_NOT {
 
 OP_PACKAGE_ENTER {
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
-    FilePackageFrame* pframe = new FilePackageFrame(this, stack.size());
+    std::shared_ptr<FilePackageFrame> pframe(new FilePackageFrame(this, stack.size()));
     pframe->top = stack.size();
     this->frame_stack->push_back(pframe);
 }
@@ -975,7 +975,7 @@ OP_CLASS_ENTER {
     // printf("entering %s(%d)\n", symbol_table->id2name(package_id).c_str(), package_id);
     MortalClassValue klass(this, package_id);
 
-    ClassFrame* cframe = new ClassFrame(this, stack.size(), klass.get());
+    std::shared_ptr<ClassFrame> cframe(new ClassFrame(this, stack.size(), klass.get()));
     cframe->top = stack.size();
     this->frame_stack->push_back(cframe);
     this->klass_.reset(klass.get());

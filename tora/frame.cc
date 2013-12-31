@@ -21,7 +21,7 @@ SharedPtr<Value> LexicalVarsFrame::get_variable(int id) const {
 
 LexicalVarsFrame::LexicalVarsFrame(VM *vm, int vars_cnt, size_t top,
                                    frame_type_t type_)
-    : refcnt(0), vm_(vm), vars(vars_cnt), top(top), type(type_) {
+    : vm_(vm), vars(vars_cnt), top(top), type(type_) {
   this->pad_list =
       std::make_shared<PadList>(vars_cnt, (vm->frame_stack->size() > 0)
                                 ? vm->frame_stack->back()->pad_list

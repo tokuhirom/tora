@@ -74,8 +74,8 @@ VM::VM(std::shared_ptr<OPArray> &ops_, std::shared_ptr<SymbolTable> &symbol_tabl
   sp = 0;
   pc = 0;
   this->stack.reserve(INITIAL_STACK_SIZE);
-  this->frame_stack = std::make_shared<std::vector<SharedPtr<LexicalVarsFrame>>>();
-  this->frame_stack->push_back(new LexicalVarsFrame(this, 0, 0));
+  this->frame_stack = std::make_shared<std::vector< std::shared_ptr<LexicalVarsFrame>>>();
+  this->frame_stack->push_back(std::make_shared<LexicalVarsFrame>(this, 0, 0));
   this->global_vars = new std::vector<SharedValue>();
   std::random_device rd;
   this->myrand = new std::mt19937(rd());
@@ -593,7 +593,7 @@ void VM::handle_exception(const SharedPtr<Value> &exception) {
       exit(1);
     }
 
-    SharedPtr<LexicalVarsFrame> frame(frame_stack->back());
+     std::shared_ptr<LexicalVarsFrame> frame(frame_stack->back());
     if (frame->type == FRAME_TYPE_FUNCTION) {
       FunctionFrame *fframe = static_cast<FunctionFrame *>(frame.get());
       pc = fframe->return_address;
@@ -662,8 +662,9 @@ void VM::function_call(int argcnt, const SharedPtr<Value> &code,
                        const SharedPtr<Value> &self) {
   assert(code.get());
 
-  SharedPtr<FunctionFrame> fframe =
-      new FunctionFrame(this, argcnt, stack.size(), this->ops);
+  std::shared_ptr<FunctionFrame> fframe(
+    new FunctionFrame(this, argcnt, stack.size(), this->ops)
+  );
   fframe->return_address = this->pc;
   fframe->argcnt = argcnt;
   fframe->code = code.get();
@@ -830,8 +831,9 @@ void VM::call_method(const SharedPtr<Value> &object,
       // delete fframe;
       // frame_stack->pop_back();
     } else {
-      SharedPtr<FunctionFrame> fframe =
-          new FunctionFrame(this, argcnt, stack.size(), ops);
+      std::shared_ptr<FunctionFrame> fframe(
+        new FunctionFrame(this, argcnt, stack.size(), ops)
+      );
       fframe->return_address = pc;
       fframe->argcnt = argcnt;
       fframe->code = code;

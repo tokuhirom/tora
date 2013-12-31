@@ -73,7 +73,7 @@ class VM {
   /*
    * stack for lexical variables.
    */
-  std::shared_ptr<std::vector<SharedPtr<LexicalVarsFrame>>> frame_stack;
+  std::shared_ptr<std::vector<std::shared_ptr<LexicalVarsFrame>>> frame_stack;
   /**
    * mark for first argument in function call.
    */

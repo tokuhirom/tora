@@ -46,8 +46,6 @@ public:
 
 // TODO rename LexicalVarsFrame to Frame
 class LexicalVarsFrame {
-  PRIM_DECL();
-
  protected:
   VM *vm_;
   std::vector<SharedPtr<Value>> vars;
