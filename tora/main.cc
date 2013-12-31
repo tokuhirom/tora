@@ -38,7 +38,7 @@ static void run_repl(const std::vector<std::string>& args,
                      const std::vector<std::string>& libs) {
   bool dump_ops = false;
 
-  SharedPtr<Scanner> scanner = new Scanner(&std::cin, "<stdin>");
+  std::shared_ptr<Scanner> scanner(new Scanner(&std::cin, "<stdin>"));
   std::shared_ptr<SymbolTable> symbol_table(new SymbolTable());
   tora::Compiler compiler(symbol_table, "<repl>");
   compiler.init_globals();
@@ -206,12 +206,12 @@ int main(int argc, char** argv) {
 
   std::unique_ptr<std::ifstream> ifs;
   std::unique_ptr<std::stringstream> ss;
-  SharedPtr<Scanner> scanner;
+  std::shared_ptr<Scanner> scanner;
   std::string filename;
   if (code.length()) {
     ss.reset(new std::stringstream(std::string(code) + ";"));
     filename = "<eval>";
-    scanner = new Scanner(ss.get(), "<eval>");
+    scanner = std::make_shared<Scanner>(ss.get(), "<eval>");
   } else if (args.size() > 0) {  // source code
     filename = args[0];
     ifs.reset(new std::ifstream(filename, std::ios::in));
@@ -221,14 +221,14 @@ int main(int argc, char** argv) {
               strerror(errno));
       exit(EXIT_FAILURE);
     }
-    scanner = new Scanner(ifs.get(), filename);
+    scanner = std::make_shared<Scanner>(ifs.get(), filename);
   } else {
     if (isatty(fileno(stdin)) && isatty(fileno(stdout))) {
       run_repl(args, libs);
       return 0;
     } else {
       filename = "<stdin>";
-      scanner = new Scanner(&std::cin, "<stdin>");
+      scanner = std::make_shared<Scanner>(&std::cin, "<stdin>");
     }
   }
 

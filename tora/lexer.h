@@ -11,7 +11,6 @@
 #include <queue>
 
 #include "node.h"
-#include "prim.h"
 
 namespace tora {
 
@@ -28,7 +27,6 @@ struct ParserState {
 };
 
 class Scanner {
-  PRIM_DECL()
  private:
   // iostream sucks. very slow.
   std::istream *ifs;
@@ -86,7 +84,7 @@ class Scanner {
   }
 
   Scanner(std::istream *ifs_, const std::string &filename, int init_size = 1024)
-      : refcnt(0),
+      :
         m_buffer(0),
         m_cursor(0),
         m_limit(0),
