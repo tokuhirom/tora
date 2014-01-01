@@ -142,15 +142,15 @@ OP_GETCLOSURE {
     int no    = get_int_operand_low();
     assert(code_pad_list(frame->code.get()).get());
     if (level == 1) {
-        SharedPtr<Value> v = code_pad_list(frame->code.get())->get(
+        SharedValue v = code_pad_list(frame->code.get())->get(
             no
         );
-        stack.push_back(v);
+        stack.push_back(v.get());
     } else {
-        SharedPtr<Value> v = code_pad_list(frame->code.get())->get_dynamic(
+        SharedValue v = code_pad_list(frame->code.get())->get_dynamic(
             level-1, no
         );
-        stack.push_back(v);
+        stack.push_back(v.get());
     }
 #endif
 }
@@ -176,13 +176,13 @@ OP_SETCLOSURE {
     if (level == 1) {
         code_pad_list(frame->code.get())->set(
             no,
-            v
+            v.get()
         );
     } else {
         code_pad_list(frame->code.get())->set_dynamic(
             level-1,
             no,
-            v
+            v.get()
         );
     }
 #endif
@@ -627,8 +627,8 @@ OP_GETDYNAMIC {
 
 OP_GETLOCAL {
     // lexical vars
-    SharedPtr<Value>v = frame_stack->back()->get_variable(get_int_operand());
-    stack.push_back(v);
+    SharedValue v = frame_stack->back()->get_variable(get_int_operand());
+    stack.push_back(v.get());
 }
 
 OP_GET_ITEM {

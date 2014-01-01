@@ -7,22 +7,23 @@
 
 namespace tora {
 
+  class SharedValue;
 class Value;
 class VM;
 
 class PadList {
  public:
-  std::vector<SharedPtr<Value>> pad_;
+  std::vector<SharedValue> pad_;
   std::shared_ptr<PadList>  next_;
 
  public:
   PadList(int vars_cnt, std::shared_ptr<PadList> next=NULL);
-  void set(int index, const SharedPtr<Value> &val);
-  SharedPtr<Value> get(int index) const;
-  PadList *upper(int level) const;
+  void set(int index, Value* val);
+  SharedValue get(int index) const;
+  std::shared_ptr<PadList> upper(int level) const;
   void dump(VM *vm) const;
-  SharedPtr<Value> get_dynamic(int level, int index) const;
-  void set_dynamic(int level, int index, const SharedPtr<Value> &val);
+  SharedValue get_dynamic(int level, int index) const;
+  void set_dynamic(int level, int index, Value* val);
   size_t size() const;
 };
 };

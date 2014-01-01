@@ -7,7 +7,7 @@
 
 using namespace tora;
 
-SharedPtr<Value> LexicalVarsFrame::get_variable(int id) const {
+SharedValue LexicalVarsFrame::get_variable(int id) const {
 #ifndef NDEBUG
   if (id >= this->vars.capacity()) {
     fprintf(stderr, "[BUG] id< vars.capacity(). id: %ld, capacity: %ld\n",
@@ -44,13 +44,13 @@ LexicalVarsFrame::~LexicalVarsFrame() {
 
 void LexicalVarsFrame::set_variable_dynamic(int level, int no,
                                             const SharedPtr<Value> &v) {
-  this->pad_list->set_dynamic(level, no, v);
+  this->pad_list->set_dynamic(level, no, v.get());
   // assert(this->pad_list->get_dynamic(level, no).get() == v.get());
 }
 
 void LexicalVarsFrame::set_variable(int id, const SharedPtr<Value> &v) {
   assert(id < this->vars.capacity());
-  this->pad_list->set(id, v);
+  this->pad_list->set(id, v.get());
 }
 
 SharedPtr<Value> LexicalVarsFrame::get_variable_dynamic(int level,

@@ -63,7 +63,7 @@ class LexicalVarsFrame {
   virtual ~LexicalVarsFrame();
   void set_variable_dynamic(int level, int id, const SharedPtr<Value> &v);
   void set_variable(int id, const SharedPtr<Value> &v);
-  SharedPtr<Value> get_variable(int id) const;
+  SharedValue get_variable(int id) const;
   // void push_dynamic_scope_var(Package* pkgid, ID monikerid, const
   // SharedPtr<Value> &target);
   const char *type_str() const;

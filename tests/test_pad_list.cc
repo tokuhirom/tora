@@ -16,12 +16,12 @@ int main() {
         std::shared_ptr<PadList>  p1 = std::make_shared<PadList>((int)1);
         MortalIntValue i5(5);
         p1->set(0, i5.get());
-        SharedPtr<Value> val = p1->get(0);
+        SharedValue val = p1->get(0);
         ok(!!val.get());
         is(val->value_type, VALUE_TYPE_INT);
         is(val->to_int(), 5);
 
-        SharedPtr<Value> val1 = p1->get(1);
+        SharedValue val1 = p1->get(1);
         is(val1->value_type, VALUE_TYPE_UNDEF);
     }
 
@@ -30,11 +30,11 @@ int main() {
         std::shared_ptr<PadList>  p1 = std::make_shared<PadList>(0);
         std::shared_ptr<PadList>  p2 = std::make_shared<PadList>(0, p1);
         std::shared_ptr<PadList>  p3 = std::make_shared<PadList>(0, p2);
-        is((void*)p1->upper(1), (void*)NULL);
-        is(p2->upper(1), p1.get());
-        is(p3->upper(1), p2.get());
-        is(p3->upper(2), p1.get());
-        is((void*)p3->upper(3), (void*)NULL);
+        is((void*)p1->upper(1).get(), (void*)NULL);
+        is(p2->upper(1).get(), p1.get());
+        is(p3->upper(1).get(), p2.get());
+        is(p3->upper(2).get(), p1.get());
+        is((void*)p3->upper(3).get(), (void*)NULL);
     }
 
     printf("# third phase\n");
