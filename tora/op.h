@@ -46,8 +46,8 @@ class OP {
  **/
 class ValueOP : public OP {
  public:
-  SharedPtr<Value> value;
-  ValueOP(op_type_t type, const SharedPtr<Value>& v) : OP(type), value(v) {}
+  SharedValue  value;
+  ValueOP(op_type_t type, const SharedValue & v) : OP(type), value(v) {}
   ValueOP(op_type_t type, Value* v) : OP(type), value(v) {}
   ValueOP(op_type_t type, const MortalValue& v) : OP(type), value(v.get()) {}
 };

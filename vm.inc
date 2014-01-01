@@ -28,8 +28,8 @@ OP_PUSH_DOUBLE {
 
 OP_PUSH_STRING {
     const OP * op = ops->at(pc);
-    SharedPtr<Value> sv = ((ValueOP*)&(*(op)))->value;
-    stack.push_back(sv);
+    SharedValue sv = static_cast<const ValueOP*>(op)->value;
+    stack.push_back(sv.get());
 }
 
 OP_GETARG {
@@ -57,8 +57,8 @@ OP_SETARG {
 
 OP_PUSH_VALUE {
     const OP * op = ops->at(pc);
-    SharedPtr<Value> v = ((ValueOP*)&(*(op)))->value;
-    stack.push_back(v);
+    SharedValue v = static_cast<const ValueOP*>(op)->value;
+    stack.push_back(v.get());
 }
 
 OP_NEW_RANGE {
