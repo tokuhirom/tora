@@ -390,7 +390,7 @@ OP_METHOD_CALL {
     SharedPtr<Value> function_id(stack.back());
     stack.pop_back();
 
-    this->call_method(object, function_id);
+    this->call_method(object.get(), function_id.get());
 }
 
 OP_LAST {
@@ -1048,7 +1048,7 @@ OP_INSTANCIATE_IDENTIFIER {
     } else {
         auto iter = this->builtin_classes_.find(id);
         if (iter != this->builtin_classes_.end()) {
-            stack.push_back(iter->second);
+            stack.push_back(iter->second.get());
         } else {
             auto iter = this->builtin_functions_.find(id);
             if (iter != this->builtin_functions_.end()) {

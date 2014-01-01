@@ -749,8 +749,8 @@ void VM::add_library_path(const std::string &dir) {
  *
  * call method. if method is not available, call parent class' method.
  */
-void VM::call_method(const SharedPtr<Value> &object,
-                     const SharedPtr<Value> &function_id_v) {
+void VM::call_method(Value* object,
+                     Value* function_id_v) {
   if (!(stack.size() >= (size_t)get_int_operand())) {
     // printf("[BUG] bad argument: %s requires %d arguments but only %ld items
     // available on stack(OP_FUNCALL)\n", funname_c, get_int_operand(), (long
@@ -762,15 +762,15 @@ void VM::call_method(const SharedPtr<Value> &object,
   if (object->value_type == VALUE_TYPE_UNDEF) {
     throw new ExceptionValue(
         "NullPointerException: Can't call method %s on an undefined value.",
-        symbol_name(this, function_id_v.get()).c_str());
+        symbol_name(this, function_id_v).c_str());
   }
 
   assert(function_id_v->value_type == VALUE_TYPE_SYMBOL);
-  ID function_id = symbol_id(function_id_v.get());
+  ID function_id = symbol_id(function_id_v);
 
   std::set<ID> seen;
   if (object->value_type == VALUE_TYPE_OBJECT) {
-    this->call_method(object, object_class(object.get()),
+    this->call_method(object, object_class(object),
                       function_id, seen);
   } else if (object->value_type == VALUE_TYPE_SYMBOL) {
     printf("[OBSOLETE] MAY NOT REACHE HERE\n");
@@ -779,9 +779,9 @@ void VM::call_method(const SharedPtr<Value> &object,
     // this->get_class(symbol_id(object)), function_id, seen);
   } else if (object->value_type == VALUE_TYPE_CLASS) {
     // class method
-    this->call_method(object, object.get(), function_id, seen);
+    this->call_method(object, object, function_id, seen);
   } else if (object->value_type == VALUE_TYPE_FILE_PACKAGE) {
-    Value *v = file_package_find(object.get(), function_id);
+    Value *v = file_package_find(object, function_id);
     if (v) {
       int argcnt = get_int_operand();
       switch (v->value_type) {
@@ -796,23 +796,24 @@ void VM::call_method(const SharedPtr<Value> &object,
       }
     } else {
       this->call_method(
-          object, get_builtin_class(symbol_table->get_id(object->type_str())),
+          object, get_builtin_class(symbol_table->get_id(object->type_str())).get(),
           function_id, seen);
     }
   } else {
     this->call_method(
-        object, get_builtin_class(symbol_table->get_id(object->type_str())),
+        object, get_builtin_class(symbol_table->get_id(object->type_str())).get(),
         function_id, seen);
   }
 }
 
-void VM::call_method(const SharedPtr<Value> &object,
-                     const SharedPtr<Value> &klass, ID function_id,
+void VM::call_method(Value* object,
+                     Value* klass,
+                     ID function_id,
                      std::set<ID> &seen) {
-  seen.insert(class_name_id(klass.get()));
+  seen.insert(class_name_id(klass));
   // std::cout << klass->name() << " " << id2name(function_id) << std::endl;
 
-  Value* code = class_get_method(klass.get(), function_id);
+  Value* code = class_get_method(klass, function_id);
   if (code) {
     assert(code->value_type == VALUE_TYPE_CODE);
     int argcnt = get_int_operand();
@@ -846,7 +847,7 @@ void VM::call_method(const SharedPtr<Value> &object,
       if (code_params(code) && argcnt != code_params(code)->size()) {
         throw new ArgumentExceptionValue(
             "%s::%s needs %d arguments but you passed %d arguments",
-            symbol_table->id2name(class_name_id(klass.get())).c_str(),
+            symbol_table->id2name(class_name_id(klass)).c_str(),
             symbol_table->id2name(function_id).c_str(),
             code_params(code)->size());
       }
@@ -856,19 +857,19 @@ void VM::call_method(const SharedPtr<Value> &object,
     }
   } else {
     // find in super class.
-    SharedPtr<Value> super = class_superclass(klass.get()).get();
+    SharedValue super(class_superclass(klass));
     if (super.get()) {
-      this->call_method(object, super, function_id, seen);
+      this->call_method(object, super.get(), function_id, seen);
       // symbol class
     } else if (object->value_type == VALUE_TYPE_CLASS &&
                seen.find(SYMBOL_CLASS_CLASS) == seen.end()) {
-      this->call_method(object, this->get_builtin_class(SYMBOL_CLASS_CLASS),
+      this->call_method(object, this->get_builtin_class(SYMBOL_CLASS_CLASS).get(),
                         function_id, seen);
       return;
       // object class(UNIVERSAL)
-    } else if (class_name_id(klass.get()) != SYMBOL_OBJECT_CLASS &&
+    } else if (class_name_id(klass) != SYMBOL_OBJECT_CLASS &&
                seen.find(SYMBOL_OBJECT_CLASS) == seen.end()) {
-      this->call_method(object, this->get_builtin_class(SYMBOL_OBJECT_CLASS),
+      this->call_method(object, this->get_builtin_class(SYMBOL_OBJECT_CLASS).get(),
                         function_id, seen);
       return;
     } else {
@@ -907,7 +908,7 @@ void VM::add_class(const SharedPtr<Value> &klass) {
       class_name_id(klass.get()), klass.get()));
 }
 
-const SharedPtr<Value> &VM::get_builtin_class(ID name_id) const {
+const SharedValue &VM::get_builtin_class(ID name_id) const {
   auto iter = builtin_classes_.find(name_id);
   if (iter != builtin_classes_.end()) {
     return iter->second;
@@ -923,11 +924,11 @@ void VM::klass(const SharedPtr<Value> &k) {
   klass_.reset(k.get());
 }
 
-void VM::add_builtin_class(const SharedPtr<Value> &klass) {
-  this->builtin_classes_.insert(std::make_pair(class_name_id(klass.get()), klass));
+void VM::add_builtin_class(Value* klass) {
+  this->builtin_classes_.insert(std::make_pair(class_name_id(klass), klass));
 }
 
-SharedPtr<Value> VM::get_class(ID name_id) const {
+SharedValue VM::get_class(ID name_id) const {
   {
     auto iter = this->file_scope_->find(name_id);
     if (iter != this->file_scope_->end()) {

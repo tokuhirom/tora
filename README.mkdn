@@ -15,7 +15,6 @@ Build Dependencies
  * gcc 4.4.3+ or clang++ 3.0+
  * SConstruct
  * Perl5
- * libboost1.48-all-dev
  * Python 2.6 or later(to generate config.json)
    * patches welcome to generate config.json by hand
 

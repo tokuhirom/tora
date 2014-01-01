@@ -121,7 +121,7 @@ class SharedValue {
     assert(v_);
     return *v_;
   }
-  Value* operator->() {
+  Value* operator->() const {
     assert(v_);
     return v_;
   }
@@ -130,9 +130,10 @@ class SharedValue {
     if (v_) {
       v_->release();
     }
-    assert(v);
     v_ = v;
-    v_->retain();
+    if (v_) {
+      v_->retain();
+    }
   }
 };
 

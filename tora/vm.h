@@ -37,12 +37,12 @@ class VM;
 class VM {
   friend class LexicalVarsFrame;
 
-  SharedPtr<Value> klass_;
+  SharedValue klass_;
   bool dump_ops_;
   typedef std::map<ID, SharedValue> file_scope_body_t;
   std::shared_ptr<file_scope_body_t> file_scope_;
   std::map<ID, std::shared_ptr<std::map<ID, SharedValue>>> file_scope_map_;
-  std::map<ID, SharedPtr<Value>> builtin_classes_;
+  std::map<ID, SharedValue> builtin_classes_;
   std::map<ID, SharedValue> builtin_functions_;
 
   SharedValue true_value_;
@@ -59,13 +59,13 @@ class VM {
 
   bool dump_ops() const { return dump_ops_; }
 
-  const SharedPtr<Value> &get_builtin_class(ID name_id) const;
+  const SharedValue &get_builtin_class(ID name_id) const;
 
-  SharedPtr<Value> get_class(ID name_id) const;
+  SharedValue get_class(ID name_id) const;
 
   std::string id2name(ID id) const;
 
-  const SharedPtr<Value> &klass() { return klass_; }
+  const SharedValue &klass() { return klass_; }
   void klass(const SharedPtr<Value> &k);
 
   void add_builtin_function(const char *name, const std::shared_ptr<CallbackFunction>& func);
@@ -114,7 +114,7 @@ class VM {
     return ops->at(pc)->operand.double_value;
   }
 
-  void add_builtin_class(const SharedPtr<Value> &klass);
+  void add_builtin_class(Value* klass);
 
   SharedPtr<Value> get_self();
 
@@ -155,10 +155,11 @@ class VM {
    */
   void add_library_path(const std::string &dir);
 
-  void call_method(const SharedPtr<Value> &object,
-                   const SharedPtr<Value> &function_id);
-  void call_method(const SharedPtr<Value> &object,
-                   const SharedPtr<Value> &klass_id, ID function_id,
+  void call_method(Value* object,
+                   Value* function_id);
+  void call_method(Value* object,
+                   Value* klass_id,
+                   ID function_id,
                    std::set<ID> &seen);
 
   void dump_value(const SharedPtr<Value> &v);
