@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include "prim.h"
 #include "tora.h"
 
 namespace tora {

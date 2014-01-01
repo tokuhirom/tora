@@ -6,6 +6,10 @@
 #include "prim.h"
 #include "value.h"
 
+/**
+ * TODO We should remove ValueOP. And add 'pool' to op_array.
+ */
+
 namespace tora {
 
 class Value;
